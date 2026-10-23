@@ -1,0 +1,637 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## State-Space Model Specification
+
+Write out the observation and transition equations for a structural time series model with a local linear trend and quarterly seasonality ($S=4$).
+
+a) Define the state vector $\alpha_t$ and write the observation equation $y_t = Z_t^T \alpha_t + \varepsilon_t$.
+b) Write the transition equations for the level $\mu_t$, slope $\delta_t$, and seasonal component $\tau_t$.
+c) How many state variables does this model have?
+d) If you add a regression component with $k$ predictors using spike-and-slab priors, how does the model change?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The state vector is $\alpha_t = (\mu_t, \delta_t, \tau_t, \tau_{t-1}, \tau_{t-2})^T$. The observation equation is:
+$$
+y_t = \mu_t + \tau_t + \varepsilon_t, \quad \varepsilon_t \sim N(0, \sigma_\varepsilon^2)
+$$
+In matrix form: $Z_t = (1, 0, 1, 0, 0)^T$.
+
+b) Transition equations:
+$$
+\mu_{t+1} = \mu_t + \delta_t + \eta_{0t}, \quad \eta_{0t} \sim N(0, \sigma_\mu^2)
+$$
+$$
+\delta_{t+1} = \delta_t + \eta_{1t}, \quad \eta_{1t} \sim N(0, \sigma_\delta^2)
+$$
+$$
+\tau_{t+1} = -\tau_t - \tau_{t-1} - \tau_{t-2} + \eta_{2t}, \quad \eta_{2t} \sim N(0, \sigma_\tau^2)
+$$
+The seasonal constraint ensures that the four seasonal effects sum to zero (in expectation).
+
+c) The state vector has 5 components: level, slope, and $S-1 = 3$ seasonal lags.
+
+d) With $k$ regression predictors, the observation equation becomes:
+$$
+y_t = \mu_t + \tau_t + \beta^T x_t + \varepsilon_t
+$$
+The spike-and-slab prior on $\beta$ introduces a latent inclusion indicator $\gamma_j \in \{0,1\}$ for each predictor, with $\beta_j \mid \gamma_j = 1 \sim N(0, \sigma_\beta^2)$ and $\beta_j \mid \gamma_j = 0 = 0$. The state vector itself does not change, but the regression coefficients are estimated jointly via MCMC.
+:::
+:::
+
+::: {#exr-}
+## Kalman Filter Update
+
+The Kalman filter performs Bayesian updating for linear Gaussian state-space models. Consider the simplest case: a random walk plus noise model.
+
+State equation: $x_{t+1} = x_t + w_t$, where $w_t \sim N(0, \sigma_w^2)$.
+
+Observation equation: $y_t = x_t + v_t$, where $v_t \sim N(0, \sigma_v^2)$.
+
+(Here $w_t$ is the state noise and $v_t$ the observation noise, corresponding to the chapter's $\eta_t$ and $\varepsilon_t$.)
+
+Suppose at time $t$ we have $x_t \mid y_{1:t} \sim N(\hat{x}_t, P_t)$.
+
+a) Write the predictive distribution $x_{t+1} \mid y_{1:t}$.
+b) Write the joint distribution of $(x_{t+1}, y_{t+1})$ given $y_{1:t}$.
+c) Derive the filtering distribution $x_{t+1} \mid y_{1:t+1}$ using the normal-normal conjugacy from @sec-bl.
+d) Identify the Kalman gain $K_{t+1}$ and interpret it. What happens when $\sigma_v^2 \gg \sigma_w^2$? When $\sigma_v^2 \ll \sigma_w^2$?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Prediction:
+$$
+x_{t+1} \mid y_{1:t} \sim N(\hat{x}_t, P_t + \sigma_w^2)
+$$
+Let $P_{t+1|t} = P_t + \sigma_w^2$.
+
+b) Joint distribution:
+$$
+\begin{pmatrix} x_{t+1} \\ y_{t+1} \end{pmatrix} \Bigg| y_{1:t} \sim N\left( \begin{pmatrix} \hat{x}_t \\ \hat{x}_t \end{pmatrix}, \begin{pmatrix} P_{t+1|t} & P_{t+1|t} \\ P_{t+1|t} & P_{t+1|t} + \sigma_v^2 \end{pmatrix} \right)
+$$
+
+c) By normal-normal conditioning:
+$$
+x_{t+1} \mid y_{1:t+1} \sim N(\hat{x}_{t+1}, P_{t+1})
+$$
+where:
+$$
+\hat{x}_{t+1} = \hat{x}_t + K_{t+1}(y_{t+1} - \hat{x}_t)
+$$
+$$
+P_{t+1} = (1 - K_{t+1}) P_{t+1|t}
+$$
+$$
+K_{t+1} = \frac{P_{t+1|t}}{P_{t+1|t} + \sigma_v^2}
+$$
+
+d) The Kalman gain $K_{t+1} \in [0,1]$ controls how much the new observation shifts the estimate:
+
+- When $\sigma_v^2 \gg \sigma_w^2$: observations are noisy, $K_{t+1} \approx 0$, the filter trusts the prior (model prediction) and largely ignores the observation.
+- When $\sigma_v^2 \ll \sigma_w^2$: observations are precise, $K_{t+1} \approx 1$, the filter tracks the observations closely.
+:::
+:::
+
+::: {#exr-hmm-forward-viterbi}
+## Forward Filtering and Viterbi Decoding for a Two-State HMM
+
+The Kalman filter derived above is the linear-Gaussian filtering recursion. Its discrete-state analogue is the hidden Markov model. Consider a two-state HMM for a volatility regime $x_t \in \{1, 2\}$, where state 1 is low-volatility and state 2 is high-volatility. The initial distribution is $\pi = (\prob{x_1 = 1}, \prob{x_1 = 2}) = (0.6, 0.4)$, and the time-homogeneous transition probabilities $P_{ij} = \prob{x_t = j \mid x_{t-1} = i}$ are
+
+$$
+P = \begin{pmatrix} 0.9 & 0.1 \\ 0.2 & 0.8 \end{pmatrix}.
+$$
+
+(This is the row-stochastic convention of the chapter, which writes the entries as $p_{ij}$: each row sums to one.) Each day is observed as calm (C) or turbulent (T), with emission probabilities $b_j(y) = \prob{y_t = y \mid x_t = j}$ given by $\prob{y_t = T \mid x_t = 1} = 0.2$ and $\prob{y_t = T \mid x_t = 2} = 0.7$. You observe $y_{1:4} = (C, C, T, T)$.
+
+a) Using the forward recursion, compute by hand the unnormalized forward messages $\alpha_t(j) = p(y_{1:t}, x_t = j)$ for $t = 1, \ldots, 4$ and the filtered probabilities $\prob{x_t = j \mid y_{1:t}}$. Present a $4 \times 2$ table and report the marginal likelihood $p(y_{1:4})$.
+
+b) Compute the Viterbi path maximizing $p(x_{1:4}, y_{1:4})$: build the $\delta_t(j)$ table with backpointers $\psi_t(j)$ and report the decoded state sequence.
+
+c) Compare $\arg\max_j \prob{x_4 = j \mid y_{1:4}}$ from (a) with the Viterbi state at $t = 4$ from (b). Do they agree? Explain why the marginal decoder and the jointly-optimal Viterbi path need not agree in general, even though they do here.
+
+d) Baum-Welch [@baum1970maximization] treats $P$ and the emission probabilities as unknown and re-estimates them by EM. Using $\gamma_t(j) = \prob{x_t = j \mid y_{1:T}}$ and $\xi_t(i, j) = \prob{x_{t-1} = i, x_t = j \mid y_{1:T}}$ as the E-step quantities, write the M-step update formulas for $\hat P_{ij}$, for $\prob{y_t = T \mid x_t = j}$, and for the initial distribution.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Write the emission probabilities as $b_1(C) = 0.8$, $b_1(T) = 0.2$, $b_2(C) = 0.3$, $b_2(T) = 0.7$.
+
+a) The forward recursion is
+
+$$
+\alpha_1(j) = \pi_j\, b_j(y_1), \qquad \alpha_t(j) = b_j(y_t) \sum_i \alpha_{t-1}(i)\, P_{ij},
+$$
+
+with filtered marginal $\prob{x_t = j \mid y_{1:t}} = \alpha_t(j) / \sum_k \alpha_t(k)$. Starting from $y_1 = C$, $\alpha_1 = (0.6 \times 0.8,\; 0.4 \times 0.3) = (0.4800, 0.1200)$. For $t = 2$ ($y_2 = C$), $\alpha_2(1) = 0.8\,(0.4800 \times 0.9 + 0.1200 \times 0.2) = 0.3648$ and $\alpha_2(2) = 0.3\,(0.4800 \times 0.1 + 0.1200 \times 0.8) = 0.0432$. Continuing with $y_3 = T$ and $y_4 = T$:
+
+| $t$ | $y_t$ | $\alpha_t(1)$ | $\alpha_t(2)$ | $\prob{x_t = 1 \mid y_{1:t}}$ | $\prob{x_t = 2 \mid y_{1:t}}$ |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1 | C | 0.48000 | 0.12000 | 0.800 | 0.200 |
+| 2 | C | 0.36480 | 0.04320 | 0.894 | 0.106 |
+| 3 | T | 0.06739 | 0.04973 | 0.575 | 0.425 |
+| 4 | T | 0.01412 | 0.03257 | 0.302 | 0.698 |
+
+The marginal likelihood is $p(y_{1:4}) = \sum_j \alpha_4(j) = 0.04668$. The filtered probability of the high-volatility state rises from 0.106 after two calm days to 0.698 once the two turbulent days arrive.
+
+b) The Viterbi recursion replaces the sum with a maximum:
+
+$$
+\delta_1(j) = \pi_j\, b_j(y_1), \qquad \delta_t(j) = b_j(y_t) \max_i\, \delta_{t-1}(i)\, P_{ij}, \qquad \psi_t(j) = \arg\max_i\, \delta_{t-1}(i)\, P_{ij}.
+$$
+
+| $t$ | $\delta_t(1)$ | $\delta_t(2)$ | $\psi_t(1)$ | $\psi_t(2)$ |
+|:---:|:---:|:---:|:---:|:---:|
+| 1 | 0.48000 | 0.12000 | - | - |
+| 2 | 0.34560 | 0.02880 | 1 | 2 |
+| 3 | 0.06221 | 0.02419 | 1 | 1 |
+| 4 | 0.011197 | 0.013548 | 1 | 2 |
+
+At $t = 2$, for instance, state 2 is reached most cheaply from state 2 ($0.12 \times 0.8 = 0.096 > 0.48 \times 0.1 = 0.048$), so $\psi_2(2) = 2$. The maximum at $t = 4$ is $\delta_4(2) = 0.013548$, so the path ends in state 2. Backtracking through the pointers, $\psi_4(2) = 2 \to \psi_3(2) = 1 \to \psi_2(1) = 1$, giving
+
+$$
+x^*_{1:4} = (1, 1, 2, 2),
+$$
+
+low, low, high, high: the model places the regime shift exactly at the transition from calm to turbulent observations.
+
+c) From (a), $\arg\max_j \prob{x_4 = j \mid y_{1:4}} = 2$; from (b), the Viterbi state at $t = 4$ is also 2, so they agree. In general they need not. The marginal decoder chooses, at each $t$ separately, the state that maximizes its own posterior marginal $\prob{x_t = j \mid y_{1:T}}$, whereas Viterbi maximizes the probability of one entire path $\prob{x_{1:T} \mid y_{1:T}}$. Optimizing each marginal independently is a different objective from optimizing the joint, so the pointwise-most-likely states need not line up into the single most probable sequence; marginal decoding can even return a sequence that uses a forbidden, zero-probability transition. At the terminal time $t = 4$ the filtered marginal coincides with the smoothed marginal and state 2 dominates decisively, so the two decoders agree here. A mismatch is most likely near an ambiguous transition, such as around $t = 3$, where the two states are close to evenly matched.
+
+d) Let $\beta_t(j) = p(y_{t+1:T} \mid x_t = j)$ be the backward messages, with $\beta_T(j) = 1$ and $\beta_t(i) = \sum_j P_{ij}\, b_j(y_{t+1})\, \beta_{t+1}(j)$, as in the chapter's forwards-and-backwards smoothing recursion. Then
+
+$$
+\gamma_t(j) = \frac{\alpha_t(j)\, \beta_t(j)}{p(y_{1:T})}, \qquad \xi_t(i, j) = \frac{\alpha_{t-1}(i)\, P_{ij}\, b_j(y_t)\, \beta_t(j)}{p(y_{1:T})}.
+$$
+
+The M-step updates set each parameter to a ratio of posterior-expected counts:
+
+$$
+\hat\pi_j = \gamma_1(j), \qquad \hat P_{ij} = \frac{\sum_{t=2}^{T} \xi_t(i, j)}{\sum_{t=2}^{T} \gamma_{t-1}(i)}, \qquad \widehat{\prob{y_t = T \mid x_t = j}} = \frac{\sum_{t=1}^{T} \gamma_t(j)\, \mathbb{1}(y_t = T)}{\sum_{t=1}^{T} \gamma_t(j)}.
+$$
+
+The transition estimate is the expected number of $i \to j$ transitions divided by the expected number of visits to state $i$ (excluding the final step), and the emission estimate is the expected number of turbulent days spent in state $j$ divided by the expected number of days in state $j$.
+:::
+:::
+
+::: {#exr-}
+## Local vs. Semilocal Linear Trend
+
+Two trend models are commonly used in structural time series:
+
+*Local linear trend*: $\mu_{t+1} = \mu_t + \delta_t + \eta_{0t}$, $\delta_{t+1} = \delta_t + \eta_{1t}$.
+
+*Semilocal linear trend*: $\mu_{t+1} = \mu_t + \delta_t + \eta_{0t}$, $\delta_{t+1} = D + \rho(\delta_t - D) + \eta_{1t}$, where $|\rho| < 1$.
+
+a) In the local linear trend, show that the slope $\delta_t$ follows a random walk. What does this imply about long-term forecast uncertainty?
+b) In the semilocal model, show that $\E{\delta_t}$ converges to $D$ as $t \to \infty$, regardless of the initial slope.
+c) Which model would you choose for S&P 500 forecasting? For quarterly GDP growth? Justify your answers.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The slope $\delta_{t+1} = \delta_t + \eta_{1t}$ is a random walk with $\Var{\delta_t} = t \sigma_{\delta}^2$. Unrolling the level recursion $h$ steps ahead gives $\mu_{t+h} = \mu_t + h\delta_t + \sum_{j=0}^{h-1}\eta_{0,t+j} + \sum_{i=0}^{h-2}(h-1-i)\eta_{1,t+i}$. The first noise sum contributes variance $h\sigma_\mu^2$, which is $O(h)$. The second contributes $\sigma_\delta^2\sum_{i=0}^{h-2}(h-1-i)^2 = \sigma_\delta^2\,(h-1)h(2h-1)/6$, which is $O(h^3)$, because each slope innovation is carried forward cumulatively into every subsequent level. This second term dominates for large $h$, so $\Var{\mu_{t+h}}$ grows as $O(h^3)$. This means forecast intervals widen without bound, leading to implausibly wide confidence intervals for long horizons.
+
+b) Taking expectations: $\E{\delta_{t+1}} = D + \rho(\E{\delta_t} - D)$. Unrolling the recursion gives $\E{\delta_t} = D + \rho^t(\E{\delta_0} - D)$. Since $|\rho| < 1$, $\rho^t \to 0$ as $t \to \infty$, so $\E{\delta_t} \to D$. The slope mean-reverts to $D$, producing bounded long-term forecast intervals.
+
+c) For S&P 500: semilocal linear trend. Stock prices should not have unbounded slope growth (no stock grows exponentially forever at an accelerating rate). The semilocal model with $D$ set to a reasonable long-term growth rate (e.g., 7% annualized) produces more realistic long-horizon forecasts.
+
+For quarterly GDP growth: semilocal is also preferable. GDP growth rates mean-revert to a long-run trend (around 2-3% for developed economies). The local linear trend would produce forecasts of 10% or -5% GDP growth at long horizons, which is unrealistic.
+:::
+:::
+
+::: {#exr-}
+## True/False: Forecasting
+
+a) The Kalman filter assumes that state transitions and observations are linear functions with Gaussian noise.
+
+b) In a BSTS model with spike-and-slab priors, the expected model size controls how many predictors are included *a priori*.
+
+c) A local linear trend model produces forecast intervals that converge to a fixed width as the forecast horizon increases.
+
+d) The `bsts` package uses maximum likelihood estimation to fit structural time series models.
+
+e) Stationarity of a time series means that its mean and variance do not change over time, and the autocovariance Cov(y_t, y_{t+k}) depends only on the lag k, not on t.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) True. The standard Kalman filter requires linear state transitions ($x_{t+1} = G_t x_t + w_t$) and linear observations ($y_t = F_t x_t + v_t$) with Gaussian noise. Extensions like the extended Kalman filter and particle filters handle nonlinear/non-Gaussian cases.
+
+b) True. The spike-and-slab prior places probability $\pi$ on each predictor being included. Setting the expected model size to $k$ means $\pi = k/p$ where $p$ is the total number of predictors.
+
+c) False. The local linear trend has a random walk slope, so forecast variance grows as $O(h^3)$, producing intervals that widen without bound. The semilocal linear trend produces bounded intervals.
+
+d) False. The `bsts` package uses MCMC (Markov chain Monte Carlo) for Bayesian posterior inference, not maximum likelihood.
+
+e) True (for weak/second-order stationarity). Strict stationarity requires the entire joint distribution to be invariant to time shifts.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Structural Time Series with bsts
+
+Use the `AirPassengers` dataset (monthly airline passengers, 1949--1960) to fit structural time series models.
+
+a) Plot the time series. Does it appear to have a trend? Seasonality? Is the variance constant?
+b) Apply a log transformation and fit a BSTS model with a local linear trend and monthly seasonality ($S=12$). Plot the fitted components.
+c) Hold out the last 12 months. Fit the model on the training data and produce 12-month-ahead forecasts. Plot the forecasts with prediction intervals.
+d) Compare the one-step-ahead prediction errors for models with and without the seasonal component using mean absolute one-step-ahead error (MAE).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+
+library(bsts)
+
+# a) Plot
+data("AirPassengers")
+plot(AirPassengers, main = "Monthly Airline Passengers", ylab = "Passengers")
+
+# The series shows increasing trend, strong seasonality, and increasing variance
+# Log transform stabilizes variance
+
+# b) Log transform and fit
+y <- log(AirPassengers)
+train <- window(y, end = c(1959, 12))
+test <- window(y, start = c(1960, 1))
+
+ss <- AddLocalLinearTrend(list(), train)
+ss <- AddSeasonal(ss, train, nseasons = 12)
+model <- bsts(train, state.specification = ss, niter = 1000)
+plot(model, main = "BSTS Components")
+plot(model, "components")
+
+# c) Forecast
+pred <- predict(model, horizon = 12)
+plot(pred, main = "12-Month Forecast")
+points(as.numeric(time(test)), as.numeric(test), col = "red", pch = 16)
+
+# d) Compare with trend-only model
+ss_trend <- AddLocalLinearTrend(list(), train)
+model_trend <- bsts(train, state.specification = ss_trend, niter = 1000)
+
+cat("With seasonal - MAE:", mean(abs(colMeans(model$one.step.prediction.errors))), "\n")
+cat("Trend only - MAE:", mean(abs(colMeans(model_trend$one.step.prediction.errors))), "\n")
+```
+
+The seasonal component substantially reduces prediction errors for these data, as the strong monthly pattern is a major source of variation.
+:::
+:::
+
+::: {#exr-}
+## Kalman Filter from Scratch
+
+Implement a simple Kalman filter for the random walk plus noise model: $x_{t+1} = x_t + w_t$, $y_t = x_t + v_t$.
+
+a) Generate 100 observations from this model with $\sigma_w = 1$ and $\sigma_v = 2$. Plot the true state and noisy observations.
+b) Implement the Kalman filter: prediction step, update step, and Kalman gain. Filter the observations and plot the filtered state alongside the true state.
+c) Plot the Kalman gain $K_t$ over time. Does it converge? To what value? (Report the iteration at which |K_t - K_{t-1}| first falls below 1e-6.)
+d) Repeat with $\sigma_v = 0.1$ (precise observations). How does the filtered estimate change?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+set.seed(42)
+n <- 100
+sigma_w <- 1
+sigma_v <- 2
+
+# a) Generate data
+x <- cumsum(rnorm(n, 0, sigma_w))  # true state (random walk)
+y <- x + rnorm(n, 0, sigma_v)      # noisy observations
+
+par(mfrow = c(1, 1))
+plot(1:n, y, col = "gray", pch = 16, cex = 0.5, xlab = "Time", ylab = "Value")
+lines(1:n, x, col = "black", lwd = 2)
+legend("topleft", c("True state", "Observations"), col = c("black", "gray"),
+       lty = c(1, NA), pch = c(NA, 16), cex = 0.8)
+
+# b) Kalman filter
+x_hat <- numeric(n)
+P <- numeric(n)
+K <- numeric(n)
+
+# Initialize
+x_hat[1] <- y[1]
+P[1] <- sigma_v^2
+
+for (t in 2:n) {
+  # Predict
+  x_pred <- x_hat[t-1]
+  P_pred <- P[t-1] + sigma_w^2
+
+  # Update
+  K[t] <- P_pred / (P_pred + sigma_v^2)
+  x_hat[t] <- x_pred + K[t] * (y[t] - x_pred)
+  P[t] <- (1 - K[t]) * P_pred
+}
+
+plot(1:n, y, col = "gray", pch = 16, cex = 0.5, xlab = "Time", ylab = "Value")
+lines(1:n, x, col = "black", lwd = 2)
+lines(1:n, x_hat, col = "red", lwd = 2)
+legend("topleft", c("True", "Observed", "Filtered"),
+       col = c("black", "gray", "red"), lty = c(1, NA, 1), pch = c(NA, 16, NA), cex = 0.8)
+
+# c) Kalman gain convergence
+plot(2:n, K[2:n], type = "l", xlab = "Time", ylab = "Kalman Gain",
+     main = "Kalman Gain Over Time")
+# Steady-state gain
+P_pred_ss <- (sigma_w^2 + sqrt(sigma_w^4 + 4 * sigma_w^2 * sigma_v^2)) / 2
+K_ss <- P_pred_ss / (P_pred_ss + sigma_v^2)
+abline(h = K_ss, col = "blue", lty = 2)
+cat("Steady-state Kalman gain:", round(K_ss, 4), "\n")
+
+# d) Precise observations
+sigma_v2 <- 0.1
+y2 <- x + rnorm(n, 0, sigma_v2)
+x_hat2 <- numeric(n)
+P2 <- numeric(n)
+x_hat2[1] <- y2[1]; P2[1] <- sigma_v2^2
+
+for (t in 2:n) {
+  P_pred <- P2[t-1] + sigma_w^2
+  K_t <- P_pred / (P_pred + sigma_v2^2)
+  x_hat2[t] <- x_hat2[t-1] + K_t * (y2[t] - x_hat2[t-1])
+  P2[t] <- (1 - K_t) * P_pred
+}
+
+plot(1:n, x, col = "black", lwd = 2, type = "l", xlab = "Time", ylab = "Value")
+lines(1:n, x_hat2, col = "red", lwd = 2)
+legend("topleft", c("True", "Filtered (sigma_v=0.1)"),
+       col = c("black", "red"), lwd = 2, cex = 0.8)
+```
+
+With precise observations ($\sigma_v = 0.1$), the Kalman gain approaches 1 and the filtered state tracks the observations almost exactly.
+:::
+:::
+
+::: {#exr-dynamic-logistic-ss}
+## Dynamic Logistic State-Space Model for a Binary Series
+
+The recession-modeling example in this chapter fits a dynamic logistic regression with a random-walk level, $\mathrm{logit}(p_t) = \mu_t + \beta^\top x_t$, $\mu_{t+1} = \mu_t + \eta_t$, using `bsts`. Here you simulate a simplified version (no regressors) and filter it yourself: the Bernoulli observation equation means the closed-form Kalman recursions of the previous exercise no longer apply, so a simulation-based filter is needed instead.
+
+a) Simulate a latent log-odds $\theta_t$ following a Gaussian random walk for $T=150$ periods: $\theta_1 = -1$ and $\theta_{t+1} = \theta_t + \eta_t$ with $\eta_t \sim N(0, \sigma_w^2)$, $\sigma_w = 0.35$. Set $p_t = \mathrm{logit}^{-1}(\theta_t)$ and draw $y_t \sim \text{Bernoulli}(p_t)$, where $y_t=1$ might represent "recession this month." Plot $p_t$ together with the observed $y_t$.
+
+b) The observation equation is Bernoulli, not Gaussian, so the linear-Gaussian Kalman filter of the previous exercise no longer gives a closed-form posterior for $\theta_t$. Implement a bootstrap particle filter: represent the filtering distribution of $\theta_t$ with $N$ weighted particles $\theta_t^{(i)}$, propagate each particle through the random-walk transition, reweight it by the Bernoulli likelihood of $y_t$, and resample. Report the filtered probability $\hat p_t = \E{p_t \mid y_{1:t}} \approx \sum_i w_t^{(i)}\,\mathrm{logit}^{-1}(\theta_t^{(i)})$.
+
+c) Compute the mean absolute tracking error $\frac{1}{T}\sum_t |\hat p_t - p_t|$ and compare it to a naive baseline that always predicts the unconditional mean $\bar y$. Report both numbers.
+
+d) Refit the filter assuming a process noise $\sigma_w = 0.05$, understating the true value. Does the filtered probability lag behind the true swings in $p_t$? Report the new tracking error and explain the result using the Kalman-gain intuition from the previous exercise.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+set.seed(47)
+Tn <- 150
+sigma_w <- 0.35
+
+theta <- numeric(Tn)
+theta[1] <- -1
+for (t in 2:Tn) theta[t] <- theta[t - 1] + rnorm(1, 0, sigma_w)
+p_true <- plogis(theta)               # true probability p_t
+y <- rbinom(Tn, 1, p_true)            # observed binary outcomes
+
+particle_filter <- function(y, sigma_w, N = 2000) {
+  part <- rnorm(N, 0, 1.5)            # diffuse prior on theta_1
+  p_filt <- numeric(length(y))
+  for (t in seq_along(y)) {
+    if (t > 1) part <- part + rnorm(N, 0, sigma_w)     # propagate
+    wt <- dbinom(y[t], 1, plogis(part))                # likelihood weights
+    wt <- wt / sum(wt)
+    p_filt[t] <- sum(wt * plogis(part))                # filtered mean of p_t
+    part <- part[sample.int(N, N, replace = TRUE, prob = wt)]  # resample
+  }
+  p_filt
+}
+
+p_filt <- particle_filter(y, sigma_w = 0.35)
+tracking_error <- mean(abs(p_filt - p_true))
+baseline_error <- mean(abs(mean(y) - p_true))
+cat("Particle filter tracking error:", round(tracking_error, 4), "\n")
+cat("Constant-baseline tracking error:", round(baseline_error, 4), "\n")
+
+plot(p_true, type = "l", lwd = 2, ylim = c(0, 1), xlab = "Time", ylab = "P(y=1)")
+lines(p_filt, col = "red", lwd = 2)
+points(y, pch = 1, cex = 0.6, col = "gray40")
+legend("topright", c("True p_t", "Filtered p_t", "y_t"),
+       col = c("black", "red", "gray40"), lty = c(1, 1, NA), pch = c(NA, NA, 1))
+
+p_filt_small <- particle_filter(y, sigma_w = 0.05)  # d) understated process noise
+cat("Tracking error, understated sigma_w = 0.05:",
+    round(mean(abs(p_filt_small - p_true)), 4), "\n")
+```
+
+With seed 47, the particle filter achieves a mean absolute tracking error of 0.1234 between $\hat p_t$ and $p_t$, versus 0.3408 for the constant baseline $\bar y$, about 2.8 times larger. The filter is genuinely tracking the time-varying regime rather than just reproducing the unconditional frequency of $y=1$. Refitting with an understated $\sigma_w = 0.05$ (part d) raises the tracking error to 0.3062, nearly back to the naive baseline. With too little assumed process noise, the particles barely move between periods, so the filter is overconfident in its own prediction and responds too slowly when $\theta_t$ actually shifts. This is the same lagging behavior seen when the Kalman gain is pushed toward zero by an understated state variance in the linear-Gaussian case.
+:::
+:::
+
+::: {#exr-regime-switching-baumwelch}
+## Regime-Switching Volatility for S&P 500 Returns via Baum-Welch and Viterbi
+
+The chapter's HMM and regime-switching sections describe a hidden Markov chain $x_t$ that switches the parameters of an observation process, $y_t = \mu(x_t) + \sigma(x_t)\varepsilon_t$, and note that FFBS-type recursions can be adapted to estimate such models. Here you fit a two-regime Gaussian HMM to real financial data by implementing scaled Baum-Welch (EM) and Viterbi decoding from scratch [@baum1970maximization; @viterbi1967error].
+
+a) Load `data/GSPC.csv` (daily S&P 500 prices, already used in this chapter) and compute daily log returns $r_t = 100(\log p_t - \log p_{t-1})$.
+
+b) Implement Baum-Welch for a two-state Gaussian HMM, $r_t \mid x_t = j \sim N(\mu_j, \sigma_j^2)$, with unknown transition matrix $P$, unknown $(\mu_j, \sigma_j)$, and unknown initial distribution. Use scaled forward-backward recursions (dividing by $c_t = p(y_t \mid y_{1:t-1})$ at each step, as in the chapter's filtering recursions) to avoid underflow, iterating the E-step and M-step until the log-likelihood $\sum_t \log c_t$ changes by less than $10^{-6}$. Initialize by splitting returns into a near-median 70 percent group (low-volatility) and an extreme 30 percent group (high-volatility).
+
+c) Label the state with the smaller $\sigma_j$ as low-volatility and the other as high-volatility. Report the fitted transition matrix, the state-dependent mean and standard deviation of daily returns, and the expected regime duration $1/(1 - P_{jj})$ in trading days for each regime.
+
+d) Decode the Viterbi path and plot the filtered probability $\prob{x_t = \text{high-vol} \mid y_{1:t}}$ over time. Report the mean filtered high-volatility probability during the COVID crash window (Feb 15 to Apr 15, 2020) versus calendar year 2017, and comment on whether the model isolates the crash as a distinct regime.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+#| fig-cap: "Filtered probability of the high-volatility regime for daily S&P 500 log returns, 2013-2022. Dashed lines mark the Feb 15 to Apr 15, 2020 COVID crash window, which the model flags as an almost-certain high-volatility regime."
+set.seed(1)
+
+## a) load prices exactly as the chapter does, compute log returns
+GSPC   <- read.csv("data/GSPC.csv")
+dates  <- as.Date(rownames(GSPC), "%Y-%m-%d")
+price  <- GSPC$GSPC.Adjusted
+r      <- 100 * diff(log(price))          # daily log returns in percent
+rdates <- dates[-1]
+n      <- length(r)
+
+## b) scaled Baum-Welch for a two-state Gaussian HMM
+baum_welch <- function(r, tol = 1e-6, maxit = 500) {
+  n   <- length(r)
+  dev <- abs(r - median(r))                          # initialize by spread
+  grp <- ifelse(dev <= quantile(dev, 0.70), 1L, 2L)  # 70% calm, 30% extreme
+  mu    <- c(mean(r[grp == 1]), mean(r[grp == 2]))
+  sigma <- c(sd(r[grp == 1]),   sd(r[grp == 2]))
+  A     <- matrix(c(0.95, 0.05, 0.10, 0.90), 2, 2, byrow = TRUE)
+  pit   <- c(0.7, 0.3)
+  oldll <- -Inf
+  for (it in 1:maxit) {
+    B <- cbind(dnorm(r, mu[1], sigma[1]), dnorm(r, mu[2], sigma[2]))
+    ah <- matrix(0, n, 2); cc <- numeric(n)          # scaled forward
+    ah[1, ] <- pit * B[1, ]; cc[1] <- sum(ah[1, ]); ah[1, ] <- ah[1, ] / cc[1]
+    for (t in 2:n) {
+      ah[t, ] <- (ah[t - 1, ] %*% A) * B[t, ]
+      cc[t]   <- sum(ah[t, ]); ah[t, ] <- ah[t, ] / cc[t]
+    }
+    bh <- matrix(0, n, 2); bh[n, ] <- 1              # scaled backward
+    for (t in (n - 1):1)
+      bh[t, ] <- (A %*% (B[t + 1, ] * bh[t + 1, ])) / cc[t + 1]
+    ll    <- sum(log(cc))
+    gamma <- ah * bh                                 # E-step marginals
+    xisum <- matrix(0, 2, 2)                          # E-step transitions
+    for (t in 2:n)
+      xisum <- xisum + (ah[t - 1, ] %o% (B[t, ] * bh[t, ])) * A / cc[t]
+    pit <- gamma[1, ]                                # M-step
+    A   <- xisum / rowSums(xisum)                    # rowSums = expected visits
+    for (j in 1:2) {
+      w <- gamma[, j]
+      mu[j]    <- sum(w * r) / sum(w)
+      sigma[j] <- sqrt(sum(w * (r - mu[j])^2) / sum(w))
+    }
+    if (abs(ll - oldll) < tol) break
+    oldll <- ll
+  }
+  list(pit = pit, A = A, mu = mu, sigma = sigma, iters = it, filt = ah)
+}
+fit <- baum_welch(r)
+
+## c) label low-vol = smaller sigma, then reorder so state 2 = high-vol
+ord   <- order(fit$sigma)
+A     <- fit$A[ord, ord]; mu <- fit$mu[ord]; sigma <- fit$sigma[ord]
+pit   <- fit$pit[ord]; filt_hi <- fit$filt[, ord[2]]
+cat("iters:", fit$iters, " mu:", round(mu, 4), " sigma:", round(sigma, 4), "\n")
+cat("expected durations (days):", round(1 / (1 - diag(A)), 1), "\n"); print(round(A, 3))
+
+## d) log-domain Viterbi decode
+viterbi <- function(r, pit, A, mu, sigma) {
+  n  <- length(r)
+  lB <- cbind(dnorm(r, mu[1], sigma[1], log = TRUE),
+              dnorm(r, mu[2], sigma[2], log = TRUE))
+  lA <- log(A); d <- matrix(-Inf, n, 2); psi <- matrix(0L, n, 2)
+  d[1, ] <- log(pit) + lB[1, ]
+  for (t in 2:n) for (j in 1:2) {
+    sc <- d[t - 1, ] + lA[, j]; psi[t, j] <- which.max(sc)
+    d[t, j] <- max(sc) + lB[t, j]
+  }
+  path <- integer(n); path[n] <- which.max(d[n, ])
+  for (t in (n - 1):1) path[t] <- psi[t + 1, path[t + 1]]
+  path
+}
+vpath <- viterbi(r, pit, A, mu, sigma)
+
+covid <- rdates >= as.Date("2020-02-15") & rdates <= as.Date("2020-04-15")
+calm  <- rdates >= as.Date("2017-01-01") & rdates <= as.Date("2017-12-31")
+cat("mean filtered P(high): COVID =", round(mean(filt_hi[covid]), 3),
+    " 2017 =", round(mean(filt_hi[calm]), 3), "\n")
+cat("Viterbi high-vol fraction: COVID =", round(mean(vpath[covid] == 2), 3),
+    " all days =", round(mean(vpath == 2), 3), "\n")
+
+plot(rdates, filt_hi, type = "l", col = "firebrick", ylim = c(0, 1),
+     xlab = "Date", ylab = "Filtered P(high-vol)")
+abline(v = as.Date(c("2020-02-15", "2020-04-15")), lty = 2, col = "gray40")
+```
+
+On the $n = 2517$ daily log returns from 2013-01-03 to 2022-12-30, the scaled EM converges in 25 iterations. Labeling by $\sigma_j$, the low-volatility regime has mean return $+0.11$ and standard deviation $0.55$ percent per day, while the high-volatility regime has mean $-0.11$ and standard deviation $1.76$ percent per day. Volatility is roughly three times higher and the mean return flips sign, capturing the familiar pattern that market sell-offs are both more volatile and, on average, negative. The fitted transition matrix is
+
+$$
+P \approx \begin{pmatrix} 0.977 & 0.023 \\ 0.046 & 0.954 \end{pmatrix},
+$$
+
+so both regimes are highly persistent, with expected durations $1/(1 - P_{11}) \approx 43$ trading days for the low-volatility regime and $1/(1 - P_{22}) \approx 22$ trading days for the high-volatility regime. The implied stationary probability of the high-volatility state is $0.34$, matching the time-averaged filtered probability of $0.33$, and the Viterbi path assigns 32 percent of all days to the high-volatility regime.
+
+During the COVID crash window (Feb 15 to Apr 15, 2020, 41 trading days) the mean filtered high-volatility probability is $0.90$, versus $0.03$ across calendar 2017, roughly a 30-fold difference. The Viterbi path spends 93 percent of the COVID window in the high-volatility regime and none of 2017. The model cleanly isolates the 2020 crash as a distinct, high-probability high-volatility regime, while long stretches of the calm mid-2010s bull market sit almost entirely in the low-volatility state. Exact figures shift slightly with the initialization, but the qualitative picture (persistent regimes, low-volatility runs about twice as long as high-volatility runs, and a decisive regime shift during the crash) is robust.
+:::
+:::
+
+::: {#exr-quantile-regression-forest}
+## Quantile Regression Forests for Predictive Intervals
+
+The chapter's discussion of quantile regression forests shows how a random forest can estimate the full conditional distribution $\hat p(y \mid x)$, not just the conditional mean $\E{Y \mid X}$, by keeping track of which training values land in each leaf. Here you fit one on simulated heteroskedastic data and check whether its predictive intervals are actually calibrated.
+
+a) Simulate $n=800$ points with $x \sim \text{Uniform}(0,10)$ and $y = 3 + 2\sin(x) + \varepsilon$, where $\varepsilon \sim N(0, \sigma(x)^2)$ and $\sigma(x) = 0.4 + 0.35x$ grows with $x$. Split into a training set (first 600 points) and a test set (last 200 points).
+
+b) Check whether the `ranger` package is installed with `requireNamespace()`. If so, fit a quantile regression forest with `quantreg = TRUE` and predict the 10th, 50th, and 90th percentiles of $y \mid x$ on the test set using `predict(..., type = "quantiles")`. If only `quantregForest` is available, use it instead. If neither package is installed, fall back to ordinary least squares plus the empirical quantiles of the training residuals, and note that this fallback only calibrates the interval on average, not conditionally on $x$.
+
+c) Using the 10th and 90th percentile predictions as an 80% interval, compute its empirical coverage: the fraction of test points whose $y$ falls between the two predicted quantiles. How close is it to the nominal 0.80?
+
+d) Now build a naive constant-width interval: add the 10th and 90th percentile of the training residuals to the median prediction, so every test point gets the same interval width. Compute the coverage of both intervals separately for $x<3$ and for $x>7$. Which method stays close to 80% coverage in both regions, and which one over-covers where the noise is small and under-covers where the noise is large?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+set.seed(2026)
+
+n <- 800
+x <- runif(n, 0, 10)
+sigma <- 0.4 + 0.35 * x                       # noise grows with x
+y <- 3 + 2 * sin(x) + rnorm(n, 0, sigma)
+train <- data.frame(x = x[1:600], y = y[1:600])
+test  <- data.frame(x = x[601:800], y = y[601:800])
+
+if (requireNamespace("ranger", quietly = TRUE)) {
+  library(ranger)
+  fit <- ranger(y ~ x, data = train, quantreg = TRUE,
+                num.trees = 1000, min.node.size = 50)
+  qtrain <- predict(fit, data = train, type = "quantiles", quantiles = 0.5)$predictions
+  qs <- predict(fit, data = test, type = "quantiles",
+                quantiles = c(0.1, 0.5, 0.9))$predictions
+  lower <- qs[, 1]; med <- qs[, 2]; upper <- qs[, 3]
+} else if (requireNamespace("quantregForest", quietly = TRUE)) {
+  library(quantregForest)
+  fit <- quantregForest(x = train["x"], y = train$y, nodesize = 50, ntree = 1000)
+  qs <- predict(fit, newdata = test["x"], what = c(0.1, 0.5, 0.9))
+  lower <- qs[, 1]; med <- qs[, 2]; upper <- qs[, 3]
+  qtrain <- predict(fit, newdata = train["x"], what = 0.5)
+} else {
+  cat("ranger/quantregForest unavailable: falling back to residual-quantile method\n")
+  fit <- lm(y ~ x, data = train)
+  qtrain <- predict(fit, newdata = train)
+  med <- predict(fit, newdata = test)
+  qres <- quantile(train$y - qtrain, c(0.1, 0.9))
+  lower <- med + qres[1]; upper <- med + qres[2]
+}
+
+coverage <- mean(test$y >= lower & test$y <= upper)
+cat("Empirical coverage of nominal 80% interval:", round(coverage, 3), "\n")
+
+qres0 <- quantile(train$y - qtrain, c(0.1, 0.9))     # d) constant-width baseline
+lower0 <- med + qres0[1]; upper0 <- med + qres0[2]
+lo_x <- test$x < 3; hi_x <- test$x > 7
+in_qrf <- test$y >= lower & test$y <= upper
+in_const <- test$y >= lower0 & test$y <= upper0
+cat("Constant-width overall coverage:", round(mean(in_const), 3), "\n")
+cat("QRF coverage:   low-x =", round(mean(in_qrf[lo_x]), 3),
+    " high-x =", round(mean(in_qrf[hi_x]), 3), "\n")
+cat("Const coverage: low-x =", round(mean(in_const[lo_x]), 3),
+    " high-x =", round(mean(in_const[hi_x]), 3), "\n")
+
+ord <- order(test$x)
+plot(test$x, test$y, pch = 16, col = "gray40", xlab = "x", ylab = "y")
+lines(test$x[ord], lower[ord], col = "blue", lty = 2)
+lines(test$x[ord], upper[ord], col = "blue", lty = 2)
+lines(test$x[ord], med[ord], col = "red", lwd = 2)
+```
+
+With seed 2026, the quantile regression forest gives an empirical coverage of 0.745 for the nominal 80% interval, modestly below nominal (quantile regression forests are known to undercover somewhat in finite samples). Raising `min.node.size` from the regression default of 5 to 50 was necessary here: with the default, each leaf holds too few training points for a stable empirical quantile, and coverage falls well below 0.70 (around 0.6 in our tests). The overall coverage of the naive constant-width interval (0.735) looks almost as good, but the region-specific breakdown in part (d) shows why marginal coverage is misleading: the quantile forest gives 0.75 coverage for $x<3$ and 0.707 for $x>7$, roughly stable across the range, while the constant-width interval gives 0.95 for $x<3$ (far too wide where the noise is small) and only 0.534 for $x>7$ (far too narrow exactly where the noise is largest). Matching the nominal rate on average is not the same as being calibrated conditionally on $x$, which is the point of using a quantile regression forest instead of a single global interval.
+:::
+:::
+
+::::

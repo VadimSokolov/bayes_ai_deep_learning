@@ -1,0 +1,565 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Bayes Factor: Drug Effectiveness
+
+A pharmaceutical company is testing a new drug. Let $H_0$ be the hypothesis that the drug has no effect (response rate $\theta_0 = 0.30$) and $H_1$ be the hypothesis that $\theta \sim \text{Beta}(3, 7)$, a diffuse prior allowing for a range of effect sizes.
+
+In a clinical trial with 100 patients, 42 responded positively.
+
+a) Calculate the Bayes factor $BF_{10}$ in favor of $H_1$.
+b) Interpret the Bayes factor using Jeffreys' scale.
+c) If the prior odds are 1:1, what are the posterior odds for drug effectiveness?
+d) How would your conclusion change if you used prior odds $P(H_1)/P(H_0) = 1/10$ (skeptical of the new drug)?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The Bayes factor is:
+$$
+BF_{10} = \frac{P(Y=42 \mid H_1)}{P(Y=42 \mid H_0)}
+$$
+
+Under $H_0$: $P(Y=42 \mid H_0) = \binom{100}{42}(0.30)^{42}(0.70)^{58}$
+
+Under $H_1$: $P(Y=42 \mid H_1) = \int_0^1 \binom{100}{42}\theta^{42}(1-\theta)^{58} \cdot \frac{\theta^{2}(1-\theta)^{6}}{B(3,7)} d\theta$
+
+```{r}
+# Under H0
+p_h0 <- dbinom(42, 100, 0.30)
+
+# Under H1: Beta-Binomial with Beta(3,7) prior
+# Posterior is Beta(3+42, 7+58) = Beta(45, 65)
+# Marginal is Beta(45,65) / Beta(3,7)
+p_h1 <- choose(100, 42) * beta(45, 65) / beta(3, 7)
+
+bf_10 <- p_h1 / p_h0
+cat("Bayes Factor BF_10 =", round(bf_10, 2), "\n")
+```
+
+b) According to Jeffreys' scale:
+- BF > 100: Decisive evidence
+- BF 30-100: Very strong evidence
+- BF 10-30: Strong evidence  
+- BF 3-10: Moderate evidence
+- BF 1-3: Anecdotal evidence
+
+c) Posterior odds = BF × Prior odds = `r round(bf_10, 2)` × 1 = `r round(bf_10, 2)`
+
+d) With skeptical prior odds $P(H_1)/P(H_0) = 1/10$ (i.e., 0.1):
+Posterior odds = `r round(bf_10 * 0.1, 2)`
+
+:::
+:::
+
+::: {#exr-}
+## Lindley's Paradox
+
+You flip a coin 1000 times and observe 527 heads. Test the null hypothesis $H_0: \theta = 0.5$ against $H_1: \theta \neq 0.5$.
+
+a) Calculate the frequentist $p$-value using a two-sided $z$-test.
+b) Under $H_1$, assume $\theta \sim \text{Beta}(1, 1)$ (uniform prior). Calculate the Bayes factor $BF_{01}$.
+c) Calculate the posterior probability of $H_0$ assuming $P(H_0) = 0.5$.
+d) Explain why the frequentist and Bayesian conclusions might differ (Lindley's Paradox).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Frequentist $z$-test:
+```{r}
+n <- 1000
+x <- 527
+p0 <- 0.5
+z <- (x/n - p0) / sqrt(p0*(1-p0)/n)
+p_value <- 2 * (1 - pnorm(abs(z)))
+cat("z-statistic =", round(z, 3), "\n")
+cat("p-value =", round(p_value, 4), "\n")
+```
+
+b) Bayes factor calculation:
+```{r}
+# Under H0
+p_h0 <- dbinom(x, n, p0)
+
+# Under H1 with Beta(1,1) prior
+# Marginal likelihood is choose(n,x) * Beta(x+1, n-x+1) / Beta(1,1)
+p_h1 <- choose(n, x) * beta(x+1, n-x+1) / beta(1, 1)
+
+bf_01 <- p_h0 / p_h1
+cat("BF_01 =", round(bf_01, 3), "\n")
+```
+
+c) Posterior probability:
+```{r}
+posterior_h0 <- bf_01 * 0.5 / (bf_01 * 0.5 + 0.5)
+cat("P(H0 | data) =", round(posterior_h0, 3), "\n")
+```
+
+d) Lindley's Paradox: Here $p \approx 0.088$, so the frequentist test does not quite reject $H_0$ at the 5% level, and $BF_{01} \approx 5.88$ also favors $H_0$ (moderate evidence, per Jeffreys' scale): the two procedures agree in this instance. The paradox becomes sharpest when the $p$-value sits exactly at a rejection boundary (e.g., $z = 1.96$, $p \approx 0.05$): as $n$ grows with the effect size held fixed at that boundary, the frequentist test keeps rejecting at the same nominal level, while the Bayes factor increasingly favors $H_0$. This occurs because:
+- The $p$-value measures $P(\text{data as extreme} \mid H_0)$, without asking how well $H_1$ predicts the data
+- The Bayes factor compares how well each hypothesis predicts the data actually observed
+- Under $H_1$, the diffuse prior spreads its probability mass over a wide range of $\theta$, so the marginal likelihood $p(y \mid H_1)$ is diluted (an Occam-factor penalty for the diffuse alternative)
+- The sharp prediction of $H_0$ at $\theta = 0.5$ pays no such penalty, so it can win even when $\hat\theta \neq 0.5$, and increasingly so as $n$ grows
+
+:::
+:::
+
+::: {#exr-}
+## Normal-Normal Hypothesis Test: Loss-Based Rejection Region
+
+Assume Normal-Normal model with known variance, $X\mid \theta \sim  N(\theta,\sigma^2)$, $\theta \sim  N(\mu ,\tau^2)$, and $\theta\mid X \sim  N(\mu^*,\rho^2)$. Given $L_0 = L(d_1\mid H_0)$ and  $L_1 = L(d_0\mid H_1)$ losses, show that for testing $H_0 : \theta \le \theta_0$ the "rejection region" is  $\mu^* > \theta_0 + z\rho$, where $z = \Phi^{-1}\left(L_0/(L_0+L_1)\right)$. Remember, that in the classical $\alpha$-level test, the rejection region is $X > \theta_0 + z_{1-\alpha}\sigma$
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We choose $d_1$ (reject $H_0$) if the expected posterior loss of $d_1$ is smaller than that of $d_0$ (accept $H_0$). With $L_0 = L(d_1 \mid H_0)$, $L_1 = L(d_0 \mid H_1)$, and zero loss for a correct decision,
+$$
+\E{L(d_1)} = L_0\, P(\theta \le \theta_0 \mid X), \qquad \E{L(d_0)} = L_1\, P(\theta > \theta_0 \mid X).
+$$
+We reject $H_0$ when $\E{L(d_1)} < \E{L(d_0)}$:
+$$
+L_0\, P(\theta \le \theta_0 \mid X) < L_1\bigl(1 - P(\theta \le \theta_0 \mid X)\bigr),
+$$
+which rearranges to
+$$
+P(\theta > \theta_0 \mid X) > \frac{L_0}{L_0 + L_1}.
+$$
+Under the posterior $\theta \mid X \sim N(\mu^*, \rho^2)$,
+$$
+P(\theta > \theta_0 \mid X) = \Phi\left(\frac{\mu^* - \theta_0}{\rho}\right),
+$$
+so we reject when $\Phi\bigl((\mu^* - \theta_0)/\rho\bigr) > L_0/(L_0 + L_1)$. Applying $\Phi^{-1}$ with $z = \Phi^{-1}\left(L_0/(L_0 + L_1)\right)$,
+$$
+\frac{\mu^* - \theta_0}{\rho} > z \implies \mu^* > \theta_0 + z\rho.
+$$
+This is the Bayesian analogue of the classical region $X > \theta_0 + z_{1-\alpha}\sigma$: the critical value $z = \Phi^{-1}(L_0/(L_0+L_1))$ increases as the false-rejection loss $L_0$ grows relative to $L_1$, pushing the threshold further above $\theta_0$.
+:::
+:::
+
+::: {#exr-}
+## Normal-Normal Hypothesis Test: $p$-value Equivalence
+
+Assume $X_1,\dots,X_n\mid \theta \overset{\text{i.i.d.}}{\sim}  N(\theta,\sigma^2)$ with known $\sigma^2$, and a flat prior $p(\theta)\propto 1$. Consider testing $H_0 : \theta  \le \theta_0$ vs. $H_1 : \theta  > \theta_0$.
+Show that $p_0 = P(\theta  \le \theta_0 \mid X_1,\dots,X_n)$ equals the classical (one-sided) $p$-value.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Classical $p$-value for $H_0: \theta \le \theta_0$ vs $H_1: \theta > \theta_0$.
+The test statistic is $Z = \frac{\bar{X} - \theta_0}{\sigma/\sqrt{n}}$.
+The $p$-value is the probability of observing a value at least as extreme as $\bar{X}$ under $H_0$ (calculated at the boundary $\theta = \theta_0$).
+$$
+p_{value} = P(\bar{X}_{new} \ge \bar{x} \mid \theta = \theta_0) = 1 - \Phi\left(\frac{\bar{x} - \theta_0}{\sigma/\sqrt{n}}\right) = \Phi\left(\frac{\theta_0 - \bar{x}}{\sigma/\sqrt{n}}\right)
+$$
+(Using $1-\Phi(z) = \Phi(-z)$).
+
+Bayesian posterior probability of $H_0$:
+Prior $p(\theta) \propto 1$. Likelihood $X_1,\dots,X_n\mid\theta \overset{\text{i.i.d.}}{\sim} N(\theta, \sigma^2)$.
+Posterior $\theta\mid \mathbf{x} \sim N(\bar{x}, \sigma^2/n)$.
+$$
+p_0 = P(\theta \le \theta_0 \mid x) = \Phi\left(\frac{\theta_0 - \E{\theta\mid x}}{\sd{\theta\mid x}}\right) = \Phi\left(\frac{\theta_0 - \bar{x}}{\sigma/\sqrt{n}}\right)
+$$
+We see that $p_0$ is exactly equal to the classical $p$-value.
+:::
+:::
+
+::: {#exr-np-most-powerful-binomial}
+## Neyman-Pearson Most Powerful Test for a Binomial Proportion
+
+In a clinical measurement setting, $Y \sim \text{Binomial}(n,\theta)$ with $n=50$. Consider the simple hypotheses $H_0:\theta=\theta_0=0.3$ versus $H_1:\theta=\theta_1=0.4$.
+
+a) Write the likelihood ratio $\mathcal{LR}_{0,1}(y)=p(y\mid\theta_0)/p(y\mid\theta_1)$ in closed form and show it is a strictly decreasing function of $y$. Using the Neyman-Pearson Lemma (@lem-np), argue that the most powerful test of any size $\alpha$ must reject $H_0$ for $Y\ge k_\alpha$, for some critical value $k_\alpha$.
+
+b) Find the smallest integer $k_\alpha$ with $\prob{Y\ge k_\alpha\mid\theta_0}\le 0.05$, and report the size actually achieved at $k_\alpha$ and at $k_\alpha-1$. Explain why the discreteness of $Y$ makes a nonrandomized test of size exactly $0.05$ impossible here, and describe a randomized test that rejects outright for $Y\ge k_\alpha$ and rejects with extra probability $\gamma$ when $Y=k_\alpha-1$, choosing $\gamma$ so the size is exactly $0.05$.
+
+c) Compute the power of the test from (b), $1-\beta=\prob{Y\ge k_\alpha\mid\theta_1}$.
+
+d) A colleague instead proposes rejecting $H_0$ when $Y\ge 18$. Compute this test's size and power. It turns out to have higher power than the test in (b); explain why this does not contradict the Neyman-Pearson Lemma.
+
+e) Suppose $Y=21$ is observed. Compute the Bayes factor $\mathrm{BF}_{01}=p(y\mid H_0)/p(y\mid H_1)$ and, with prior odds $1{:}1$, the posterior probability of $H_0$. Does the Bayesian conclusion agree with the Neyman-Pearson decision here? Contrast with the disagreement documented in @exm-nptest.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) With $p(y\mid\theta)=\binom{n}{y}\theta^y(1-\theta)^{n-y}$, the binomial coefficients cancel in the ratio:
+$$
+\mathcal{LR}_{0,1}(y)=\left(\frac{\theta_0}{\theta_1}\right)^{y}\left(\frac{1-\theta_0}{1-\theta_1}\right)^{n-y}.
+$$
+The ratio of consecutive terms is constant,
+$$
+\frac{\mathcal{LR}_{0,1}(y+1)}{\mathcal{LR}_{0,1}(y)}=\frac{\theta_0(1-\theta_1)}{\theta_1(1-\theta_0)}=\frac{0.3\times 0.6}{0.4\times 0.7}\approx 0.643<1,
+$$
+so $\mathcal{LR}_{0,1}(y)$ is strictly decreasing in $y$ (the binomial family has a monotone likelihood ratio in $y$). Because $\mathcal{LR}_{0,1}$ decreases in $y$, the rejection set $\{\mathcal{LR}_{0,1}<k\}$ is exactly a right tail $\{Y\ge k_\alpha\}$. By @lem-np the most powerful size-$\alpha$ test rejects on $\{\mathcal{LR}_{0,1}<k_\alpha\}$, which is therefore of the form $Y\ge k_\alpha$.
+
+b)
+```{r}
+n <- 50; th0 <- 0.3; th1 <- 0.4
+tail0 <- function(k) sum(dbinom(k:n, n, th0))
+ks <- 0:n
+k_alpha <- ks[min(which(sapply(ks, tail0) <= 0.05))]
+cat("k_alpha =", k_alpha, "\n")
+cat("size at Y >= k_alpha  :", round(tail0(k_alpha), 4), "\n")
+cat("size at Y >= k_alpha-1:", round(tail0(k_alpha - 1), 4), "\n")
+gamma <- (0.05 - tail0(k_alpha)) / dbinom(k_alpha - 1, n, th0)
+cat("gamma =", round(gamma, 4), "\n")
+```
+The smallest threshold with tail probability at most $0.05$ is $k_\alpha=21$: the size at $Y\ge 21$ is $\prob{Y\ge 21\mid\theta_0}=0.0478$, whereas dropping the threshold to $Y\ge 20$ jumps the size to $0.0848$. No nonrandomized rule attains size exactly $0.05$, because the attainable tail probabilities are the discrete values $\ldots,0.0478,0.0848,\ldots$, which straddle $0.05$ with a gap. A randomized test closes the gap:
+$$
+\varphi(y)=\begin{cases}1 & y\ge 21,\\ \gamma & y=20,\\ 0 & y\le 19,\end{cases}
+$$
+with $\gamma$ solving $\prob{Y\ge 21\mid\theta_0}+\gamma\,\prob{Y=20\mid\theta_0}=0.05$. Since $\prob{Y=20\mid\theta_0}=0.0370$, we get $\gamma=(0.05-0.0478)/0.0370\approx 0.060$.
+
+c)
+```{r}
+cat("power P(Y >= 21 | th1) =", round(sum(dbinom(21:n, n, th1)), 4), "\n")
+```
+The (nonrandomized) size-$0.048$ test has power $1-\beta=\prob{Y\ge 21\mid\theta_1}=0.439$, about $44\%$.
+
+d)
+```{r}
+cat("size  P(Y >= 18 | th0) =", round(sum(dbinom(18:n, n, th0)), 4), "\n")
+cat("power P(Y >= 18 | th1) =", round(sum(dbinom(18:n, n, th1)), 4), "\n")
+```
+The rule $Y\ge 18$ has size $\prob{Y\ge 18\mid\theta_0}=0.218$ and power $\prob{Y\ge 18\mid\theta_1}=0.763$. It is more powerful only because it operates at a far larger size ($21.8\%$ versus $4.8\%$). The Neyman-Pearson Lemma guarantees that $Y\ge 21$ is most powerful only among tests of size at most $0.048$; a test of size $0.218$ is not a competitor at that level, so no contradiction arises. Power can always be bought with size.
+
+e)
+```{r}
+y <- 21
+BF01 <- dbinom(y, n, th0) / dbinom(y, n, th1)
+cat("BF01 =", round(BF01, 4), "  P(H0 | y) =", round(BF01 / (1 + BF01), 4), "\n")
+```
+For simple-versus-simple hypotheses the Bayes factor equals the likelihood ratio, $\mathrm{BF}_{01}=\mathcal{LR}_{0,1}(21)=0.208$. With prior odds $1{:}1$, $\prob{H_0\mid y}=0.208/1.208=0.172$. The Neyman-Pearson test rejects $H_0$ (since $21\ge k_\alpha$), and the Bayesian also favors $H_1$, assigning $H_0$ only $17\%$ posterior probability. Here the two procedures agree, because $Y=21$ lies closer to the $H_1$ mean $n\theta_1=20$ than to the $H_0$ mean $n\theta_0=15$. This contrasts with @exm-nptest, where $\overline{y}$ was actually closer to $\mu_0$ yet Neyman-Pearson still rejected: whether the two procedures agree depends on the specific configuration of hypotheses and observed data, not on a universal conflict.
+:::
+:::
+
+::: {#exr-hpd-vs-equal-tailed}
+## HPD versus Equal-Tailed Credible Intervals
+
+A study observes 1 event in 8 trials. Using a uniform $\text{Beta}(1,1)$ prior for the event probability $\theta$, the posterior is $\theta\mid y \sim \text{Beta}(2,8)$, a right-skewed density with mode $0.125$ and mean $0.2$.
+
+a) Compute the 90% equal-tailed credible interval $[q_{0.05},q_{0.95}]$ for $\theta$ using the Beta quantile function. Report its length.
+b) The 90% HPD interval $[\theta_L,\theta_U]$ (@def-hpd) is the shortest interval with $P(\theta_L\le\theta\le\theta_U\mid y)=0.90$; equivalently, by @lem-hpd, it is the interval with equal posterior density at both endpoints, $p(\theta_L\mid y)=p(\theta_U\mid y)$. Find $[\theta_L,\theta_U]$ numerically: search over the lower-tail probability $p_L\in(0,0.10)$ for the choice that minimizes the length of the interval $[q_{p_L},q_{p_L+0.90}]$. Report the interval and its length.
+c) Confirm numerically that the posterior density is (approximately) equal at the two HPD endpoints from part (b), and that it is not equal at the two equal-tailed endpoints from part (a).
+d) By how much shorter is the HPD interval than the equal-tailed interval, in absolute terms and as a percentage? Using @lem-hpd, explain why the HPD interval can never be longer than any other interval with the same coverage, and why the two intervals would coincide if the posterior were symmetric and unimodal.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+a <- 2; b <- 8
+alpha <- 0.10
+et_lower <- qbeta(alpha/2, a, b)
+et_upper <- qbeta(1 - alpha/2, a, b)
+cat("Equal-tailed: [", round(et_lower, 3), ",", round(et_upper, 3), "]  length =", round(et_upper - et_lower, 3), "\n")
+```
+The 90% equal-tailed interval is $[0.041, 0.429]$, with length $0.388$.
+
+b) For a fixed coverage of 90%, every interval of the form $[q_{p_L}, q_{p_L+0.90}]$, as $p_L$ ranges over $(0,0.10)$, has the required coverage by construction; minimizing over $p_L$ finds the shortest such interval, which @lem-hpd guarantees is the HPD interval.
+```{r}
+mass <- 1 - alpha
+width <- function(pL) qbeta(pL + mass, a, b) - qbeta(pL, a, b)
+opt <- optimize(width, interval = c(0, alpha), tol = 1e-10)
+hpd_lower <- qbeta(opt$minimum, a, b)
+hpd_upper <- qbeta(opt$minimum + mass, a, b)
+cat("HPD: [", round(hpd_lower, 3), ",", round(hpd_upper, 3), "]  length =", round(hpd_upper - hpd_lower, 3), "\n")
+```
+The 90% HPD interval is $[0.015, 0.376]$, with length $0.361$.
+
+c)
+```{r}
+cat("Density at HPD endpoints:", round(dbeta(hpd_lower, a, b), 4), round(dbeta(hpd_upper, a, b), 4), "\n")
+cat("Density at equal-tailed endpoints:", round(dbeta(et_lower, a, b), 4), round(dbeta(et_upper, a, b), 4), "\n")
+```
+The density at the two HPD endpoints agrees to 4 decimal places ($0.9964$ both), matching the horizontal-line-cut characterization of @def-hpd. At the equal-tailed endpoints the density is $2.203$ at the lower bound but only $0.6105$ at the upper bound: because the posterior is right-skewed, the equal-tailed rule keeps a thin, low-density tail on the right while excluding some higher-density values just to the left of $0.041$.
+
+d) The HPD interval is shorter by $0.388-0.361=0.027$, a $7.1\%$ reduction in length for the same coverage. By @lem-hpd, the HPD set is the highest-posterior-density region for its coverage level, and the proof there shows directly that no other set with the same coverage can be shorter; the equal-tailed interval achieves the required coverage but ignores the shape of the density between the tails, so it matches the HPD interval in length only when the two coincide, which happens exactly when the posterior is symmetric and unimodal (then the equal-tailed cut and the horizontal-density cut agree by symmetry). The more skewed the posterior, the more length the equal-tailed rule wastes in its thin tail, so the gap between the two grows with skewness.
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Bayesian Hypothesis Testing
+
+Mark each statement as TRUE or FALSE and provide a brief explanation.
+
+a) The Bayes factor depends on the prior probabilities assigned to $H_0$ and $H_1$.
+
+b) If the Bayes factor $BF_{01} = 10$, then $P(H_0 \mid \text{data}) = 0.91$.
+
+c) Lindley's Paradox shows that with large samples, a Bayesian analysis will always reject the null when a frequentist test does.
+
+d) The Bayes factor for a point null against a diffuse alternative tends to favor the null as sample size increases, even when the true parameter is slightly different from the null.
+
+e) In sequential Bayesian testing, the log Bayes factor accumulates additively across independent observations.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) FALSE. The Bayes factor is the ratio of marginal likelihoods and does not depend on prior probabilities of the hypotheses. It equals:
+$$
+BF_{01} = \frac{P(\text{data} \mid H_0)}{P(\text{data} \mid H_1)}
+$$
+The prior probabilities affect the posterior odds but not the Bayes factor itself.
+
+b) FALSE. If $BF_{01} = 10$ and prior odds are 1:1, then posterior odds are 10:1, giving $P(H_0 \mid \text{data}) = 10/11 \approx 0.91$. But if prior odds are different, the posterior probability will differ. The statement is only true for equal prior probabilities.
+
+c) FALSE. Lindley's Paradox shows the opposite: with large samples, the Bayesian analysis may favor the null hypothesis while the frequentist test rejects it. This occurs because the $p$-value gets small, but the Bayes factor can favor $H_0$ when the alternative is diffuse.
+
+d) FALSE. For a fixed true parameter different from the null, the Bayes factor will eventually favor the alternative as $n \to \infty$, regardless of how diffuse the prior is. The Jeffreys-Lindley paradox refers to a different phenomenon: when the frequentist $p$-value is held fixed at the rejection boundary, the corresponding BF increasingly favors $H_0$ as $n$ grows (because the effect size shrinks as $1/\sqrt{n}$). With a fixed nonzero effect, sufficient data will overwhelm any prior.
+
+e) TRUE. For independent observations, $BF_n = \prod_{i=1}^n BF_i$, so $\log BF_n = \sum_{i=1}^n \log BF_i$.
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Sequential Bayesian Testing
+
+Alan Turing used sequential Bayesian testing to crack the Enigma code. Suppose you're testing whether a substitution cipher maps letter A to letter X. Enigma traffic was in German, so this exercise uses German letter statistics (the chapter's Enigma example, @exm-enigma, uses English for illustration).
+
+- Under $H_0$ (correct mapping): $P(\text{match}) = 0.08$, an aggregate match/coincidence probability for German text (analogous to the index-of-coincidence statistic $m \approx 0.066$ the chapter computes for English), not a single-letter frequency
+- Under $H_1$ (incorrect mapping): $P(\text{match}) = 1/26 \approx 0.0385$
+
+You observe a sequence of positions where you expect letter A, and record whether you see X.
+
+a) What is the Bayes factor for a single match observation?
+b) What is the Bayes factor for a single non-match observation?
+c) If you start with prior odds of 1:25 (one correct mapping among 26 possibilities), how many consecutive matches do you need to achieve posterior odds of 10:1?
+d) Plot the evolution of log posterior odds as you observe: match, match, non-match, match, match, match.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+p_match_h0 <- 0.08
+p_match_h1 <- 1/26
+
+# a) BF for match
+bf_match <- p_match_h0 / p_match_h1
+cat("BF for match =", round(bf_match, 3), "\n")
+
+# b) BF for non-match
+bf_nonmatch <- (1 - p_match_h0) / (1 - p_match_h1)
+cat("BF for non-match =", round(bf_nonmatch, 3), "\n")
+
+# c) Starting odds 1:25
+# Need (1/25) * bf_match^k > 10
+# bf_match^k > 250
+k <- ceiling(log(250) / log(bf_match))
+cat("Need", k, "consecutive matches\n")
+
+# d) Evolution
+observations <- c(1, 1, 0, 1, 1, 1)  # 1=match, 0=non-match
+log_odds <- log(1/25)
+log_bf <- ifelse(observations == 1, log(bf_match), log(bf_nonmatch))
+cumulative_log_odds <- log_odds + cumsum(log_bf)
+
+plot(0:6, c(log_odds, cumulative_log_odds), type = "b", 
+     xlab = "Observation number", ylab = "Log posterior odds",
+     main = "Sequential Bayesian Testing (Enigma style)")
+abline(h = log(10), col = "red", lty = 2)
+legend("bottomright", "Threshold (10:1)", col = "red", lty = 2)
+```
+
+:::
+:::
+
+::: {#exr-seqtrial-operating-characteristics}
+## Operating Characteristics of a Bayesian Sequential Trial
+
+Extend the Bayesian sequential design of @exm-berry-trial and the operating-characteristics simulation of @exm-operating-chars to study how two design choices, the maximum sample size per arm $n_{\max}$ and the efficacy threshold $\theta_E$, trade off Type I error, power, and expected sample size.
+
+a) Write an R function `simulate_trial(p_C, p_T, n_max, theta_E, theta_F = 0.10, alpha_prior = 1, beta_prior = 1, n_mc = 2000)` that generates Bernoulli outcomes for both arms under true rates $p_C, p_T$; looks at three interims at $\mathrm{round}(n_{\max}/3)$, $\mathrm{round}(2n_{\max}/3)$, and $n_{\max}$ patients per arm; at each interim draws `n_mc` Monte Carlo samples from the Beta posteriors of $p_C$ and $p_T$ and computes $\prob{p_T>p_C\mid\text{data}}$; and stops for efficacy if this probability exceeds $\theta_E$, for futility if it drops below $\theta_F$, or otherwise continues to the next look, returning the decision and the per-arm sample size at stopping.
+
+b) For every combination of $n_{\max}\in\{25,35,40\}$ and $\theta_E\in\{0.90,0.95,0.99\}$ (holding $\theta_F=0.10$ fixed), simulate 500 trials under the null ($p_C=p_T=0.30$) and 500 under a moderate effect ($p_C=0.30$, $p_T=0.50$). Tabulate, for each of the nine combinations, the Type I error rate (fraction of null trials stopping for efficacy), the power (fraction of moderate-effect trials stopping for efficacy), and the expected per-arm sample size $\E{N}$ in each scenario.
+
+c) Discuss the efficiency-error tradeoff in your table: how do Type I error, power, and $\E{N}$ change as $\theta_E$ rises from $0.90$ to $0.99$ at fixed $n_{\max}$, and as $n_{\max}$ rises at fixed $\theta_E$?
+
+d) A regulator requires Type I error below $0.05$ and power above $60\%$. Does any of your nine combinations satisfy both constraints? If not, explain what would have to change about the design.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The function generates every outcome up front, then walks the three interim looks and stops at the first one where the Monte Carlo posterior probability of superiority crosses a threshold.
+```{r}
+simulate_trial <- function(p_C, p_T, n_max, theta_E, theta_F = 0.10,
+                           alpha_prior = 1, beta_prior = 1, n_mc = 2000) {
+  interim_points <- c(round(n_max / 3), round(2 * n_max / 3), n_max)
+  ctrl <- rbinom(n_max, 1, p_C)
+  trt  <- rbinom(n_max, 1, p_T)
+  for (n in interim_points) {
+    xC <- sum(ctrl[1:n]); xT <- sum(trt[1:n])
+    pC <- rbeta(n_mc, alpha_prior + xC, beta_prior + n - xC)
+    pT <- rbeta(n_mc, alpha_prior + xT, beta_prior + n - xT)
+    p_sup <- mean(pT > pC)
+    if (p_sup > theta_E) return(list(decision = "Efficacy", n_final = n))
+    if (p_sup < theta_F) return(list(decision = "Futility", n_final = n))
+  }
+  list(decision = "Max reached", n_final = n_max)
+}
+```
+
+b) We loop over the $3\times 3$ grid, running 500 null and 500 moderate-effect trials in each cell.
+```{r}
+set.seed(42)
+n_rep <- 500
+grid <- expand.grid(theta_E = c(0.90, 0.95, 0.99), n_max = c(25, 35, 40))
+oc <- data.frame()
+for (i in seq_len(nrow(grid))) {
+  nm <- grid$n_max[i]; te <- grid$theta_E[i]
+  nl <- replicate(n_rep, simulate_trial(0.30, 0.30, nm, te), simplify = FALSE)
+  md <- replicate(n_rep, simulate_trial(0.30, 0.50, nm, te), simplify = FALSE)
+  oc <- rbind(oc, data.frame(
+    n_max = nm, theta_E = te,
+    `Type I` = mean(sapply(nl, `[[`, "decision") == "Efficacy"),
+    `E[N] null` = mean(sapply(nl, `[[`, "n_final")),
+    Power = mean(sapply(md, `[[`, "decision") == "Efficacy"),
+    `E[N] mod` = mean(sapply(md, `[[`, "n_final")),
+    check.names = FALSE
+  ))
+}
+knitr::kable(oc, digits = c(0, 2, 3, 1, 3, 1),
+  caption = "Operating characteristics over the design grid (500 trials per cell)")
+```
+
+With `set.seed(42)` the grid gives Type I error rising from about $0.012$ to $0.022$ at $\theta_E=0.99$ up to $0.156$ to $0.196$ at $\theta_E=0.90$, power ranging from $0.222$ (smallest trial, strictest threshold) to $0.788$ (largest trial, loosest threshold), and expected sample sizes between roughly $17$ and $37$ per arm. (Monte Carlo values shift by a point or two under a different seed.)
+
+c) Two trends dominate. Raising $\theta_E$ from $0.90$ to $0.99$ at fixed $n_{\max}$ sharply lowers Type I error (at $n_{\max}=40$, from $0.196$ to $0.022$) but also cuts power heavily (from $0.788$ to $0.376$) and pushes $\E{N}$ toward $n_{\max}$ in both scenarios, since efficacy stopping becomes rare and most trials run to the final look. Raising $n_{\max}$ at fixed $\theta_E$ raises power, because there is more information to detect the 20-point difference (at $\theta_E=0.95$, power climbs from $0.516$ at $n_{\max}=25$ to $0.628$ at $n_{\max}=40$), and raises $\E{N}$ roughly in proportion, while leaving Type I error near-flat (about $0.084$ to $0.088$ across that row).
+
+d) None of the nine combinations satisfies both Type I error below $0.05$ and power above $0.60$. The $\theta_E=0.95$ designs reach the power target at the larger trials ($0.630$ and $0.628$ for $n_{\max}=35,40$), but their Type I error, near $0.085$, exceeds $0.05$. The $\theta_E=0.99$ designs control Type I error ($0.012$ to $0.022$) but their power collapses to between $0.222$ and $0.376$. The figure makes the gap visual: every design sits outside the shaded target corner. Meeting both requirements is not achievable by tuning $\theta_E$ and $n_{\max}$ within this range. The maximum sample size would have to grow well beyond 40 per arm, or the number and spacing of interim looks and their thresholds would need explicit calibration, echoing the chapter's point that a Bayesian design must be checked by simulation against frequentist operating characteristics whenever regulators require them.
+```{r}
+#| fig-cap: "Power against Type I error for the nine designs. Each colored path joins the three efficacy thresholds (0.90, 0.95, 0.99, labeled) at one maximum sample size. The shaded corner is the regulator target (Type I below 0.05, power above 0.60); no design reaches it."
+#| fig-height: 3
+cols <- c("25" = "#1b9e77", "35" = "#d95f02", "40" = "#7570b3")
+plot(oc$`Type I`, oc$Power,
+  type = "n", xlim = c(0, 0.22), ylim = c(0.15, 0.85),
+  xlab = "Type I error (null scenario)", ylab = "Power (moderate effect)"
+)
+rect(0, 0.60, 0.05, 0.85, col = rgb(0, 0.6, 0, 0.10), border = NA)
+abline(v = 0.05, lty = 2, col = "gray50")
+abline(h = 0.60, lty = 2, col = "gray50")
+for (nm in c(25, 35, 40)) {
+  s <- oc[oc$n_max == nm, ]
+  lines(s$`Type I`, s$Power, col = cols[as.character(nm)], lwd = 2)
+  points(s$`Type I`, s$Power, pch = 19, col = cols[as.character(nm)])
+  text(s$`Type I`, s$Power, labels = s$theta_E, pos = 3, cex = 0.6)
+}
+legend("bottomright",
+  legend = paste("n_max =", c(25, 35, 40)),
+  col = cols, lwd = 2, pch = 19, bty = "n", cex = 0.8
+)
+```
+:::
+:::
+
+::: {#exr-}
+## Posterior Odds with Asymmetric Losses
+
+A security system must decide whether to flag a transaction as fraudulent. Let $H_0$ be "legitimate" and $H_1$ be "fraudulent."
+
+- Loss matrix: Missing fraud ($d_0 \mid H_1$) costs \$10,000; False alarm ($d_1 \mid H_0$) costs \$100
+- Prior probability of fraud: $P(H_1) = 0.01$
+- Based on transaction features, the Bayes factor is $BF_{10} = 5$
+
+a) Calculate the posterior probability of fraud.
+b) What is the optimal decision rule based on minimizing expected loss?
+c) Should this transaction be flagged?
+d) What Bayes factor threshold would lead to flagging the transaction?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Posterior probability:
+```{r}
+prior_fraud <- 0.01
+bf_10 <- 5
+posterior_odds <- bf_10 * (prior_fraud / (1 - prior_fraud))
+posterior_fraud <- posterior_odds / (1 + posterior_odds)
+cat("P(Fraud | data) =", round(posterior_fraud, 4), "\n")
+```
+
+b) Optimal decision rule:
+Flag as fraud if:
+$$
+\frac{P(H_1 \mid \text{data})}{P(H_0 \mid \text{data})} > \frac{L(d_1 \mid H_0)}{L(d_0 \mid H_1)} = \frac{100}{10000} = 0.01
+$$
+
+c) Posterior odds = `r round(posterior_odds, 4)` > 0.01, so YES, flag the transaction.
+
+d) For flagging:
+$$
+BF_{10} \times \frac{0.01}{0.99} > 0.01
+$$
+$$
+BF_{10} > 0.99
+$$
+
+Any Bayes factor above approximately 1 would lead to flagging.
+
+:::
+:::
+
+::: {#exr-}
+## Point Null vs Composite Alternative
+
+A quality control inspector tests whether a manufacturing process has mean $\mu = 100$ grams (the specification) versus $\mu \neq 100$. A sample of 25 items has $\bar{x} = 102$ and $s = 5$; treat $s$ as the known population $\sigma$ for this exercise.
+
+Under $H_1$, assume $\mu \sim N(100, 10^2)$ (diffuse alternative centered at spec).
+
+a) Calculate the Bayes factor $BF_{01}$ for the point null.
+b) What prior probability would you assign to $H_0: \mu = 100$ exactly?
+c) Discuss whether a point null makes sense in this manufacturing context.
+d) Propose an interval null hypothesis and explain how you would test it.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+xbar <- 102
+s <- 5
+n <- 25
+mu0 <- 100
+
+# Likelihood under H0 (treating s as known sigma)
+se <- s / sqrt(n)
+lik_h0 <- dnorm(xbar, mu0, se)
+
+# Marginal likelihood under H1
+# Prior: mu ~ N(100, 100)
+# Posterior: mu ~ N(mu_post, sigma_post^2)
+prior_var <- 100
+lik_var <- s^2 / n
+post_var <- 1 / (1/prior_var + 1/lik_var)
+# Marginal: N(xbar; 100, prior_var + lik_var)
+marginal_var <- prior_var + lik_var
+lik_h1 <- dnorm(xbar, mu0, sqrt(marginal_var))
+
+bf_01 <- lik_h0 / lik_h1
+cat("BF_01 =", round(bf_01, 3), "\n")
+```
+
+b) In practice, assigning positive probability to a point null is philosophically questionable. The true mean is unlikely to be exactly 100.0000... However, for practical purposes, we might use a "spike and slab" prior where the spike has probability, say, 0.05-0.50.
+
+c) A point null doesn't make physical sense: no manufacturing process produces items with exactly 100.0000g mean. An interval null like $|\mu - 100| < 1$ gram (within tolerance) is more appropriate.
+
+d) Interval null: $H_0: 99 < \mu < 101$ (within ±1 gram of spec)
+
+We would compute:
+$$
+P(99 < \mu < 101 \mid \text{data}) = \int_{99}^{101} p(\mu \mid \text{data}) d\mu
+$$
+
+:::
+:::
+
+::::

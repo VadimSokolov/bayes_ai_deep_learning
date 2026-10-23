@@ -1,0 +1,1297 @@
+{{< include ./misc/common.qmd >}}
+
+# Linear Regression
+
+The simplest form of a parametric model is a linear model that assumes a linear relationship between the input variables and the output variable. There are several ways to specify such a family of functions, for example as linear combinations of inputs 
+$$
+f_{\beta}(x)=\beta_0+\beta_1x_1 + \ldots + \beta_p x_p.
+$$
+Technically, this is not a linear function. In mathematics, it is called an affine function, which is a linear function with an additional constant term ($\beta_0$). However, if we add a dummy variable $x_0 = 1$ to the input vector $x$, we can rewrite the function as a linear function of the parameters $\beta = (\beta_0,\beta_1,\ldots,\beta_p)$ using vector notation
+$$
+f_{\beta}(x) = \beta^\top x, ~ x = (1,x_1,\ldots,x_p).
+$$
+
+Note that instead of using a generic notation $\theta$ for the parameters, we use $\beta$ to emphasize that we are talking about the parameters of the linear model. The vector $\beta$ is called the *regression coefficients*.
+
+Regression analysis is the most widely used statistical tool for understanding relationships among variables. It provides a conceptually simple method for investigating functional relationships between one or more factors and an outcome of interest. This relationship is expressed in the form of an equation, which we call the model, connecting the response or dependent variable and one or more explanatory or predictor variables. 
+
+A more general form of a linear model is a linear combination of basis functions
+$$
+f_{\beta}(x)= \beta_0 + \beta_1 \psi_1(x) + \ldots + \beta_M \psi_M(x) = \beta^\top \psi(x), 
+$$ 
+where $\psi_1,\ldots,  \psi_M$ are the basis functions and $\psi(x) = (1, \psi_1(x),\ldots,\psi_M(x))$.
+
+Notice in the latter case, the function $f$ is *linear in the parameters* $\beta = (\beta_0,\beta_1,\ldots, \beta_M)$ but not in the input variables $x$. The goal of the modeler is to choose an appropriate set of predictors and basis functions that will lead to a good reconstruction of the input-output relations. After we've specified what the function $f$ is, we need to find the best possible values of parameters $\beta$.
+
+Finding a predictive rule $f_{\beta}(x)$ starts by defining the criterion of what is a good prediction. We assume that the function $f_{\beta}(x)$ is parameterized by a vector of parameters $\beta$, and we want to find the best value of $\beta$ that will give us the best prediction.
+
+We will use a loss function that quantifies the difference between the predicted and actual values of the output variable. It is closely related to the loss function used in decision theory (thus the name). In decision theory, a loss function is a mathematical representation of the "cost" associated with making a particular decision in a given state of the world. It quantifies the negative consequences of choosing a specific action and helps guide decision-makers towards optimal choices. You can think of the loss function in predictive problems as a "cost" associated with making an inaccurate prediction given the values of the input variables $x$. 
+
+
+The *least squares* loss function, discussed in @sec-pattern, is the sum of squared differences between the predicted and actual values.  Given observed dataset $\{(x_1,y_1),\ldots,(x_n,y_n)\}$, the least squares estimator is the value of $\beta$ that minimizes the sum of squared errors
+$$
+\min_{\beta}\sum_{i=1}^n (y_i - \hat y_i)^2, ~ \hat y_i =  \beta^\top \psi(x_i).
+$$
+In most regression settings, we treat the observations as exchangeable (often simplified to i.i.d.), meaning the order of the data is not informative (@sec-bl).
+
+In the unconditional case, when we do not observe any inputs $x$, the least squares estimator is the sample mean. We can solve this minimization problem by taking the derivative of the loss function and setting it to zero
+$$
+\frac{d}{d\beta}\sum_{i=1}^n (y_i - \beta_0)^2 = -2\sum_{i=1}^n (y_i - \beta_0) = 0
+$$
+which gives us the solution $\hat{\beta}_0 = 1/n\sum_{i=1}^n y_i$, which is the sample mean.
+
+
+::: {#exm-houses}
+## Housing Price Prediction
+
+To demonstrate linear regression, we develop a model that predicts the price of a house, given its square footage. This is a simplified version of a regression model used by Zillow, a house pricing site. First, we look at property sales data where we know the price and some observed characteristics. Let's look at the scatter plot of living areas measured in thousands of square feet and the price measured in thousands of dollars. 
+
+Second, we build a model that predicts price as a function of the observed characteristics. Now, we need to decide on what characteristics do we use. There are many factors or variables that affect the price of a house, for example, location. Some other basic ones include size, number of rooms, and parking.
+
+
+We will use the `SaratogaHouses` dataset from the `mosaicData` package. This dataset contains information about house sales in Saratoga County, New York, in 2006. The dataset contains 1,728 observations and 16 variables. We will use the `price` variable as the dependent variable and the `livingArea` variable as the independent variable. The `price` variable contains the sale price of the house in dollars, and the `livingArea` variable contains the living area of the house in square feet.
+$$
+\mathrm{price} = \beta_0 + \beta_1 \mathrm{livingArea}
+$$
+The value that we seek to predict, `price`, is called the dependent variable, and we denote this by $y$. The variable that we use to construct our prediction, `livingArea`, is the predictor variable, and we denote it with $x$. 
+
+First, we read the data into the data frame `d` and express `price` in thousands of dollars and `livingArea` in thousands of square feet.
+```{r plothouses}
+d <- read.csv("data/SaratogaHouses.csv")
+d$price <- d$price / 1000
+d$livingArea <- d$livingArea / 1000
+```
+
+We use `lm` function to estimate the parameters of the line
+```{r lm-houses}
+#| echo: true
+l <- lm(price ~ livingArea, data = d)
+```
+This R code is fitting a linear regression model using the `lm` function. Let's break down the code:
+
+1. `lm`: This is the function used for fitting linear models, it uses least squares loss function.
+
+2. `price`: This is the dependent variable, the variable you are trying to predict. It is assumed to be in the dataset specified by the `data` argument.
+
+3. `~`: In the context of the formula inside `lm`, the tilde (`~`) separates the dependent variable from the independent variable(s).
+
+4. `livingArea`: This is the independent variable or predictor. In this case, the model is trying to predict the variable `price` based on the values of `livingArea`.
+
+5. `data = d`: This specifies the dataset that contains the variables `price` and `livingArea`. The dataset is named `d`.
+
+So, in plain English, this `R` code is fitting a linear regression model where the `price` is predicted based on the `livingArea` in the dataset `d`. The model is trying to find a coefficient for `livingArea` to minimize the difference between the predicted values and the actual values of `price`.
+
+We can use `coef` function to find out the slope and the intercept of this line. 
+```{r}
+#| echo: true
+coef(l)
+```
+The intercept value is in units of $y$ (\$1000). The slope is in units of $y$ per units of $x$ (\$1000 per 1000 sq. feet). In our housing example, we find that $\beta_0 = `r round(coef(l)[1], 2)`$ and $\beta_1 = `r round(coef(l)[2], 2)`$. Thus, every additional $1000$ square feet increases the price of the house by about \$`r fmt(round(coef(l)[2]*1000, -2), 0)`, and the price of a lot of land without a house is about \$`r fmt(round(coef(l)[1]*1000, -2), 0)`. The magnitude of $\beta_1$ shows the *economic significance* of a house's square footage. 
+
+We can now predict the price of a house when we only know that size: take the value off the regression line. For example, given a house size of $x = 2.2$. Predicted price is 
+$$
+\hat{y} = 13.44 + 113.12\times 2.2 = 262.3.
+$$
+
+
+```{r}
+plot(d$livingArea, d$price, "p", pch = 21, bg = "lightblue", xlab = "Living Area", ylab = "Price", cex = 0.6)
+abline(l, col = "red", lwd = 3)
+# Draw a line between the two points
+x <- 2.2
+yhat <- x * coef(l)[2] + coef(l)[1]
+lines(c(x, x), c(0, yhat), col = "black", lwd = 3, lty = 2)
+lines(c(0, x), c(yhat, yhat), col = "black", lwd = 3, lty = 2)
+text(x + 2.3, yhat - 150, expression(hat(y) == "262.3"), cex = 1.5)
+arrows(x + 1.7, yhat - 120, x + 0.08, yhat - 15, length = 0.08, lwd = 1.5)
+```
+:::
+
+We used `lm` function to fit the linear model for the housing data. This function uses the least squares loss function to estimate the parameters of the line. One of the nice properties of the least squares estimator is that it has a closed-form solution. This means that we can find the values of the parameters that minimize the loss function by solving a system of linear equations rather than using an optimization algorithm. The linear system is obtained by taking the gradient (multivariate derivative) of the loss function with respect to the parameters and setting it to zero.  The loss function
+$$
+\mathcal{L}(\beta) = \sum_{i=1}^n (y_i - f_{\beta}(x_i))^2
+$$
+is a quadratic function of the parameters, so, provided the predictors are not linearly dependent, the solution is unique and can be found analytically. The gradient of the loss function with respect to the parameters is
+$$
+\nabla \mathcal{L}(\beta) = -2\sum_{i=1}^n (y_i - f_{\beta}(x_i))\nabla f_{\beta}(x_i).
+$$
+Given that $f_{\beta}(x_i) = \beta^\top \psi(x_i)$, the gradient of the loss function with respect to the parameters is
+$$
+\nabla \mathcal{L}(\beta)  = -2\sum_{i=1}^n (y_i - \beta^\top \psi(x_i))\psi(x_i).
+$$
+Setting the gradient to zero gives us the normal equations
+$$
+\sum_{i=1}^n y_i \psi(x_i) = \sum_{i=1}^n \psi(x_i) \psi(x_i)^\top \beta.
+$$
+In matrix form, the normal equations are
+$$
+\Psi^\top y = \Psi^\top\Psi\beta
+$$ {#eq-normal-equations}
+where $\Psi$ is the design matrix with rows $\psi(x_i)^\top$ and $y$ is the vector of output values. The solution to the normal equations is
+$$
+\hat{\beta} = (\Psi^\top\Psi)^{-1}\Psi^\top y.
+$$
+
+```{r echo=T}
+y <- d$price
+Psi <- cbind(1, d$livingArea)
+lhs <- t(Psi) %*% Psi
+rhs <- t(Psi) %*% y
+beta <- solve(lhs, rhs)
+beta[, 1]
+```
+The function `solve` solves the @eq-normal-equations and indeed finds the same values as the `lm` function. Essentially this is what the `lm` function does under the hood. The `solve` function uses the elimination method to solve the system of linear equations. The method we all learned when we were introduced to linear equations. The technique is known in linear algebra as LU decomposition.
+
+
+In our housing example, we used a linear model to predict the price of a house based on its square footage. The model is simple and easy to interpret, making it suitable for both prediction and interpretation. The model provides insights into the relationship between house size and price, allowing us to understand how changes in house size affect the price. The model can also be used to make accurate predictions of house prices based on square footage.
+
+To further demonstrate the versatility of linear models, let's consider an example that allows us to understand the relationship between the performance of a stock portfolio managed by John Maynard Keynes and overall market performance.
+
+::: {#exm-keynes}
+## Keynes Investment Performance
+John Maynard Keynes was a good investor, achieving a long-term average annual return of 16% while managing the King's College Cambridge endowment fund from 1921 to 1946. This performance significantly outperformed the overall market during that period. In the 1921--1929 period, he experimented with investments in art and currency, as well as cyclical equity investing. However, later in the 1930s and onwards, Keynes transitioned to a value investing strategy, focusing on undervalued stocks with strong fundamentals. This coincided with the Great Depression, where such investments offered significant opportunities. This shift led to consistent outperformance, with the King's College endowment generating returns exceeding the market on average. In our analysis, we consider his returns during the 1928--1945 period. Below is the plot of his returns.
+```{r keynes, echo=-2}
+#| fig-height: 2
+keynes <- read.csv("data/keynes.csv", header = T)
+knitr::kable(head(keynes))
+attach(keynes)
+# Plot the data
+plot(Year, Keynes, pch = 20, col = 34, cex = 3, type = "l", lwd = 3)
+mean(Keynes)
+```
+
+Let's compare his performance to the overall stock market. The Dow Jones Industrial Average, grew at an average annual rate of 8.5% during the same period (1921--1946).
+Keynes was able to consistently generate alpha, exceeding the market's overall returns.
+
+The dots in @fig-keynes-plot below show the market returns vs Keynes portfolio returns. The correlation coefficient is 0.74, which is high; when markets are doing well, Keynes also did well.
+
+Now we fit a linear regression model 
+$$
+\text{Keynes} = \alpha + \beta \text{Market}
+$$
+Note that here, instead of generic notations $\beta_0$ for intercept and $\beta_1$ for slope, we use $\alpha$ and $\beta$, which are common in finance literature. 
+```{r}
+#| fig-cap: "Scatterplot of the market returns vs Keynes portfolio returns."
+#| label: fig-keynes-plot
+#| echo: true
+plot(Market, Keynes, xlab = "Market Return", ylab = "Keynes Excess Return", col = 20, bg = "lightblue", pch = 21, cex = 0.8)
+model <- lm(Keynes ~ Market)
+abline(model, lwd = 3)
+```
+
+```{r}
+#| echo: true
+coef(model)
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+The intercept of the least squares line is $\alpha = 13.2$, which is significantly higher than 0. This indicates that Keynes was able to generate higher returns than the market, even when the market was performing well. This is consistent with his value investing strategy, which allowed him to identify undervalued stocks and generate significant alpha.
+
+Now we adjust for the risk-free returns and calculate excess return.
+```{r}
+#| echo: true
+Keynes <- Keynes - Rate
+Market <- Market - Rate
+modelnew <- lm(Keynes ~ Market)
+modelnew %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+We see that after the adjustment, the intercept $\alpha=14.46$ is now even larger. 
+:::
+
+
+## Statistical Properties of Linear Models
+Previously we demonstrated how the Central Limit Theorem enables us to derive key statistical properties of the sample mean, including its asymptotic normality, unbiasedness, and the relationship between sample size and estimation precision. These same principles extend naturally to linear models, where we can derive analogous properties for the least squares estimators of regression coefficients.
+
+First, we introduce a regression model using the language of probability. A regression model assumes that the mean of the output variable $y$ depends linearly on predictors $x_1,\ldots,x_p$ 
+$$
+y = \beta_0 +  \beta_1 x + \ldots + \beta_p x_p + \epsilon,~ \text{where}~\epsilon \sim N(0, \sigma^2).
+$$ 
+Often, we use simpler dot-product notation
+$$
+y = \beta^\top x + \epsilon,
+$$
+where $\beta = (\beta_0,\beta_1,\ldots,\beta_p)$ is the vector of regression coefficients and $x = (1,x_1,\ldots,x_p)$ is the vector of predictors, with 1 appended to the beginning. 
+
+
+A more convenient form of the model is as follows
+$$
+y \mid \beta,x \overset{\text{i.i.d.}}{\sim}  N(\beta^\top x, \sigma^2).
+$$
+
+
+
+The additional term $\epsilon$ is a random variable that captures the uncertainty in the relationship between $y$ and $x$; it is called the error term or the residual. The error term is assumed to be normally distributed with mean zero and variance $\sigma^2$. Thus, the linear regression model has a new parameter $\sigma^2$ that models the dispersion of $y_i$ around the mean $\beta^\top x$, let's see an example.
+
+
+### Estimates and Intervals
+In our housing example, we estimated the parameter $\beta_1$ to be equal to 113.12 and made a conclusion that the price of the house goes up by that amount when the living area goes up by one unit. However, the estimated value is based on a sample. The sample is a result of well-designed data collection procedure and is representative of the population, and we should expect the estimated value to be close to the true value. However, the estimated value is not the true value of the parameter, but an estimate of it. The true value of the parameter is unknown, and the estimated value is subject to sampling error. 
+
+
+The sampling error is modeled by the normal distribution. The standard error of the estimate is a measure of the uncertainty in the estimated value of the parameter. The standard error is calculated from the sample data and is used to calculate confidence intervals and $p$-values for the estimated parameter.
+
+We used the `lm` function to estimate the parameters of the linear model. The estimated values of the parameters are given in the `estimate` column of the table printed in the example below. The estimated value of the intercept is $\hat \beta_0 = `r coef(l)[1]`$ and the estimated value of the slope is $\hat \beta_1 = `r coef(l)[2]`$. These values are calculated using the least squares loss function, which minimizes the sum of squared differences between the predicted and actual values of the output variable. The standard error of the estimates is given in the `std.error` column of the table. We read the rest of the `lm` output in the example below.
+
+::: {#exm-houses2}
+## House Prices
+Let's go back to the Saratoga Houses dataset
+
+
+```{r}
+d <- read.csv("data/SaratogaHouses.csv")
+d$price <- d$price / 1000
+d$livingArea <- d$livingArea / 1000
+l <- lm(price ~ livingArea, data = d)
+l %>%
+  tidy() %>%
+  kable()
+```
+
+The output of the `lm` function has several components. Besides calculating the estimated values of the coefficients, given in the `estimate` column, the method also calculates the standard error (`std.error`) and the $t$-statistic (`statistic`) for each coefficient. The $t$-statistic is the ratio of the estimated coefficient to its standard error. The $p$-value (`p.value`) is the probability of observing a value at least as extreme as the one observed, assuming the null hypothesis is true. The null hypothesis is that the coefficient is equal to zero. If the $p$-value is less than 0.05, we typically reject the null hypothesis and conclude that the coefficient is statistically significant. In this case, the $p$-value for the `livingArea` coefficient is less than 0.05, so we conclude that the coefficient is statistically significant. This means that the size of the house is a statistically significant predictor of the price. The residual standard error, which `summary(l)` reports but the table does not show, is $\hat\sigma = \sqrt{\sum_{i=1}^n (y_i - \hat y_i)^2/(n-2)}$, the estimate of the standard deviation of the errors; here it is `r sprintf("%.1f", sigma(l))`, in thousands of dollars.
+:::
+
+The estimated values of the parameters were calculated using the least squares loss function discussed above. The residual standard error is also relatively easy to calculate from the model residuals 
+$$
+s_e = \sqrt{ \frac{1}{n-2} \sum_{i=1}^n ( \hat y_i - y_i )^2 }.
+$$
+Now the question is, how was the $p$-value for the estimates calculated? And why did we assume that $\epsilon$ is normally distributed in the first place? 
+The normality of $\epsilon$ and as a consequence, the conditional normality of $y \mid x \overset{\text{i.i.d.}}{\sim}  N(\beta^\top x, \sigma^2)$ is easy to explain; it is simply due to mathematical convenience. Plus, this assumption happens to describe reality well in a wide range of applications. One of those conveniences is our ability to calculate the mean and variance of the distribution of $\hat \beta_0$ and $\hat \beta_1$.
+
+To understand how to calculate the $p$-values, we first notice that there is uncertainty about the values of the parameters $\beta_i$s. To get a feeling for the amount of variability in our experiments, imagine that we have two sample datasets. For example, we have housing data from two different realtor firms. Do you think that the estimated value of price per square foot will be the same for both of those? The answer is no. Let's demonstrate with an example; we simulate 10 datasets from the same distribution and estimate 10 different linear models.
+```{r}
+#| fig-cap: Ten different linear models estimated using a randomly selected subsample of the data.
+#| label: fig-simbeta
+set.seed(92) # Kuzy
+d <- read.csv("data/SaratogaHouses.csv")
+d$price <- d$price / 1000
+d$livingArea <- d$livingArea / 1000
+plot(d$livingArea, d$price,
+  col = "lightblue", xlab = "Living Area",
+  ylab = "Price", bg = "lightblue", pch = 21, cex = 0.6
+)
+for (i in 1:10) {
+  # Sample with replacement
+  dnew <- d[sample(1:nrow(d), replace = T), ]
+  # Fit a linear model
+  l <- lm(price ~ livingArea, data = dnew, subset = sample(1:nrow(d), 100))
+  abline(l, col = "green", lwd = 3)
+}
+```
+@fig-simbeta shows the results of this simulation. We can see that the estimated coefficients $\hat \beta_i$ are different for each of the 10 samples. This is due to the sampling error. The sampling error is the difference between the estimated value of a parameter and its true value. The value of $\beta_1$ will differ from sample to sample. In other words, it will be a random variable. The sampling distribution of $\beta_1$ describes how it varies over different samples with the $x$ values fixed. Statistical view of linear regression allows us to calculate confidence and prediction intervals for estimated parameters. It turns out that when the least squares principle is used, the estimated $\hat\beta_1$ is normally distributed: $\hat\beta_1\mid \beta_1 \sim N( \beta_1 , s_1^2 )$. Let's see how we can derive this result.
+
+The extension of the central limit theorem, sometimes called the Lindeberg CLT, states that a linear combination of independent random variables that satisfy some mild condition is approximately normally distributed. We can show that estimates of $(\beta_0\ldots,\beta_p)$ are linear combinations of the observed values of $y$ and are therefore approximately normally distributed. Indeed, if we write the linear regression model in matrix form
+$$
+y = X \beta + \epsilon,
+$$
+where $y$ is the vector of observed values of the dependent variable, $X$ is the matrix of observed values of the independent variables, $\beta$ is the vector of unknown parameters, and $\epsilon$ is the vector of errors.  Then, if we take the derivative of the loss function for linear regression and set it to zero, we get the following expression for the estimated parameters
+$$
+\hat \beta =  Ay, \hat y = X \hat \beta = H y.
+$$
+where $A = (X^\top X)^{-1}X^\top$, $H = XA = X(X^\top X)^{-1}X^\top$ is the hat matrix. Since $\hat \beta = Ay$ is a linear function of $y$, it is exactly normal when the errors $\epsilon$ are normal. For other error distributions with finite variance, and a design with $\max_i H_{ii} \to 0$, the Lindeberg central limit theorem makes $\hat \beta$ approximately normal in large samples. This is a useful property that allows us to calculate confidence intervals and $p$-values for the estimated parameters. 
+
+Now, we need to compute the mean and variance of $\hat \beta$. The mean is easy to compute, since the expectation of the sum is the sum of expectations, we have $\hat{\beta} = A(X\beta + \epsilon)$, hence
+$$
+\hat{\beta} = \beta + A\epsilon
+$$
+
+The expectation and variance of $\hat{\beta}$ are then:
+\begin{align*}
+\E{\hat{\beta}} = & \E{\beta + A\epsilon} = \E{\beta} + \E{A\epsilon} = \beta\\
+\Var{\hat{\beta}} = & \Var{A\epsilon} = \sigma^2 AA^\top = \sigma^2 (X^\top X)^{-1}
+\end{align*}
+Putting together the expectation and variance, we get the following distribution for $\hat{\beta}$:
+$$
+\hat{\beta} \sim N(\beta, \sigma^2 (X^\top X)^{-1}).
+$$
+
+We can think of the estimated coefficients $\hat \beta_i$ as an average amount of change in $y$, when $x_i$ goes up by one unit. Since this average was calculated using a sample data, it is subject to sampling error, and the sampling error is modeled by the normal distribution. Assuming that residuals $\epsilon$ are independently normally distributed with a variance that does not depend on $x$ (homoscedasticity), we can calculate the mean and variance of the distribution of $\hat \beta_i$.
+
+
+In summary, the statistical view of the linear regression model is useful for understanding the uncertainty associated with the estimated parameters. It also allows us to calculate confidence intervals and prediction intervals for the output variable.
+
+1. Average value of output $y$ is a linear function of input $x$ and lie on the straight line of regression $\hat y_i = \beta^\top x_i$.
+2. The values of $y$ are statistically independent.
+3. The true value of $y = \hat y_i + \epsilon_i$ is a random variable, and it is normally distributed around the mean with variance $\sigma^2$. This variance is the same for all values of $y$.
+4. The estimated values of the parameters $\hat \beta_i$ are calculated from observed data and are subject to sampling error, and we are not certain about them. This uncertainty is modeled by treating $\hat\beta$ as normally distributed around the true values $\beta$. Given that errors $\epsilon_i$ are homoscedastic and independent,  we have $\Var{\hat{\beta}} = \sigma^2 (X^\top X)^{-1}$.
+
+Again, consider a house example. Say in our data we have 10 houses with the same square footage, say 2000. Now the third point states that the prices of those houses should follow a normal distribution, and if we are to compare prices of 2000 sqft houses and 2500 sqft houses, they will have the same standard deviation. The second point means that the price of one house does not depend on the price of another house.
+
+All of the assumptions in the regression model can be written using probabilist notations: 
+$$
+y \mid x \overset{\text{i.i.d.}}{\sim}  N(\beta^\top x, \sigma^2).
+$$
+
+
+In the case when we have only one predictor, the variance of the estimated slope $\hat \beta_1$ is given by
+$$
+\Var{\hat \beta_1} = \frac{\sigma^2}{\sum_{i=1}^n ( x_i - \bar{x} )^2 } = \frac{ \sigma^2 }{ (n-1) s_x^2 },
+$$
+where $s_x^2$ is the sample variance of $x$. Thus, there are three factors that impact the size of standard error for $\beta_1$: sample size ($n$), error variance ($\sigma^2$), and $x$-spread, $s_x$.
+
+
+We can empirically demonstrate the sampling error by simulating several samples from the same distribution and estimating several linear models. We can see that the estimated coefficients $\hat \beta_i$ are normally distributed around the true values $\beta_i$. If we plot coefficients for 1000 different models, we can see that the empirical distribution resembles a normal distribution.
+```{r}
+#| echo: true
+set.seed(92) # Kuzy
+# Read housing data
+d <- read.csv("data/SaratogaHouses.csv")
+d$price <- d$price / 1000
+d$livingArea <- d$livingArea / 1000
+# Simulate 1000 samples
+n <- 1000
+# Create a matrix to store the results
+beta <- matrix(0, nrow = n, ncol = 2)
+for (i in 1:n) {
+  # Sample with replacement
+  dnew <- d[sample(1:nrow(d), replace = T), ]
+  # Fit a linear model
+  l <- lm(price ~ livingArea, data = dnew)
+  # Store the coefficients
+  beta[i, ] <- coef(l)
+}
+```
+```{r}
+ind <- 2
+# Plot the results
+plot(beta[, 1], beta[, 2], col = "blue", xlab = "Intercept", ylab = "Slope", bg = "lightblue", cex = 0.8)
+abline(h = coef(l)[2], lwd = 3, col = "red")
+abline(v = coef(l)[1], lwd = 3, col = "red")
+X <- cbind(1, d$livingArea)
+# Calculate the variance of the coefficients
+var <- sigma(l)^2 * solve(t(X) %*% X)
+varb <- var[ind, ind] / 0.63
+hist(beta[, ind], col = "lightblue", xlab = "Slope", main = "", freq = F)
+bt <- seq(80, 140, 0.1)
+```
+
+Accounting for uncertainty in $\hat \beta$s we can calculate confidence intervals for the predicted average $\hat y$. When we additionally account for the uncertainty in the predicted value $\hat y$, we can calculate prediction intervals.
+
+Another advantage of adopting a statistical view of the linear regression model is the ability to quantify information about potential outliers. Outliers are points that are extreme relative to our model predictions. Recall that the residual is $e_i  = y_i- \hat y_i$. Since our predicted value $\hat y_i$ follows a normal distribution, the residual also follows a normal distribution, since it is a difference of normal random variable $\hat y_i$ and a constant $y_i$. It is easy to see that $$e_i \sim N(0, s_e^2),$$ where $s_e^2$ is an empirical estimate of the error's variance.
+
+Consider the relation between the *fitted values* $\hat y_i$ and residuals $e_i$. Our predictions are given by the line. The residual $e_i$ and predicted value $\hat y_i$ for the $i$th observation are related via 
+$$
+y_i = \hat{y}_i + ( y_i - \hat{y}_i ) = \hat{y}_i + e_i.
+$$ 
+
+Residuals allow us to define outliers. They simply have large residuals. We re-scale the residuals by their standard errors. This lets us define $$r_i = \frac{ e_i }{ s_{ e} } =\frac{y_i - \hat{y}_i   }{ s_{ e } }$$ Since residuals follow a normal distribution $e \sim N(0,\sigma^2)$, in 95% of the time we expect the standardized residuals to satisfy $- 2 < r_i < 2$. Any observation with $|r_i| > 3$ is an extreme outlier; it is three sigmas away from the mean.
+
+Another type of observations we are interested in are the *influential points*. These are observations that affect the magnitude of our estimates $\hat{\beta}$s. They are important to find as they typically have economic consequences. We will use Cook's distance to assess the significance of an influential point. Cook's distance associated with sample $i$ measures the change in estimated model parameters $\hat \beta$ when sample $i$ is removed from the training dataset. 
+
+Intuitively, we model *regression-back-to-the-mean* effect. This is one of the most interesting statistical effects you'll see in daily life. In statistics, regression does not mean "going backwards", but rather the tendency for a variable that is extremely high or low to move closer to the average upon subsequent measurement.  For example, Francis Galton, who was a cousin of Charles Darwin, in his study on regression to the mean height showed that if your parents are taller than the average, you'll regress back to the average. While people might expect the children of tall parents to be even taller and the children of short parents to be even shorter, Galton found that this wasn't the case. Instead, he observed that the heights of the children tended to be closer to the average height for the population. Galton termed this phenomenon "regression towards mediocrity" (now more commonly known as "regression to the mean"). It meant that extreme characteristics (in this case, height) in parents were likely to be less extreme (closer to the average) in their children. It doesn't imply that all individual cases will follow this pattern; rather, it's a trend observed across a population. It's important to understand that regression to the mean doesn't suggest that extreme traits diminish over generations but rather that an extreme measurement is partly due to random variation and is likely to be less extreme upon subsequent measurement. 
+
+Another example was documented by Daniel Kahneman and Amos Tversky [@tversky1974judgment] and retold in Kahneman's book *Thinking, Fast and Slow* [@kahneman2011thinking]. They found that when a person performs a task, their performance is partly due to skill and partly due to luck. They observed that when a person performs a task and achieves an extreme result, their subsequent performance is likely to be less extreme. Particularly they studied the effect of criticism and praise used by Israeli Air Force fighter pilots trainers. After criticism, the low-scoring pilots were retested. Often, their scores improve. At first glance, this seems like a clear effect of feedback from the trainer. However, some of this improvement is likely a statistical artifact and demonstrates the regression to the mean effect.
+
+Why? Those pilots who initially scored poorly were, statistically speaking, somewhat unlucky. Their low scores may have been due to a bad day, stress, or other factors. When retested, their scores are likely to be closer to their true skill level, which is closer to the average. This natural movement towards the average can give the illusion that the intervention (praise or criticism) was more effective than it actually was.
+Conversely, if the top performers were praised and retested, we might find their scores decrease slightly, not necessarily due to the inefficacy of the praise but due to their initial high scores being partly due to good luck or an exceptionally good day.
+In conclusion, in pilot training and other fields, it's important to consider regression to the mean when evaluating the effectiveness of interventions. Without this consideration, one might draw incorrect conclusions about the impact of training or other changes.
+
+
+
+::: {#exm-googspy}
+## Google vs S&P 500
+We will demonstrate how we can use statistical properties of a linear regression model to understand the relationship between returns of a google stock and the S&P 500 index. We will use the Capital Asset Pricing Model (CAPM) regression model to estimate the expected return of an investment into Google stock and to price the risk.
+The CAPM model is 
+
+$$
+\mathrm{GOOG} = \alpha + \beta \mathrm{SP500} + \epsilon
+$$
+On the left-hand side, we have the return that investors expect to earn from investing in Google stock. In the CAPM model, this return is typically modeled as a dependent variable.
+
+The input variable `SP500`  represents the average return of the entire US market. Beta measures the volatility or systematic risk of a security or a portfolio in comparison to the market as a whole. A beta greater than 1 indicates that the security is more volatile than the market, while a beta less than 1 indicates it is less volatile. Alpha is the intercept of the regression line, it measures the excess return of the security over the market. The error term $\epsilon$ captures the uncertainty in the relationship between the returns of Google stock and the market.
+
+
+In a CAPM regression analysis, the goal is to find out how well the model explains the returns of a security based on its beta. This involves regressing the security's excess returns (returns over the risk-free rate) against the excess returns of the market. The slope of the regression line represents the beta, and the intercept should ideally be close to the risk-free rate, although in practice it often deviates. This model helps in understanding the relationship between the expected return and the systematic risk of an investment.
+
+Based on the uncertainty associated with the estimates for alpha and beta, we can formulate several hypothesis tests, for example:
+
+| Hypothesis | Question |
+|------------|----------|
+| $H_0: \beta = 0$ | Is Google related to the market? |
+| $H_0: \alpha = 0$ | Does Google outperform the market in a consistent fashion? |
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: true
+#| fig-cap: Google vs S&P 500 returns between 2017-2023.
+getSymbols(Symbols = c("GOOG", "SPY"), from = "2017-01-03", to = "2023-12-29")
+gret <- as.numeric(dailyReturn(GOOG))
+spyret <- as.numeric(dailyReturn(SPY))
+l <- lm(gret ~ spyret)
+tidy(l) %>% knitr::kable(digits = 4)
+```
+```{r}
+#| fig-cap: Google vs S&P 500 returns between 2017-2023.
+plot(spyret, gret, bg = "lightblue", xlab = "SPY Return", ylab = "Google Return")
+abline(l, lwd = 3, col = "red")
+```
+Here's what we get after we fit the model using \verb|lm| function
+
+Our best estimates are
+$$
+\hat \alpha = 0.0003 \; , \; \hat{\beta} = 1.17
+$$
+
+
+Now we can provide the results for the hypotheses we set at the beginning. Given that the $p$-value for $H_0: \beta = 0$ is `<2e-16` we can reject the null hypothesis and conclude that Google is related to the market. The $p$-value for $H_0: \alpha = 0$ is 0.27, which is greater than 0.05, so we cannot reject the null hypothesis and conclude that Google does not outperform the market in a consistent fashion in the 2017--2023 period. 
+
+Further, we can answer some of the other important questions, such as how much will Google move if the market goes up $10$\%? 
+```{r}
+#| echo: true
+alpha <- coef(l)[1]
+beta <- coef(l)[2]
+# Calculate the expected return
+alpha + beta * 0.1
+```
+
+
+However, if we look at the earlier period between 2005--2016 (the earlier days of Google), the results will be different. 
+```{r message=FALSE, warning=FALSE}
+#| tbl-cap: "Google vs S&P 500 returns between 2005--2016."
+#| label: tbl-googspy
+getSymbols(Symbols = c("GOOG", "SPY"), from = "2005-01-03", to = "2016-12-29")
+gret <- as.numeric(dailyReturn(GOOG))
+spyret <- as.numeric(dailyReturn(SPY))
+l <- lm(gret ~ spyret)
+tidy(l) %>% knitr::kable(digits = 4)
+```
+
+```{r}
+#| fig-cap: Google vs S&P 500 returns between 2005-2016.
+#| label: fig-googspy
+plot(spyret, gret, col = "blue", ylab = "Google Return", xlab = "SPY Return", bg = "lightblue", cex = 0.8)
+abline(l, lwd = 3, col = "red")
+```
+In this period Google did consistently outperform the market. The $p$-value for $H_0: \alpha = 0$ is 0.03.
+:::
+
+
+::: {#exm-yahoo-capm}
+## CAPM Model for Yahoo! Stock
+Rather than estimate $\mu$ directly, the CAPM estimates the difference between $\mu$ and the risk-free rate $r_f$.  This quantity $\mu-r_f$ is known as the expected excess return (excess relative to a risk-free investment).  The CAPM relates the expected excess return of a stock to that of an underlying benchmark, typically a broad-based market index.  Let $\mu_M$ and $\sigma_M$ denote the return and volatility on the market index. The implication of CAPM is that there is a linear relationship between the expected excess return of a stock, $\mu-r_f$, and the excess return of the market, $\mu_M-r_f$.  
+$$
+\text{Excess   Return}_{\text{Stock}} =  \beta \;  \text{Excess  
+Return}_{\text{Market}}
+$$
+$$
+\mu-r_f = \beta(\mu_M - r_f )
+$$
+Put simply, the expected excess return of a stock is $\beta$ times the excess expected return of the market. Beta ($\beta$) is a measure of a stock's risk in relation to the market.  A beta of 1.3 implies that the excess return on  the stock is expected to move up or down 30\% more than the market.  A beta bigger than one implies the stock is riskier than the market and goes up (and down) faster than the market goes up (and down). A beta less than one implies the stock is less risky than the market.
+
+Using the CAPM, the expected return of the stock can now be defined as the risk-free interest rate plus beta times the expected excess return of the market,
+$$
+\mu = \text{Expected   Return}_{\text{Stock}} = r_f+\beta (\mu_M-r_f) 
+$$
+Beta is typically estimated from a regression of the individual stock's returns on those of the market.  The other parameters are typically measured as the historical average return on the market $\mu_M$ and the yield on Treasury Bills $r_f$. Together these form an estimate of $\mu$.  The volatility parameter $\sigma$ is estimated by the standard deviation of historical returns.
+
+Our qualitative discussion implicitly took the year as the unit of time. For our example, we make one minor change and consider daily returns so that $\mu$ and $\sigma$ are interpreted as a daily rate of return and daily volatility (or standard deviation).  We use an annual risk-free rate of 5\%; this makes a daily risk-free rate of .019\%, $r_f = 0.00019$, assuming there are 252 trading days in a year. A simple historical average is used to estimate the market return ($\mu_M$) for the Nasdaq 100.  The average annual return is about 23\%, with corresponding daily mean $\mu_M = 0.00083$.  A regression  using daily returns from 1996--2000 leads to an estimate of $\beta = 1.38$. Combining these (pieces) leads to an estimated expected return of Yahoo!, $\mu_{Yahoo} = 0.00019+1.38(0.00083-0.00019) = 0.00107$ on a daily basis.  Note that the CAPM model estimates a future return that is much lower than the observed rate over the last three-plus years of 0.42\% per day or 188\% per year.
+ 
+To measure the riskiness of Yahoo! notice that the daily historical volatility is 5\%, i.e., $\sigma = 0.05$. On an annual basis, this implies a volatility of $\sigma \sqrt{T} = 0.05 \sqrt{252} = 0.79$, that is 79\%.  For comparison, the benchmark Nasdaq 100 has historical daily volatility of 1.9\% and an annual historical volatility of 30\%.  The estimates of all the parameters are recorded in @tbl-returns.
+
+| Asset          | Expected return   | Volatility         | Regression coefft (s.e.) |
+|----------------|-------------------|--------------------|--------------------------|
+| Yahoo!         | $\mu = 0.00107$   | $\sigma = 0.050$   | $\beta = 1.38 (.07)$     |
+| Nasdaq 100     | $\mu_M = 0.00083$ | $\sigma_M = 0.019$ | 1                        |
+| Treasury Bills | $r_f = 0.00019$   | --                 | --                       |
+
+: Key Parameter Estimates Based on Daily Returns 1996--2000. {#tbl-returns}
+:::
+
+## Factor Regression and Feature Engineering
+A linear model assumes that the output variable is proportional to the input variable plus an offset. However, this is not always the case. Often, we need to transform input variables by combining multiple inputs into a single predictor, for example by taking a ratio or putting inputs on a different scale, e.g., log-scale. In machine learning, this process is called feature engineering. 
+
+One of the classic examples of feature engineering is Fama-French three-factor model which is used in asset pricing and portfolio management. The model states that asset returns depend on (1) market risk, (2) the outperforming of small versus big companies, and (3) the outperformance of high book/market versus small book/market companies, mathematically $$r = R_f + \beta(R_m - R_f) + b_s\cdot SMB + b_v\cdot HML + \alpha$$ Here $R_f$ is risk-free return, $R_m$ is the return of the market, $SMB$ stands for \"Small market capitalization Minus Big\" and $HML$ for \"High book-to-market ratio Minus Low\"; they measure the historic excess returns of small caps over big caps and of value stocks over growth stocks. These factors are calculated with combinations of portfolios composed by ranked stocks (BtM ranking, Cap ranking) and available historical market data.
+
+### Logarithmic and Power Transformations
+Consider the growth of the Apple stock between 2000 and 2024. With the exception of the 2008 financial crisis period and 2020 COVID 19 related declines, the stock price has been growing exponentially. @fig-aapl shows the price of Apple stock between 2000 and 2024. The price is closely related to the company's growth. 
+```{r}
+#| fig-cap: Apple stock price growth in the 2000-2024 period.
+#| label: fig-aapl
+#| fig-height: 3
+library(quantmod)
+getSymbols(Symbols = "AAPL", from = "2000-01-01", to = "2023-12-31", auto.assign = TRUE) |> invisible()
+plot(AAPL$AAPL.Adjusted, type = "l", col = "blue", xlab = "", ylab = "Price", grid.col = NA, main = "")
+```
+The 2008 and 2020 declines are more related to extraneous factors, rather than the growth of the company. Thus, we can conclude that the overall growth of the company is exponential. The growth of a successful company typically follows the rule of compounding. Compounding is a fundamental principle that describes how some quantity grows over time when this quantity increases by a fixed percentage periodically. This is a very common phenomenon in nature and business. For example, if two parents have 2.2 children on average, then the population increases by 10% every generation. Another example is the growth of investment in a savings account. 
+
+A more intuitive example is probably an investment in a savings account. If you invest $1000$ in a savings account with a $10\%$ annual interest rate and you get paid once a year, then your account value will be $1100$ by the end of the year. However, if you get paid $n$ times a year, and initially invest $w_0$, the final value $w_t$ of the account after $t$ years will be
+$$
+w_t = w_0 \times (1 + r/n)^{nt}
+$$
+where $r$ is the annual interest rate. When you get paid every month ($n=12$), a traditional payout schedule used by banks, then
+$$
+w_t = 1000 \times (1 + 0.1/12)^{12} = 1105.
+$$
+A value slightly higher than the annual payout of 1100. 
+
+
+The effect of compounding is minimal in the short term. However, the effect of compounding is more pronounced when the growth rate is higher and time periods are longer. For example at $r=2$, $n=365$ and 4-year period $t=4$, you get
+$$
+w_t = 1000 \times (1 + 2/365)^{4\times 365} = 2{,}916{,}565.
+$$
+Your account is close to 3 million dollars!
+Compared to $n=1$ scenario
+$$
+w_t = 1000 \times (1 + 2)^{4} = 81{,}000,
+$$
+when you will end up with merely 81 thousand. This is why compounding is often referred to as the "eighth wonder of the world" in investing contexts.
+
+
+In general, as $n$ goes up, the growth rate of the quantity approaches the constant
+```{r}
+#| fig-cap: Growth of an investment in a savings account when n increases and return rate is 100% per year.
+#| label: fig-compound
+T <- 1:100
+r <- 1
+plot(T, (1 + r / T)^T, type = "l", col = "blue", ylab = "Future Value")
+abline(h = exp(r), col = "red", lwd = 3)
+```
+
+@fig-compound shows the growth of an investment in a savings account when $n$ increases, and the return rate is $100\%$ per year. We can see that the growth rate approaches the constant $e \approx 2.72$ as $n$ increases.
+$$
+(1+r/n)^n \rightarrow e^r,~\text{as}~n \rightarrow \infty.
+$$
+This limit was first investigated by Jacob Bernoulli in 1683, and the number $e$ is known as Euler's number, after Leonhard Euler, who introduced the notation and studied its properties.
+
+
+Coming back to the growth of the Apple company, we can think of it growing at a small constant rate every day. The relation between the time and size of Apple is multiplicative. Meaning when time increases by one day, the size of the company increases by a small constant percentage. This is a multiplicative relation. In contrast, a linear relation is additive, meaning that when time increases by one day, the size of the company increases by a constant amount. The exponential growth model is given by the formula
+$$
+y = y_0 \times e^{\beta^\top x}.
+$$
+There are many business and natural science examples where a multiplicative relation holds. If we apply the $\log$ function to both sides of the equation, we get
+$$
+\log y = \log y_0 + \beta^\top x.
+$$
+This is a linear relation between $\log y$ and $x$. Thus, we can use linear regression to estimate the parameters of the exponential growth model by putting the output variable $y$ on the log-scale.
+
+
+Another example of a nonlinear relation that can be analyzed using linear regression is when variables are related via a power law. This concept helps us model proportional relationships or ratios. In a multiplicative relationship, when one variable changes on a percent scale, the other changes in a directly proportional manner, as long as the multiplying factor remains constant. For example, the relation between the size of a city and the number of cars registered in the city is given by a power law. When the size of the city doubles, the number of cars registered in the city is also expected to double. The power law model is given by the formula
+$$
+y = \beta_0 x^{\beta_1}.
+$$
+If we apply the $\log$ function to both sides of the equation, we get
+$$
+\log y = \log \beta_0 + \beta_1 \log x.
+$$
+This is a linear relation between $\log y$ and $\log x$. Thus, we can use linear regression to estimate the parameters of the power law model by putting the output variable $y$ and input variable $x$ on the log-scale.
+
+However, there are several caveats when putting variables on the log-scale. We need to make sure that the variable is positive. This means that we cannot apply log transformations to variables that contain zeros, such as dummy variables or count variables with zero values. 
+
+::: {#exm-mammal}
+## World's Smartest Mammal
+We will demonstrate the power relation using data on brain (measured in grams) and body (measured in kilograms) weights for 62 mammal species. The data were collected by Harry J. Jerison in 1973. The dataset contains the following variables:
+```{r}
+mammals <- read.csv("data/mammals.csv")
+knitr::kable(head(mammals))
+```   
+
+Let's build a linear model.
+
+```{r mammals}
+#| fig-cap: Brain vs Body weight for 62 mammal species.
+#| echo: true
+attach(mammals)
+model <- lm(Brain ~ Body)
+plot(Body, Brain, pch = 21, bg = "lightblue")
+abline(model, col = "red", lwd = 3)
+```
+
+We see a few outliers with large residuals. This  suggests that the normality assumption is violated. We can check the residuals by plotting  residuals against fitted values and plotting fitted vs true values. 
+```{r}
+#| layout-ncol: 2
+#| fig-width: 2.6
+#| fig-height: 1.8
+#| fig-cap:
+#|   - "Residuals vs fitted y"
+#|   - "Fitted y vs true y"
+#| label: fig-mammals
+plot(model$fitted.values, model$residuals, pch = 21, bg = "lightblue", xlab = "Fitted y", ylab = "Residuals", lab = c(5, 3, 7))
+abline(h = 0, col = "red", lwd = 3)
+plot(Brain, model$fitted.values, pch = 21, bg = "lightblue", xlab = "True y", ylab = "Fitted y")
+abline(a = 0, b = 1, col = "red", lwd = 3)
+```
+
+Remember that residuals should roughly follow a normal distribution with mean zero and constant variance. We can see that the residuals are not normally distributed and the variance increases with the fitted values. This is a clear indication that we need to transform the data. We can try a log-log transformation.
+
+```{r mammals2}
+#| echo: true
+model <- lm(log(mammals$Brain) ~ log(mammals$Body))
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+  
+```{r}
+#| layout-ncol: 2
+#| fig-width: 2.6
+#| fig-height: 1.8
+#| fig-cap:
+#|   - "Residuals vs fitted log y"
+#|   - "Fitted log y vs true log y"
+#| label: fig-mammalslog
+plot(model$fitted.values, model$residuals, pch = 21, bg = "lightblue", xlab = "Fitted log y", ylab = "Residuals")
+abline(h = 0, col = "red", lwd = 3)
+plot(log(Brain), model$fitted.values, pch = 21, bg = "lightblue", xlab = "True log y", ylab = "Fitted log y")
+abline(a = 0, b = 1, col = "red", lwd = 3)
+```
+
+That is much better! The residuals variance is constant, and the plot of fitted vs true values shows a linear relationship. The log-log model is given by the formula
+$$
+\log \mathrm{Brain} = 2.18 + 0.74 \log \mathrm{Body}.
+$$
+Both log transformations seem to achieve two important goals, namely linearity and constant variance. The coefficients are highly significant.
+
+
+Although the log-log model fits the data rather well, there are a couple of outliers there. Let us print the observations with the largest residuals.
+```{r mammals4}
+# res = rstudent(model)
+res <- model$residuals / sd(model$residuals)
+outliers <- order(res, decreasing = T)[1:10]
+cbind(mammals[outliers, ],
+  Std.Res = res[outliers], Residual = model$residuals[outliers],
+  Fit = exp(model$fitted.values[outliers])
+) %>% knitr::kable(digits = 2)
+```
+There are two outliers, the Chinchilla and the Human, both have disproportionately large brains!
+
+In fact, the Chinchilla has the largest standardized residual of 3.41. Meaning that the predicted value of 4.7 g is 3.41 standard deviations away from the recorded value of 64 g. This suggests that the Chinchilla is an intellectually superior species! However, after checking more carefully we realized that there was a recording error and the actual weight of an average Chinchilla's brain is 6.4. We mistyped the decimal separator! Thus the actual residual is 0.4.
+```{r}
+#| echo: true
+abs(model$fitted.values[11] - log(6.4)) / sd(model$residuals)
+```
+In reality a Chinchilla's brain is not far from an average mammal of this size! 
+:::
+
+::: {#exm-Newfood}
+## Newfood
+A six-month market test has been performed on the Newfood product, which is a breakfast cereal. The goal is to build a multiple regression model that provides accurate sales forecasts. This dataset represents the outcome of a controlled experiment in which the values of the independent variables that affect sales were carefully chosen by the analyst.
+
+The analysis aims to identify the factors that contribute to sales of a new breakfast cereal and to quantify the effects of business decisions such as the choice of advertising level, location in store, and pricing strategies.
+
+   variable                 description
+  ---------- -----------------------------------------
+   `sales`               new cereal sales
+   `price`                     price
+    `adv`      low or high advertising ($0$ or $1$)
+   `locat`    bread or breakfast section ($0$ or $1$)
+     `inc`              neighborhood income
+    `svol`                 size of store
+
+First, we need to understand which variables need to be transformed. We start by running the "kitchen-sink" regression with all variables. Then we perform diagnostic checks to assess model assumptions and identify potential issues. Based on these diagnostics, we decide which variables should be transformed. After running the new model with transformations, we perform additional diagnostics and variable selection to refine the model. Using the final model after transformations and eliminating variables, we examine what the largest Cook's distance is to identify influential observations. Finally, we provide a summary of coefficients and their statistical significance.
+
+First, let's examine the correlation matrix to understand the relationships between all variables in the dataset. This will help us identify potential multicollinearity issues and understand the strength and direction of associations between variables before building our regression model.
+
+```{r newfood}
+#| echo: true
+newfood <- read.csv("data/newfood.csv")
+attach(newfood)
+names(newfood)
+# knitr::kable()
+head(newfood)
+# correlation matrix
+cm <- cor(cbind(sales, price, adv, locat, income, svol))
+cm[upper.tri(cm, diag = TRUE)] <- NA
+# knitr::kable(as.table(round(cm, 3)))
+as.table(round(cm, 3)) %>% knitr::kable()
+```
+
+Remember, correlations between variables are not the same as regression coefficients ($\beta$'s)! Looking at the correlation matrix, we can see that total sales volume (`svol`) is negatively correlated with advertising (`adv`), and income (`income`) is also negatively correlated with advertising (`adv`). The question is how might these negative correlations impact our ability to estimate the true advertising effects in our regression model?
+
+```{r abtable}
+as.table(round(cm[2:4, 1:3], 3)) %>% knitr::kable()
+```
+
+There's no correlation in the $X$'s by design! Let's start by only including `price`, `adv`, `locat`
+
+```{r newfood-lm1}
+#| echo: true
+model <- lm(sales ~ price + adv + locat)
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+Why is the marketer likely to be upset by this regression? Why is the economist happy? The marketer might be upset because the advertising coefficient looks small or insignificant due to omitted variable bias (e.g., not controlling for store volume or income properly). The economist is happy because the price coefficient is negative, consistent with the law of demand. Let's add `income` and `svol` to the regression and use log-log model.
+
+```{r newfood-lm}
+#| echo: true
+model <- lm(log(sales) ~ log(price) + adv + locat +
+  log(income) + log(svol))
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+Why no logs for `adv` and `locat` variables? The log(`svol`) coefficient is close to one!
+
+The reason we don't apply logarithms to `adv` and `locat` variables is because they are binary categorical variables (taking values 0 or 1). Taking the logarithm of 0 is undefined, and taking the logarithm of 1 equals 0, which would not provide any meaningful transformation. For binary variables, the exponential transformation in the final model interpretation directly gives us the multiplicative effect on sales when the variable changes from 0 to 1.
+
+Regarding the log(`svol`) coefficient being close to one (1.03), this suggests that sales scale approximately proportionally with store volume. A coefficient of 1.0 would indicate perfect proportional scaling, meaning a 1% increase in store volume would lead to a 1% increase in sales. Our coefficient of 1.03 indicates slightly more than proportional scaling—a 1% increase in store volume leads to a 1.03% increase in sales, suggesting some economies of scale or network effects in larger stores.
+
+On the transformed scale (log-log model),
+$$
+\log sales=8.41 - 1.74 \log price + 0.150 {\text{adv}} + 0.001 {\text{locat}} - 0.524 \log inc  + 1.03 \log svol
+$$
+On the un-transformed scale,
+$$
+\text{sales} = e^{8.41} ( \text{price} )^{-1.74} e^{ 0.15 \text{adv} } e^{ 0.001 \text{locat}} ( \text{inc} )^{-0.524}  ( \text{svol} )^{1.03}
+$$
+In the log-log regression model, the relationship between sales and the continuous variables (price, income, and store volume) follows a power function relationship. This means that a 1% change in these variables leads to a proportional change in sales according to their respective coefficients. Specifically, a 1% increase in price leads to a 1.74% decrease in sales, a 1% increase in income leads to a 0.524% decrease in sales, and a 1% increase in store volume leads to a 1.03% increase in sales.
+
+In contrast, the binary variables (advertising and location) follow an exponential relationship with sales. When advertising is present (adv=1), sales increase by a factor of e^0.15 = 1.16, representing a 16% improvement. Similarly, when a store is in a good location (locat=1), sales increase by a factor of e^0.001 = 1.001, representing a 0.1% improvement. This exponential relationship arises because these variables are binary (0 or 1) and cannot be log-transformed, so their effects are multiplicative on the original sales scale.
+
+
+- Price elasticity is $\hat{\beta}_{\text{price}} = - 1.74$. A $1$% increase in price will drop sales $1.74$%
+- $\mathrm{adv}=1$ increases `sales` by a factor of $e^{0.15} = 1.16$. That's a $16$% improvement
+
+We should delete the `locat` variable from our regression model because it is statistically insignificant. The coefficient for `locat` has a very small magnitude (0.001) and a high $p$-value, indicating that there is insufficient evidence to reject the null hypothesis that this variable has no effect on sales. Including statistically insignificant variables in a model can lead to overfitting and reduce the model's predictive accuracy on new data. By removing `locat`, we create a more parsimonious model that focuses only on the variables that have meaningful relationships with the outcome variable.
+
+Now, we are ready to use our model for prediction. `predict.lm` provides a $\hat{Y}$-prediction given a new $X_f$
+```{r oj-lm-log}
+#| echo: true
+modelnew <- lm(log(sales) ~ log(price) + adv + log(income) + log(svol))
+modelnew %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+newdata <- data.frame(price = 30, adv = 1, income = 8, svol = 34)
+predict.lm(modelnew, newdata, interval = "confidence", level = 0.99)
+```
+
+Exponentiate-back to find $\text{sales} = e^{5.1739} = 176.60$.
+:::
+
+## Interactions
+In many situations, $x_1$ and $x_2$ interact when predicting $y$. An interaction occurs when the effect of one independent variable on the dependent variable changes at different levels of another independent variable. For example, consider a study analyzing the effect of study hours $x_1$ and a tutoring program $x_2$, a binary variable where 0 = no tutoring, 1 = tutoring) on test scores $y$. Without an interaction term, we assume the effect of study hours on test scores is the same regardless of tutoring. With an interaction term, we can explore whether the effect of study hours on test scores is different for those who receive tutoring compared to those who do not. Here are a few more examples when there is potential interaction. 
+
+Examples of potential interactions include whether gender changes the effect of education on wages, whether patients recover faster when taking drug A, and how advertisement affects price sensitivity. Interactions are particularly useful with dummy variables. We can build a kitchen-sink model with all possible dummies (day of the week, gender, etc.).
+
+If we think that the effect of $x_1$ on $y$ depends on the value of $x_2$, we model it using a linear relation
+$$
+\beta_1 = \beta_{10} + \beta_{11} x_2
+$$
+and the  model without interaction $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2$ becomes
+$$
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1 x_2 + \epsilon.
+$$
+The interaction term captures the effect of $x_1$ on $y$ when $x_2=1$. The coefficient $\beta_3$ is the difference in the effect of $x_1$ on $y$ when $x_2=1$ and $x_2=0$. If $\beta_3$ is significant, then there is an interaction effect. If $\beta_3$ is not significant, then there is no interaction effect. The coefficients $\beta_1$ and $\beta_2$ are called marginal effects.
+
+In `R`:
+```{r}
+#| echo: true
+#| eval: false
+model <- lm(y ~ x1 * x2)
+```
+estimates $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1 x_2 + \epsilon$, and
+
+```{r}
+#| echo: true
+#| eval: false
+model <- lm(y ~ x1:x2)
+```
+estimates only $y = \beta_3 x_1 x_2 + \epsilon$
+
+
+If $\beta_3$ is significant, there's an interaction effect, and we must leave $\beta_1$ and $\beta_2$ in the model whether they are significant or not.
+
+When $x_2 = D$ is a dummy variable with values of zero or one, we typically run a regression of the form
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 x_1 \star D + \epsilon$$
+The coefficient $\beta_1 + \beta_2$ is the effect of $x_1$ when $D=1$. The coefficient $\beta_1$ is the effect when $D=0$.
+
+
+::: {#exm-oj}
+## Orange Juice
+
+Understanding how advertising affects consumer price sensitivity is a fundamental question in marketing analytics. Do promotional campaigns make consumers more or less sensitive to price changes? To explore this question, we analyze a dataset from the orange juice category that includes sales data from 83 Chicagoland stores. This dataset provides rich information including price, sales volume (measured as log units moved), brand identity, and whether the product was featured in store displays or advertising circulars.
+
+We read the data into the data frame `oj`, print its first rows, and fit two small regressions: the log of sales on the log of price with a separate slope for weeks with a feature ad, and the log of price on the brand with no intercept, whose coefficients are the average log prices of the three brands.
+
+```{r oj-lm}
+oj <- read.csv("data/oj.csv")
+knitr::kable(oj[1:5, c(1:7, 10)], digits = 2)
+model <- lm(logmove ~ log(price) * feat, data = oj)
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+model <- lm(log(price) ~ brand - 1, data = oj)
+model %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+The dataset includes three major brands: Dominick's (the store brand), Minute Maid, and Tropicana. We can visualize the price distributions and the relationship between price and sales for these brands.
+
+```{r oj-lm-plot}
+#| layout-ncol: 2
+#| fig-width: 2.6
+#| fig-height: 1.8
+brandcol <- c("green", "red", "gold")
+oj$brand <- factor(oj$brand)
+boxplot(log(price) ~ brand,
+  data = oj, col = brandcol, xlab = "Brand", ylab = "Log price",
+  names = c("Dominick's", "Minute Maid", "Tropicana")
+)
+plot(logmove ~ log(price), data = oj, col = brandcol[oj$brand], pch = 20, xlab = "Log price", ylab = "Log units sold")
+```
+
+The boxplot reveals that Tropicana commands premium pricing, while Dominick's store brand is positioned as the value option. The scatterplot shows a clear negative relationship between price and sales, as expected from basic economic theory: higher prices lead to lower sales volume.
+
+A critical modeling decision is whether to use logarithmic transformations for our variables. Let's examine the relationship between price and sales on both the original and log scales to determine which specification better captures the underlying relationship.
+
+First, we plot sales against price on the original scale:
+
+```{r plot-oj-lm, echo=-(1:2)}
+plot(exp(logmove) ~ price, data = oj, col = brandcol[oj$brand], pch = 16, cex = 0.5, xlab = "Price", ylab = "Units sold")
+legend("topright", c("Dominick's", "Minute Maid", "Tropicana"), col = brandcol, pch = 16, bty = "n", cex = 0.7)
+```
+
+The pattern suggests a nonlinear relationship that might be better captured with a transformation. Next, we examine the relationship between price and log(sales):
+
+```{r lines-smoothed1, echo=-1}
+#| cache: true
+par(mar = c(2.5, 2.5, 0.5, 1), bty = "n")
+l1 <- loess(logmove ~ price, data = oj, span = 2)
+smoothed1 <- predict(l1)
+ind <- order(oj$price)
+plot(logmove ~ price, data = oj, col = brandcol[oj$brand], pch = 16, cex = 0.5, xlab = "Price", ylab = "Log units sold")
+lines(smoothed1[ind], x = oj$price[ind], col = "blue", lwd = 2)
+```
+
+While this shows some improvement, the relationship still exhibits curvature. Finally, we examine the log-log specification:
+
+```{r lines-smoothed2}
+par(mar = c(2.5, 2.5, 0.5, 1), bty = "n")
+plot(logmove ~ log(price), data = oj, col = brandcol[oj$brand], pch = 16, cex = 0.5, xlab = "Log price", ylab = "Log units sold")
+for (i in 1:3) {
+  brand_data <- oj[oj$brand == levels(oj$brand)[i], ]
+  l2 <- lm(logmove ~ log(price), data = brand_data)
+  smoothed2 <- predict(l2)
+  ind <- order(brand_data$price)
+  lines(smoothed2[ind], x = log(brand_data$price[ind]), col = "blue", lwd = 2)
+}
+```
+
+The log-log specification produces a much more linear relationship. This makes economic sense: the relationship between price and sales is multiplicative rather than additive. A 10% increase in price leads to a proportional percentage decrease in sales, regardless of the starting price level. This constant elasticity model is the standard approach in demand analysis.
+
+Our central research question is whether featuring a product in advertisements affects consumers' price sensitivity. We start with a baseline model that includes both log price and the advertising indicator:
+$$
+\log(\mathrm{sales}) = \beta_0 + \beta_1\log(\mathrm{price}) + \beta_2 \mathrm{feat}.
+$$
+
+However, this model assumes that advertising only shifts demand up or down, without changing how consumers respond to price. To test whether advertising actually changes price sensitivity, we need to allow the price coefficient $\beta_1$ to vary with advertising. We can model this by assuming that the price sensitivity depends linearly on the advertising indicator:
+$$
+\beta_1 = \beta_3 +  \beta_4\mathrm{feat}.
+$$ 
+
+Substituting this into our demand equation gives us an interaction model:
+$$
+\log(\mathrm{sales}) = \beta_0 + (\beta_3 +  \beta_4\mathrm{feat})\log(\mathrm{price}) + \beta_2 \mathrm{feat}.
+$$
+
+Expanding this expression yields:
+$$
+\log(\mathrm{sales}) = \beta_0 + \beta_3\log(\mathrm{price}) +  \beta_4\mathrm{feat} \times \log(\mathrm{price}) + \beta_2 \mathrm{feat}.
+$$
+
+The coefficient $\beta_4$ on the interaction term tells us how much price sensitivity changes when the product is featured in advertising.
+
+First, we fit the basic model with only log price:
+
+```{r lm-logmove}
+#| echo: true
+lm(logmove ~ log(price), data = oj) %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+This simple model suggests a price elasticity of approximately -1.6, meaning a 1% increase in price leads to roughly a 1.6% decrease in sales.
+
+Next, we add brand effects and the advertising indicator without interactions:
+
+```{r lm-logmove1}
+#| echo: true
+lm(logmove ~ log(price) + feat + brand, data = oj) %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+Now we estimate the full model with the interaction between price and advertising:
+
+```{r lm-logmove2}
+#| echo: true
+ojreg <- lm(logmove ~ log(price) * feat, data = oj)
+ojreg %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+The results reveal a striking finding: the interaction coefficient is -0.98, which is highly statistically significant. When products are not featured (feat = 0), the price elasticity is -0.96. However, when products are featured in advertising (feat = 1), the price elasticity becomes $-0.96 + (-0.98) = -1.94$, essentially doubling in magnitude. This means that advertising makes consumers nearly twice as sensitive to price changes.
+
+This result seems counterintuitive at first. We might expect that advertising would make consumers less price-sensitive by building brand loyalty or highlighting non-price attributes. Why would advertising increase price sensitivity?
+
+The explanation lies in the promotional strategy employed by retailers. Let's examine the pricing behavior during advertising campaigns:
+
+```{r oj-box}
+#| message: false
+#| layout-ncol: 3
+#| fig-width: 1.74
+#| fig-height: 1.5
+doj <- oj %>% filter(brand == "dominicks")
+boxplot(price ~ feat,
+  data = oj[oj$brand == "dominicks", ], col = c(2, 3),
+  main = "Dominick's", xlab = "Featured", ylab = "Price ($)", names = c("No", "Yes")
+)
+boxplot(price ~ feat,
+  data = oj[oj$brand == "minute.maid", ], col = c(2, 3),
+  main = "Minute Maid", xlab = "Featured", ylab = "Price ($)", names = c("No", "Yes")
+)
+boxplot(price ~ feat,
+  data = oj[oj$brand == "tropicana", ], col = c(2, 3),
+  main = "Tropicana", xlab = "Featured", ylab = "Price ($)", names = c("No", "Yes")
+)
+```
+
+The boxplots reveal the key insight: prices are systematically lower when products are featured (`feat` = 1) compared to when they are not (`feat` = 0). This is a classic promotional pricing strategy where advertising and price discounts are bundled together. Retailers use advertising to draw attention to temporary price reductions.
+
+The increased price sensitivity we observe during advertising periods is not caused by the advertising itself making consumers more price-conscious. Rather, it reflects the fact that advertising campaigns coincide with periods of price variation, and consumers who respond to advertisements are precisely those who are most price-sensitive. The advertising serves as a signal that draws price-sensitive consumers into the market, creating a selected sample with higher elasticity.
+
+What appears to be an advertising effect on price sensitivity is actually a selection effect driven by the correlation between advertising and pricing strategies.
+:::
+
+## Categorical Variables and Dummy Encoding
+
+In our orange juice analysis, we want to understand how brand affects sales. Intuitively, we might want to include brand in our regression model:
+
+$$
+\log(\mathrm{sales}) = \beta_0 + \beta_1\log(\mathrm{price}) + \xcancel{\beta_2\mathrm{brand}}
+$$
+
+However, we immediately encounter a problem: brand is a categorical variable, not a numerical one. We have three brands in our dataset - Dominick's, Minute Maid, and Tropicana - but these are labels, not numbers. How can we incorporate such categorical information into a mathematical equation that requires numerical coefficients?
+
+The solution lies in creating *dummy variables* (also called indicator variables). For a categorical variable with $k$ categories, we create $k-1$ binary variables, each taking the value 1 if the observation belongs to that category and 0 otherwise. One category is designated as the reference category and is represented when all dummy variables equal zero.
+
+For our three-brand scenario, we create two dummy variables as shown in the table below:
+
+  Brand          Intercept   brandminute.maid   brandtropicana
+  ------------- ----------- ------------------ ----------------
+  minute.maid        1              1                 0
+  tropicana          1              0                 1
+  dominicks          1              0                 0
+
+This encoding transforms our regression equation into:
+
+$$
+\log(\mathrm{sales}) = \beta_0 + \beta_1\log(\mathrm{price}) + \beta_{21}\mathrm{brandminute.maid} + \beta_{22}\mathrm{brandtropicana}.
+$$
+
+Fortunately, statistical software like R handles this transformation automatically when you include a categorical variable in your model specification:
+
+```{r}
+#| echo: true
+lm(logmove ~ log(price) + brand, data = oj) %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+::: {#exm-golf}
+## Golf Performance Data
+[Dave Pelz](https://en.wikipedia.org/wiki/Dave_Pelz) wrote two best-selling books for golfers, *Dave Pelz's Short Game Bible*, and *Dave Pelz's Putting Bible*.
+
+Pelz joined NASA's Goddard Space Flight Center as a physicist in 1961 and did research there on the upper atmospheres of the Earth and other planets, with responsibilities for several satellite programs, before he turned to golf in the 1970s. His background in physics and engineering provided him with the analytical skills to improve golf instruction through data analytics. His systematic approach to analyzing golf performance helped him refine his teaching methods and develop evidence-based strategies for improving players' games. From the data of thousands of rounds, Pelz concluded that more than 60 percent of shots are played within about 100 yards of the hole and that the short game matters most for scoring. @broadie2012assessing later reached a different conclusion from more than eight million shots on the PGA Tour in 2003 to 2010: shots from more than 100 yards explain about two-thirds of the variability of scores among tour players.
+
+One of Pelz's most famous findings concerns the optimal speed for a putt. Through extensive data collection and analysis, he determined that the best chance to make a putt is one that will leave the ball $17$ inches past the hole, if it misses. This counterintuitive result challenges the common belief that golfers should aim to leave putts just short of the hole. Pelz's research showed that putts hit with this specific speed have the highest probability of going in, as they account for the natural variations in green speed, slope, and other factors that affect putt trajectory.
+
+Now, we demonstrate how to use data to improve your golf game. We analyze the dataset that contains comprehensive year-end performance statistics for 195 professional golfers from the 2000 PGA Tour season. This rich dataset captures the technical abilities of the players as well as financial success (measured by the amount of prize money they made). Each observation represents  the season's averages of the players' performance and total prize money. List below shows the variables in the dataset.
+
+::: {tbl-colwidths="[20, 80]"}
+| Variable    | Description                                                                                                                                                                                                                   |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `nevents`   | The number of official PGA events included in the statistics                                                                                                                           |
+| `money`     | The official dollar winnings of the player                                                                                                                                              |
+| `drivedist` | The average number of yards driven on par 4 and par 5 holes                                                                                                                            |
+| `gir`       | Greens in regulation, measured as the percentage of time that the first (tee) shot on a par 3 hole ends up on the green, or the second shot on a par 4 hole ends up on the green, or the third shot on a par 5 hole ends up on the green |
+| `avgputts`  | The average number of putts on the holes where the green was reached in regulation (the PGA Tour's putting average)                                                                     |
+:::
+
+We will analyze these data to determine which of the variables `nevents`, `drivedist`, `gir`, and `avgputts` is most important for winning money on the PGA Tour. We begin by performing a regression of `money` on all explanatory variables for the 2000 season (data frame `d00`); the 2018 season (`d18`) serves for a comparison at the end of the example:
+
+```{r load-pga-data, message=FALSE}
+d00 <- read_csv("data/pga-2000.csv")
+d18 <- read_csv("data/pga-2018.csv")
+```
+```{r pga-lm}
+#| echo: true
+model00 <- lm(money ~ nevents + drivedist + gir + avgputts, data = d00)
+model00 %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+```
+
+Let's look at the residuals:
+```{r pga-lm-plot}
+hist(rstandard(model00),
+  breaks = 20, col = "lightblue",
+  xlab = "Standardized Residual", main = ""
+)
+arrows(x0 = 7.5, y0 = 22 - strheight("Tiger Woods"), x1 = 8.5, y1 = 2, length = 0.1)
+text(x = 7, y = 22, labels = "Tiger Woods", cex = 1)
+```
+
+It seems like we need to measure `money` on a log scale. Let's transform with `log(money)` as it has much better residual diagnostic plots. 
+```{r pga-lm-log-1, echo=-2}
+model00log <- lm(log(money) ~ nevents + drivedist + gir + avgputts, data = d00)
+model00log %>%
+  tidy() %>%
+  knitr::kable(digits = 2)
+hist(rstandard(model00log),
+  breaks = 20, col = "lightblue",
+  xlab = "Standardized Residual", main = ""
+)
+arrows(x0 = 3, y0 = 20, x1 = 3.2, y1 = 2, length = 0.1)
+text(x = 2.6, y = 22, labels = "Notah Begay III", cex = 1)
+```
+Using log scale for `money` gives us a better model. We will keep it for now. How about selecting variables? Notice that the $t$-statistic of `nevents` is $-0.94$, so $|t| < 1.5$. Thus, we can remove it.
+```{r pga-lm-final}
+#| echo: true
+m1 <- lm(formula = log(money) ~ drivedist + gir + avgputts, data = d00)
+m1 %>%
+  tidy() %>%
+  knitr::kable(digits = 3)
+```
+
+It is obvious that fewer putts indicate a better golfer. The coefficient of `avgputts` looks large because the variable is measured per green reached in regulation and varies little: the whole field lies between 1.70 and 1.84. A decrease of 0.01 putts per green multiplies earnings by $e^{0.214} = 1.24$, an extra $24$%.
+
+*Evaluating the Coefficients*
+
+1.  Greens in Regulation (GIR) has a $\hat{\beta} = 0.166$. If I can
+    increase my GIR by one percentage point, I'll earn $e^{0.166} = 1.18$, an extra $18$%.
+
+2.  `drivedist` has a $\hat{\beta} = 0.015$. A $10$ yard improvement, I'll
+    earn $e^{0.015 \times 10} = e^{0.15} = 1.16$, an extra $16$%.
+
+Caveat: Everyone has gotten better since 2000!
+
+Tiger Woods was nine standard deviations better than what the untransformed model predicted. On the log scale he is not an outlier: `m1` predicts \$12.0 million for him, more than the \$9.2 million he earned, because he was first in the field in greens in regulation and second in driving distance and in putting, and on the log scale these advantages multiply. Taking the natural logarithm of money earnings significantly improves the residual diagnostics, and an exponential model appears to fit the data well, as evidenced by the good residual diagnostic plots; furthermore, the $t$-ratio for the number of events is only $-0.94$ in the log model, indicating it may not be a significant predictor.
+
+The outliers represent the biggest over- and under-performers in terms of money winnings when compared with their performance statistics. Prize money depends on where a player finishes, and a tournament pays a large share of its purse to its winner, so a few good weeks can lift a player far above what his season averages predict. Notah Begay III, the largest over-performer, earned seven times his prediction.
+
+We can see the over-performers and under-performers in the data, the players whose standardized residual in `m1` is beyond 2 in absolute value.
+
+```{r Over-Performers, echo=F}
+ind <- which(rstandard(m1) > 2)
+tb <- data.frame(Name = d00$name[ind], Money = d00$money[ind], Predicted = exp(m1$fitted.values[ind]))
+tb$Ratio <- tb$Money / tb$Predicted
+knitr::kable(tb, caption = "Over-Performers", align = "c", digits = c(0, 0, 0, 2), format.args = list(big.mark = ","), row.names = FALSE)
+```
+
+Now, let's extract the list of underperformers, which are given by large negative residuals. According to our model, Perry Moss, Casey Martin and Tommy Tolles should win more money based on their performance statistics: each earned about a quarter of his prediction. This could be due to several factors: they could be playing in fewer high-payout events, or their performance metrics might not capture other important aspects of tournament success like clutch putting or mental toughness during critical moments.
+
+```{r Under-Performers, echo=F} 
+ind <- which(rstandard(m1) < -2)
+tb <- data.frame(Name = d00$name[ind], Money = d00$money[ind], Predicted = exp(m1$fitted.values[ind]))
+tb$Ratio <- tb$Money / tb$Predicted
+knitr::kable(tb, caption = "Under-Performers", align = "c", digits = c(0, 0, 0, 2), format.args = list(big.mark = ","), row.names = FALSE)
+```
+
+Let's look at the 2018 data. Refitted to the 2018 season, the log model with the same three predictors gives driving distance about twice the weight it had in 2000 (0.032 per yard against 0.015) and greens in regulation a little less (0.131 against 0.166); the over- and under-performers below come from this refitted model. The highest earners are
+
+```{r Highest, echo=F} 
+tb <- d18 %>%
+  arrange(desc(money)) %>%
+  dplyr::select(-ROUNDS) %>%
+  as.data.frame() %>%
+  head()
+knitr::kable(tb, caption = "Highest earners 2018", align = "c")
+```
+
+Overperformers
+
+```{r, echo=F} 
+m18 <- lm(log(money) ~ drivedist + gir + avgputts, data = d18)
+ind <- which(rstandard(m18) > 2)
+tb <- data.frame(Name = d18$name[ind], Money = d18$money[ind], Predicted = exp(m18$fitted.values[ind]))
+tb$Ratio <- tb$Money / tb$Predicted
+knitr::kable(tb, caption = "Overperformers 2018", align = "c", digits = c(0, 0, 0, 2), format.args = list(big.mark = ","), row.names = FALSE)
+```
+
+Underperformers
+
+```{r, echo=F}
+ind <- which(rstandard(m18) < -2)
+tb <- data.frame(Name = d18$name[ind], Money = d18$money[ind], Predicted = exp(m18$fitted.values[ind]))
+tb$Ratio <- tb$Money / tb$Predicted
+knitr::kable(tb, caption = "Underperformers 2018", align = "c", digits = c(0, 0, 0, 2), format.args = list(big.mark = ","), row.names = FALSE)
+```
+
+Our analysis reveals three particularly interesting insights from the golf performance data. First, Tiger Woods appears as an outlier nine standard deviations above the untransformed model's predictions, but not on the log scale, where his statistics, among the best in the field, predict more than he earned: earnings grow multiplicatively with skill, and a model on the dollar scale misses this. Second, the model shows that increasing driving distance by ten yards corresponds to a sixteen percent increase in earnings, suggesting that power off the tee provides a significant competitive advantage. Finally, improving greens in regulation (GIR) by one percentage point leads to an eighteen percent increase in earnings. This highlights the importance of approach shot accuracy in determining financial success on the PGA Tour.
+:::
+
+So far, we have viewed regression coefficients $\beta$ as fixed, unknown constants that we estimate from data. However, in many applications, we may have prior knowledge about these parameters or wish to handle uncertainty more formally. This motivates the Bayesian approach to regression.
+
+## Quantile Regression
+While least squares regression provides an estimate of the conditional mean, it can be sensitive to outliers. In contrast, quantile regression offers a robust alternative by estimating conditional quantiles, such as the median.
+
+*The least absolute deviations (Quantile)* loss function is the sum of absolute differences between the predicted and actual values. It is used for regression problems with continuous variables. The goal is to minimize the sum of absolute errors (SAE) to improve the predictive performance of the model. Given an observed dataset, the least absolute deviations estimator is the value of $\beta$ that minimizes the sum of absolute errors
+$$
+\mini_{\beta}\sum_{i=1}^n |y_i - f_{\beta}(x_i)|
+$$
+The least absolute deviations estimator is also known as the quantile estimator, where the quantile is set to 0.5 (the median). This is because the least absolute deviations estimator is equivalent to the median of the data (the 0.5 quantile). 
+
+Again, in the unconditional case, when we do not observe any inputs $x$, the least absolute deviations estimator is the sample median. To solve this minimization problem, we need to consider the concept of a *subgradient*, since the absolute value function is not differentiable at zero.
+
+A subgradient generalizes the idea of a derivative for functions that are not differentiable everywhere. For a convex function $f(x)$, a subgradient at a point $x_0$ is any value $g$ such that for all $x$,
+$$
+f(x) \geq f(x_0) + g(x - x_0).
+$$
+The set of all such $g$ is called the *subdifferential* at $x_0$.
+
+For the absolute value function, the subgradient is given by:
+$$
+\frac{\partial}{\partial x} |x| = 
+\begin{cases}
+1 & \text{if } x > 0 \\
+-1 & \text{if } x < 0 \\
+[-1, 1] & \text{if } x = 0
+\end{cases}
+$$
+That is, at $x = 0$, any value between $-1$ and $1$ is a valid subgradient.
+
+Applying this to our minimization problem, the subgradient of the sum of absolute deviations with respect to $\beta$ is:
+$$
+\sum_{i=1}^n \operatorname{sign}(y_i - \beta).
+$$
+This equals to zero only when the number of positive items equals the number of negative which happens when $\beta$ is the median.
+
+<!-- https://math.stackexchange.com/questions/113270/the-median-minimizes-the-sum-of-absolute-deviations-the-ell-1-norm -->
+A more rigorous and non-calculus proof is due to @schwertman1990simple, and it works by pairing observations from the outside in. Let $y_{(1)} \leq \cdots \leq y_{(n)}$ be the ordered data and pair $y_{(i)}$ with $y_{(n+1-i)}$. For any $\beta$,
+$$
+|y_{(i)} - \beta| + |y_{(n+1-i)} - \beta| \geq y_{(n+1-i)} - y_{(i)},
+$$
+because the two distances must together span the whole gap between the pair. Equality holds exactly when $\beta$ lies in the closed interval $[y_{(i)}, y_{(n+1-i)}]$, and the inequality is strict outside it. Summing over all pairs,
+$$
+\sum_{i=1}^n |y_i - \beta| \geq \sum_{i \leq n/2} \left( y_{(n+1-i)} - y_{(i)} \right),
+$$
+a lower bound that does not depend on $\beta$. It is attained precisely when $\beta$ lies in *every* one of the nested intervals $[y_{(i)}, y_{(n+1-i)}]$, that is in the innermost one. For odd $n$ that intersection is the single point $y_{((n+1)/2)}$, and for even $n$ it is the interval $[y_{(n/2)}, y_{(n/2+1)}]$, whose midpoint is the usual sample median. Note the even case makes the minimizer non-unique, which is why the median, unlike the mean, need not be a single value.
+
+The generalization of the median estimator to the case of estimating the value of the quantile $\tau$ is as follows
+$$
+\mini_{\beta}\sum_{i=1}^n \rho_{\tau}(y_i - \beta)
+$$
+where $\rho_{\tau}(x) = x(\tau - \mathbb{I}(x < 0))$ is the quantile loss function. If we set $\tau = 0.5$, the loss function becomes the absolute value function, and we get the median estimator. The expected loss is
+$$
+\E{\rho_{\tau}(y - \beta)} = (\tau-1)\int_{-\infty}^{\beta} (y-\beta)dF(y) + \tau\int_{\beta}^{\infty} (y-\beta)dF(y)
+$$
+Differentiating the expected loss function with respect to $\beta$ and setting it to zero gives the quantile estimator
+$$
+\hat{\beta}_{\tau} = F^{-1}(\tau)
+$$
+where $F^{-1}$ is the quantile function of the distribution of $y$. Thus, the problem of finding a quantile is solved via optimization.
+
+A key difference between the least squares and least absolute deviations estimators is their sensitivity to outliers. The least squares estimator is sensitive to outliers because it squares the errors, giving more weight to large errors. In contrast, the least absolute deviations estimator is less sensitive to outliers because it takes the absolute value of the errors, giving equal weight to all errors.
+
+Another difference is the computational complexity. Least squares estimator can be found by solving a linear system of equations. There are fast and efficient algorithms for it, making the least squares estimator computationally efficient. In contrast, the least absolute deviations estimator requires more computationally expensive numerical optimization algorithms.
+
+There is also a hybrid loss function, called *Huber loss*, which combines the advantages of squared errors and absolute deviations.  It uses SE for small errors and AE for large errors, making it less sensitive to outliers.
+
+## Bayes Regression
+The Bayesian approach to linear regression treats the regression coefficients as random variables rather than fixed unknowns. This perspective offers several advantages: it provides a natural way to incorporate prior knowledge, quantifies uncertainty about parameter estimates through probability distributions, and allows for principled inference even with limited data.
+
+Consider a linear regression model
+$$
+f_{\beta}(x) = x^\top\beta + \epsilon,~~~\epsilon \sim N(0,\sigma_e^2),
+$$
+where $y = f_{\beta}(x)$ represents the observed response, $x$ is a vector of predictors, and $\epsilon$ captures random noise with variance $\sigma_e^2$. In the Bayesian framework, we specify a prior distribution over the coefficients
+$$
+\beta \sim N(0,\Sigma).
+$$
+The choice of prior covariance $\Sigma$ encodes our beliefs about the likely values of $\beta$ before seeing data. A diagonal $\Sigma = \sigma_\beta^2 I$ assumes independent, identically distributed coefficients with variance $\sigma_\beta^2$. Smaller values of $\sigma_\beta^2$ express stronger beliefs that coefficients are close to zero, effectively imposing shrinkage similar to ridge regression.
+
+The goal of Bayesian inference is to calculate the posterior distribution over model parameters given the observed data $(X, y)$:
+$$
+p(\beta\mid X,y) = \dfrac{p(y\mid \beta,X)p(\beta)}{p(y\mid X)}.
+$$
+The numerator contains the likelihood $p(y\mid \beta, X)$, which measures how well each $\beta$ explains the data, and the prior $p(\beta)$, which encodes our initial beliefs. The denominator $p(y\mid X)$ is the marginal likelihood or evidence, which serves as a normalizing constant ensuring the posterior integrates to one.
+
+A key property of the normal distribution is conjugacy: the product of two Gaussian density functions yields another Gaussian. This allows us to derive the posterior analytically:
+$$
+\begin{aligned}
+p(\beta\mid X,y)  & \propto \exp\left(-\dfrac{1}{2\sigma_e^2}(y-X\beta)^\top(y-X\beta)\right)\exp\left(-\dfrac{1}{2}\beta^\top\Sigma^{-1}\beta\right)\\
+& \propto \exp\left(-\dfrac{1}{2}(\beta - \bar\beta)^\top A(\beta-\bar\beta)\right)
+\end{aligned}
+$$
+where we have completed the square in the exponent. This reveals that the posterior is Gaussian:
+$$
+\beta\mid X,y \sim N(\bar\beta,A^{-1}),
+$$ 
+where the precision matrix is
+$$A = \sigma_e^{-2}X^\top X + \Sigma^{-1},$$
+and the posterior mean is
+$$\bar\beta = \sigma_e^{-2}A^{-1}X^\top y = A^{-1}\left(\sigma_e^{-2}X^\top y\right).$$
+
+The posterior mean $\bar\beta$ represents a compromise between the data and the prior. When we have abundant data (large $n$), the term $\sigma_e^{-2}X^\top X$ dominates $\Sigma^{-1}$, and $\bar\beta$ approaches the ordinary least squares estimate. Conversely, with limited data, the prior exerts stronger influence, pulling $\bar\beta$ toward zero. The posterior covariance $A^{-1}$ quantifies remaining uncertainty: diagonal entries give the variance of each coefficient, while off-diagonal entries capture correlations between parameters.
+
+::: {#exm-posterior}
+## Posterior Distribution for Simple Linear Regression
+
+To build intuition, consider a simple linear model with a single predictor ($p = 1$):
+$$
+y = \beta_0 + \beta_1 x + \epsilon, ~~ \beta_i \sim N(0,1),~~~\sigma_e = 1.
+$$
+The prior $\beta_i \sim N(0, 1)$ reflects moderate uncertainty: we expect coefficients to typically fall within $[-2, 2]$ (covering approximately 95% of probability mass), but we remain open to larger values if the data demand them.
+
+Before observing any data, this prior induces a distribution over possible linear functions $y = \beta_0 + \beta_1 x$. Each draw $(\beta_0, \beta_1)$ from the prior defines a different line. Sampling many such pairs generates an ensemble of lines representing our prior beliefs about plausible relationships between $x$ and $y$. Let's visualize this:
+
+```{r, echo=-10}
+#| label: fig-bayes-lm
+#| fig-cap: "Bayesian linear regression: prior and posterior distributions over linear models. The dots are the ten observations."
+#| fig-subcap:
+#|   - "Sample from prior distribution over possible linear models."
+#|   - "Sample from posterior distribution over possible linear models."
+#| layout-ncol: 1
+#| fig-width: 3.6
+#| fig-height: 2
+set.seed(1)
+n <- 10
+x <- runif(n, -1, 1)
+y <- 0.4 + 0.8 * x + rnorm(n)
+X <- cbind(1, x)
+A <- crossprod(X) + diag(2)
+bbar <- solve(A, crossprod(X, y))
+prior <- mvrnorm(20, c(0, 0), diag(2))
+post <- mvrnorm(20, bbar, solve(A))
+for (b in list(prior, post)) {
+  plot(NULL, xlim = c(-1, 1), ylim = c(-3, 3), xlab = "x", ylab = "y")
+  for (i in 1:20) abline(b[i, 1], b[i, 2], col = "gray60")
+  if (identical(b, post)) points(x, y, pch = 16)
+}
+```
+
+The upper panel displays a sample of twenty linear functions drawn from the prior distribution $\beta_i \sim N(0,1)$, representing our initial beliefs before observing any data. Notice the wide dispersion of lines with varying slopes and intercepts, reflecting substantial uncertainty about the true relationship. The lower panel shows twenty draws from the posterior after conditioning on ten observations, the dots. The posterior concentrates: the lines now follow the trend of the observations, and their intercepts and slopes vary less than under the prior. This concentration demonstrates how Bayesian inference combines prior beliefs with empirical evidence to reduce uncertainty. The remaining spread in the posterior is residual parameter uncertainty; it is large because ten observations with noise $\sigma_e = 1$ carry limited information. This shrinkage from a diffuse prior to a concentrated posterior exemplifies the core principle of Bayesian learning: data updates our beliefs in a principled, probabilistic manner.
+
+:::
+
+### Penalized Regression and Priors
+
+In the standard linear regression setting, we minimize the sum of squared errors. However, when the number of predictors is large, or when we want to prevent overfitting, we often add a penalty term to the loss function. This is known as penalized regression or regularization.
+
+The two most common forms of penalized regression are *Ridge Regression* and *Lasso Regression*.
+
+*   *Ridge Regression* adds a penalty proportional to the sum of squared coefficients ($\lambda \sum \beta_j^2$). This shrinks coefficients toward zero but rarely sets them exactly to zero.
+*   *Lasso Regression* adds a penalty proportional to the sum of absolute values of coefficients ($\lambda \sum |\beta_j|$). This has the unique property of setting some coefficients exactly to zero, effectively performing variable selection.
+
+These frequentist regularization methods have direct Bayesian interpretations:
+
+*   Ridge regression corresponds to placing a *Gaussian prior* on the coefficients: $\beta_j \sim N(0, \tau^2)$.
+*   Lasso regression corresponds to placing a *Laplace prior* (Double Exponential) on the coefficients: $\beta_j \sim \text{Laplace}(0, b)$.
+
+While Lasso is powerful for variable selection, it has a drawback: it shrinks all coefficients, including the large signals that we want to keep. This can introduce bias in our estimates of the important predictors. Ideally, we want a method that aggressively shrinks small coefficients (noise) to zero but leaves large coefficients (signals) relatively untouched.
+
+### Global-Local Priors and the Horseshoe
+
+To address the limitations of Lasso, modern Bayesian statistics uses *global-local* shrinkage priors, which have two variance components for each coefficient: a global shrinkage parameter ($\tau$) that pulls all coefficients toward zero (estimating the overall sparsity level), and a local shrinkage parameter ($\lambda_j$) for each coefficient that allows specific signals to escape the global shrinkage. The *horseshoe prior* is a widely-used global-local prior that uses half-Cauchy distributions for both parameters, encouraging coefficients to be either very close to zero (strong shrinkage) or very large (no shrinkage), making it nearly ideal for sparse signal recovery.
+
+For a detailed theoretical treatment of the horseshoe prior, including its mathematical formulation, shrinkage properties, computational implementation, and comprehensive examples, see @sec-horseshoe.
+
+## Exercises {.unnumbered}
+
+{{< include ./ex/12-regression-ex.qmd >}}
+

@@ -1,0 +1,597 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Kernel Hyperparameter Interpretation
+
+For the squared exponential kernel $k(x, x') = \sigma^2 \exp\left(-\frac{(x-x')^2}{2\ell^2}\right)$:
+
+a) What happens to the GP when $\ell \to 0$?
+b) What happens when $\ell \to \infty$?
+c) If you double the length scale, by what factor does the "effective range" of correlation increase?
+d) A meteorologist uses a GP to model temperature as a function of location. She finds $\ell = 50$ km. Interpret this value.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) As $\ell \to 0$: Points become uncorrelated unless they're at exactly the same location. The function becomes extremely rough/discontinuous (white noise limit). The GP cannot interpolate smoothly.
+
+b) As $\ell \to \infty$: All points become perfectly correlated with covariance $\sigma^2$. The function becomes essentially constant: a horizontal line drawn from $N(0, \sigma^2)$.
+
+c) "Effective range" is often defined as the distance where correlation drops to some threshold (e.g., $e^{-1} \approx 0.37$ or $e^{-2} \approx 0.14$).
+
+For correlation = $e^{-1}$: This occurs when $(x-x')^2/(2\ell^2) = 1$, i.e., $|x-x'| = \sqrt{2}\ell$.
+
+If $\ell$ doubles, the effective range also doubles (linear relationship).
+
+d) $\ell = 50$ km means:
+- Temperatures at locations within ~50 km are highly correlated
+- At ~100 km apart, correlation is about $e^{-2} \approx 0.14$
+- At ~150 km apart, correlation is negligible ($e^{-4.5} \approx 0.01$)
+
+This captures the intuition that nearby locations have similar weather, while distant locations can have very different temperatures.
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Gaussian Processes
+
+a) A Gaussian Process defines a probability distribution over functions.
+
+b) For a GP, any finite collection of function values has a joint Gaussian distribution.
+
+c) The posterior variance of a GP at a test point depends on the observed function values $y$.
+
+d) The squared exponential kernel produces smooth (infinitely differentiable) sample functions.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **TRUE**. A GP is a distribution over functions such that any finite collection of function values is jointly Gaussian.
+
+b) **TRUE**. This is essentially the definition of a Gaussian Process.
+
+c) **FALSE**. The posterior variance depends only on the locations of observations $X$ and test points $X_*$, not on the observed values $y$. The posterior mean depends on $y$, but variance is determined by the geometry of the input space.
+
+d) **TRUE**. The squared exponential kernel is infinitely differentiable, and this smoothness property transfers to the sample functions.
+
+:::
+:::
+
+::: {#exr-gp-posterior-by-hand}
+## GP Posterior Predictive by Hand
+
+Consider a noiseless GP with mean function $m(x) = 0$ and squared exponential kernel $k(x,x') = \sigma^2\exp\left(-\frac{(x-x')^2}{2\ell^2}\right)$ with $\sigma^2 = 1$ and $\ell = 1$. You observe two training points:
+
+| x | y |
+|---|---|
+| 0 | 1 |
+| 1 | 2 |
+
+a) Build the $2\times 2$ training covariance matrix $\mathbf{K}$ by evaluating the kernel at $x = 0, 1$.
+b) Invert $\mathbf{K}$ by hand, using the explicit $2\times2$ inverse formula $\begin{pmatrix} a & b \\ b & d\end{pmatrix}^{-1} = \frac{1}{ad-b^2}\begin{pmatrix} d & -b \\ -b & a \end{pmatrix}$.
+c) Using @eq-mupost and @eq-Spost, compute the posterior mean $\mu_*$ and variance $\Sigma_*$ at the test point $x_* = 0.5$.
+d) Without redoing the arithmetic, explain why $\mu_*$ must lie strictly between $y_1 = 1$ and $y_2 = 2$, and why $\Sigma_*$ must be strictly less than $\sigma^2 = 1$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $K_{11} = k(0,0) = 1$, $K_{22} = k(1,1) = 1$, and $K_{12} = K_{21} = k(0,1) = e^{-1/2} \approx 0.6065$, so
+$$
+\mathbf{K} = \begin{pmatrix} 1 & 0.6065 \\ 0.6065 & 1 \end{pmatrix}.
+$$
+
+b) $\det \mathbf{K} = 1 - 0.6065^2 \approx 0.6321$, so
+$$
+\mathbf{K}^{-1} = \frac{1}{0.6321}\begin{pmatrix} 1 & -0.6065 \\ -0.6065 & 1 \end{pmatrix} = \begin{pmatrix} 1.5820 & -0.9595 \\ -0.9595 & 1.5820 \end{pmatrix}.
+$$
+
+c) The test point $x_* = 0.5$ is equidistant from both training points, so by symmetry $k(0, 0.5) = k(1, 0.5) = e^{-0.125} \approx 0.8825$, giving $\mathbf{K}_* = (0.8825, 0.8825)^\top$ and $K_{**} = k(0.5,0.5) = 1$. Then
+$$
+\mathbf{K}^{-1}\mathbf y = \begin{pmatrix} 1.5820 & -0.9595 \\ -0.9595 & 1.5820 \end{pmatrix}\begin{pmatrix}1\\2\end{pmatrix} \approx \begin{pmatrix} -0.337 \\ 2.204\end{pmatrix},
+$$
+$$
+\mu_* = \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf y \approx 0.8825(-0.337) + 0.8825(2.204) = 0.8825 \times 1.867 \approx 1.648.
+$$
+Similarly $\mathbf{K}^{-1}\mathbf{K}_* \approx (0.549, 0.549)^\top$, so
+$$
+\Sigma_* = K_{**} - \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf{K}_* \approx 1 - 2(0.8825)(0.549) \approx 0.030.
+$$
+So $\mu_* \approx 1.648$ and $\Sigma_* \approx 0.030$ (standard deviation $\approx 0.174$); a numerical check with `solve()` in R confirms $\mu_* = 1.6480$ and $\Sigma_* = 0.0305$, matching the hand calculation up to rounding.
+
+d) Because $x_*$ is equidistant from both training inputs, the squared exponential kernel assigns them equal correlation with the test point, so, as the computation in part (c) confirms, the two training points enter $\mu_*$ with equal, positive coefficients. A prediction built from positive weights on $y_1$ and $y_2$ that treats them symmetrically is pulled into the range spanned by the data rather than extrapolating beyond it, so $\mu_*$ falls between 1 and 2. For the variance, @eq-Spost subtracts the nonnegative term $\mathbf{K}_*^\top\mathbf{K}^{-1}\mathbf{K}_*$ from the prior variance $K_{**}=\sigma^2$; whenever at least one training point has nonzero correlation with $x_*$ (here, correlation $\approx 0.88$, far from zero), that term is strictly positive, so $\Sigma_*$ is strictly less than $\sigma^2$. This illustrates the Bayesian principle stated after @eq-Spost: observing data can only reduce uncertainty, never increase it, at a point correlated with the observations.
+
+:::
+:::
+
+::: {#exr-gp-kernel-ridge}
+## GP Posterior Mean as Kernel Ridge Regression
+
+Consider a GP with zero mean and kernel $k(\cdot,\cdot)$, observed with i.i.d. noise $y_i = f(x_i) + \epsilon_i$, $\epsilon_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(0,\sigma_n^2)$.
+
+a) Using @eq-mupost and @eq-Spost as a template, argue that the noisy-GP posterior mean at a test point $x_*$ is
+$$
+\mu_* = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y.
+$$
+b) Kernel ridge regression fits $f(x) = \sum_{i=1}^n \alpha_i k(x,x_i)$ by minimizing the penalized least-squares objective
+$$
+J(\boldsymbol\alpha) = \|\mathbf y - \mathbf K\boldsymbol\alpha\|^2 + \lambda\, \boldsymbol\alpha^\top \mathbf K \boldsymbol\alpha,
+$$
+where the penalty term $\boldsymbol\alpha^\top \mathbf K \boldsymbol\alpha$ is the squared norm of $f$ in the reproducing kernel Hilbert space associated with $k$. Differentiate $J$ with respect to $\boldsymbol\alpha$ and solve for the minimizer $\hat{\boldsymbol\alpha}$.
+c) Substitute $\hat{\boldsymbol\alpha}$ into $f(x_*) = \sum_i \alpha_i k(x_*,x_i)$ and compare the result to part (a). For what value of $\lambda$ are the two predictions identical?
+d) The two methods produce the same point prediction under that correspondence. What does the GP framework provide that ridge regression does not?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) With additive noise, $\Cov{\mathbf y,\mathbf y} = \Cov{f(\mathbf X)+\boldsymbol\epsilon,\ f(\mathbf X)+\boldsymbol\epsilon} = \mathbf K + \sigma_n^2\mathbf I$, since $\boldsymbol\epsilon$ has covariance $\sigma_n^2\mathbf I$ and is independent of $f$, while $\Cov{\mathbf y,\mathbf y_*} = \Cov{f(\mathbf X),f(\mathbf X_*)} = \mathbf K_*$ is unchanged, since the test function values are noiseless. Substituting $\mathbf K + \sigma_n^2\mathbf I$ for $\mathbf K$ in @eq-mupost then gives $\mu_* = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y$, and correspondingly @eq-Spost gives $\Sigma_* = \mathbf{K}_{**} - \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{K}_*$.
+
+b) Since $f(x_j) = \sum_i \alpha_i k(x_j,x_i) = (\mathbf K \boldsymbol\alpha)_j$ and $\|f\|^2_{\mathcal H} = \boldsymbol\alpha^\top \mathbf K \boldsymbol\alpha$ by the reproducing property,
+$$
+J(\boldsymbol\alpha) = \mathbf y^\top \mathbf y - 2\boldsymbol\alpha^\top \mathbf K \mathbf y + \boldsymbol\alpha^\top \mathbf K \mathbf K \boldsymbol\alpha + \lambda \boldsymbol\alpha^\top \mathbf K \boldsymbol\alpha.
+$$
+Differentiating and setting the gradient to zero,
+$$
+\frac{\partial J}{\partial \boldsymbol\alpha} = -2\mathbf K \mathbf y + 2 \mathbf K \mathbf K \boldsymbol\alpha + 2\lambda \mathbf K \boldsymbol\alpha = 2\mathbf K\big[(\mathbf K+\lambda \mathbf I)\boldsymbol\alpha - \mathbf y\big] = 0.
+$$
+Since $\mathbf K$ is invertible (or, more generally, restricting attention to the row space of $\mathbf K$), this requires $(\mathbf K + \lambda \mathbf I)\boldsymbol\alpha = \mathbf y$, so
+$$
+\hat{\boldsymbol\alpha} = (\mathbf K + \lambda \mathbf I)^{-1}\mathbf y.
+$$
+
+c) The fitted function at $x_*$ is $\hat f(x_*) = \sum_i \hat\alpha_i k(x_*,x_i) = \mathbf{K}_*^\top \hat{\boldsymbol\alpha} = \mathbf{K}_*^\top(\mathbf K + \lambda \mathbf I)^{-1}\mathbf y$, which is identical to the GP posterior mean $\mu_*$ from part (a) whenever $\lambda = \sigma_n^2$.
+
+d) The point predictions coincide, but the GP additionally returns $\Sigma_*$, a calibrated posterior variance at every test point, and it supplies a principled way to choose the kernel hyperparameters and the noise level $\sigma_n^2$ by maximizing the marginal likelihood, as in the chapter's MLE example, whereas ridge regression treats $\lambda$ purely as a tuning constant, ordinarily chosen by cross-validation, with no accompanying uncertainty statement.
+
+:::
+:::
+
+::: {#exr-gp-loglik-gradient}
+## Gradient of the GP Log-Likelihood and a Closed Form for the Signal Variance
+
+The chapter states the gradient of the GP log marginal likelihood (in the collapsible "Mathematical Details: Gradient Derivation" box) but leaves the derivation to the reader. Fill it in, then use it to obtain a closed form for the signal variance. Work throughout with the noiseless log marginal likelihood
+$$
+\mathcal{L}(\theta) = \log p(\mathbf y \mid \mathbf X, \theta) = -\frac{1}{2}\log|\mathbf K| - \frac{1}{2}\mathbf y^\top \mathbf K^{-1}\mathbf y - \frac{n}{2}\log 2\pi,
+$$
+where $\mathbf K$ is built from the squared exponential kernel $k(x,x') = \sigma^2\exp\left(-(x-x')^2/(2\ell^2)\right)$ with hyperparameters $\theta\in\{\sigma,\ell\}$. You may use the two matrix calculus identities stated in the chapter,
+$$
+\frac{\partial \mathbf K^{-1}}{\partial \theta} = -\mathbf K^{-1}\frac{\partial \mathbf K}{\partial \theta}\mathbf K^{-1}, \qquad \frac{\partial \log|\mathbf K|}{\partial \theta} = \mathrm{tr}\left(\mathbf K^{-1}\frac{\partial \mathbf K}{\partial \theta}\right).
+$$
+
+a) Differentiating $\mathcal{L}$ term by term, and being explicit about how the first identity enters when you differentiate the quadratic term $\mathbf y^\top \mathbf K^{-1}\mathbf y$, derive
+$$
+\frac{\partial \mathcal{L}}{\partial \theta} = -\frac{1}{2}\mathrm{tr}\left(\mathbf K^{-1}\frac{\partial \mathbf K}{\partial \theta}\right) + \frac{1}{2}\mathbf y^\top \mathbf K^{-1}\frac{\partial \mathbf K}{\partial \theta}\mathbf K^{-1}\mathbf y.
+$$
+Then, writing $\boldsymbol\alpha = \mathbf K^{-1}\mathbf y$, show that this collapses to the single trace
+$$
+\frac{\partial \mathcal{L}}{\partial \theta} = \frac{1}{2}\mathrm{tr}\left[\left(\boldsymbol\alpha\boldsymbol\alpha^\top - \mathbf K^{-1}\right)\frac{\partial \mathbf K}{\partial \theta}\right].
+$$
+
+b) Positive hyperparameters are usually optimized in an unconstrained space by taking logarithms, as the computing exercise on the held-out motorcycle data does for its three hyperparameters. Take $\sigma = e^{u}$ and optimize over $u = \log\sigma$. Using the chain rule together with the chapter identity $\partial \mathbf K/\partial\sigma = (2/\sigma)\mathbf K$, show that $\partial \mathbf K/\partial u = 2\mathbf K$ (the explicit dependence on $\sigma$ cancels), and hence that
+$$
+\frac{\partial \mathcal{L}}{\partial u} = \mathbf y^\top \mathbf K^{-1}\mathbf y - n.
+$$
+
+c) Write $\mathbf K = \sigma^2 \mathbf R$, where $\mathbf R$ is the correlation matrix (the same kernel with $\sigma^2$ set to $1$), so that $\mathbf K^{-1} = \mathbf R^{-1}/\sigma^2$. Setting the derivative from part (b) to zero, show that with $\ell$ held fixed, the log-likelihood is maximized in closed form at
+$$
+\hat\sigma^2 = \frac{1}{n}\mathbf y^\top \mathbf R^{-1}\mathbf y,
+$$
+and explain why this stationary point is the unique maximum, so the signal variance never needs numerical optimization once $\ell$ is fixed.
+
+d) Apply the closed form to the two-point dataset of @exr-gp-posterior-by-hand ($x = (0,1)$, $y = (1,2)$, $\ell = 1$). Reusing the matrix $\mathbf K^{-1}$ computed there (where $\sigma = 1$, so $\mathbf R = \mathbf K$), compute $\mathbf y^\top \mathbf R^{-1}\mathbf y$ and $\hat\sigma^2$. Is $\hat\sigma$ larger or smaller than the value $\sigma = 1$ used in that exercise? Use your answer to predict the sign of $\partial \mathcal{L}/\partial u$ at $\sigma = 1, \ell = 1$, then confirm it against the formula in part (b).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The constant $-\frac{n}{2}\log 2\pi$ has zero derivative. For the log-determinant term, the second identity applies directly,
+$$
+\frac{\partial}{\partial\theta}\left(-\frac{1}{2}\log|\mathbf K|\right) = -\frac{1}{2}\mathrm{tr}\left(\mathbf K^{-1}\frac{\partial \mathbf K}{\partial\theta}\right).
+$$
+The quadratic term depends on $\theta$ only through $\mathbf K^{-1}$, and $\mathbf y$ is constant, so
+$$
+\frac{\partial}{\partial\theta}\left(\mathbf y^\top \mathbf K^{-1}\mathbf y\right) = \mathbf y^\top\frac{\partial \mathbf K^{-1}}{\partial\theta}\mathbf y = -\mathbf y^\top \mathbf K^{-1}\frac{\partial \mathbf K}{\partial\theta}\mathbf K^{-1}\mathbf y,
+$$
+where the first identity was used at the second equality. The leading $-\frac{1}{2}$ flips the sign, giving $+\frac{1}{2}\mathbf y^\top \mathbf K^{-1}(\partial \mathbf K/\partial\theta)\mathbf K^{-1}\mathbf y$. Summing the two nonzero pieces reproduces the stated gradient.
+
+For the compact form, set $\boldsymbol\alpha = \mathbf K^{-1}\mathbf y$. The quadratic term is a scalar, hence equal to its own trace, and by the cyclic property of the trace,
+$$
+\mathbf y^\top \mathbf K^{-1}\frac{\partial \mathbf K}{\partial\theta}\mathbf K^{-1}\mathbf y = \boldsymbol\alpha^\top\frac{\partial \mathbf K}{\partial\theta}\boldsymbol\alpha = \mathrm{tr}\left(\boldsymbol\alpha^\top\frac{\partial \mathbf K}{\partial\theta}\boldsymbol\alpha\right) = \mathrm{tr}\left(\boldsymbol\alpha\boldsymbol\alpha^\top\frac{\partial \mathbf K}{\partial\theta}\right).
+$$
+Combining this with the trace from the log-determinant term,
+$$
+\frac{\partial \mathcal{L}}{\partial\theta} = \frac{1}{2}\mathrm{tr}\left(\boldsymbol\alpha\boldsymbol\alpha^\top\frac{\partial \mathbf K}{\partial\theta}\right) - \frac{1}{2}\mathrm{tr}\left(\mathbf K^{-1}\frac{\partial \mathbf K}{\partial\theta}\right) = \frac{1}{2}\mathrm{tr}\left[\left(\boldsymbol\alpha\boldsymbol\alpha^\top - \mathbf K^{-1}\right)\frac{\partial \mathbf K}{\partial\theta}\right],
+$$
+which is the single-trace form implemented in practice (one solve for $\boldsymbol\alpha$ and $\mathbf K^{-1}$, reused across all hyperparameters).
+
+b) With $\sigma = e^{u}$ we have $d\sigma/du = e^{u} = \sigma$, so by the chain rule and the chapter identity $\partial \mathbf K/\partial\sigma = (2/\sigma)\mathbf K$,
+$$
+\frac{\partial \mathbf K}{\partial u} = \frac{\partial \mathbf K}{\partial\sigma}\frac{d\sigma}{du} = \frac{2}{\sigma}\mathbf K\cdot\sigma = 2\mathbf K,
+$$
+and the explicit $\sigma$ cancels. Substituting $\partial \mathbf K/\partial u = 2\mathbf K$ into the part (a) gradient, the trace term becomes $-\frac{1}{2}\mathrm{tr}(\mathbf K^{-1}\,2\mathbf K) = -\frac{1}{2}\mathrm{tr}(2\mathbf I) = -n$, and the quadratic term becomes $\frac{1}{2}\mathbf y^\top \mathbf K^{-1}(2\mathbf K)\mathbf K^{-1}\mathbf y = \mathbf y^\top \mathbf K^{-1}\mathbf y$, so
+$$
+\frac{\partial \mathcal{L}}{\partial u} = \mathbf y^\top \mathbf K^{-1}\mathbf y - n.
+$$
+
+c) Substituting $\mathbf K^{-1} = \mathbf R^{-1}/\sigma^2$ into part (b), and using that $\mathbf R$ depends on $\ell$ only,
+$$
+\frac{\partial \mathcal{L}}{\partial u} = \frac{1}{\sigma^2}\mathbf y^\top \mathbf R^{-1}\mathbf y - n = e^{-2u}\,\mathbf y^\top \mathbf R^{-1}\mathbf y - n,
+$$
+since $\sigma^2 = e^{2u}$. Setting this to zero gives $\hat\sigma^2 = \frac{1}{n}\mathbf y^\top \mathbf R^{-1}\mathbf y$. Because $\mathbf R$ is positive definite, $\mathbf y^\top \mathbf R^{-1}\mathbf y > 0$, so $\partial \mathcal{L}/\partial u$ is strictly decreasing in $u$ (the factor $e^{-2u}$ decreases), positive for small $u$ and negative for large $u$. It therefore crosses zero exactly once, and that crossing is the unique global maximum over $\sigma$. No numerical search over $\sigma$ is needed once $\ell$ is fixed; $\hat\sigma^2$ is the profile (concentrated) maximum-likelihood estimate of the signal variance.
+
+d) From @exr-gp-posterior-by-hand, with $\sigma = 1$ (so $\mathbf R = \mathbf K$) and $\ell = 1$,
+$$
+\mathbf K^{-1} = \begin{pmatrix} 1.5820 & -0.9595 \\ -0.9595 & 1.5820 \end{pmatrix}, \qquad \mathbf K^{-1}\mathbf y \approx \begin{pmatrix} -0.337 \\ 2.204 \end{pmatrix}.
+$$
+Hence $\mathbf y^\top \mathbf R^{-1}\mathbf y = \mathbf y^\top(\mathbf K^{-1}\mathbf y) \approx 1(-0.337) + 2(2.204) = 4.072$, and with $n = 2$,
+$$
+\hat\sigma^2 = \frac{4.072}{2} \approx 2.036, \qquad \hat\sigma \approx 1.427.
+$$
+Since $\hat\sigma \approx 1.427 > 1$, the maximizer lies above the value $\sigma = 1$, so the log-likelihood is still increasing in $\sigma$ (equivalently in $u$) at $\sigma = 1$: the derivative there must be positive. The part (b) formula confirms this: $\partial \mathcal{L}/\partial u\big|_{\sigma=1} = \mathbf y^\top \mathbf K^{-1}\mathbf y - n \approx 4.072 - 2 = 2.072 > 0$. A direct numerical check agrees, giving $\partial \mathcal{L}/\partial u|_{\sigma=1} = 2.0718$, which matches a central finite-difference gradient of $\mathcal{L}$ to eight decimal places; evaluating $\mathcal{L}$ at $0.9\hat\sigma$, $\hat\sigma$, and $1.1\hat\sigma$ (log-likelihoods $-3.343$, $-3.319$, $-3.337$) confirms that the peak sits at $\hat\sigma$, as part (c) predicts.
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## GP Prior Sampling
+
+Consider a Gaussian Process with mean function $m(x) = 0$ and squared exponential kernel:
+$$
+k(x, x') = \sigma^2 \exp\left(-\frac{(x-x')^2}{2\ell^2}\right)
+$$
+
+a) For $\sigma^2 = 1$ and $\ell = 1$, calculate the covariance matrix $K$ for points $x = (0, 1, 2)^T$.
+b) Sample 5 functions from this GP prior at points $x = (0, 0.5, 1, 1.5, 2, 2.5, 3)$.
+c) How does changing $\ell$ to 0.5 affect the sampled functions?
+d) How does changing $\sigma^2$ to 4 affect the sampled functions?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Covariance matrix:
+```{r}
+se_kernel <- function(x1, x2, sigma2 = 1, ell = 1) {
+  sigma2 * exp(-(x1 - x2)^2 / (2 * ell^2))
+}
+
+x <- c(0, 1, 2)
+K <- outer(x, x, se_kernel)
+cat("Covariance matrix K:\n")
+print(round(K, 4))
+```
+
+b) Sample from GP prior:
+```{r}
+set.seed(42)
+x_grid <- seq(0, 3, by = 0.5)
+n <- length(x_grid)
+K <- outer(x_grid, x_grid, se_kernel, sigma2 = 1, ell = 1)
+
+# Add small jitter for numerical stability
+K <- K + 1e-6 * diag(n)
+
+# Sample from multivariate normal
+library(MASS)
+samples <- mvrnorm(5, mu = rep(0, n), Sigma = K)
+
+matplot(x_grid, t(samples), type = "l", lty = 1,
+        xlab = "x", ylab = "f(x)",
+        main = "GP Prior Samples (ell=1, sigma2=1)")
+```
+
+c) With $\ell = 0.5$:
+```{r}
+K_short <- outer(x_grid, x_grid, se_kernel, sigma2 = 1, ell = 0.5)
+K_short <- K_short + 1e-6 * diag(n)
+samples_short <- mvrnorm(5, mu = rep(0, n), Sigma = K_short)
+
+matplot(x_grid, t(samples_short), type = "l", lty = 1,
+        xlab = "x", ylab = "f(x)",
+        main = "GP Prior Samples (ell=0.5) - More Wiggly")
+```
+Shorter length scale = faster variation, more "wiggly" functions.
+
+d) With $\sigma^2 = 4$:
+```{r}
+K_tall <- outer(x_grid, x_grid, se_kernel, sigma2 = 4, ell = 1)
+K_tall <- K_tall + 1e-6 * diag(n)
+samples_tall <- mvrnorm(5, mu = rep(0, n), Sigma = K_tall)
+
+matplot(x_grid, t(samples_tall), type = "l", lty = 1,
+        xlab = "x", ylab = "f(x)",
+        main = "GP Prior Samples (sigma2=4) - Larger Amplitude")
+```
+Larger signal variance = functions have larger vertical amplitude.
+
+:::
+:::
+
+::: {#exr-}
+## GP Posterior Prediction
+
+You observe the following data points:
+| x | y |
+|---|---|
+| 0 | 1.0 |
+| 2 | 0.5 |
+| 4 | 2.0 |
+
+Assume a GP prior with $m(x) = 0$, squared exponential kernel with $\sigma^2 = 1$, $\ell = 1$, and observation noise $\sigma_n^2 = 0.1$. Because real observations include noise, this exercise uses the noisy-GP posterior obtained from @eq-mupost and @eq-Spost by replacing $\mathbf{K}$ with $\mathbf{K} + \sigma_n^2\mathbf{I}$ wherever it appears, equivalent to observing $y_i = f(x_i) + \epsilon_i$ with $\epsilon_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(0,\sigma_n^2)$.
+
+a) Write the posterior mean formula $\mu_*$ for predictions at new points.
+b) Calculate the posterior mean and variance at $x_* = 1$.
+c) Calculate the posterior mean and variance at $x_* = 3$.
+d) Plot the posterior mean and 95% credible interval for $x \in [0, 5]$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The GP posterior formulas are:
+$$
+\mu_* = K_*^T (K + \sigma_n^2 I)^{-1} y
+$$
+$$
+\Sigma_* = K_{**} - K_*^T (K + \sigma_n^2 I)^{-1} K_*
+$$
+
+where $K$ is covariance of training points, $K_*$ is cross-covariance, $K_{**}$ is prior covariance at test points.
+
+b) and c) Implementation:
+```{r}
+# Training data
+X <- c(0, 2, 4)
+y <- c(1.0, 0.5, 2.0)
+sigma2 <- 1
+ell <- 1
+sigma_n2 <- 0.1
+
+se_kernel <- function(x1, x2, sigma2 = 1, ell = 1) {
+  sigma2 * exp(-(x1 - x2)^2 / (2 * ell^2))
+}
+
+# Training covariance with noise
+K <- outer(X, X, se_kernel, sigma2 = sigma2, ell = ell) + sigma_n2 * diag(3)
+
+# Prediction function
+gp_predict <- function(x_star) {
+  K_star <- sapply(X, function(xi) se_kernel(x_star, xi, sigma2, ell))
+  K_star_star <- se_kernel(x_star, x_star, sigma2, ell)
+
+  K_inv <- solve(K)
+  mu_star <- t(K_star) %*% K_inv %*% y
+  var_star <- K_star_star - t(K_star) %*% K_inv %*% K_star
+
+  return(c(mean = mu_star, var = var_star))
+}
+
+# Predictions
+pred_1 <- gp_predict(1)
+cat("At x=1: mean =", round(pred_1[1], 3), ", var =", round(pred_1[2], 3), "\n")
+
+pred_3 <- gp_predict(3)
+cat("At x=3: mean =", round(pred_3[1], 3), ", var =", round(pred_3[2], 3), "\n")
+```
+
+d) Full posterior plot:
+```{r}
+x_test <- seq(0, 5, length = 100)
+predictions <- t(sapply(x_test, gp_predict))
+
+mu <- predictions[, 1]
+sigma <- sqrt(pmax(predictions[, 2], 0))
+
+plot(x_test, mu, type = "l", lwd = 2, ylim = c(-1, 4),
+     xlab = "x", ylab = "f(x)", main = "GP Posterior with 95% CI")
+polygon(c(x_test, rev(x_test)),
+        c(mu + 1.96*sigma, rev(mu - 1.96*sigma)),
+        col = rgb(0, 0, 1, 0.2), border = NA)
+points(X, y, pch = 19, col = "red", cex = 1.5)
+legend("topleft", c("Posterior mean", "95% CI", "Data"),
+       lty = c(1, NA, NA), pch = c(NA, 15, 19),
+       col = c("black", rgb(0,0,1,0.5), "red"))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Log Marginal Likelihood
+
+Using the data from the GP Posterior Prediction exercise above ($X = (0, 2, 4)$, $y = (1.0, 0.5, 2.0)$), the log marginal likelihood for a (noiseless) GP is:
+$$
+\log p(y \mid X, \theta) = -\frac{1}{2}y^T K^{-1} y - \frac{1}{2}\log|K| - \frac{n}{2}\log(2\pi)
+$$
+where $\theta = (\sigma^2, \ell)$ are the kernel hyperparameters. This uses the noiseless log marginal likelihood matching @eq-mupost and @eq-Spost as derived in the chapter, which generalizes to the noisy-GP posterior of the previous exercise by replacing $\mathbf{K}$ with $\mathbf{K}+\sigma_n^2\mathbf{I}$ throughout and extending $\theta$ to $(\sigma^2,\ell,\sigma_n^2)$.
+
+a) Calculate the log marginal likelihood for $(\sigma^2 = 1, \ell = 1)$.
+b) Calculate it for $(\sigma^2 = 1, \ell = 0.5)$.
+c) Which hyperparameters are better supported by the data?
+d) Interpret each term in the log marginal likelihood formula.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+X <- c(0, 2, 4)
+y <- c(1.0, 0.5, 2.0)
+n <- length(y)
+
+log_marg_lik <- function(sigma2, ell) {
+  K <- outer(X, X, se_kernel, sigma2 = sigma2, ell = ell)
+
+  term1 <- -0.5 * t(y) %*% solve(K) %*% y  # Data fit
+  term2 <- -0.5 * log(det(K))               # Complexity penalty
+  term3 <- -n/2 * log(2 * pi)                # Constant
+
+  return(c(total = term1 + term2 + term3,
+           data_fit = term1,
+           complexity = term2))
+}
+
+# a) ell = 1
+lml_1 <- log_marg_lik(1, 1)
+cat("ell=1: log p(y|X) =", round(lml_1[1], 3), "\n")
+cat("  Data fit:", round(lml_1[2], 3), ", Complexity:", round(lml_1[3], 3), "\n")
+
+# b) ell = 0.5
+lml_05 <- log_marg_lik(1, 0.5)
+cat("ell=0.5: log p(y|X) =", round(lml_05[1], 3), "\n")
+cat("  Data fit:", round(lml_05[2], 3), ", Complexity:", round(lml_05[3], 3), "\n")
+
+# c) Compare
+cat("\nBetter hyperparameters:", ifelse(lml_1[1] > lml_05[1], "ell=1", "ell=0.5"), "\n")
+```
+
+d) Interpretation of terms:
+- **$-\frac{1}{2}y^T K^{-1} y$** (Data fit): How well the model explains the data. Smaller residuals = larger (less negative) value.
+- **$-\frac{1}{2}\log|K|$** (Complexity penalty): Penalizes overly flexible models. Larger $K$ determinant = more negative value.
+- **$-\frac{n}{2}\log(2\pi)$** (Normalization): Constant that doesn't affect optimization.
+
+This implements Occam's razor: the marginal likelihood balances data fit against model complexity.
+
+:::
+:::
+
+::: {#exr-rbf-vs-matern}
+## RBF versus Matern: Sample-Path Roughness
+
+The squared exponential kernel is infinitely differentiable, which forces every function sampled from a GP with this kernel to be extremely smooth. A commonly used alternative is the Matern family of kernels, which controls smoothness directly through a parameter. The Matern-5/2 kernel, with length scale $\ell$ and signal variance $\sigma^2$, is
+$$
+k_{5/2}(x,x') = \sigma^2\left(1+\frac{\sqrt5\,r}{\ell}+\frac{5r^2}{3\ell^2}\right)\exp\left(-\frac{\sqrt5\,r}{\ell}\right), \qquad r = |x-x'|,
+$$
+and produces sample paths that are twice, but not infinitely, differentiable: rougher than the squared exponential kernel's paths at small scales.
+
+a) On a grid of $n=200$ points over $[0,10]$, build the covariance matrices for the squared exponential kernel and the Matern-5/2 kernel above, both with $\sigma^2=1$, $\ell=1$.
+b) Using the same underlying standard normal draws for both kernels, so that any difference between the two sets of sample paths is due to the kernel alone and not to randomness, draw 5 sample paths from each GP prior and plot them.
+c) Compute a roughness statistic, such as the sum of squared successive differences $\sum_i(f(x_{i+1})-f(x_i))^2$ or the number of local extrema, for each path, and report the average over the 5 paths for each kernel.
+d) Which kernel produces rougher paths, and does the direction of the difference match what the differentiability of the two kernels predicts?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(21)
+
+se_kernel <- function(x1, x2, sigma2 = 1, ell = 1) {
+  sigma2 * exp(-outer(x1, x2, "-")^2 / (2 * ell^2))
+}
+matern52_kernel <- function(x1, x2, sigma2 = 1, ell = 1) {
+  r <- abs(outer(x1, x2, "-"))
+  a <- sqrt(5) * r / ell
+  sigma2 * (1 + a + 5 * r^2 / (3 * ell^2)) * exp(-a)
+}
+
+x <- seq(0, 10, length.out = 200)
+n <- length(x)
+K_se <- se_kernel(x, x) + diag(1e-8, n)
+K_m  <- matern52_kernel(x, x) + diag(1e-8, n)
+L_se <- t(chol(K_se))
+L_m  <- t(chol(K_m))
+
+Z    <- matrix(rnorm(n * 5), n, 5)   # common random numbers for both kernels
+F_se <- L_se %*% Z
+F_m  <- L_m %*% Z
+
+matplot(x, F_se, type = "l", lty = 1, col = "blue",
+        xlab = "x", ylab = "f(x)", ylim = range(F_se, F_m))
+matlines(x, F_m, lty = 1, col = "red")
+legend("topright", c("Squared exponential", "Matern-5/2"), col = c("blue", "red"), lty = 1)
+```
+
+```{r}
+roughness <- function(F) mean(apply(F, 2, function(f) sum(diff(f)^2)))
+extrema   <- function(F) mean(apply(F, 2, function(f) sum(diff(sign(diff(f))) != 0)))
+cat("Mean roughness, SE:    ", round(roughness(F_se), 4), "\n")
+cat("Mean roughness, Matern:", round(roughness(F_m), 4), "\n")
+cat("Mean # local extrema, SE:    ", extrema(F_se), "\n")
+cat("Mean # local extrema, Matern:", extrema(F_m), "\n")
+```
+
+Running this gives an average roughness of $0.735$ for the squared-exponential paths versus $1.163$ for the Matern-5/2 paths (about 58% higher), and an average of $5.4$ local extrema per squared-exponential path versus $11.2$ for Matern-5/2 (about twice as many).
+
+d) The Matern-5/2 kernel produces rougher paths: both the sum-of-squared-increments statistic and the extrema count are substantially larger for Matern-5/2 than for the squared exponential kernel. This matches the theory. The squared exponential kernel is infinitely mean-square differentiable, so its sample paths are extremely smooth, while the Matern-5/2 kernel is only twice mean-square differentiable, allowing visibly rougher local behavior even though both kernels share the same length scale and signal variance.
+
+:::
+:::
+
+::: {#exr-gp-mcycle-heldout}
+## GP Regression on the Motorcycle Data
+
+The chapter's motorcycle accident example (@exm-gp) fits a GP to the full `MASS::mcycle` dataset using the `laGP` package. Here you will implement the GP posterior directly with matrix algebra, as in @eq-mupost and @eq-Spost, and use it to fill in a deliberately held-out gap in the data.
+
+a) Load `MASS::mcycle` and remove all observations with `times` in $(25, 30]$; call the remaining data the training set and the removed points the held-out test set.
+b) Using a squared exponential kernel, estimate the signal variance $\sigma^2$, length scale $\ell$, and noise variance $\sigma_n^2$ by maximizing the log marginal likelihood on the training set only, following the same MLE approach as @exm-gp-sim but now including $\sigma_n^2$ as in the noisy-GP posterior of @exr-gp-kernel-ridge (replace $\mathbf{K}$ with $\mathbf{K}+\sigma_n^2\mathbf{I}$ in @eq-mupost and @eq-Spost). It is numerically convenient to standardize `accel` (subtract the training mean, divide by the training standard deviation) before fitting, and to transform predictions back to the original scale afterward.
+c) Predict the posterior mean and standard deviation at the held-out times, and plot them (mean $\pm$ 2 standard deviations) against the true held-out observations.
+d) Compare the root-mean-squared prediction error of the GP on the held-out points to that of a cubic polynomial regression fit on the same training data.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(MASS)
+set.seed(8)
+
+se_kernel <- function(x1, x2, sigma2 = 1, ell = 1) {
+  sigma2 * exp(-outer(x1, x2, "-")^2 / (2 * ell^2))
+}
+
+gap   <- mcycle$times > 25 & mcycle$times <= 30
+train <- mcycle[!gap, ]
+test  <- mcycle[gap, ]
+
+ym <- mean(train$accel); ys <- sd(train$accel)
+ytr <- (train$accel - ym) / ys
+
+neg_log_lik <- function(par, x, y) {
+  sigma2 <- exp(par[1]); ell <- exp(par[2]); sigma_n2 <- exp(par[3])
+  n <- length(y)
+  K <- se_kernel(x, x, sigma2, ell) + diag(sigma_n2, n)
+  Ki <- solve(K)
+  0.5 * log(det(K)) + 0.5 * t(y) %*% Ki %*% y + n / 2 * log(2 * pi)
+}
+opt <- optim(log(c(1, 5, 0.1)), neg_log_lik, x = train$times, y = ytr)
+sigma2 <- exp(opt$par[1]); ell <- exp(opt$par[2]); sigma_n2 <- exp(opt$par[3])
+cat("sigma2 =", round(sigma2, 3), " ell =", round(ell, 3), " sigma_n2 =", round(sigma_n2, 3), "\n")
+
+n   <- nrow(train)
+K   <- se_kernel(train$times, train$times, sigma2, ell) + diag(sigma_n2, n)
+Ki  <- solve(K)
+Ks  <- se_kernel(train$times, test$times, sigma2, ell)
+Kss <- se_kernel(test$times, test$times, sigma2, ell)
+
+mu    <- (t(Ks) %*% Ki %*% ytr) * ys + ym
+sd_gp <- sqrt(pmax(diag(Kss - t(Ks) %*% Ki %*% Ks), 0)) * ys
+```
+
+```{r}
+#| fig-cap: GP fit on the motorcycle data with a held-out gap. Gray points are training data, red points are the held-out test data, and the blue band is the GP mean $\pm$ 2 standard deviations.
+plot(train$times, train$accel, pch = 20, col = "gray40",
+     xlab = "time (ms)", ylab = "acceleration (g)", xlim = range(mcycle$times))
+polygon(c(test$times, rev(test$times)), c(mu + 2 * sd_gp, rev(mu - 2 * sd_gp)),
+        col = rgb(0, 0, 1, 0.2), border = NA)
+lines(test$times, mu, col = "blue", lwd = 2)
+points(test$times, test$accel, pch = 20, col = "red")
+```
+
+```{r}
+rmse_gp   <- sqrt(mean((mu - test$accel)^2))
+poly_fit  <- lm(accel ~ poly(times, 3), data = train)
+rmse_poly <- sqrt(mean((predict(poly_fit, newdata = test) - test$accel)^2))
+cat("GP RMSE:", round(rmse_gp, 2), "\n")
+cat("Cubic polynomial RMSE:", round(rmse_poly, 2), "\n")
+```
+
+With `n_train = 116` and `n_test = 17`, maximizing the marginal likelihood gives, on the standardized scale, $\sigma^2 \approx 0.85$, $\ell \approx 5.13$, $\sigma_n^2 \approx 0.18$. The GP achieves an RMSE of about $29.8$ on the held-out gap, versus about $39.5$ for the cubic polynomial fit on the same training data, a roughly 25% reduction in error. The GP's advantage comes from letting the posterior standard deviation widen exactly where the training data thin out around the gap, rather than forcing a single global polynomial shape through both the fast-changing region before the gap and the recovery afterward.
+
+:::
+:::
+
+::::

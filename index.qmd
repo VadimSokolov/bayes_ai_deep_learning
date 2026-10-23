@@ -1,0 +1,65 @@
+{{< pagebreak >}}
+
+Copyright © {{< meta book-year >}} Nick Polson and Vadim Sokolov. First edition, {{< meta book-year >}}.
+
+::: {.content-visible when-meta="book-has-isbn"}
+Paperback ISBN: {{< meta book-isbn >}}
+:::
+
+::: {.content-visible when-meta="book-has-doi"}
+Digital Object Identifier (DOI): [{{< meta book-doi >}}](https://doi.org/{{< meta book-doi >}})
+:::
+
+License: distributed under the Creative Commons Attribution 4.0 International License (CC BY 4.0), <https://creativecommons.org/licenses/by/4.0/>: you may copy, share and adapt this book for any purpose, provided you credit the authors. The code is released under the MIT License.
+
+{{< pagebreak >}}
+
+# Preface {.unnumbered}
+Modern AI rests on three foundations: Bayesian reasoning, statistical learning, and deep neural networks. This book develops all three, starting from probability and decision theory, progressing through classical machine learning, and ending with transformers and autonomous agents. Whether you're a business analyst seeking operational intuition or an engineer building systems, this book provides mathematical depth and practical fluency. Throughout, uncertainty is a first-class citizen: the foundation for better algorithms and clearer thinking about data, models, and decisions.
+
+The material draws from courses we teach to MBAs at the University of Chicago Booth School of Business and engineers at George Mason University. These two audiences demand different emphases (business students want operational intuition and decision frameworks; engineers want mathematical rigor and implementation details), but each gains from the other: the same Bayesian methods that power marketing analytics and financial risk modeling also drive robotics and autonomous systems.
+
+When John McCarthy coined "artificial intelligence" (AI) in 1955, the field meant symbolic reasoning, hand-coded rules and algorithms. The foundations trace further back: Claude Shannon's information theory, John von Neumann's game theory and decision science, and Richard Bellman's dynamic programming. The shift to data-driven learning, models that generalize from examples, defines modern AI. The contrast:
+
+:::: {layout="[48,-4,48]"}
+
+::: {.callout-note icon=false}
+## Old AI
+
+*IF raining THEN take_umbrella*
+
+A fixed rule. It works only one way. Seeing an umbrella tells us nothing about rain.
+:::
+
+::: {.callout-note icon=false}
+## New AI
+
+*Probability of umbrella, given rain*
+
+Learned from data. It works backwards as well. Seeing an umbrella tells us it's likely raining.
+:::
+::::
+
+For example, the Kalman filter navigated Apollo 11 to the moon in 1969. Today's autonomous systems, from rocket landings to self-driving cars, rely on optimization and learning algorithms that would have been computationally infeasible then.
+
+
+How we interact with AI as consumers has evolved through four stages:
+
+1.  *Search.* Early search engines answered a single question with a ranked list of webpages. The PageRank algorithm, developed by Google founders, used power iterations to rank these pages by relevance. Statistical tools like Kendall's tau and Spearman's rank correlation measured the similarity between the ranking and actual relevance.
+2.  *Suggestions.* Suggestion algorithms were popularized by Netflix and Amazon, which used collaborative filtering to recommend movies and products to users based on their history and that of others, easing the burden of choice.
+3.  *Summaries.* Systems like ChatGPT go beyond retrieval: they synthesize and generalize across domains.
+4.  *Agents.* Autonomous systems that perceive their environment, reason about goals, and take actions, orchestrating tools to execute multi-step tasks without step-by-step human guidance.
+
+
+Building systems at each stage requires the same foundations: probabilistic reasoning to handle uncertainty, statistical learning to extract patterns, and scalable computation to train models. This book develops all three.
+
+The book is organized into three parts:
+
+* *Part 1: Bayesian Learning:* Probability, decision theory, and Bayesian inference.
+* *Part 2: Statistical Learning:* Pattern-matching algorithms including regression, decision trees, and generalized linear models.
+* *Part 3: Deep Learning:* Neural network architectures, optimization via gradient descent, convolutional networks for vision, natural language processing, large language models, and autonomous agents.
+
+Chapters include derivations, Python/R code, and problems and case studies.
+
+The code of every chapter is also available as stand-alone files, one per language per chapter, in the `code/` folder of the book repository at <https://github.com/VadimSokolov/bayes_ai_deep_learning>, for example `code/03-bl.R`. Results of computations that take long to run are stored in `results/`, and the datasets come as `data.zip` with each release and unpack into `data/`. The `README.md` of the repository lists the packages the code needs. The computing exercises of each chapter are in the same repository, as notebooks in the `exercises/` folder, and a short linear algebra tutorial is on the book's website, <https://vsokolov.org/books/bayes_ai_deep_learning/>.
+

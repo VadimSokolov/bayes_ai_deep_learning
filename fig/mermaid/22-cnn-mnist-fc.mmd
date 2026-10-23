@@ -1,0 +1,39 @@
+%%{init: {"flowchart": {"padding": 4, "nodeSpacing": 20, "rankSpacing": 10, "subGraphTitleMargin": {"top": 0, "bottom": 4}}}}%%
+graph TB
+    subgraph RowA[" "]
+        direction LR
+        subgraph Input["Input Layer"]
+            I[784 nodes<br/>28×28 flattened image]
+        end
+
+        subgraph Hidden1["Hidden Layer 1"]
+            H1[1024 nodes<br/>tanh activation]
+        end
+
+        I -->|W1: 784×1024<br/>b1: 1024| H1
+    end
+
+    subgraph RowB[" "]
+        direction LR
+        subgraph Hidden2["Hidden Layer 2"]
+            H2[1024 nodes<br/>tanh activation]
+        end
+
+        subgraph Output["Output Layer"]
+            O[10 nodes<br/>log-softmax]
+        end
+
+        H2 -->|W3: 1024×10<br/>b3: 10| O
+
+        O --> P[Predicted digit<br/>0-9]
+    end
+
+    RowA --->|W2: 1024×1024<br/>b2: 1024| RowB
+
+    style Input fill:#e1f5ff
+    style Hidden1 fill:#fff4e1
+    style Hidden2 fill:#fff4e1
+    style Output fill:#e8f5e9
+    style P fill:#f3e5f5
+    style RowA fill:#ffffff,stroke:#bbbbbb,stroke-width:1px
+    style RowB fill:#ffffff,stroke:#bbbbbb,stroke-width:1px

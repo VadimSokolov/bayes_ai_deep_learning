@@ -1,0 +1,739 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Brownian Motion Properties
+
+Let $B_t$ be a standard Brownian motion.
+
+a) Calculate $\E{B_5}$ and $\Var{B_5}$.
+b) Calculate $\Cov{B_3, B_7}$.
+c) If $B_2 = 1.5$, what is the conditional distribution of $B_5$?
+d) What is the probability that $B_4 > 2$?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) For standard Brownian motion:
+- $\E{B_t} = 0$ for all $t$
+- $\Var{B_t} = t$
+
+So $\E{B_5} = 0$ and $\Var{B_5} = 5$.
+
+b) $\Cov{B_s, B_t} = \min(s, t) = \min(3, 7) = 3$
+
+c) Conditional on $B_2 = 1.5$:
+$$
+B_5 \mid B_2 = 1.5 \sim N(1.5, 5-2) = N(1.5, 3)
+$$
+The increment $B_5 - B_2$ is independent of $B_2$ and has distribution $N(0, 3)$.
+
+d)
+```{r}
+# P(B_4 > 2) = P(Z > 2/sqrt(4)) = P(Z > 1)
+prob <- 1 - pnorm(2, 0, sqrt(4))
+cat("P(B_4 > 2) =", round(prob, 4), "\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Scale Invariance of Brownian Motion
+
+Brownian motion has a remarkable scale invariance property: if $B_t$ is a Brownian motion, then so is $\tilde{B}_t = c B_{t/c^2}$ for any constant $c > 0$.
+
+a) Verify that $\E{\tilde{B}_t} = 0$.
+b) Verify that $\Var{\tilde{B}_t} = t$.
+c) Show that $\Cov{\tilde{B}_s, \tilde{B}_t} = \min(s, t)$.
+d) Use this property to argue that a stock's annual volatility of 20% implies a daily volatility of approximately $20\%/\sqrt{252} \approx 1.26\%$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $\E{\tilde{B}_t} = \E{c B_{t/c^2}} = c \cdot \E{B_{t/c^2}} = c \cdot 0 = 0$
+
+b) $\Var{\tilde{B}_t} = \Var{c B_{t/c^2}} = c^2 \cdot \Var{B_{t/c^2}} = c^2 \cdot \frac{t}{c^2} = t$
+
+c) $\Cov{\tilde{B}_s, \tilde{B}_t} = c^2 \cdot \Cov{B_{s/c^2}, B_{t/c^2}} = c^2 \cdot \min(s/c^2, t/c^2) = \min(s, t)$
+
+d) Let annual time be $T = 1$ year and daily time be $t = 1/252$ year.
+
+If $\sigma_{annual} = 0.20$ is the annualized volatility, then:
+$$
+\sigma_{daily} = \sigma_{annual} \cdot \sqrt{1/252} = 0.20 / \sqrt{252} \approx 0.0126 = 1.26\%
+$$
+
+This is because $\Var{\sigma B_t} = \sigma^2 t$, so the standard deviation over $t$ days is $\sigma \sqrt{t}$. For $t = 1/252$: $0.20 \times \sqrt{1/252} \approx 1.26\%$.
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Stochastic Processes
+
+a) The value of $B_5 - B_3$ depends on the value of $B_1$.
+
+b) For Geometric Brownian Motion, $\E{S_T} = S_0 e^{\mu T}$ but the median of $S_T$ is less than $S_0 e^{\mu T}$.
+
+c) If a basketball team has a 70% win probability at halftime, the win probability must increase as the game progresses, if we evaluate the win-probability formula at the current lead $l$ as $t$ increases.
+
+d) Brownian motion paths are continuous but nowhere differentiable (with probability 1).
+
+e) The Black-Scholes formula for option pricing uses geometric Brownian motion for the stock price.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. Brownian motion has independent increments. $B_5 - B_3$ is independent of $(B_1, B_2, B_3)$.
+
+b) **TRUE**. $\log(S_T) \sim N(\log S_0 + (\mu - \sigma^2/2)T, \sigma^2 T)$. The median of $\log(S_T)$ is the mean, so the median of $S_T$ is $S_0 e^{(\mu - \sigma^2/2)T}$, which is less than $\E{S_T} = S_0 e^{\mu T}$ when $\sigma > 0$.
+
+c) **TRUE**. As time passes with a fixed lead, the remaining variance decreases (less time for opponent to catch up). Win probability approaches 1 (if leading) or 0 (if trailing) as the game ends.
+
+d) **TRUE**. This is a famous property of Brownian motion: the paths are continuous but so jagged they have no derivative anywhere.
+
+e) **TRUE**. Black-Scholes assumes $dS_t = \mu S_t dt + \sigma S_t dB_t$, which is geometric Brownian motion.
+
+:::
+:::
+
+::: {#exr-}
+## Toll Road
+You are designing a toll road that carries trucks and cars. Each week you see an average of 19,000 vehicles pass by. The current toll for cars is 50 cents, and you wish to set the toll for trucks so that the revenue reaches \$11,500 per week. You observe the following data: three of every four trucks on the road are followed by a car, while only one of every five cars is followed by a truck. 
+
+a) What is the equilibrium distribution of trucks and cars on the road? 
+a) What should you charge trucks so as to reach your goal of \$11,500     in revenues per week? 
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The transition matrix for the number of trucks and cars is given by $$P = \left (  \begin{array}{cc}  \frac{1}{4} & \frac{3}{4} \\  \frac{1}{5} & \frac{4}{5}   \end{array}    \right )$$ The equilibrium distribution $\pi = ( \pi_1 , \pi_2 )$ is given by $\pi P = \pi$. This has solution given by $$\frac{1}{4} \pi_1 + \frac{1}{5} \pi_2 = \pi_1 \; \; \mathrm{ and} \; \; \frac{3}{4} \pi_1 + \frac{4}{5} \pi_2 = \pi_2$$ with $\pi_1 = \frac{4}{19}$ and $\pi_2 = \frac{15}{19}$. 
+
+With cars at a toll of 50 cents we see that we need to charge trucks \$1.00 to generate revenues of \$11,500 per week.
+
+:::
+:::
+
+::: {#exr-poisson-process}
+## Poisson Process Fundamentals
+
+Let $\{N_t, t\ge 0\}$ be a Poisson process with rate $\lambda>0$, so that $N_t \sim \text{Poisson}(\lambda t)$ for every $t \ge 0$ (as defined in the chapter).
+
+a) Let $T_1$ be the time of the first arrival. Using $\prob{T_1 > t} = \prob{N_t = 0}$, derive the distribution of $T_1$. Then show that for any $s,t \ge 0$,
+$$
+\prob{T_1 > s+t \mid T_1 > s} = \prob{T_1 > t},
+$$
+and explain in words what this "memoryless" property means for the process.
+
+b) Conversely, suppose we only know that the inter-arrival times $T_1, T_2, \ldots$ are i.i.d. Exponential($\lambda$), as established in part (a). Let $S_k = T_1 + \cdots + T_k$ be the time of the $k$th arrival. Using the identity $\{N_t \ge k\} = \{S_k \le t\}$, derive that $N_t \sim \text{Poisson}(\lambda t)$.
+
+c) Let $N^{(1)}_t$ and $N^{(2)}_t$ be independent Poisson processes with rates $\lambda_1$ and $\lambda_2$. *Superposition*: show that $N_t = N^{(1)}_t + N^{(2)}_t$ is a Poisson process with rate $\lambda_1+\lambda_2$. *Thinning*: now take a single Poisson process with rate $\lambda$ and independently label each arrival "Type 1" with probability $p$ and "Type 2" with probability $1-p$. Show that the Type-1 arrivals alone form a Poisson process with rate $\lambda p$, the Type-2 arrivals alone form a Poisson process with rate $\lambda(1-p)$, and the two are independent.
+
+d) Suppose $\lambda$ is unknown and assigned a Gamma($a, A$) prior, $\pi(\lambda) \propto \lambda^{a-1} e^{-A\lambda}$. We observe the process on $[0,T]$ and count $N_T = n$ arrivals. Derive the posterior distribution of $\lambda$ and its posterior mean, and relate the result to the Poisson-Gamma conjugacy of @sec-bl.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The event $\{T_1 > t\}$ (no arrival by time $t$) is exactly the event $\{N_t = 0\}$, so
+$$
+\prob{T_1 > t} = \prob{N_t = 0} = e^{-\lambda t}.
+$$
+This gives the exponential CDF $F_{T_1}(t) = 1 - e^{-\lambda t}$ and density $f_{T_1}(t) = \lambda e^{-\lambda t}$ for $t \ge 0$, so $T_1 \sim \text{Exponential}(\lambda)$. By stationary, independent increments, the waiting time between any two consecutive arrivals has this same distribution, so $T_1, T_2, \ldots$ are i.i.d. Exponential($\lambda$).
+
+For the memoryless property,
+$$
+\prob{T_1 > s+t \mid T_1 > s} = \frac{\prob{T_1 > s+t}}{\prob{T_1 > s}} = \frac{e^{-\lambda(s+t)}}{e^{-\lambda s}} = e^{-\lambda t} = \prob{T_1 > t}.
+$$
+Having waited $s$ time units without an arrival tells us nothing about how much longer we must wait: the remaining waiting time has exactly the same distribution as the original one. The process has no memory of elapsed time, which is why the Poisson process models events that occur "at random" with no aging or wear.
+
+b) $S_k$ is a sum of $k$ i.i.d. Exponential($\lambda$) variables, so $S_k \sim \text{Gamma}(k, \lambda)$ with density $f_{S_k}(s) = \lambda^k s^{k-1} e^{-\lambda s}/(k-1)!$ for $s>0$. Integrating by parts with $u = s^{k-1}/(k-1)!$ and $dv = \lambda^k e^{-\lambda s}\,ds$,
+$$
+\prob{S_k \le t} = \left[-\frac{\lambda^{k-1} s^{k-1} e^{-\lambda s}}{(k-1)!}\right]_0^t + \int_0^t \frac{\lambda^{k-1}s^{k-2}e^{-\lambda s}}{(k-2)!}\,ds = \prob{S_{k-1}\le t} - e^{-\lambda t}\frac{(\lambda t)^{k-1}}{(k-1)!}
+$$
+for $k \ge 2$ (the boundary term at $s=0$ vanishes). Applying this recursion down to $\prob{S_1 \le t} = 1 - e^{-\lambda t}$ from part (a) gives
+$$
+\prob{S_k \le t} = 1 - \sum_{j=0}^{k-1} e^{-\lambda t}\frac{(\lambda t)^j}{j!}.
+$$
+Since $\{N_t \ge k\} = \{S_k \le t\}$,
+$$
+\prob{N_t = k} = \prob{N_t \ge k} - \prob{N_t \ge k+1} = \prob{S_k \le t} - \prob{S_{k+1}\le t} = e^{-\lambda t}\frac{(\lambda t)^k}{k!},
+$$
+the Poisson($\lambda t$) pmf. This confirms that the counting-process axioms and the i.i.d.-Exponential inter-arrival characterization describe the same process.
+
+c) The probability generating function (pgf) of a Poisson($\mu$) variable is $\phi(s) = \E{s^X} = e^{-\mu(1-s)}$.
+
+*Superposition*: by independence of $N^{(1)}_t$ and $N^{(2)}_t$,
+$$
+\E{s^{N_t}} = \E{s^{N^{(1)}_t}}\E{s^{N^{(2)}_t}} = e^{-\lambda_1 t(1-s)}e^{-\lambda_2 t (1-s)} = e^{-(\lambda_1+\lambda_2)t(1-s)},
+$$
+which is the pgf of Poisson($(\lambda_1+\lambda_2)t$). Sums of independent, stationary increments remain independent and stationary, so $N_t = N_t^{(1)} + N_t^{(2)}$ is a Poisson process with rate $\lambda_1+\lambda_2$.
+
+*Thinning*: conditional on $N_t = n$, each arrival is independently Type 1 with probability $p$, so $(N^{(1)}_t \mid N_t=n) \sim \text{Binomial}(n,p)$ and $N^{(2)}_t = N_t - N^{(1)}_t$. The joint pgf is
+$$
+\E{s^{N^{(1)}_t} u^{N^{(2)}_t}} = \E{\E{s^{N^{(1)}_t}u^{N_t^{(2)}} \mid N_t}} = \E{\left(ps + (1-p)u\right)^{N_t}} = e^{-\lambda t\left[1 - ps - (1-p)u\right]},
+$$
+using the Poisson pgf evaluated at $ps+(1-p)u$. The exponent factors as
+$$
+-\lambda t\left[1-ps-(1-p)u\right] = -\lambda p t(1-s) - \lambda(1-p)t(1-u),
+$$
+so the joint pgf is the product of a Poisson($\lambda p t$) pgf in $s$ and a Poisson($\lambda(1-p)t$) pgf in $u$. A factored joint pgf implies independence, so the Type-1 and Type-2 arrivals form independent Poisson processes with rates $\lambda p$ and $\lambda(1-p)$.
+
+d) The likelihood is $p(N_T = n \mid \lambda) \propto \lambda^n e^{-\lambda T}$. Combining with the Gamma($a,A$) prior,
+$$
+\pi(\lambda \mid N_T = n) \propto \lambda^n e^{-\lambda T} \cdot \lambda^{a-1}e^{-A\lambda} = \lambda^{n+a-1}e^{-\lambda(T+A)},
+$$
+the kernel of a Gamma($a+n$, $A+T$) density, so $(\lambda \mid N_T=n) \sim \text{Gamma}(a+n, A+T)$. The posterior mean is
+$$
+\E{\lambda \mid N_T = n} = \frac{a+n}{A+T} = w \cdot \frac{n}{T} + (1-w) \cdot \frac{a}{A}, \qquad w = \frac{T}{T+A},
+$$
+a weighted average of the MLE $n/T$ and the prior mean $a/A$. This is exactly the Poisson-Gamma shrinkage estimator of @sec-bl, applied here to arrivals observed continuously over $[0,T]$ rather than a single fixed count: as $T\to\infty$, $w \to 1$ and the posterior concentrates on the MLE.
+
+:::
+:::
+
+::: {#exr-levy-ito-moments}
+## The Lévy-Itô Decomposition: Moments and the Case for Jumps
+
+Consider a Lévy process decomposed as in the chapter, $X_t = \mu t + \sigma B_t + J_t$, where $B_t$ is standard Brownian motion and $J_t = \sum_{i=1}^{N_t} Z_i$ is a compound Poisson jump process: $N_t \sim \text{Poisson}(\lambda t)$ counts jump arrivals, and the jump sizes $Z_i$ are i.i.d. with mean $\mu_Z$ and variance $\sigma_Z^2$, independent of $N_t$ and of $B_t$.
+
+a) In one or two sentences each, state which feature of a financial time series each of the three terms $\mu t$, $\sigma B_t$, and $J_t$ is meant to capture.
+
+b) Using the laws of total expectation and total variance (condition on $N_t$), derive $\E{J_t}$ and $\Var{J_t}$ in terms of $\lambda, t, \mu_Z, \sigma_Z^2$. Hence give $\E{X_t}$ and $\Var{X_t}$.
+
+c) On September 15, 2008, the S&P 500 fell 4.7% following the Lehman Brothers bankruptcy (@exm-levy-ito-finance). Assume a pure-diffusion model ($\mu = 0$, no jumps) for daily log-returns with annualized volatility $\sigma = 15\%$, so the daily standard deviation is $\sigma/\sqrt{252}$. Compute the $z$-score of this one-day move, and use the normal approximation to estimate how often (in trading days, and in years) a drop at least this large should occur. Does this justify including a jump term?
+
+d) True or false, with one sentence of justification: "The Lévy-Itô decomposition implies that every Lévy process has continuous sample paths."
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $\mu t$ captures the deterministic trend, the expected growth rate of the asset. $\sigma B_t$ captures the continuous, small, everyday fluctuations produced by the steady flow of trading and information. $J_t$ captures the rare, discontinuous, large moves caused by discrete shocks such as earnings surprises, defaults, or crashes.
+
+b) Condition on $N_t$. Given $N_t = n$, the sum $J_t = \sum_{i=1}^{n} Z_i$ has $\E{J_t \mid N_t = n} = n\mu_Z$ and $\Var{J_t \mid N_t = n} = n\sigma_Z^2$. The law of total expectation gives
+$$
+\E{J_t} = \E{N_t \mu_Z} = \lambda t\, \mu_Z .
+$$
+The law of total variance gives
+$$
+\Var{J_t} = \E{\Var{J_t \mid N_t}} + \Var{\E{J_t \mid N_t}} = \E{N_t}\sigma_Z^2 + \Var{N_t}\mu_Z^2 = \lambda t\,(\sigma_Z^2 + \mu_Z^2) = \lambda t\, \E{Z^2},
+$$
+using $\E{N_t} = \Var{N_t} = \lambda t$ for the Poisson process and $\E{Z^2} = \sigma_Z^2 + \mu_Z^2$. Since $B_t$ and $J_t$ are independent with $\E{B_t} = 0$ and $\Var{B_t} = t$,
+$$
+\E{X_t} = \mu t + \lambda t\, \mu_Z, \qquad \Var{X_t} = \sigma^2 t + \lambda t\, \E{Z^2}.
+$$
+This is the same drift-plus-diffusion-plus-jump variance split the chapter uses for the SVJ model, $\Var(y_t) = \E{v_{t-1}} + \lambda \E{Z_t^2}$. A simulation confirms both moment formulas (with $\mu = 0.05$, $\sigma = 0.2$, $\lambda = 3$, $\mu_Z = -0.02$, $\sigma_Z = 0.1$, and $t = 1$):
+
+```{r}
+set.seed(11)
+mu <- 0.05; sigma <- 0.2; lam <- 3; muZ <- -0.02; sigZ <- 0.1
+n  <- 2e6
+Nt <- rpois(n, lam)                          # jump arrivals in [0, 1]
+Jt <- rnorm(n, Nt * muZ, sqrt(Nt) * sigZ)    # given Nt, the jump sum is Gaussian
+Xt <- mu + sigma * rnorm(n) + Jt
+round(c(EJ = mean(Jt),  EJ_theory = lam * muZ,
+        VarJ = var(Jt), VarJ_theory = lam * (sigZ^2 + muZ^2)), 4)
+round(c(EX = mean(Xt),  EX_theory = mu + lam * muZ,
+        VarX = var(Xt), VarX_theory = sigma^2 + lam * (sigZ^2 + muZ^2)), 4)
+```
+
+c)
+```{r}
+sd_daily <- 0.15 / sqrt(252)
+z <- 0.047 / sd_daily
+p <- pnorm(-z)
+round(c(sd_daily = sd_daily, z = z), 4)
+c(prob = p, one_in_days = 1 / p, one_in_years = 1 / p / 252)
+```
+The daily standard deviation is $0.15/\sqrt{252} \approx 0.94\%$, so the $z$-score is $4.7/0.94 \approx 4.97$. The one-tailed normal probability is $P(Z \le -4.97) \approx 3.3 \times 10^{-7}$, about one trading day in three million, or once every twelve thousand years. Drops of this size have in fact occurred several times in recent decades (1987, 2008, 2020), so a Gaussian-only model is badly misspecified and a jump component is empirically necessary. This matches the chapter's own illustrative claim that a 5% daily drop "should occur roughly once every 10,000 years" under the same assumptions.
+
+d) False. Only $\mu t + \sigma B_t$ is continuous. The jump component $J_t$ is discontinuous at each arrival time of $N_t$, so $X_t$ is càdlàg (right-continuous with left limits) rather than continuous, unless the jump rate is $\lambda = 0$.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Geometric Brownian Motion for Stock Prices
+
+Tesla stock is modeled using Geometric Brownian Motion with drift $\mu = 0.15$ (15% annual return) and volatility $\sigma = 0.50$ (50% annual volatility). Current price is $S_0 = \$250$.
+
+a) Write the stochastic differential equation for Tesla's stock price.
+b) What is the expected stock price in 1 year?
+c) What is the probability that the stock price exceeds $\$400$ in 1 year?
+d) Simulate 5 sample paths for 1 year (252 trading days) and plot them.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $dS_t = \mu S_t dt + \sigma S_t dB_t$
+
+Or equivalently: $S_T = S_0 \exp\left((\mu - \frac{\sigma^2}{2})T + \sigma B_T\right)$
+
+b) Expected price:
+```{r}
+S0 <- 250
+mu <- 0.15
+sigma <- 0.50
+T <- 1
+
+E_ST <- S0 * exp(mu * T)
+cat("E[S_1] = $", round(E_ST, 2), "\n")
+```
+
+c) Log-price is normal:
+$$
+\log(S_T) \sim N\left(\log(S_0) + (\mu - \frac{\sigma^2}{2})T, \sigma^2 T\right)
+$$
+
+```{r}
+log_mean <- log(S0) + (mu - sigma^2/2) * T
+log_sd <- sigma * sqrt(T)
+prob <- 1 - pnorm(log(400), log_mean, log_sd)
+cat("P(S_1 > 400) =", round(prob, 4), "\n")
+```
+
+d) Simulation:
+```{r}
+set.seed(42)
+n_days <- 252
+dt <- 1/252
+n_paths <- 5
+
+paths <- matrix(NA, n_days + 1, n_paths)
+paths[1,] <- S0
+
+for (i in 1:n_paths) {
+  for (t in 1:n_days) {
+    dB <- rnorm(1, 0, sqrt(dt))
+    paths[t+1, i] <- paths[t, i] * exp((mu - sigma^2/2)*dt + sigma*dB)
+  }
+}
+
+matplot(0:n_days, paths, type = "l", lty = 1,
+        xlab = "Trading Days", ylab = "Stock Price ($)",
+        main = "Tesla GBM Sample Paths")
+abline(h = S0, lty = 2, col = "gray")
+```
+
+:::
+:::
+
+::: {#exr-merton-volatile}
+## The Merton Rule for a Volatile Asset
+
+Consider a volatile technology stock with expected excess return (over the risk-free rate) $\mu = 0.10$ (10%) and annual volatility $\sigma = 0.40$ (40%), noticeably higher than the S&P 500's historical $\sigma \approx 0.16$ used in @exm-merton-sp500.
+
+a) Compute the full-Kelly (Merton) allocation $f^* = \mu/\sigma^2$ for this asset. Does it call for leverage, unlike the S&P 500 example in the text?
+b) Compute the half-Kelly fraction ($\gamma = 2$) and an "over-betting" fraction equal to twice the full-Kelly fraction $f^*$.
+c) For each of the three fractions from (a)-(b), simulate 2,000 independent 20-year wealth paths under geometric Brownian motion (daily steps, $dt=1/252$) and report the median annualized log-growth rate and the median maximum drawdown. Set a seed for reproducibility.
+d) Show algebraically that betting exactly twice the full-Kelly fraction drives the expected log-growth rate to exactly zero, for any $\mu, \sigma$. Does your simulation in (c) confirm this?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+$$
+f^* = \frac{\mu}{\sigma^2} = \frac{0.10}{0.40^2} = \frac{0.10}{0.16} = 0.625.
+$$
+Unlike the S&P 500 case ($f^*\approx 2.3$, which requires borrowing to leverage above 100%), here $f^*=0.625 < 1$: the higher volatility of this stock means full Kelly invests only 62.5% of wealth in the risky asset (with the remainder at the risk-free rate) and calls for no leverage at all.
+
+b) Half-Kelly: $f = f^*/2 = 0.3125$. Over-betting at twice full Kelly: $f = 2f^* = 1.25$ (a levered position, borrowing 25% of wealth to invest 125% in the stock).
+
+c)
+```{r}
+set.seed(2026)
+
+mu    <- 0.10
+sigma <- 0.40
+
+f_full <- mu / sigma^2
+f_half <- f_full / 2
+f_over <- 2 * f_full
+
+T_years <- 20
+n_steps <- 252 * T_years
+dt      <- 1 / 252
+n_paths <- 2000
+
+simulate_log_wealth <- function(f) {
+  Z <- matrix(rnorm(n_paths * n_steps), n_paths, n_steps)
+  incr <- (f * mu - 0.5 * f^2 * sigma^2) * dt + f * sigma * sqrt(dt) * Z
+  t(apply(incr, 1, cumsum))
+}
+
+paths_full <- simulate_log_wealth(f_full)
+paths_half <- simulate_log_wealth(f_half)
+paths_over <- simulate_log_wealth(f_over)
+
+growth_rate <- function(paths) median(paths[, ncol(paths)]) / T_years
+
+max_drawdown <- function(path) {
+  running_max <- cummax(c(0, path))
+  max(running_max - c(0, path))
+}
+
+cat("f* (full Kelly)  =", round(f_full, 3), "\n")
+cat("f (half Kelly)   =", round(f_half, 3), "\n")
+cat("f (over-betting) =", round(f_over, 3), "\n")
+
+cat("\nMedian annualized log-growth rate:\n")
+cat("  Full Kelly:", round(growth_rate(paths_full), 4), "\n")
+cat("  Half Kelly:", round(growth_rate(paths_half), 4), "\n")
+cat("  Over-bet:  ", round(growth_rate(paths_over), 4), "\n")
+
+dd_full <- median(apply(paths_full, 1, max_drawdown))
+dd_half <- median(apply(paths_half, 1, max_drawdown))
+dd_over <- median(apply(paths_over, 1, max_drawdown))
+
+cat("\nMedian max drawdown (as % decline from peak):\n")
+cat("  Full Kelly:", round(100 * (1 - exp(-dd_full)), 1), "%\n")
+cat("  Half Kelly:", round(100 * (1 - exp(-dd_half)), 1), "%\n")
+cat("  Over-bet:  ", round(100 * (1 - exp(-dd_over)), 1), "%\n")
+```
+
+d) Writing the expected log-growth rate as $g(f) = f\mu - \tfrac12 f^2\sigma^2$ (from @eq-merton, maximized at $f^*=\mu/\sigma^2$), evaluate at $f = 2f^*$:
+$$
+g(2f^*) = 2f^*\mu - \tfrac12(2f^*)^2\sigma^2 = 2f^*\mu - 2(f^*)^2\sigma^2 = \frac{2\mu^2}{\sigma^2} - \frac{2\mu^2}{\sigma^2} = 0,
+$$
+using $f^*=\mu/\sigma^2$. This holds for any $\mu>0, \sigma>0$: doubling the Kelly fraction always eliminates the expected long-run growth rate, even though the simple (arithmetic) expected return of the position is still positive. The simulation in (c) confirms this: the over-betting strategy's median annualized log-growth rate comes out close to zero (small deviations are Monte Carlo noise), while its median drawdown is far larger than either the full- or half-Kelly strategy, despite no higher expected growth.
+
+:::
+:::
+
+::: {#exr-}
+## Win Probability in Sports
+
+A basketball game is modeled as a stochastic process where the point differential $X_t$ follows:
+$$
+X_t = X_0 + \mu t + \sigma B_t
+$$
+where $\mu = 0.1$ points per minute (home team advantage), $\sigma = 0.8$ points per minute$^{1/2}$, and game length is 48 minutes.
+
+The home team leads by 5 points with 12 minutes remaining.
+
+a) What is the probability the home team wins (ends with positive point differential)?
+b) Plot the win probability as a function of time remaining, for a 5-point lead.
+c) Calculate the "implied volatility" if a betting market gives the home team 85% win probability.
+d) What lead is needed with 6 minutes left to have 95% win probability?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Current time $t = 36$ minutes, time remaining $\tau = 12$ minutes, current lead $l = 5$.
+
+At end of game: $X_{48} = 5 + 0.1(12) + 0.8 B_{12}$
+$$
+E[X_{48}] = 5 + 1.2 = 6.2, \quad \text{SD}(X_{48}) = 0.8\sqrt{12} \approx 2.77
+$$
+
+```{r}
+l <- 5
+mu <- 0.1
+sigma <- 0.8
+tau <- 12
+
+expected_final <- l + mu * tau
+sd_final <- sigma * sqrt(tau)
+win_prob <- pnorm(0, -expected_final, sd_final)
+cat("P(Home wins) =", round(win_prob, 4), "\n")
+```
+
+b) Win probability vs time remaining:
+```{r}
+tau_grid <- seq(0.1, 48, by = 0.5)
+win_probs <- sapply(tau_grid, function(tau) {
+  pnorm(0, -(l + mu * tau), sigma * sqrt(tau))
+})
+
+plot(tau_grid, win_probs, type = "l", lwd = 2,
+     xlab = "Time Remaining (minutes)",
+     ylab = "Win Probability",
+     main = "Win Probability with 5-Point Lead")
+abline(h = 0.5, lty = 2, col = "gray")
+```
+
+c) Implied volatility from 85% win probability with 12 minutes left:
+$$
+0.85 = \Phi\left(\frac{5 + 0.1(12)}{\sigma_{IV}\sqrt{12}}\right)
+$$
+
+```{r}
+z_85 <- qnorm(0.85)
+sigma_iv <- (l + mu * tau) / (z_85 * sqrt(tau))
+cat("Implied volatility =", round(sigma_iv, 3), "\n")
+```
+
+d) For 95% win probability with 6 minutes left:
+```{r}
+tau6 <- 6
+z_95 <- qnorm(0.95)
+lead_needed <- z_95 * sigma * sqrt(tau6) - mu * tau6
+cat("Lead needed =", round(lead_needed, 1), "points\n")
+```
+
+:::
+:::
+
+::: {#exr-skellam-soccer}
+## Skellam Process for Soccer Score Differences
+
+The EPL betting example (@exm-eplodds) models the soccer score difference between two teams as a Skellam process, $N_t = N_{A,t} - N_{B,t}$, with $N_{A,t}\sim\text{Poisson}(\lambda^A t)$ and $N_{B,t}\sim\text{Poisson}(\lambda^B t)$ independent, so that at full time $N_1 \sim \text{Skellam}(\lambda^A, \lambda^B)$.
+
+a) Write an R function `skellam_pmf(k, lamA, lamB)` that returns $P(N_1 = k)$ by convolving the two Poisson pmfs, $\sum_{i-j=k}\text{dpois}(i,\lambda^A)\,\text{dpois}(j,\lambda^B)$ (truncate $i,j$ at 100). Using the chapter's Everton vs. West Ham estimates $\hat\lambda^A = 2.33$, $\hat\lambda^B = 1.44$, tabulate $P(N_1 = k)$ for $k = -4,\ldots,5$ and compare to the "Skellam Prob. (%)" row of @tbl-Table2.
+
+b) Simulate 100,000 independent matches with $N_{A,1}\sim\text{Poisson}(2.33)$, $N_{B,1}\sim\text{Poisson}(1.44)$ and confirm the empirical distribution of $N_1$ matches part (a). Also confirm the Skellam moments $\E{N_1} = \lambda^A - \lambda^B$ and $\Var{N_1} = \lambda^A + \lambda^B$.
+
+c) The "Market Prob. (%)" row of @tbl-Table2 gives market-implied probabilities for the same score differences; the raw row sums to 97.12%, so renormalize it to sum to one. Estimate $(\hat\lambda^A, \hat\lambda^B)$ by minimizing the sum of squared errors between `skellam_pmf` and these renormalized probabilities using `optim()`. Report your estimates, and as a check, refit against the chapter's own Skellam row.
+
+d) Using both your part (c) estimates and the chapter's $(2.33, 1.44)$, compute $P(\text{Everton win}) = P(N_1 > 0)$, $P(\text{Draw}) = P(N_1 = 0)$, and $P(\text{West Ham win}) = P(N_1 < 0)$, and compare to the market row. Using the Skellam mean and variance from (b), explain why the two parameter pairs give almost the same win probability but different draw probabilities.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The Skellam pmf is the convolution of the two Poisson pmfs. Evaluated at $(2.33, 1.44)$ it reproduces the chapter's Skellam row to within rounding (the largest discrepancy is 0.03 percentage points):
+
+```{r}
+skellam_pmf <- function(k, lamA, lamB, nmax = 100) {
+  sapply(k, function(kk) {
+    i <- max(0, kk):nmax
+    sum(dpois(i, lamA) * dpois(i - kk, lamB))   # j = i - kk, so i - j = kk
+  })
+}
+k <- -4:5
+pmf <- skellam_pmf(k, 2.33, 1.44)
+chapter <- c(0.78, 2.50, 6.47, 13.02, 19.50, 21.08, 16.96, 10.61, 5.37, 2.27)
+round(rbind(k = k, model = 100 * pmf, chapter = chapter), 2)
+```
+
+b) The 100,000 simulated matches reproduce the analytic pmf to within Monte Carlo error (the largest gap is about 0.24 percentage points), and the sample mean 0.88 and variance 3.76 match $\lambda^A - \lambda^B = 0.89$ and $\lambda^A + \lambda^B = 3.77$. A Skellam distribution has mean equal to the difference of the two rates and variance equal to their sum:
+
+```{r}
+set.seed(7)
+sim <- rpois(1e5, 2.33) - rpois(1e5, 1.44)
+emp <- sapply(k, function(kk) mean(sim == kk))
+round(rbind(k = k, empirical = 100 * emp, model = 100 * pmf), 2)
+round(c(mean = mean(sim), lamA_minus_lamB = 2.33 - 1.44,
+        variance = var(sim), lamA_plus_lamB = 2.33 + 1.44), 3)
+```
+
+c) The raw market row sums to 0.9712, so we divide by that to renormalize. Minimizing squared error against the renormalized market marginal gives $(\hat\lambda^A, \hat\lambda^B) \approx (1.976, 1.108)$, below the chapter's $(2.33, 1.44)$. Refitting the same routine against the chapter's own Skellam row recovers $(2.33, 1.44)$ almost exactly, so the fitting code is correct and the gap is real, not a bug:
+
+```{r}
+market <- c(0.54, 2.03, 4.88, 12.33, 21.93, 22.06, 16.58, 9.82, 4.72, 2.23) / 100
+market <- market / sum(market)                      # renormalize (raw sum 0.9712)
+sse <- function(par) sum((skellam_pmf(k, par[1], par[2]) - market)^2)
+fit <- optim(c(2, 1), sse)
+round(fit$par, 3)
+round(optim(c(2, 1),                                # sanity check on the Skellam row
+  function(par) sum((skellam_pmf(k, par[1], par[2]) - chapter / 100)^2))$par, 3)
+```
+
+d)
+```{r}
+wdl <- function(a, b, nmax = 200) {
+  kk <- -nmax:nmax
+  p  <- skellam_pmf(kk, a, b, nmax)
+  c(win = sum(p[kk > 0]), draw = p[kk == 0], lose = sum(p[kk < 0]))
+}
+round(rbind(
+  `part (c)` = wdl(fit$par[1], fit$par[2]),
+  `chapter`  = wdl(2.33, 1.44),
+  `market`   = c(sum(market[k > 0]), market[k == 0], sum(market[k < 0]))), 4)
+```
+Both parameter pairs give essentially the same Everton win probability (about 0.575), close to the market's renormalized 0.571, but the chapter's pair puts less mass on a draw (0.195 versus 0.216). The reason follows from part (b): a Skellam distribution has mean $\lambda^A - \lambda^B$ and variance $\lambda^A + \lambda^B$. The two fits agree on the difference ($1.976 - 1.108 = 0.868$ versus $2.33 - 1.44 = 0.89$), which controls the mean and hence the win probability, but disagree on the sum ($3.084$ versus $3.77$), which controls the variance. The aggregated score-difference marginal in @tbl-Table2 pins down the mean tightly but is only weakly informative about the total scoring rate, so it under-identifies the variance. The chapter instead calibrates to the full bivariate odds matrix over individual scorelines (@tbl-Table1), which carries the extra information needed to separate $\lambda^A$ and $\lambda^B$. The larger total in the chapter's fit spreads more mass into the tails, leaving less on the exact draw, which matches the chapter's remark that the Skellam model has "longer tails" than the raw market row.
+:::
+:::
+
+::: {#exr-sv-simulate-estimate}
+## Simulating and Estimating a Stochastic Volatility Model
+
+The discrete-time stochastic volatility (SV) model of the chapter is
+$$
+y_t = \mu + \sqrt{v_{t-1}}\,\varepsilon_t^s, \qquad \log v_t = \alpha_v + \beta_v \log v_{t-1} + \sigma_v \varepsilon_t^v,
+$$
+with $\varepsilon_t^s, \varepsilon_t^v \sim N(0,1)$. Throughout use $\mu = 0.0003$, $\alpha_v = -0.46$, $\beta_v = 0.95$, $\sigma_v = 0.2$, start at the unconditional mean $\log v_0 = \alpha_v/(1 - \beta_v)$, and $T = 2000$ days.
+
+a) Simulate the model with $\varepsilon_t^s, \varepsilon_t^v$ independent, using a set seed. Plot $y_t$ and $\sqrt{v_t}$ on stacked panels and compute the lag-1 autocorrelation of $y_t^2$. What is the half-life of a shock to $\log v_t$, and does the series show volatility clustering?
+
+b) *Leverage effect.* Replace $\varepsilon_t^v$ by $\rho \varepsilon_t^s + \sqrt{1 - \rho^2}\,\eta_t$ with $\eta_t \sim N(0,1)$ independent and $\rho = -0.5$, and re-simulate. Confirm numerically that $\Cor{y_t, \varepsilon_t^v} \approx \rho$, and scatter-plot $y_t$ against $\Delta \log v_t = \log v_t - \log v_{t-1}$. In this discretization, does the leverage effect show up as skewness of $y_t$ or as a return-volatility cross-correlation?
+
+c) *Jumps (SVJ).* Add jumps to returns, $y_t = \mu + \sqrt{v_{t-1}}\varepsilon_t^s + J_t Z_t$ with $J_t \sim \text{Bernoulli}(\lambda)$, $\lambda = 0.015$, and $Z_t \sim N(-0.03, 0.02^2)$, layered on the leverage simulation. Decompose the return variance into a diffusive part (the sample average of $v_{t-1}$) and a jump part ($\lambda\,\E{Z_t^2}$) and report each as a percentage of the total. Compare to the chapter's SVJ split (85% diffusive / 15% jump).
+
+d) *Higher moments.* Because a single 2000-day path gives a noisy sample kurtosis when jumps are rare, repeat the simulation many times and report the average excess kurtosis of $y_t$ for the models in (a), (b), and (c), plus the average skewness for (a) and (c). Which model best captures a sudden one-day crash like October 1987, and why?
+
+e) *Bayesian estimation with observed volatility.* Suppose, only for this part, that the entire log-volatility path from (a) were observed. Treat the volatility recursion as a linear regression of $\log v_t$ on $(1, \log v_{t-1})$. Under a flat prior, fit it and report point estimates and 95% intervals for $(\alpha_v, \beta_v, \sigma_v)$; do they recover the truth? Then explain in a few sentences why, when only $y_t$ is observed, the full conditional $p(v_t \mid v_{t-1}, v_{t+1}, \theta, y_{t+1})$ is *not* conjugate even though this step is, so the chapter's MCMC uses Metropolis-Hastings for the volatility update.
+
+f) *Metropolis for one latent volatility.* Holding $v_0$, $v_2$, and $\theta$ fixed at their true simulated values, implement a random-walk Metropolis sampler on $\log v_1$ that targets $p(v_1 \mid v_0, v_2, \theta, y_2) \propto p(y_2 \mid v_1)\,p(\log v_1 \mid \log v_0)\,p(\log v_2 \mid \log v_1)$. Run at least 15,000 iterations after burn-in, report the acceptance rate, the posterior mean of $v_1$, and a 95% credible interval, and compare to the true $v_1$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The log-volatility is an AR(1) with half-life $\log(0.5)/\log(0.95) \approx 13.5$ days, so volatility swings persist for weeks. The lag-1 autocorrelation of $y_t^2$ is about 0.10, positive, the signature of volatility clustering: the stacked plot shows $\sqrt{v_t}$ drifting slowly while the amplitude of $y_t$ tracks it.
+
+```{r}
+set.seed(1)
+Tn <- 2000
+mu <- 0.0003; alpha_v <- -0.46; beta_v <- 0.95; sigma_v <- 0.2
+
+sim_sv <- function(rho = 0, jump = FALSE, lambda = 0.015,
+                   muZ = -0.03, sigZ = 0.02, seed = 1) {
+  if (!is.null(seed)) set.seed(seed)
+  h <- numeric(Tn + 1)
+  h[1] <- alpha_v / (1 - beta_v)              # log v_0 at its stationary mean
+  es <- rnorm(Tn); eta <- rnorm(Tn)
+  ev <- rho * es + sqrt(1 - rho^2) * eta       # rho = 0 makes ev independent of es
+  for (t in 1:Tn) h[t + 1] <- alpha_v + beta_v * h[t] + sigma_v * ev[t]
+  v <- exp(h)
+  y <- mu + sqrt(v[1:Tn]) * es
+  J <- integer(Tn)
+  if (jump) { J <- rbinom(Tn, 1, lambda); Z <- rnorm(Tn, muZ, sigZ); y <- y + J * Z }
+  list(y = y, v = v, h = h, es = es, ev = ev, J = J)
+}
+
+A <- sim_sv(rho = 0, seed = 1)
+round(c(half_life = log(0.5) / log(beta_v), acf1_y2 = cor(A$y[-Tn]^2, A$y[-1]^2)), 3)
+```
+
+```{r}
+#| fig-cap: "Simulated stochastic volatility: daily returns (top) track the slowly varying volatility (bottom)."
+#| fig-height: 3.2
+op <- par(mfrow = c(2, 1), mar = c(3, 4, 1, 1))
+plot(A$y, type = "l", xlab = "", ylab = expression(y[t]))
+plot(sqrt(A$v), type = "l", col = 4, xlab = "day", ylab = expression(sqrt(v[t])))
+par(op)
+```
+
+b) With $\rho = -0.5$ the return and volatility innovations are negatively correlated: $\Cor{y_t, \varepsilon_t^v} \approx -0.45$ and $\Cor{y_t, \Delta\log v_t} \approx -0.44$, and the scatter of $y_t$ against $\Delta\log v_t$ slopes down. Note the subtlety: here $\varepsilon_t^v$ enters $v_t$ (next period's variance), not $v_{t-1}$, so within a period $y_t = \mu + \sqrt{v_{t-1}}\varepsilon_t^s$ is still symmetric in $\varepsilon_t^s$. The leverage effect therefore appears as a return-volatility cross-correlation (today's drop raises tomorrow's volatility), not as unconditional skewness of single-day returns, which part (d) confirms is near zero without jumps.
+
+```{r}
+B <- sim_sv(rho = -0.5, seed = 1)
+round(c(cor_y_epsv = cor(B$y, B$ev), cor_y_dlogv = cor(B$y, diff(B$h))), 3)
+```
+
+```{r}
+#| fig-cap: "Leverage effect: negative returns coincide with increases in log-volatility."
+#| fig-height: 2.6
+plot(diff(B$h), B$y, pch = 20, cex = 0.4, col = "gray40",
+     xlab = expression(Delta * log(v[t])), ylab = expression(y[t]))
+abline(lm(B$y ~ diff(B$h)), col = 2, lwd = 2)
+```
+
+c) The diffusive variance (sample average of $v_{t-1}$) is about $1.33\times 10^{-4}$, an annualized volatility of about 18%, and the jump variance is $\lambda\,\E{Z_t^2} = 0.015\,(0.03^2 + 0.02^2) = 1.95\times 10^{-5}$. The split is about 87% diffusive / 13% jump, close to the chapter's 85% / 15% for the S&P 500:
+
+```{r}
+Cc <- sim_sv(rho = -0.5, jump = TRUE, seed = 1)
+diff_var <- mean(Cc$v[1:Tn])
+jump_var <- 0.015 * ((-0.03)^2 + 0.02^2)
+round(c(diffusive = diff_var, jump = jump_var,
+        pct_diffusive = 100 * diff_var / (diff_var + jump_var),
+        annualized_vol = 100 * sqrt(diff_var * 252), jumps = sum(Cc$J)), 5)
+```
+
+d) Averaged over 400 simulated paths, the excess kurtosis is about 1.4 for the pure-SV and leverage models and about 3.4 once jumps are added: jumps roughly double the tail weight. Skewness is essentially zero without jumps (about $0.00$) and about $-0.51$ with the negative jumps.
+
+```{r}
+exkurt <- function(x) { x <- x - mean(x); mean(x^4) / mean(x^2)^2 - 3 }
+skew   <- function(x) { x <- x - mean(x); mean(x^3) / mean(x^2)^1.5 }
+set.seed(2024)
+mc <- t(replicate(400, {
+  a  <- sim_sv(rho =  0.0, jump = FALSE, seed = NULL)
+  bb <- sim_sv(rho = -0.5, jump = FALSE, seed = NULL)
+  cc <- sim_sv(rho = -0.5, jump = TRUE,  seed = NULL)
+  c(k_SV = exkurt(a$y), k_lev = exkurt(bb$y), k_SVJ = exkurt(cc$y),
+    s_SV = skew(a$y), s_SVJ = skew(cc$y))
+}))
+round(colMeans(mc), 3)
+```
+
+The SVJ model best captures a sudden one-day crash. Only the jump model produces heavy tails (excess kurtosis about 3.4 versus about 1.4) and a pronounced left skew (about $-0.51$): a Bernoulli jump can strike on any day, including a calm one, producing a large discontinuous move independent of the current volatility level. Pure SV, with or without leverage, can generate a comparably large move only after volatility has slowly ramped up over many days, so it cannot represent an abrupt crash out of a quiet market such as October 1987. The jump term also supplies the negative skewness that a symmetric diffusion cannot. Conversely, the chapter's remark that much of what looks like a return jump is really a volatility spike is the same point seen from the SV side: when $v_{t-1}$ is temporarily large, ordinary Brownian innovations already generate outsized moves.
+
+e) With the full log-volatility path observed, recovering $(\alpha_v, \beta_v, \sigma_v)$ is an ordinary, well-conditioned regression of $\log v_t$ on $(1, \log v_{t-1})$. The estimates $\hat\alpha_v \approx -0.51$ (95% interval $[-0.64, -0.37]$), $\hat\beta_v \approx 0.944$ ($[0.930, 0.959]$), and $\hat\sigma_v \approx 0.207$ all cover the true $(-0.46, 0.95, 0.20)$. This is the conjugate Normal-Inverse-Gamma parameter step of the chapter's MCMC.
+
+```{r}
+hv_prev <- A$h[1:Tn]          # log v_{t-1}
+hv_now  <- A$h[2:(Tn + 1)]    # log v_t
+reg <- lm(hv_now ~ hv_prev)
+round(summary(reg)$coefficients, 4)
+round(confint(reg), 4)
+round(summary(reg)$sigma, 3)
+```
+
+The volatility update is different. The full conditional $p(v_t \mid v_{t-1}, v_{t+1}, \theta, y_{t+1})$ multiplies the likelihood $p(y_{t+1}\mid v_t) = N(\mu, v_t)$, in which $v_t$ enters the *variance*, by two AR(1) transition densities that are Gaussian in $\log v_t$. A term that is Gaussian in $v_t$'s variance, times terms that are Gaussian in $\log v_t$'s mean, belongs to no standard conjugate family, so $v_t$ cannot be drawn directly and the chapter uses Metropolis-Hastings.
+
+f) The single-site random-walk Metropolis sampler on $\log v_1$ targets exactly the non-standard full conditional from (e). With an $N(0, 0.3^2)$ proposal the acceptance rate is about 49%, and the posterior mean of $v_1$ is about $7.6\times 10^{-5}$ against the true simulated $8.5\times 10^{-5}$, which lies inside the 95% credible interval $[5.6\times 10^{-5},\, 1.0\times 10^{-4}]$. With only the single return $y_2$ informing $v_1$ the interval is wide, but the sampler correctly targets the distribution derived in (e).
+
+```{r}
+v0 <- A$v[1]; v2 <- A$v[3]; y2 <- A$y[2]; v1_true <- A$v[2]
+logpost <- function(h1)                          # h1 = log v_1
+  dnorm(y2, mu, sqrt(exp(h1)), log = TRUE) +
+  dnorm(h1, alpha_v + beta_v * log(v0), sigma_v, log = TRUE) +
+  dnorm(log(v2), alpha_v + beta_v * h1, sigma_v, log = TRUE)
+
+set.seed(123)
+N <- 20000; burn <- 5000
+h1 <- log(v1_true); cur <- logpost(h1)
+draws <- numeric(N); acc <- 0
+for (i in 1:N) {
+  cand <- h1 + rnorm(1, 0, 0.3)
+  lp <- logpost(cand)
+  if (log(runif(1)) < lp - cur) { h1 <- cand; cur <- lp; acc <- acc + 1 }
+  draws[i] <- h1
+}
+v1 <- exp(draws[(burn + 1):N])
+round(c(accept = acc / N, post_mean = mean(v1),
+        lo = quantile(v1, 0.025), hi = quantile(v1, 0.975), true = v1_true), 6)
+```
+:::
+:::
+
+::: {#exr-}
+## Markov Property
+
+A random walk starts at position 0 and takes steps of $+1$ or $-1$ with equal probability. Let $X_n$ denote the position after $n$ steps.
+
+a) Given that $X_5 = 3$, what is $\E{X_{10}}$?
+b) Given that $X_5 = 3$, what is $\Var{X_{10}}$?
+c) Given $X_3 = 1$ and $X_7 = 3$, what is $\E{X_5}$?
+d) Explain why part (c) requires knowledge of both $X_3$ and $X_7$ (hint: this is a *Brownian bridge*, a Brownian motion conditioned to take fixed values at both endpoints of an interval, e.g., $B(0) = B(T) = 0$).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) By the Markov property, given $X_5 = 3$:
+$$
+\E{X_{10} \mid X_5 = 3} = X_5 + \E{\text{next 5 steps}} = 3 + 0 = 3
+$$
+
+b) The variance of 5 additional steps:
+$$
+\Var{X_{10} \mid X_5} = 5 \times 1^2 = 5
+$$
+
+c) This is a Brownian bridge interpolation. Given both endpoints:
+$$
+\E{X_5 \mid X_3 = 1, X_7 = 3} = 1 + \frac{5-3}{7-3}(3 - 1) = 1 + \frac{2}{4}(2) = 2
+$$
+
+```{r}
+# Linear interpolation between endpoints
+x3 <- 1
+x7 <- 3
+t3 <- 3
+t5 <- 5
+t7 <- 7
+E_X5 <- x3 + (t5 - t3)/(t7 - t3) * (x7 - x3)
+cat("E[X_5 | X_3=1, X_7=3] =", E_X5, "\n")
+```
+
+d) The Markov property says that, given the present, the future is independent of the past. Conditioning on both $X_3$ and $X_7$ does not change this: the random walk itself is still Markov. What changes is the *conditional distribution* we are asked to compute. Once we also condition on the future value $X_7 = 3$, Bayes' rule combines the forward transition from $X_3$ with the backward transition to $X_7$, pulling $X_5$ toward both endpoints rather than depending only on $X_3$. This is exactly the "Brownian bridge" construction, and it is tractable precisely because the underlying process is Markov: the joint distribution of $(X_3, X_5, X_7)$ factors through the one-step transition kernel at each step, which is all we need to derive the conditional law of $X_5$.
+
+:::
+:::
+
+::::

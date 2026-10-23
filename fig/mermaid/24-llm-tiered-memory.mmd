@@ -1,0 +1,9 @@
+%%{init: {'flowchart': {'rankSpacing': 30}}}%%
+flowchart TB
+  U[User] --> A[Active context<br/>last few turns + current task]
+  A --> M[Model call]
+  M --> O[Output]
+  A --> S[Session summary<br/>compact running state]
+  A --> P[Persistent memory<br/>vector store / graph]
+  P -->|retrieve on demand| A
+  S -->|refresh| A

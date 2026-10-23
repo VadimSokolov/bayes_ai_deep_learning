@@ -1,0 +1,719 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## BIC Derivation
+
+The Bayesian Information Criterion approximates the log marginal likelihood $\log p(\mathcal{D} \mid M)$ using the Laplace approximation.
+
+a) Starting from the marginal likelihood $p(\mathcal{D} \mid M) = \int p(\mathcal{D} \mid \theta, M) p(\theta \mid M) d\theta$, apply a second-order Taylor expansion of the log-posterior $\log p(\mathcal{D} \mid \theta, M) + \log p(\theta \mid M)$ around the MAP estimate $\hat{\theta}$, using $\nabla\big[\log p(\mathcal{D} \mid \hat\theta, M) + \log p(\hat\theta \mid M)\big] = 0$, which holds because $\hat\theta$ is the mode of the posterior (not of the likelihood alone). Show that the integral becomes:
+$$
+p(\mathcal{D} \mid M) \approx p(\mathcal{D} \mid \hat{\theta}, M) \cdot p(\hat{\theta} \mid M) \cdot (2\pi)^{k/2} \lvert H \rvert^{-1/2}
+$$
+where $H$ is the negative Hessian of the log-posterior at $\hat\theta$ and $k = \dim(\theta)$.
+
+b) Show that for large $n$, the $\log \lvert H \rvert$ term is approximately $k \log n$, yielding the BIC:
+$$
+\text{BIC} = \log p(\mathcal{D} \mid \hat{\theta}, M) - \frac{k}{2} \log n
+$$
+
+c) Explain why BIC penalizes complex models more heavily than AIC (which uses $k$ instead of $\frac{k}{2}\log n$).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Let $\ell(\theta) = \log p(\mathcal{D} \mid \theta, M) + \log p(\theta \mid M)$ denote the (unnormalized) log-posterior, so $p(\mathcal{D} \mid M) = \int e^{\ell(\theta)} d\theta$. Since $\hat\theta$ is the MAP estimate, it maximizes the posterior and hence $\ell$, so $\nabla \ell(\hat{\theta}) = 0$. Taylor expand $\ell(\theta)$ around $\hat{\theta}$, dropping the vanishing first-order term:
+$$
+\ell(\theta) \approx \ell(\hat{\theta}) - \frac{1}{2}(\theta - \hat{\theta})^T H (\theta - \hat{\theta})
+$$
+where $H = -\nabla^2 \ell(\hat{\theta})$ is the negative Hessian of the log-posterior (positive definite at the maximum). Substituting and using $e^{\ell(\hat\theta)} = p(\mathcal{D} \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M)$:
+$$
+p(\mathcal{D} \mid M) \approx p(\mathcal{D} \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M) \int \exp\left(-\frac{1}{2}(\theta - \hat{\theta})^T H (\theta - \hat{\theta})\right) d\theta
+$$
+The integral is a multivariate Gaussian with covariance $H^{-1}$, evaluating to $(2\pi)^{k/2} |H|^{-1/2}$.
+
+b) For i.i.d. data, $H \approx n \cdot I(\hat{\theta})$ where $I(\hat{\theta})$ is the per-observation Fisher information. Therefore $\log |H| \approx k \log n + \log |I(\hat{\theta})|$, and for large $n$ the $k \log n$ term dominates. Taking the log of the result in (a):
+$$
+\log p(\mathcal{D} \mid M) \approx \log p(\mathcal{D} \mid \hat{\theta}, M) + \log p(\hat{\theta} \mid M) + \frac{k}{2}\log(2\pi) - \frac{1}{2}\log|H|
+$$
+The prior term $\log p(\hat{\theta} \mid M)$ and the constant $\frac{k}{2}\log(2\pi)$ do not grow with $n$, so for large $n$ they are dominated by $\frac{1}{2}\log|H| \approx \frac{k}{2}\log n$. Dropping the $O(1)$ terms gives:
+$$
+\log p(\mathcal{D} \mid M) \approx \log p(\mathcal{D} \mid \hat{\theta}, M) - \frac{k}{2} \log n
+$$
+
+c) BIC's penalty $\frac{k}{2}\log n$ grows with sample size, while AIC's penalty $k$ is fixed. For $n > e^2 \approx 7.4$, BIC penalizes each additional parameter more than AIC. This means BIC selects simpler models, especially with large datasets. BIC is consistent (selects the true model asymptotically), while AIC tends to overfit.
+:::
+:::
+
+::: {#exr-}
+## Bayesian Model Selection: Dice
+
+You observe 10 rolls of a die: {3, 5, 2, 6, 1, 4, 6, 3, 5, 2}. Consider three models:
+
+- $M_1$: Fair die ($P(k) = 1/6$ for $k = 1, \ldots, 6$)
+- $M_2$: Biased toward high numbers ($P(k) = k/21$ for $k = 1, \ldots, 6$)
+- $M_3$: Uniform over $\{1, \ldots, K\}$ where $K$ is unknown with prior $P(K) = 1/6$ for $K \in \{4, 5, 6, 7, 8, 9\}$
+
+Assume equal prior probabilities: $P(M_1) = P(M_2) = P(M_3) = 1/3$.
+
+a) Compute $P(\mathcal{D} \mid M_1)$.
+b) Compute $P(\mathcal{D} \mid M_2)$.
+c) Compute $P(\mathcal{D} \mid M_3)$ by marginalizing over $K$. (Note: any $K < 6$ gives zero likelihood since we observed a 6.)
+d) Compute the posterior model probabilities $P(M_i \mid \mathcal{D})$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Under $M_1$, each outcome has probability $1/6$:
+$$
+P(\mathcal{D} \mid M_1) = (1/6)^{10} = 1/6^{10} \approx 1.654 \times 10^{-8}
+$$
+
+b) Under $M_2$, $P(k) = k/21$. The observed values are {3,5,2,6,1,4,6,3,5,2}:
+$$
+P(\mathcal{D} \mid M_2) = \frac{3 \cdot 5 \cdot 2 \cdot 6 \cdot 1 \cdot 4 \cdot 6 \cdot 3 \cdot 5 \cdot 2}{21^{10}}
+$$
+
+```{r}
+#| eval: false
+rolls <- c(3, 5, 2, 6, 1, 4, 6, 3, 5, 2)
+
+p_M1 <- (1/6)^10
+cat("P(D|M1):", p_M1, "\n")
+
+p_M2 <- prod(rolls / 21)
+cat("P(D|M2):", p_M2, "\n")
+```
+
+c) Under $M_3$, we marginalize over $K \in \{4,...,9\}$:
+$$
+P(\mathcal{D} \mid M_3) = \sum_{K=4}^{9} P(\mathcal{D} \mid K) P(K)
+$$
+For $K < 6$: $P(\mathcal{D} \mid K) = 0$ since we observed 6. For $K \geq 6$:
+
+```{r}
+#| eval: false
+p_M3 <- 0
+for (K in 6:9) {
+  if (all(rolls <= K)) {
+    p_M3 <- p_M3 + (1/K)^10 * (1/6)
+  }
+}
+cat("P(D|M3):", p_M3, "\n")
+```
+
+d) Posterior model probabilities:
+```{r}
+#| eval: false
+priors <- rep(1/3, 3)
+likelihoods <- c(p_M1, p_M2, p_M3)
+posteriors <- likelihoods * priors / sum(likelihoods * priors)
+cat("P(M1|D):", round(posteriors[1], 4), "\n")
+cat("P(M2|D):", round(posteriors[2], 4), "\n")
+cat("P(M3|D):", round(posteriors[3], 4), "\n")
+```
+:::
+:::
+
+::: {#exr-}
+## Occam's Razor in Model Selection
+
+Explain why the Bayesian marginal likelihood $p(\mathcal{D} \mid M) = \int p(\mathcal{D} \mid \theta) p(\theta \mid M) d\theta$ automatically implements Occam's razor.
+
+a) A complex model $M_C$ with many parameters can fit a wide range of datasets, while a simple model $M_S$ fits only a narrow range. Draw a schematic showing how $p(\mathcal{D} \mid M)$ is distributed over the space of possible datasets for each model.
+b) Since $\int p(\mathcal{D} \mid M) d\mathcal{D} = 1$ for both models, what does the normalization constraint imply about the maximum value of $p(\mathcal{D} \mid M)$ for each?
+c) For a dataset that both models fit well, which model will have higher marginal likelihood? Why?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The complex model $M_C$ spreads its probability mass thinly over many possible datasets (it can explain almost anything). The simple model $M_S$ concentrates its mass on a smaller set of datasets it can explain well. Schematically, $M_S$ has a tall, narrow peak while $M_C$ has a flat, wide distribution.
+
+b) Since both distributions must integrate to 1, the model that spreads probability over more datasets must assign lower probability to any particular one. The simple model, concentrating on fewer datasets, can assign higher probability to each dataset it does explain.
+
+c) For a dataset that both models fit, the simple model will generally have higher marginal likelihood. The complex model "wastes" probability on datasets it could explain but that were not observed. This is the Bayesian Occam's razor: unnecessary complexity is penalized because it dilutes the evidence.
+:::
+:::
+
+::: {#exr-}
+## True/False: Model Selection
+
+a) Cross-validation always selects the same model as BIC.
+
+b) A model with lower training error always has lower test error.
+
+c) The ROC curve plots the true positive rate against the false positive rate at various classification thresholds.
+
+d) A calibrated model is one whose predicted probabilities match the observed frequencies (e.g., among predictions of 70%, roughly 70% are positive).
+
+e) BIC is consistent, meaning it selects the true model as $n \to \infty$, while AIC is not.
+
+f) Leave-one-out cross-validation typically has higher variance than 5-fold cross-validation.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) False. Cross-validation optimizes predictive performance (expected out-of-sample loss), while BIC approximates the marginal likelihood (which model generated the data). They can select different models, especially when the true model is not in the candidate set.
+
+b) False. Overfitting produces low training error but high test error. The bias-variance tradeoff shows that increasing model complexity reduces training error but eventually increases test error.
+
+c) True. Each point on the ROC curve corresponds to a different threshold. A perfect classifier has AUC = 1 (curve passes through the upper-left corner).
+
+d) True. This is the definition of calibration. A calibration plot (reliability diagram) checks this by binning predictions and comparing average predicted probability to the observed fraction of positives.
+
+e) True. BIC selects the true model with probability 1 as $n \to \infty$ (assuming the true model is in the candidate set). AIC tends to select overly complex models asymptotically.
+
+f) True. LOO-CV uses $n-1$ training points per fold, so the training sets are nearly identical, producing highly correlated estimates. This correlation increases the variance of the average. 5-fold CV has less overlap between folds, reducing correlation and variance.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Bias-Variance Tradeoff: Polynomial Regression
+
+Use the `Boston` housing dataset from the `MASS` package to explore the bias-variance tradeoff.
+
+a) Split the data into 80% training and 20% test. Fit polynomial models of degree 1 through 12 predicting `medv` from `lstat`. Compute training and test MSE for each degree.
+b) Plot training MSE and test MSE versus polynomial degree on the same graph. Identify the optimal degree.
+c) Repeat the experiment 50 times with different random splits. Plot the average test MSE with error bars (standard deviation). Does the optimal degree change?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+data(Boston, package = "MASS")
+
+set.seed(42)
+n <- nrow(Boston)
+degrees <- 1:12
+
+# a) Single split
+train_idx <- sample(1:n, round(0.8 * n))
+train <- Boston[train_idx, ]
+test <- Boston[-train_idx, ]
+
+train_mse <- numeric(length(degrees))
+test_mse <- numeric(length(degrees))
+
+for (d in degrees) {
+  fit <- lm(medv ~ poly(lstat, d), data = train)
+  train_mse[d] <- mean(fit$residuals^2)
+  test_pred <- predict(fit, newdata = test)
+  test_mse[d] <- mean((test$medv - test_pred)^2)
+}
+
+# b) Plot
+plot(degrees, train_mse, type = "b", col = "blue", ylim = range(c(train_mse, test_mse)),
+     xlab = "Polynomial Degree", ylab = "MSE", pch = 16)
+lines(degrees, test_mse, type = "b", col = "red", pch = 16)
+legend("topright", c("Training MSE", "Test MSE"), col = c("blue", "red"), pch = 16)
+cat("Optimal degree:", which.min(test_mse), "\n")
+
+# c) Repeated experiment
+n_reps <- 50
+test_mse_mat <- matrix(NA, n_reps, length(degrees))
+
+for (r in 1:n_reps) {
+  idx <- sample(1:n, round(0.8 * n))
+  tr <- Boston[idx, ]
+  te <- Boston[-idx, ]
+  for (d in degrees) {
+    fit <- lm(medv ~ poly(lstat, d), data = tr)
+    pred <- predict(fit, newdata = te)
+    test_mse_mat[r, d] <- mean((te$medv - pred)^2)
+  }
+}
+
+avg_mse <- colMeans(test_mse_mat)
+sd_mse <- apply(test_mse_mat, 2, sd)
+
+plot(degrees, avg_mse, type = "b", pch = 16, xlab = "Polynomial Degree",
+     ylab = "Average Test MSE")
+arrows(degrees, avg_mse - sd_mse, degrees, avg_mse + sd_mse,
+       angle = 90, code = 3, length = 0.05, col = "gray")
+cat("Optimal degree (averaged):", which.min(avg_mse), "\n")
+```
+:::
+:::
+
+::: {#exr-poly-residual-diagnostics}
+## Residual Diagnostics for Polynomial Regression
+
+@exm-qqplot used Q-Q plots and residual/scatter plots to check whether a model's assumed error distribution is reasonable. The prediction interval stated at the top of this chapter,
+$$
+\hat{y} \pm t_{n-2,\,1-\alpha/2}\, s\sqrt{1+\frac{1}{n}+\frac{(x-\bar{x})^2}{\sum_{i=1}^n(x_i-\bar{x})^2}},
+$$
+is only trustworthy when the residuals are approximately normal with constant variance $\Var{\epsilon_i} = \sigma^2$. Return to the polynomial fits of `medv` on `lstat` in `MASS::Boston` from the bias-variance exercise and check whether those assumptions actually hold. No train/test split is needed here: diagnostics concern the fitted model itself, not out-of-sample error.
+
+a) Fit polynomial regressions of degree 1, 5, and 12 to the full `Boston` data, predicting `medv` from `lstat`. Report $R^2$ and adjusted $R^2$ for each. How much of the improvement in fit does degree 5 already capture?
+
+b) For each of the three fits, produce (i) a scatter plot of residuals against fitted values with a horizontal reference line at 0 and (ii) a normal Q-Q plot of the residuals (`qqnorm`/`qqline`, exactly as in @exm-qqplot). For the degree-5 fit, also produce the full base-R diagnostic set (`plot(fit)`), which adds the scale-location and residuals-versus-leverage panels.
+
+c) Run `shapiro.test` on each set of residuals to test normality. Separately, test for non-constant variance by regressing the squared residuals on the fitted values, `lm(resid(fit)^2 ~ fitted(fit))`, and checking whether the slope differs significantly from 0.
+
+d) Identify the handful of observations that produce the largest residuals in all three models (hint: inspect `table(Boston$medv)`). Explain why raising the degree from 5 to 12 barely changes the diagnostic picture, even though degree 5 minimized averaged out-of-sample MSE in the bias-variance exercise. What does this imply about trusting the prediction interval above for this dataset, at any polynomial degree?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Fitting `lm(medv ~ poly(lstat, d), ...)` for the three degrees:
+
+```{r}
+#| echo: true
+data(Boston, package = "MASS")
+set.seed(16)
+
+degrees <- c(1, 5, 12)
+fits <- lapply(degrees, function(d) lm(medv ~ poly(lstat, d), data = Boston))
+r2     <- sapply(fits, function(f) summary(f)$r.squared)
+adj_r2 <- sapply(fits, function(f) summary(f)$adj.r.squared)
+round(rbind(degree = degrees, R2 = r2, adj_R2 = adj_r2), 3)
+```
+
+$R^2$ rises from 0.544 (degree 1) to 0.682 (degree 5) and only 0.689 (degree 12); on adjusted $R^2$ the gain from degree 5 to 12 is a negligible 0.679 to 0.682. Degree 5 captures essentially all the curvature available from `lstat`, and the extra seven parameters add almost nothing.
+
+b) The residual and Q-Q plots:
+
+```{r}
+#| echo: true
+#| fig-height: 6.5
+#| fig-cap: "Residuals versus fitted values (left) and normal Q-Q plots (right) for the degree-1, degree-5, and degree-12 polynomial fits. The degree-1 residuals show a systematic arc; higher degrees remove the arc but leave a heavy upper tail."
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 1))
+for (i in seq_along(degrees)) {
+  f <- fits[[i]]
+  plot(fitted(f), resid(f), pch = 20, col = "gray40",
+       main = paste("degree", degrees[i]), xlab = "Fitted", ylab = "Residual")
+  abline(h = 0, col = "red", lwd = 2)
+  qqnorm(resid(f), pch = 20, col = "gray40", main = paste("degree", degrees[i]))
+  qqline(resid(f), col = "red", lwd = 2)
+}
+```
+
+```{r}
+#| echo: true
+#| fig-height: 5
+#| fig-cap: "Full base-R diagnostics for the degree-5 fit: residuals versus fitted, normal Q-Q, scale-location, and residuals versus leverage. The first three panels flag the same top-coded medv = 50 tracts (372, 373, 268); the residuals-versus-leverage panel instead flags the highest-influence tracts (375, 41, 415) ranked by Cook's distance."
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1))
+plot(fits[[2]], which = c(1, 2, 3, 5))
+```
+
+For degree 1 the residuals-versus-fitted plot bends in a clear systematic arc: `medv` is convex-decreasing in `lstat`, not linear, so a straight line underfits. The Q-Q plot bows well above the reference line in the upper tail. For degrees 5 and 12 the arc disappears (the curvature is now captured), but the residual spread still fans out at the high-fitted end and the Q-Q plot still bends sharply upward. The scale-location panel confirms the widening spread, and the residuals-versus-leverage panel flags a few high-influence tracts (large Cook's distance) sitting at the extremes of the `lstat` range.
+
+c) Both formal tests reject the assumptions decisively at every degree:
+
+```{r}
+#| echo: true
+tests <- t(sapply(fits, function(f) {
+  sw   <- shapiro.test(resid(f))
+  vfit <- lm(resid(f)^2 ~ fitted(f))
+  c(shapiro_p   = sw$p.value,
+    var_slope   = unname(coef(vfit)[2]),
+    var_slope_p = summary(vfit)$coefficients[2, 4])
+}))
+rownames(tests) <- paste0("degree_", degrees)
+signif(tests, 3)
+```
+
+Shapiro-Wilk rejects normality overwhelmingly for all three fits ($p = 1.8\times10^{-19}$, $2.3\times10^{-15}$, $1.6\times10^{-15}$). The squared-residual regression has a significantly positive slope in every case ($2.07$, $1.84$, $1.78$, with $p = 7.6\times10^{-5}$, $1.9\times10^{-6}$, $2.6\times10^{-6}$): the residual variance grows with the fitted value, i.e., heteroscedasticity. Neither violation is repaired by adding polynomial flexibility.
+
+d) The culprit is a top-coded response:
+
+```{r}
+#| echo: true
+tail(table(Boston$medv), 4)          # a spike of 16 at the top-coded value
+cens <- Boston$medv == 50
+for (i in seq_along(degrees)) {
+  r <- resid(fits[[i]])
+  top20 <- order(r, decreasing = TRUE)[1:20]
+  cat(sprintf("degree %2d: censored tracts among 20 largest residuals = %2d;  mean residual: censored %+.1f vs %+.1f rest\n",
+              degrees[i], sum(cens[top20]), mean(r[cens]), mean(r[!cens])))
+}
+```
+
+Sixteen census tracts have `medv` exactly 50: this is a censored value, recorded whenever the true median home value is \$50,000 or more. Under the linear fit all 16 of these tracts sit among the 20 largest positive residuals, with a mean residual of $+19.6$ against $-0.6$ for the rest. They are essentially the entire right tail. As the degree rises the curve bends upward toward the cap (the mean fitted value at the lowest-`lstat` tracts climbs from about 32 to about 43), so fewer censored points dominate the very top, but they can never be reached: 15 to 16 of the 16 keep a positive residual with mean near $+13$, and the upper tail stays heavy. That is why the Q-Q plots and both tests look almost identical at degrees 5 and 12: no amount of polynomial flexibility in `lstat` can fix a censored response or the intrinsic heteroscedasticity.
+
+This is the key model-selection lesson. Out-of-sample MSE (which favored degree 5 in the bias-variance exercise) and the diagnostic checks (which reject every degree examined) answer different questions: one asks which model predicts best, the other asks whether a given model's assumptions hold. Here they disagree. The MSE-best model still badly violates the normal, constant-variance assumptions behind the stated prediction interval, so that interval should not be trusted at face value for this dataset at any degree. A careful analyst would first apply a variance-stabilizing transform (such as modeling $\log$ `medv`), report a heteroscedasticity-robust or quantile-based interval, or handle the censoring in `medv` explicitly. Discrimination between models on predictive loss and validation of a single model's assumptions are complementary steps, not substitutes (@sec-model-eval).
+:::
+:::
+
+::: {#exr-}
+## Cross-Validation from Scratch
+
+Implement k-fold cross-validation from scratch (without using a library function).
+
+a) Write a function `kfold_cv(X, y, k, degree)` that splits data into $k$ folds, fits a polynomial of the given degree on $k-1$ folds, predicts on the held-out fold, and returns the average MSE across all folds.
+b) Apply your function to the `Boston` data (predicting `medv` from `lstat`) with $k = 5$ and degrees 1 through 8. Which degree minimizes CV error?
+c) Compare $k = 5$ and $k = 10$ cross-validation. Are the selected models the same?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+data(Boston, package = "MASS")
+
+# a) k-fold CV function
+kfold_cv <- function(X, y, k, degree) {
+  n <- length(y)
+  folds <- sample(rep(1:k, length.out = n))
+  mse_folds <- numeric(k)
+
+  for (i in 1:k) {
+    test_idx <- which(folds == i)
+    train_X <- X[-test_idx]
+    train_y <- y[-test_idx]
+    test_X <- X[test_idx]
+    test_y <- y[test_idx]
+
+    df <- data.frame(x = train_X, y = train_y)
+    fit <- lm(y ~ poly(x, degree), data = df)
+
+    df_test <- data.frame(x = test_X)
+    pred <- predict(fit, newdata = df_test)
+    mse_folds[i] <- mean((test_y - pred)^2)
+  }
+  return(mean(mse_folds))
+}
+
+# b) Apply with k=5
+set.seed(123)
+degrees <- 1:8
+cv5 <- sapply(degrees, function(d) kfold_cv(Boston$lstat, Boston$medv, 5, d))
+cat("5-fold CV errors:", round(cv5, 2), "\n")
+cat("Best degree (k=5):", which.min(cv5), "\n")
+
+# c) Compare with k=10
+cv10 <- sapply(degrees, function(d) kfold_cv(Boston$lstat, Boston$medv, 10, d))
+cat("10-fold CV errors:", round(cv10, 2), "\n")
+cat("Best degree (k=10):", which.min(cv10), "\n")
+
+plot(degrees, cv5, type = "b", col = "blue", pch = 16,
+     xlab = "Degree", ylab = "CV Error", ylim = range(c(cv5, cv10)))
+lines(degrees, cv10, type = "b", col = "red", pch = 16)
+legend("topright", c("5-fold", "10-fold"), col = c("blue", "red"), pch = 16)
+```
+:::
+:::
+
+::: {#exr-}
+## Wine Clustering
+
+Use `wine.csv` containing 6,497 wines with 11 chemical properties, color (red/white), and quality ratings.
+
+a) Scale the 11 chemical features and perform k-means clustering with K=2. What do the clusters correspond to?
+b) Use AIC/BIC to choose K. Try K=1 to 50 and plot the information criteria.
+c) With your chosen K, examine cluster quality distributions. Do clusters help identify high-quality wines?
+d) Compare: regressing quality on cluster membership vs. regressing on raw features. Which gives better OOS R²?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+wine <- read.csv("data/wine.csv")
+
+# a) K-means with K=2
+xwine <- scale(wine[, 1:11])
+two <- kmeans(xwine, 2, nstart = 10)
+
+# What do clusters correspond to?
+cat("Cluster distribution by color:\n")
+print(tapply(wine$color, two$cluster, table))
+cat("\nClusters correspond to red vs white wine!\n")
+
+# Visualize (random order so colors overlay)
+i <- sample(1:nrow(xwine))
+plot(wine$fixed.acidity[i], wine$volatile.acidity[i],
+     pch = 21, cex = 0.75,
+     xlab = "Fixed Acidity", ylab = "Volatile Acidity",
+     bg = c("maroon", "gold")[two$cluster[i]],
+     col = c("maroon", "gold")[as.numeric(factor(wine$color[i]))])
+legend("topright", c("Cluster 1", "Cluster 2"), fill = c("maroon", "gold"))
+
+# b) AIC/BIC for choosing K
+kIC <- function(fit, rule = "A") {
+  df <- length(fit$centers)
+  n <- length(fit$cluster)
+  D <- fit$tot.withinss
+  if (rule == "A") return(D + 2 * df)  # AIC
+  else return(D + log(n) * df)  # BIC
+}
+
+kfit <- lapply(2:50, function(k) kmeans(xwine, k, nstart = 5))
+kaicc <- sapply(kfit, kIC, "A")
+kbic <- sapply(kfit, kIC, "B")
+
+plot(2:50, kaicc, type = "l", lwd = 2, xlab = "K", ylab = "IC",
+     ylim = range(c(kaicc, kbic)))
+lines(2:50, kbic, col = 4, lwd = 2)
+abline(v = which.min(kaicc) + 1, lty = 2)
+abline(v = which.min(kbic) + 1, col = 4, lty = 2)
+legend("topright", c("AIC", "BIC"), col = c(1, 4), lwd = 2)
+
+cat("\nAIC chooses K =", which.min(kaicc) + 1, "\n")
+cat("BIC chooses K =", which.min(kbic) + 1, "\n")
+
+# c) Quality by cluster
+k <- 30  # Use moderate K
+kfit30 <- kmeans(xwine, k, nstart = 10)
+cat("\nQuality by cluster (K=30):\n")
+print(round(tapply(wine$quality, kfit30$cluster, mean), 2))
+
+# d) Compare regression approaches
+library(gamlr)
+
+# Cluster-based regression
+xclust <- model.matrix(~ factor(kfit30$cluster) + wine$color)[, -1]
+reg_clust <- cv.gamlr(xclust, wine$quality, nfold = 5)
+
+# Raw feature regression  
+x <- model.matrix(quality ~ .^2, data = wine)[, -1]
+reg_raw <- cv.gamlr(x, wine$quality, nfold = 5)
+
+cat("\nOOS R² comparison:\n")
+cat("Cluster regression:", round(max(1 - reg_clust$cvm / reg_clust$cvm[1]), 3), "\n")
+cat("Raw feature regression:", round(max(1 - reg_raw$cvm / reg_raw$cvm[1]), 3), "\n")
+```
+
+**Key Finding**: Raw feature regression outperforms cluster-based regression because quality is not a major source of variation: the main variation is red vs white. Clustering helps when variation aligns with cluster structure.
+:::
+:::
+
+::: {#exr-explainability-methods}
+## Explaining a Black-Box Classifier: Importance, PDP, and Shapley
+
+Use the German credit data (`credit.csv`) to fit a random forest classifier predicting `Default` from `duration`, `amount`, `installment`, `age`, and `history` (recode `history` into `good`, `poor`, `terrible`, as in earlier chapters). Dedicated explanation packages such as `fastshap`, `iml`, or `DALEX` may not be installed in every environment; check with `requireNamespace()` and, if they are unavailable, implement the following by hand.
+
+a) Split the data 70/30 into training and test sets and fit a random forest. Compute the baseline test accuracy. Compute permutation variable importance for each of the five features: shuffle the feature's values in the test set, re-predict, and record the drop in accuracy relative to the baseline. Average over several shuffles per feature and rank the features.
+b) For the feature with the largest permutation importance, construct a partial dependence plot: sweep that feature over a grid of values, overwrite it in the training data at each grid point, and average the model's predicted probability of default over all other (unchanged) rows.
+c) Pick the test-set instance with the highest predicted default probability. With the five features $F = \{$`duration`, `amount`, `installment`, `age`, `history`$\}$, compute the exact Shapley value of each feature for this instance,
+$$
+\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!}\Big[v(S \cup \{i\}) - v(S)\Big],
+$$
+where the value function $v(S) = \E[X_{-S}]{f(x_S, X_{-S})}$ is the model's average predicted probability over a background sample with the features in $S$ fixed at the instance's values and the remaining features left at their background values. Since $|F|=5$, all $2^5 = 32$ subsets can be enumerated exactly. Verify the efficiency property $\sum_i \phi_i = f(x) - v(\emptyset)$.
+d) Compute the empirical default rate for each level of `history`. Reconcile this with the sign of the Shapley contribution of `history` found in (c), and comment on what this reveals about interpreting black-box explanations fit to real data (compare with the "wolf detector" story earlier in the chapter).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(randomForest)
+set.seed(16)
+
+credit <- read.csv("data/credit.csv", stringsAsFactors = TRUE)
+credit$history <- factor(credit$history, levels = c("A30", "A31", "A32", "A33", "A34"))
+levels(credit$history) <- c("good", "good", "poor", "poor", "terrible")
+credit$Default <- factor(credit$Default)  # 0 = repaid, 1 = defaulted
+
+# Dedicated explanation packages are not installed here, so we implement by hand
+cat("fastshap:", requireNamespace("fastshap", quietly = TRUE),
+    " iml:", requireNamespace("iml", quietly = TRUE),
+    " DALEX:", requireNamespace("DALEX", quietly = TRUE), "\n")
+
+n <- nrow(credit)
+train_idx <- sample(1:n, round(0.7 * n))
+train <- credit[train_idx, ]
+test <- credit[-train_idx, ]
+
+features <- c("duration", "amount", "installment", "age", "history")
+form <- as.formula(paste("Default ~", paste(features, collapse = " + ")))
+rf <- randomForest(form, data = train, ntree = 500)
+
+# a) Permutation importance, computed by hand on the held-out test set
+base_acc <- mean(predict(rf, newdata = test) == test$Default)
+
+n_reps <- 20
+perm_importance <- sapply(features, function(f) {
+  drops <- numeric(n_reps)
+  for (r in 1:n_reps) {
+    test_perm <- test
+    test_perm[[f]] <- sample(test_perm[[f]])
+    drops[r] <- base_acc - mean(predict(rf, newdata = test_perm) == test$Default)
+  }
+  mean(drops)
+})
+perm_importance <- sort(perm_importance, decreasing = TRUE)
+cat("Baseline test accuracy:", round(base_acc, 3), "\n")
+cat("Permutation importance (mean drop in accuracy, 20 shuffles):\n")
+print(round(perm_importance, 4))
+
+# b) Partial dependence plot for the top feature
+top_feature <- names(perm_importance)[1]
+grid <- seq(min(credit[[top_feature]]), max(credit[[top_feature]]), length.out = 20)
+pdp_vals <- sapply(grid, function(g) {
+  d <- train
+  d[[top_feature]] <- g
+  mean(predict(rf, newdata = d, type = "prob")[, "1"])
+})
+plot(grid, pdp_vals, type = "b", pch = 16,
+     xlab = paste(top_feature, "(months)"), ylab = "Avg. predicted P(default)")
+
+# c) Exact Shapley values for one instance, over the 5-feature game
+pred_prob <- function(newdata) predict(rf, newdata = newdata, type = "prob")[, "1"]
+test_probs <- pred_prob(test)
+instance <- test[which.max(test_probs), ]
+
+set.seed(160)
+background <- train[sample(1:nrow(train), 100), ]
+
+value_fn <- function(S) {
+  d <- background
+  for (f in S) d[[f]] <- instance[[f]]
+  mean(pred_prob(d))
+}
+all_subsets <- function(v) {
+  if (length(v) == 0) return(list(character(0)))
+  unlist(lapply(0:length(v), function(k) combn(v, k, simplify = FALSE)), recursive = FALSE)
+}
+subsets <- all_subsets(features)
+vS <- sapply(subsets, value_fn)
+
+shapley_value <- function(feature) {
+  others <- setdiff(features, feature)
+  p <- length(features)
+  total <- 0
+  for (S in all_subsets(others)) {
+    s <- length(S)
+    weight <- factorial(s) * factorial(p - s - 1) / factorial(p)
+    idx_S <- which(sapply(subsets, function(x) setequal(x, S)))
+    idx_Swith <- which(sapply(subsets, function(x) setequal(x, c(S, feature))))
+    total <- total + weight * (vS[idx_Swith] - vS[idx_S])
+  }
+  total
+}
+phi <- sapply(features, shapley_value)
+
+cat("\nExplained instance (highest predicted default risk in the test set):\n")
+print(instance[, features])
+cat("Model prediction f(x):", round(max(test_probs), 3), "\n")
+cat("\nExact Shapley values:\n")
+print(round(phi, 4))
+cat("Efficiency check: sum(phi) =", round(sum(phi), 3),
+    "  f(x) - v(empty set) =", round(value_fn(features) - value_fn(character(0)), 3), "\n")
+
+barplot(sort(phi), horiz = TRUE, las = 1, col = "steelblue", xlab = "Shapley value")
+
+# d) Empirical default rate by history level
+cat("\nEmpirical default rate by history level:\n")
+print(round(tapply(as.numeric(as.character(credit$Default)), credit$history, mean), 3))
+```
+
+*Discussion (d)*: The permutation importance ranks `duration` above `history` overall (0.0482 vs. 0.0397), and the partial dependence plot shows predicted default risk rising from about 0.21 for short loans to a plateau near 0.53 beyond roughly 45 months. Yet for the single riskiest test case (a 12-month, good-history loan predicted at $f(x) = 0.914$), the Shapley decomposition attributes most of the gap above the background average ($v(\emptyset) = 0.272$) to `history` ($\phi = 0.471$) rather than to `duration` ($\phi = 0.008$); the five contributions sum exactly to $f(x) - v(\emptyset) = 0.642$, as the efficiency property requires. This looks paradoxical until we check the raw data: the empirical default rate is 59.6% for `good` history, 31.9% for `poor`, and only 17.1% for `terrible`. This is a known quirk of the German credit data: `good` ("no credits taken, all credits paid duly") includes many thin-file, first-time borrowers, while `terrible` ("critical account") describes borrowers who already hold other credit lines elsewhere, a marker of an established (and here, more reliable) credit history despite the alarming label. The random forest has learned this pattern correctly; the label names are simply misleading. This is the same caution the chapter raises with the "wolf detector" example: a faithful local explanation can reveal that a model is right for reasons that contradict our intuitive reading of a variable, and only inspecting the explanation, and the underlying data, exposes it.
+:::
+:::
+
+::: {#exr-roc-calibration}
+## Evaluating Classifiers: ROC/AUC, Calibration, and Proper Scores
+
+Use the same German credit data and predictors as @exr-explainability-methods (`duration`, `amount`, `installment`, `age`, recoded `history`) to fit a logistic regression predicting `Default`, using a 70/30 train/test split. Packages such as `pROC` and `ROCR` may not be installed; check with `requireNamespace()` and compute the following by hand if necessary.
+
+a) Compute the ROC curve on the test set by sweeping over all thresholds implied by the fitted probabilities, and the AUC two ways: (i) the trapezoidal area under the ROC curve, and (ii) the rank-sum (Mann-Whitney) identity
+$$
+\text{AUC} = \frac{\sum_{i:\,y_i=1} r_i - P(P+1)/2}{P N},
+$$
+where $r_i$ is the rank of $\hat p_i$ among all test-set predictions, and $P$, $N$ are the numbers of positives (defaults) and negatives. Confirm the two methods agree, and plot the ROC curve.
+b) Construct a calibration (reliability) plot: bin the test-set predictions into deciles, and for each bin plot the mean predicted probability against the observed default frequency, together with the 45-degree reference line.
+c) Compute the Brier score and the log score on the test set,
+$$
+\text{Brier} = \frac{1}{n}\sum_{i=1}^n (\hat p_i - y_i)^2, \qquad
+\text{LogScore} = -\frac{1}{n}\sum_{i=1}^n\Big[y_i \log \hat p_i + (1-y_i)\log(1-\hat p_i)\Big].
+$$
+d) Apply the strictly increasing transform $\tilde p = \hat p^3 / \big(\hat p^3 + (1-\hat p)^3\big)$ to the fitted probabilities. This exaggerates confidence (pushes probabilities toward 0 or 1) but cannot change the ranking of cases. Recompute the AUC, calibration table, Brier score, and log score for $\tilde p$, and overlay the new calibration curve on the plot from (b). Explain why the AUC is unchanged while the other three diagnostics indicate worse calibration, and what this implies about relying on AUC alone to evaluate a probabilistic classifier.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(1602)
+
+credit <- read.csv("data/credit.csv", stringsAsFactors = TRUE)
+credit$history <- factor(credit$history, levels = c("A30", "A31", "A32", "A33", "A34"))
+levels(credit$history) <- c("good", "good", "poor", "poor", "terrible")
+
+cat("pROC available:", requireNamespace("pROC", quietly = TRUE),
+    " ROCR available:", requireNamespace("ROCR", quietly = TRUE), "\n")
+
+n <- nrow(credit)
+train_idx <- sample(1:n, round(0.7 * n))
+train <- credit[train_idx, ]
+test <- credit[-train_idx, ]
+
+fit <- glm(Default ~ duration + amount + installment + age + history,
+           data = train, family = binomial)
+p_hat <- predict(fit, newdata = test, type = "response")
+y <- test$Default
+P <- sum(y == 1); N <- sum(y == 0)
+
+# a) ROC curve and AUC, computed by hand two ways
+thresholds <- sort(unique(c(1.1, p_hat, -0.1)), decreasing = TRUE)
+tpr <- fpr <- numeric(length(thresholds))
+for (i in seq_along(thresholds)) {
+  pred_pos <- p_hat >= thresholds[i]
+  tpr[i] <- sum(pred_pos & y == 1) / P
+  fpr[i] <- sum(pred_pos & y == 0) / N
+}
+auc_trapezoid <- sum(diff(fpr) * (head(tpr, -1) + tail(tpr, -1)) / 2)
+
+r <- rank(p_hat)
+auc_rank <- (sum(r[y == 1]) - P * (P + 1) / 2) / (P * N)
+cat("AUC (trapezoidal rule):", round(auc_trapezoid, 3), "\n")
+cat("AUC (rank-sum formula):", round(auc_rank, 3), "\n")
+
+plot(fpr, tpr, type = "l", lwd = 2, xlab = "False positive rate", ylab = "True positive rate")
+abline(0, 1, lty = 2, col = "gray50")
+
+# b) Calibration (reliability) table, decile bins
+n_bins <- 10
+bins <- cut(p_hat, breaks = quantile(p_hat, probs = seq(0, 1, length.out = n_bins + 1)),
+            include.lowest = TRUE)
+cal_pred <- tapply(p_hat, bins, mean)
+cal_obs <- tapply(y == 1, bins, mean)
+cat("\nCalibration table:\n")
+print(round(cbind(mean_pred = cal_pred, obs_freq = cal_obs), 3))
+
+# c) Brier score and log score
+brier <- mean((p_hat - (y == 1))^2)
+eps <- 1e-10
+logscore <- -mean((y == 1) * log(pmax(p_hat, eps)) + (y == 0) * log(pmax(1 - p_hat, eps)))
+cat("\nBrier score:", round(brier, 3), "\n")
+cat("Log score:", round(logscore, 3), "\n")
+
+# d) Monotonic miscalibration: sharpen confidence, ranking (hence ROC/AUC) unchanged
+p_miscal <- p_hat^3 / (p_hat^3 + (1 - p_hat)^3)
+r2 <- rank(p_miscal)
+auc_miscal <- (sum(r2[y == 1]) - P * (P + 1) / 2) / (P * N)
+brier_miscal <- mean((p_miscal - (y == 1))^2)
+logscore_miscal <- -mean((y == 1) * log(pmax(p_miscal, eps)) + (y == 0) * log(pmax(1 - p_miscal, eps)))
+
+bins2 <- cut(p_miscal, breaks = quantile(p_miscal, probs = seq(0, 1, length.out = n_bins + 1)),
+             include.lowest = TRUE)
+cal_pred2 <- tapply(p_miscal, bins2, mean)
+cal_obs2 <- tapply(y == 1, bins2, mean)
+
+cat("\nAfter monotonic transform p^3 / (p^3 + (1-p)^3):\n")
+print(round(rbind(
+  AUC = c(original = auc_rank, miscalibrated = auc_miscal),
+  Brier = c(brier, brier_miscal),
+  LogScore = c(logscore, logscore_miscal)
+), 3))
+
+plot(cal_pred, cal_obs, type = "b", pch = 16, xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "Mean predicted probability", ylab = "Observed frequency")
+lines(cal_pred2, cal_obs2, type = "b", pch = 17, col = "firebrick")
+abline(0, 1, lty = 2, col = "gray50")
+legend("topleft", c("original", "miscalibrated"), pch = c(16, 17),
+       col = c("black", "firebrick"), bty = "n", cex = 0.8)
+```
+
+*Discussion (d)*: Both AUC computations agree exactly at 0.715, confirming the rank-sum identity. The fitted model is reasonably well calibrated (the points scatter around the diagonal, with the sampling noise expected from only 30 test cases per bin), giving Brier score 0.194 and log score 0.570. After the monotonic transform $\tilde p = \hat p^3/(\hat p^3+(1-\hat p)^3)$, the AUC is unchanged at 0.715, since raising to a power and renormalizing never reverses which of two cases receives the higher score, so the ROC curve, and hence its area, is identical by construction. The Brier score rises to 0.240 and the log score rises to 0.866, and the overlaid calibration curve shows the transformed probabilities pulled toward 0 and 1: overconfident almost everywhere. Discrimination (AUC) measures only whether a model ranks cases correctly; calibration and proper scoring rules measure whether the reported probabilities themselves are trustworthy (@sec-model-eval). A model can be an excellent ranker and still be badly miscalibrated, in either direction, with no change whatsoever in AUC; only a calibration plot or a proper score such as the Brier or log score can detect this.
+:::
+:::
+
+::::

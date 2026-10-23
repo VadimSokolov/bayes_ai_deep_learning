@@ -1,0 +1,29 @@
+<script>
+  // Load MathJax with custom macros
+  window.MathJax = {
+    tex: {
+      macros: {
+        Cov: ["\\mathrm{Cov}\\left(#1\\right)", 1],
+        Cor: ["\\mathrm{Cor}\\left(#1\\right)", 1],
+        Var: ["\\mathrm{Var}\\left(#1\\right)", 1],
+        sd: ["\\mathrm{sd}\\left(#1\\right)", 1],
+        E: ["\\mathrm{E}_{#1}\\left(#2\\right)", 2, ""],
+        prob: ["\\mathrm{P}\\left(#1\\right)", 1],
+        defeq: "\\stackrel{\\mathrm{def}}{=}",
+        mini: "\\operatorname*{minimize}"
+      }
+    }
+  };
+</script>
+
+<style>
+  /* Custom styling for math content */
+  .MathJax {
+    font-size: 1em !important;
+  }
+
+  /* Ensure consistent math rendering */
+  mjx-container[jax="CHTML"] {
+    line-height: 1.2;
+  }
+</style>

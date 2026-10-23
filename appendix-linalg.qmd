@@ -1,0 +1,85 @@
+# Linear Algebra Toolkit {#sec-linalg-toolkit}
+
+This tutorial accompanies the book *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov. It collects a small set of linear algebra definitions and identities that the book uses repeatedly for the multivariate normal, Gaussian processes, and optimization-based estimation. It is not intended to be exhaustive.
+
+## Vectors, Matrices, and Dimensions
+
+Let $x \in \mathbb{R}^d$ be a column vector and let $A \in \mathbb{R}^{m\times n}$ be a matrix. We write $A_{ij}$ for the $(i,j)$ entry and $I_d$ for the $d\times d$ identity matrix.
+
+## Transpose
+
+The transpose of $A$ is $A^\top \in \mathbb{R}^{n\times m}$ defined by $(A^\top)_{ij}=A_{ji}$. A matrix is symmetric if $A=A^\top$.
+
+## Matrix-vector and Matrix-Matrix Multiplication
+
+For $A \in \mathbb{R}^{m\times n}$ and $x\in\mathbb{R}^n$, the product $Ax \in \mathbb{R}^m$ has entries $(Ax)_i=\sum_{j=1}^n A_{ij}x_j$.
+
+For $A \in \mathbb{R}^{m\times n}$ and $B\in\mathbb{R}^{n\times p}$, the product $AB\in\mathbb{R}^{m\times p}$ has entries $(AB)_{ik}=\sum_{j=1}^n A_{ij}B_{jk}$.
+
+## Inner Product and Dot Product
+
+For $x,y\in\mathbb{R}^d$, the standard inner product is
+$$
+\langle x,y\rangle = x^\top y = \sum_{i=1}^d x_i y_i.
+$$
+
+## Norms
+
+The Euclidean (or $\ell_2$) norm is $\|x\|_2=\sqrt{x^\top x}$. More generally, for $p\ge 1$,
+$$
+\|x\|_p = \left(\sum_{i=1}^d |x_i|^p\right)^{1/p}.
+$$
+For a matrix $A$, a common norm is the Frobenius norm,
+$$
+\|A\|_F=\left(\sum_{i=1}^m\sum_{j=1}^n A_{ij}^2\right)^{1/2}.
+$$
+
+## Inverse and Matrix Inversion
+
+For a square matrix $A\in\mathbb{R}^{d\times d}$, the inverse $A^{-1}$ satisfies $AA^{-1}=A^{-1}A=I_d$ (when it exists). A matrix is invertible if and only if its determinant is nonzero.
+
+## Determinant
+
+The determinant $|A|$ is a scalar associated with a square matrix. It is multiplicative: $|AB|=|A||B|$. For an invertible matrix, $|A^{-1}|=|A|^{-1}$.
+
+## Trace
+
+The trace of a square matrix is the sum of its diagonal entries:
+$$
+\operatorname{tr}(A)=\sum_{i=1}^d A_{ii}.
+$$
+It is invariant under cyclic permutations: $\operatorname{tr}(AB)=\operatorname{tr}(BA)$ whenever the products are defined.
+
+## Positive Definiteness
+
+A symmetric matrix $A\in\mathbb{R}^{d\times d}$ is positive definite (written $A\succ 0$) if
+$$
+x^\top A x > 0 \quad \text{for all } x\neq 0.
+$$
+It is positive semidefinite (written $A\succeq 0$) if $x^\top A x \ge 0$ for all $x$.
+
+Covariance matrices are symmetric and positive semidefinite; in many models (e.g., multivariate normal densities) we require positive definiteness so that $A^{-1}$ exists and $|A|>0$.
+
+## Eigenvalues and Eigenvectors
+
+For a square matrix $A$, a nonzero vector $v$ is an eigenvector with eigenvalue $\lambda$ if $Av=\lambda v$. For symmetric $A$, eigenvalues are real and $A$ admits an orthonormal eigen-decomposition $A=Q\Lambda Q^\top$ with diagonal $\Lambda$.
+
+## Singular Value Decomposition (SVD)
+
+For any matrix $A\in\mathbb{R}^{m\times n}$, the SVD is
+$$
+A = UDV^\top,
+$$
+where $U\in\mathbb{R}^{m\times m}$ and $V\in\mathbb{R}^{n\times n}$ are orthogonal matrices and $D$ is diagonal (rectangular) with nonnegative singular values.
+
+## A Key Quadratic Form Property (Gaussian Exponent)
+
+Many Gaussian formulas reduce to manipulating quadratic forms of the type $(x-\mu)^\top\Sigma^{-1}(x-\mu)$. When completing the square, it is helpful to remember that for symmetric $\Sigma\succ 0$ and vectors $x,\mu$,
+$$
+(x-\mu)^\top\Sigma^{-1}(x-\mu)
+$$
+is always nonnegative and equals zero only when $x=\mu$.
+
+## The Multivariate Normal
+
+The marginal and conditional distributions of a partitioned multivariate normal are in the section "Multivariate Normal" of Chapter 3 of the book.

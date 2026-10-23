@@ -1,0 +1,653 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Decision Tree Splitting
+
+Consider a dataset with 100 observations for binary classification:
+
+- Node A: 60 positive, 40 negative
+- Proposed split creates:
+  - Node B (left): 50 positive, 10 negative
+  - Node C (right): 10 positive, 30 negative
+
+a) Calculate the Gini impurity for Node A.
+b) Calculate the Gini impurity for Nodes B and C.
+c) Calculate the weighted average Gini impurity after the split.
+d) Is this a good split? Explain using the reduction in Gini impurity (Gini gain).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Gini impurity: $G = 1 - \sum_k p_k^2$
+
+For Node A:
+```{r}
+p_pos_A <- 60/100
+p_neg_A <- 40/100
+gini_A <- 1 - (p_pos_A^2 + p_neg_A^2)
+cat("Gini(A) =", round(gini_A, 4), "\n")
+```
+
+b) For Nodes B and C:
+```{r}
+# Node B: 50 pos, 10 neg (total 60)
+p_pos_B <- 50/60
+p_neg_B <- 10/60
+gini_B <- 1 - (p_pos_B^2 + p_neg_B^2)
+cat("Gini(B) =", round(gini_B, 4), "\n")
+
+# Node C: 10 pos, 30 neg (total 40)
+p_pos_C <- 10/40
+p_neg_C <- 30/40
+gini_C <- 1 - (p_pos_C^2 + p_neg_C^2)
+cat("Gini(C) =", round(gini_C, 4), "\n")
+```
+
+c) Weighted Gini after split:
+```{r}
+n_B <- 60
+n_C <- 40
+n_total <- 100
+gini_split <- (n_B/n_total) * gini_B + (n_C/n_total) * gini_C
+cat("Weighted Gini after split =", round(gini_split, 4), "\n")
+```
+
+d) Gini gain (reduction in impurity):
+```{r}
+gini_gain <- gini_A - gini_split
+cat("Gini gain =", round(gini_gain, 4), "\n")
+```
+
+The split reduces Gini impurity from 0.48 to ~0.32, a reduction of ~0.16. This is a good split because:
+
+- It significantly reduces impurity
+- It creates more homogeneous child nodes
+- Node B is 83% positive, Node C is 75% negative
+
+:::
+:::
+
+::: {#exr-splitting-criteria-purity}
+## Gini, Cross-Entropy, and Misclassification Rate
+
+The chapter claims that two candidate splits can share the same overall misclassification rate yet be ranked differently by the Gini index and cross-entropy, because those criteria are more sensitive to node purity. It states the example but never shows the arithmetic. Verify the claim directly.
+
+A parent node holds 800 observations, 400 of class 1 and 400 of class 2. Consider two splits:
+
+- Split 1: two children of size 400 each, with class counts $(300, 100)$ and $(100, 300)$.
+- Split 2: children of size 600 and 200, with class counts $(200, 400)$ and $(200, 0)$.
+
+a) Compute the size-weighted misclassification rate $\sum_m \frac{N_m}{N}\left(1 - \max_k p_{mk}\right)$ for each split. Confirm both equal $0.25$.
+
+b) Compute the Gini impurity $G_m = \sum_k p_{mk}(1 - p_{mk})$ for each of the four children, then the size-weighted average for each split. Which split does Gini prefer?
+
+c) Compute the cross-entropy $D_m = -\sum_k p_{mk}\log p_{mk}$ for each child (with the convention $0\log 0 = 0$), then the size-weighted average for each split. Which split does cross-entropy prefer, and does it agree with Gini?
+
+d) The misclassification rate $1 - \max_k p_{mk}$ is piecewise linear in $p_{mk}$, while Gini and cross-entropy are strictly concave. Use this to explain in one or two sentences why Gini and cross-entropy can distinguish the two splits (rewarding the one that produces a pure node) while the misclassification rate cannot.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) For Split 1 both children have proportions $(0.75, 0.25)$, so each has error $1 - 0.75 = 0.25$, and the weighted rate is $\frac{400}{800}(0.25) + \frac{400}{800}(0.25) = 0.25$. For Split 2 the large child $(200,400)$ has proportions $(\tfrac13, \tfrac23)$ and error $1 - \tfrac23 = \tfrac13$, while the pure child $(200,0)$ has error $0$; the weighted rate is $\frac{600}{800}\cdot\tfrac13 + \frac{200}{800}\cdot 0 = 0.25$. Both splits tie at $0.25$.
+
+b) Using $G_m = \sum_k p_{mk}(1 - p_{mk})$: the nodes $(300,100)$ and $(100,300)$ each give $G = 2(0.75)(0.25) = 0.375$, so Split 1's weighted Gini is $0.375$. The node $(200,400)$ gives $G = 2(\tfrac13)(\tfrac23) = \tfrac49 \approx 0.444$ and the pure node $(200,0)$ gives $G = 0$, so Split 2's weighted Gini is $\frac{600}{800}\cdot\tfrac49 = \tfrac13 \approx 0.333$. Gini prefers Split 2, since $0.333 < 0.375$.
+
+c) Using $D_m = -\sum_k p_{mk}\log p_{mk}$ (natural log): the nodes $(300,100)$ and $(100,300)$ each give $D = -(0.75\log 0.75 + 0.25\log 0.25) \approx 0.562$, so Split 1's weighted cross-entropy is $0.562$. The node $(200,400)$ gives $D = -(\tfrac13\log\tfrac13 + \tfrac23\log\tfrac23) \approx 0.637$ and the pure node gives $D = 0$, so Split 2's weighted cross-entropy is $\frac{600}{800}(0.637) \approx 0.477$. Cross-entropy also prefers Split 2, since $0.477 < 0.562$, agreeing with Gini.
+
+```{r}
+gini <- function(p) sum(p * (1 - p))
+xent <- function(p) { p <- p[p > 0]; -sum(p * log(p)) }
+misc <- function(p) 1 - max(p)
+wavg <- function(na, nb, fa, fb) (na * fa + nb * fb) / (na + nb)
+
+s1 <- list(a = c(300, 100) / 400, b = c(100, 300) / 400, na = 400, nb = 400)
+s2 <- list(a = c(200, 400) / 600, b = c(200, 0) / 200,   na = 600, nb = 200)
+
+for (nm in c("misc", "gini", "xent")) {
+  f <- get(nm)
+  v1 <- wavg(s1$na, s1$nb, f(s1$a), f(s1$b))
+  v2 <- wavg(s2$na, s2$nb, f(s2$a), f(s2$b))
+  cat(sprintf("%-5s  Split 1 = %.4f   Split 2 = %.4f\n", nm, v1, v2))
+}
+```
+
+The misclassification rate ties the two splits at $0.25$, but Gini ($0.375$ vs $0.333$) and cross-entropy ($0.562$ vs $0.477$) both rank Split 2 as the better one.
+
+d) Because Gini and cross-entropy are strictly concave in $p_{mk}$, they keep decreasing as a node approaches purity, so a split that manufactures one perfectly pure node (Split 2's $(200,0)$ child) is rewarded even though it changes no majority-vote decision. The misclassification rate only records whether a majority-vote error occurs and is insensitive to how close a node already is to purity, so it cannot separate the two splits.
+
+:::
+:::
+
+::: {#exr-}
+## Random Forest
+
+You build a Random Forest with 100 trees on a dataset with 1000 observations and 20 features.
+
+a) Explain what "bagging" means and how it applies to Random Forest.
+b) If mtry = 5, what does this mean? Why not use all 20 features?
+c) What is the expected percentage of observations NOT used in each tree (out-of-bag)?
+d) How would you use OOB error to avoid overfitting?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **Bagging** (Bootstrap Aggregating):
+- Draw bootstrap samples (with replacement) of size n from training data
+- Each tree is trained on a different bootstrap sample
+- Predictions are aggregated (majority vote for classification, average for regression)
+- This reduces variance by averaging over many diverse trees
+
+b) **mtry = 5** means:
+- At each split, only 5 randomly selected features are considered (not all 20)
+- This decorrelates the trees (they don't all split on the same strong predictor)
+- Reduces variance further compared to regular bagging
+- Rule of thumb: mtry = $\sqrt{p}$ for classification, mtry = $p/3$ for regression
+
+c) Out-of-bag probability:
+```{r}
+n <- 1000
+# Probability of NOT being selected in one draw: (n-1)/n
+# Probability of NOT being selected in n draws: ((n-1)/n)^n
+oob_prob <- (1 - 1/n)^n
+cat("P(OOB) =", round(oob_prob, 4), "\n")
+cat("This approaches 1/e ≈", round(1/exp(1), 4), "for large n\n")
+```
+
+Approximately 36.8% of observations are out-of-bag for each tree.
+
+d) Using OOB error:
+- For each observation, predict using only trees where it was OOB
+- Compare OOB predictions to true labels to get OOB error
+- This is essentially free cross-validation (no need for separate validation set)
+- Monitor OOB error as you add trees, it should stabilize
+- If OOB error is much lower than test error, consider more trees or tuning
+
+:::
+:::
+
+::: {#exr-}
+## Pruning and Cost-Complexity
+
+A decision tree has the following structure:
+
+- Full tree: 10 terminal nodes, training error = 0.05, test error = 0.18
+- Pruned (8 nodes): training error = 0.08, test error = 0.12
+- Pruned (5 nodes): training error = 0.15, test error = 0.11
+- Pruned (3 nodes): training error = 0.22, test error = 0.14
+
+a) Which tree would you select and why?
+b) Cost-complexity pruning minimizes $R_\alpha(T) = R(T) + \alpha|T|$, where $R(T)$ is the training error (RSS for regression, misclassification rate for classification). Explain each term.
+c) If $\alpha = 0$, which tree is selected? If $\alpha$ is very large?
+d) How would you select $\alpha$ in practice?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **Select the tree with 5 terminal nodes** because:
+- It has the lowest test error (0.11)
+- The full tree is overfitting (high gap between train and test error)
+- The 3-node tree is underfitting (high training error)
+- 5 nodes balances complexity and performance
+
+b) Cost-complexity:
+$$
+R_\alpha(T) = R(T) + \alpha|T|
+$$
+- $R(T)$: misclassification rate (or RSS for regression) on training data
+- $|T|$: number of terminal nodes (tree size/complexity)
+- $\alpha$: complexity parameter (penalty per node)
+- This implements Occam's razor: prefer simpler models unless complexity pays off
+
+c) Effect of $\alpha$:
+- $\alpha = 0$: No penalty for complexity → select full tree (10 nodes)
+- $\alpha \to \infty$: Infinite penalty → select root-only tree (1 node)
+- Intermediate $\alpha$ values select intermediate tree sizes
+
+d) Selecting $\alpha$:
+- Grow a full tree, then prune back
+- Use cross-validation to compute test error for each $\alpha$
+- Select $\alpha$ with lowest CV error (or use 1-SE rule: simplest tree within 1 SE of minimum)
+
+```{r}
+# Illustration
+alpha_grid <- seq(0, 0.05, by = 0.001)
+nodes <- c(10, 8, 5, 3)
+train_err <- c(0.05, 0.08, 0.15, 0.22)
+
+# Cost-complexity for each tree (simplified)
+matplot(alpha_grid, outer(alpha_grid, nodes) + matrix(train_err, 
+        nrow = length(alpha_grid), ncol = 4, byrow = TRUE),
+        type = "l", xlab = "alpha", ylab = "R_alpha(T)",
+        main = "Cost-Complexity Curves", lty = 1)
+legend("topleft", paste(nodes, "nodes"), col = 1:4, lty = 1)
+```
+
+:::
+:::
+
+::: {#exr-}
+## Feature Importance
+
+A Random Forest model for predicting customer churn includes 5 features. The variable importance (mean decrease in Gini) is:
+
+| Feature | Importance |
+|---------|------------|
+| Tenure  | 0.25       |
+| Monthly Charges | 0.22 |
+| Contract Type | 0.18 |
+| Tech Support | 0.15  |
+| Payment Method | 0.08 |
+
+a) Interpret these importance values.
+b) Why might this importance measure be biased for categorical variables with many levels?
+c) Describe an alternative importance measure based on permutation.
+d) If Tenure and Monthly Charges are correlated (r = 0.6), how might this affect importance?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Interpretation:
+- **Tenure** (0.25): Most important predictor; splits on tenure provide the largest reduction in Gini impurity on average
+- **Monthly Charges** (0.22): Second most important
+- **Payment Method** (0.08): Least important; contributes little to prediction accuracy
+- These are relative importance values that typically sum to 1 or are normalized
+
+b) Bias for categorical variables with many levels:
+- Variables with more categories/levels have more potential split points
+- They get more "chances" to reduce impurity just by having more options
+- A variable with 10 categories may appear more important than a binary variable even if the binary variable is truly more predictive
+- Solution: Use permutation importance instead
+
+c) **Permutation importance**:
+1. Compute baseline model accuracy on OOB/test data
+2. For each feature: randomly permute its values (breaking the feature-target relationship)
+3. Compute accuracy with permuted feature
+4. Importance = baseline accuracy - permuted accuracy
+5. Features that hurt performance when permuted are important
+
+d) Effect of correlation:
+- When Tenure and Monthly Charges are correlated, the tree might split on one instead of the other (they contain similar information)
+- Importance gets "shared" between correlated features
+- Both may appear less important than they truly are individually
+- If you dropped Tenure, Monthly Charges would become more important (and vice versa)
+
+:::
+:::
+
+::: {#exr-}
+## Gradient Boosting
+
+Compare Random Forest and Gradient Boosting:
+
+a) Explain how boosting builds trees sequentially, fitting residuals.
+b) If a Gradient Boosting model with 100 trees has training error 0.02 and test error 0.15, what might be wrong?
+c) What role does the learning rate (shrinkage) play?
+d) You have two boosted models: (A) 50 trees, learning rate 0.2 and (B) 500 trees, learning rate 0.02. Which would you expect to generalize better?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Boosting algorithm:
+1. Fit initial tree $f_0$ to data (often just the mean)
+2. Calculate residuals: $r_i = y_i - f_0(x_i)$
+3. Fit a new tree $h_1$ to these residuals
+4. Update: $f_1 = f_0 + \lambda h_1$ (shrinkage $\lambda$)
+5. Repeat: fit trees to current residuals, update model
+6. Final model: $F = f_0 + \lambda h_1 + \lambda h_2 + ...$
+
+Each tree corrects the errors of the ensemble so far.
+
+b) With train error = 0.02, test error = 0.15:
+- The model is **overfitting** (large gap between train and test)
+- Possible solutions:
+  - Reduce number of trees
+  - Decrease learning rate (smaller $\lambda$; compensate with more trees or early stopping)
+  - Add regularization (max_depth, min_samples)
+  - Subsample rows/columns
+  - Early stopping based on validation error
+
+c) Learning rate (shrinkage) $\lambda$:
+- Scales each tree's contribution: $F = F + \lambda \cdot h_{new}$
+- Smaller $\lambda$ (e.g., 0.01-0.1) means each tree contributes less
+- Requires more trees but usually generalizes better
+- Implements a form of regularization, shrinks toward simpler model
+- Trade-off: slower training, but better generalization
+
+d) Model comparison:
+- **Model B (500 trees, $\lambda = 0.02$)** should generalize better
+- More trees with smaller steps allows finer tuning
+- $50 \times 0.2 = 10$ and $500 \times 0.02 = 10$ give similar "total learning"
+- But smaller steps with more iterations provides regularization
+- This is like taking many small gradient descent steps vs few large ones
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Tree Models
+
+a) A single decision tree with unlimited depth will always achieve 0% training error on distinct data points.
+
+b) Random Forest is less prone to overfitting than a single deep tree.
+
+c) In a decision tree, the order of features at the top of the tree is always the same as their importance ranking.
+
+d) Gradient Boosting typically uses shallow trees (stumps or small trees).
+
+e) The OOB error in Random Forest is always lower than the cross-validation error.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **TRUE**. With no restrictions, the tree can create a separate leaf for each training point, perfectly memorizing the data. (Assuming distinct x values.)
+
+b) **TRUE**. Single deep trees have high variance. Random Forest:
+- Averages over many trees (reduces variance)
+- Uses bootstrap samples (different training data)
+- Uses random feature subsets (decorrelates trees)
+All three mechanisms reduce overfitting.
+
+c) **FALSE**. The first split uses the globally best feature, but:
+- Feature importance aggregates across the whole tree
+- A feature might not be best at the root but very useful lower down
+- Features might trade importance at different depths
+- Importance is cumulative, not determined by position
+
+d) **TRUE**. Boosting works best with "weak learners":
+- Shallow trees (depth 1-6) prevent individual trees from overfitting
+- The ensemble builds complexity gradually
+- Deep trees can overfit residuals, hurting generalization
+- XGBoost default max_depth = 6
+
+e) **FALSE**. OOB error and CV error estimate the same quantity (expected test error) in different ways:
+- OOB uses ~37% of data left out from each tree
+- CV uses held-out folds
+- They should be similar on average, but neither is systematically lower
+- OOB is computationally cheaper (no need to retrain)
+
+:::
+:::
+
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## California Housing: Model Comparison
+
+Use `CAhousing.csv` containing median home values for California census tracts. Create derived variables: `AveBedrms = totalBedrooms/households`, `AveRooms = totalRooms/households`, `AveOccupancy = population/households`.
+
+a) Fit a LASSO regression with interactions: `log(medianHouseValue) ~ .^2`. Use cross-validation to select $\lambda$.
+b) Fit a CART tree to predict `log(medianHouseValue)`. Use CV to determine if pruning helps.
+c) Fit a Random Forest with 200 trees. Examine variable importance.
+d) Compare out-of-sample MSE across the three methods using repeated train/test splits.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(tree)
+library(gamlr)
+library(ranger)
+
+# Load and prepare data
+CAhousing <- read.csv("data/CAhousing.csv")
+CAhousing$AveBedrms <- CAhousing$totalBedrooms / CAhousing$households
+CAhousing$AveRooms <- CAhousing$totalRooms / CAhousing$households
+CAhousing$AveOccupancy <- CAhousing$population / CAhousing$households
+logMedVal <- log(CAhousing$medianHouseValue)
+CAhousing <- CAhousing[, -c(4, 5, 9)]  # Remove totals and medval
+CAhousing$logMedVal <- logMedVal
+
+# a) LASSO with interactions
+XXca <- model.matrix(logMedVal ~ .^2, data = CAhousing)[, -1]
+capen <- cv.gamlr(x = XXca, y = logMedVal, lmr = 1e-5)
+plot(capen)
+cat("LASSO selected", sum(coef(capen) != 0) - 1, "non-zero coefficients\n")
+
+# b) CART tree
+catree <- tree(logMedVal ~ ., data = CAhousing)
+plot(catree, col = 8, lwd = 2)
+text(catree, cex = 0.7)
+
+cvca <- cv.tree(catree)
+plot(cvca)
+cat("CV selects", cvca$size[which.min(cvca$dev)], "terminal nodes\n")
+
+# c) Random Forest
+carf <- ranger(logMedVal ~ ., data = CAhousing,
+               num.trees = 200, min.node.size = 25, importance = "impurity")
+cat("\nVariable Importance:\n")
+print(sort(carf$variable.importance, decreasing = TRUE))
+
+# d) Out-of-sample comparison
+set.seed(123)
+MSE <- data.frame(LASSO = numeric(5), CART = numeric(5), RF = numeric(5))
+
+for (i in 1:5) {
+  train <- sample(1:nrow(CAhousing), 5000)
+  
+  # LASSO
+  lin <- cv.gamlr(x = XXca[train, ], y = logMedVal[train], lmr = 1e-4)
+  yhat.lin <- drop(predict(lin, XXca[-train, ], select = "min"))
+  MSE$LASSO[i] <- mean((logMedVal[-train] - yhat.lin)^2)
+  
+  # CART
+  rt <- tree(logMedVal ~ ., data = CAhousing[train, ])
+  yhat.rt <- predict(rt, newdata = CAhousing[-train, ])
+  MSE$CART[i] <- mean((logMedVal[-train] - yhat.rt)^2)
+  
+  # Random Forest
+  rf <- ranger(logMedVal ~ ., data = CAhousing[train, ],
+               num.trees = 200, min.node.size = 25, write.forest = TRUE)
+  yhat.rf <- predict(rf, data = CAhousing[-train, ])$predictions
+  MSE$RF[i] <- mean((logMedVal[-train] - yhat.rf)^2)
+}
+
+boxplot(MSE, col = "dodgerblue", ylab = "MSE", main = "Out-of-Sample Comparison")
+cat("\nMean MSE:\n")
+print(round(colMeans(MSE), 4))
+```
+
+**Key Finding**: Random Forest typically achieves the lowest MSE, followed by LASSO, then CART. The most important predictors are median income, location (lat/long), and occupancy rates.
+:::
+:::
+
+::: {#exr-boosting-lr-tuning}
+## Gradient Boosting: Tuning Learning Rate and Number of Trees
+
+The Gradient Boosting exercise above asked you to reason on paper about a fast learner (50 trees, learning rate $\lambda=0.2$) versus a slow learner (500 trees, $\lambda=0.02$). Here you fit both to real data and watch the overfitting play out.
+
+Use the `Boston` housing data (`medv` as the response, all other columns as predictors) and hold out 30% of the rows as a test set.
+
+a) Fit a boosted model with `gbm` (`distribution = "gaussian"`, `interaction.depth = 3`) at two learning rates: $\lambda=0.2$ grown out to 1,000 trees, and $\lambda=0.02$ grown out to 3,000 trees. For each fit, compute the training and test MSE every 10 trees using `predict.gbm()` with a vector of `n.trees` values.
+b) Plot training and test MSE against the number of trees for each learning rate. At what number of trees does the $\lambda=0.2$ model's test error stop improving? Does it get worse after that, and by how much?
+c) Repeat the question in (b) for $\lambda=0.02$. Does it overfit as quickly as the $\lambda=0.2$ model? Which of the two reaches the lower minimum test MSE, and how many trees does it take to get there?
+d) Refit with `cv.folds = 5` and use `gbm.perf(..., method = "cv")` to select the number of trees automatically. How does the cross-validated choice compare to the manual holdout choice in (c)?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r, message=FALSE}
+library(gbm)
+data(Boston, package = "MASS")
+set.seed(14)
+train <- sample(1:nrow(Boston), round(0.7 * nrow(Boston)))
+tr <- Boston[train, ]; te <- Boston[-train, ]
+
+fit_curve <- function(lr, ntree) {
+  fit <- gbm(medv ~ ., data = tr, distribution = "gaussian",
+             n.trees = ntree, interaction.depth = 3, shrinkage = lr, verbose = FALSE)
+  trees <- seq(10, ntree, by = 10)
+  tr_mse <- colMeans((predict(fit, tr, n.trees = trees) - tr$medv)^2)
+  te_mse <- colMeans((predict(fit, te, n.trees = trees) - te$medv)^2)
+  list(trees = trees, train = tr_mse, test = te_mse)
+}
+
+fast <- fit_curve(lr = 0.2,  ntree = 1000)  # large steps, few trees
+slow <- fit_curve(lr = 0.02, ntree = 3000)  # small steps, many trees
+
+plot(fast$trees, fast$train, type = "l", col = "steelblue",
+     xlab = "number of trees", ylab = "MSE", main = "lambda = 0.2")
+lines(fast$trees, fast$test, col = "firebrick")
+legend("topright", c("train", "test"), col = c("steelblue", "firebrick"), lty = 1, bty = "n")
+
+cat("lambda=0.20: best n.trees =", fast$trees[which.min(fast$test)],
+    ", min test MSE =", round(min(fast$test), 3),
+    ", test MSE @1000 trees =", round(tail(fast$test, 1), 3), "\n")
+cat("lambda=0.02: best n.trees =", slow$trees[which.min(slow$test)],
+    ", min test MSE =", round(min(slow$test), 3),
+    ", test MSE @3000 trees =", round(tail(slow$test, 1), 3), "\n")
+```
+
+b) The $\lambda=0.2$ model reaches its lowest test MSE (6.735) at 90 trees. Past that point it overfits steadily: training MSE keeps falling toward zero while test MSE climbs back up to 7.466 by 1000 trees, about 11% worse than the best value found along the way.
+
+c) The $\lambda=0.02$ model needs far more trees, about 1460, to reach its own minimum test MSE of 6.246, slightly lower than the fast learner's best. It also overfits much more gently: pushed to 3000 trees, twice its optimum, test MSE only creeps up to 6.437, a fraction of the degradation seen with large steps. Many small steps reach a better solution and are far more forgiving of running past the optimal stopping point than a few large steps, echoing the "total learning is similar, but the path matters" intuition from the paper exercise.
+
+```{r}
+cvfit <- gbm(medv ~ ., data = tr, distribution = "gaussian", n.trees = 1000,
+             interaction.depth = 3, shrinkage = 0.05, cv.folds = 5, verbose = FALSE)
+best_cv <- gbm.perf(cvfit, method = "cv", plot.it = FALSE)
+cat("CV-selected n.trees (lambda=0.05):", best_cv, ", test MSE:",
+    round(mean((predict(cvfit, te, n.trees = best_cv) - te$medv)^2), 3), "\n")
+```
+
+d) Cross-validation at $\lambda=0.05$ selects 990 trees, with a test MSE of 6.572 that falls between the two manual fits. Cross-validation locates a reasonable stopping point automatically, without needing a held-out test set to eyeball a curve, though here it lands a bit above the best achievable MSE because $\lambda=0.05$ is itself a compromise between the two extremes tried in (b)-(c).
+
+:::
+:::
+
+::: {#exr-bart-causal-sim}
+## BART for Causal Inference: A Simulation with a Known Answer
+
+@sec-bart-causal used BART to recover the effect of the NSW job training program from the confounded Lalonde data, where the true effect is unknown outside of the experimental benchmark. Here you build a simulation where the confounding is by design and the true effect is known, so you can check directly whether BART recovers it and whether the naive comparison is biased.
+
+a) Simulate $n=1000$ units with covariates $x_1, x_2 \overset{\text{i.i.d.}}{\sim} N(0,1)$. Assign treatment via $Z_i \sim \text{Bernoulli}(\pi(x_i))$ with $\mathrm{logit}\,\pi(x_i) = 0.8x_{1i} - 0.6x_{2i}$, and generate the outcome as
+$$
+Y_i = 1 + x_{1i}^2 + 2x_{2i} - x_{1i}x_{2i} + \tau Z_i + \epsilon_i, \qquad \epsilon_i \sim N(0,1),
+$$
+with true effect $\tau=2$. Treatment depends on the same covariates that drive the outcome: this is confounding by construction. Set a seed.
+b) Compute the naive difference in means, $\bar Y_{Z=1} - \bar Y_{Z=0}$. How far is it from $\tau=2$, and in which direction? Explain the bias in terms of which units end up treated.
+c) Check whether `bartCause`, `dbarts`, or `BART` is installed using `requireNamespace()`. Using whichever is available (or a `randomForest` T-learner as a fallback), estimate the ATE adjusting for $x_1,x_2$. Report the point estimate and, if available, an interval. Does it recover $\tau$ better than the naive estimate in (b)?
+d) Identification of $\tau$ here rests on ignorability, $(Y(0),Y(1)) \perp Z \mid X$, and positivity, $0 < P(Z=1 \mid X=x) < 1$ for every $x$. Are both satisfied in this simulation, and why can we be sure of that here in a way we never can with real observational data? Compute the range of the true $\pi(x_i)$ across the sample. What change to the treatment-assignment model would push positivity toward failing, and what would you expect to happen to the BART estimate as a result?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(14)
+n <- 1000
+x1 <- rnorm(n); x2 <- rnorm(n)
+pz <- plogis(0.8 * x1 - 0.6 * x2)      # treatment depends on X: confounded
+Z  <- rbinom(n, 1, pz)
+tau_true <- 2
+Y  <- 1 + x1^2 + 2 * x2 - x1 * x2 + tau_true * Z + rnorm(n)
+dat <- data.frame(Y, Z, x1, x2)
+
+cat("range of true P(Z=1|X):", round(range(pz), 3), "\n")
+naive_ate <- mean(dat$Y[Z == 1]) - mean(dat$Y[Z == 0])
+cat("naive difference-in-means:", round(naive_ate, 3), " (true tau =", tau_true, ")\n")
+
+if (requireNamespace("bartCause", quietly = TRUE)) {
+  library(bartCause)
+  fit <- bartc(Y, Z, cbind(x1, x2), data = dat,
+               estimand = "ate", seed = 14, verbose = FALSE)
+  est <- summary(fit)$estimates
+  cat("BART ATE:", round(est$estimate, 3), " 95% CI: (",
+      round(est$ci.lower, 3), ",", round(est$ci.upper, 3), ")\n")
+} else if (requireNamespace("randomForest", quietly = TRUE)) {
+  library(randomForest)                 # T-learner fallback
+  m1 <- randomForest(Y ~ x1 + x2, data = dat[Z == 1, ])
+  m0 <- randomForest(Y ~ x1 + x2, data = dat[Z == 0, ])
+  cat("T-learner ATE:", round(mean(predict(m1, dat) - predict(m0, dat)), 3), "\n")
+}
+```
+
+This solution uses `bartCause::bartc()`, which is backed by `dbarts`; `dbarts::bart2()` or `BART::wbart()` would give an equivalent fit if `bartCause` were unavailable.
+
+b) The naive estimate is 0.943, far below the true $\tau=2$. Units with high $x_1$ and low $x_2$ are more likely to be treated, and those are exactly the covariate values that the baseline surface $1+x_1^2+2x_2-x_1x_2$ makes low: the mean untreated potential outcome is 1.544 for the treated group versus 2.497 for the controls, a gap of about $-0.95$ that has nothing to do with the treatment. The naive comparison adds the true effect to this negative selection gap, $2 - 0.95 \approx 1.05$, close to the 0.943 actually observed. Treated units would have looked worse off even with no treatment at all.
+
+c) BART gives an ATE of 1.875 with a 95% credible interval of (1.7, 2.05), which contains the true $\tau=2$ and is far closer to it than the naive estimate. Adjusting for $x_1,x_2$ removes essentially all of the selection bias identified in (b).
+
+d) Ignorability holds by construction: $Y$ was generated as a function of $x_1,x_2,Z$ only, so no third variable confounds treatment and outcome once we condition on $x_1,x_2$. That certainty is a privilege of simulation. In real observational data ignorability is untestable; an unmeasured confounder can never be ruled out. The true propensity $\pi(x_i)$ ranges from 0.023 to 0.942, bounded away from the 0/1 boundary, so positivity holds too, though the lower tail is close enough to zero that treated units are sparse in that region of covariate space. Making the assignment rule more extreme, for example replacing the coefficients $0.8,-0.6$ with $5,-4$, or using a deterministic rule like $Z=1$ whenever $x_1>0$, would push $\pi(x)$ toward 0 or 1 in parts of the covariate space and leave no comparable units of the other arm there. BART would then have to extrapolate the outcome surface into regions with no data from one treatment arm, and the ATE estimate would become sensitive to the tree prior rather than the data, the same regularization-induced confounding risk discussed in @sec-bart-causal.
+
+:::
+:::
+
+::: {#exr-bart-icate-heterogeneity}
+## Recovering Heterogeneous Treatment Effects with BART
+
+The previous exercise gave every unit the same treatment effect, $\tau = 2$, so BART only had to recover a single number. @sec-bart-causal argues that a key advantage of BART is its ability to recover the Conditional Average Treatment Effect $\tau(x) = \E{Y(1) - Y(0) \mid X = x}$ and an Individual CATE (ICATE) for each unit. Here you check whether BART delivers on that promise when the true effect genuinely varies with $x$.
+
+a) Reuse the confounded design from the previous exercise ($x_1, x_2 \overset{\text{i.i.d.}}{\sim} N(0,1)$, $Z_i \sim \text{Bernoulli}(\pi(x_i))$ with $\mathrm{logit}\,\pi(x_i) = 0.8x_{1i} - 0.6x_{2i}$), but replace the constant effect with one that is linear in $x_1$: $\tau(x_{1i}) = 2 + 1.5x_{1i}$. Generate $Y_i = 1 + x_{1i}^2 + 2x_{2i} - x_{1i}x_{2i} + \tau(x_{1i})Z_i + \epsilon_i$, $\epsilon_i \sim N(0,1)$, for $n = 1000$ units, with a set seed.
+
+b) Fit the same causal BART model as before (`bartc()` with `estimand = "ate"`), and additionally extract the posterior-mean ICATE for every unit, $\hat\tau(x_i) = \hat\mu(x_i, 1) - \hat\mu(x_i, 0)$ (use `fitted(fit, type = "icate")`). Report the estimated ATE and interval, and compare it to the population-average effect $\E{\tau(x_1)}$ implied by $x_1 \sim N(0,1)$.
+
+c) Plot the estimated ICATE against $x_1$ and overlay the true line $\tau(x_1) = 2 + 1.5x_1$. Report the correlation between estimated ICATE and true $\tau(x_1)$, and regress estimated ICATE on $x_1$: how close are the fitted intercept and slope to the true values $2$ and $1.5$?
+
+d) Split the sample at the bottom and top quartile of $x_1$. Report the mean estimated ICATE and the mean true $\tau(x_1)$ in each subgroup. Which subgroup benefits most from the intervention, and which barely benefits? Relate the answer to the chapter's discussion of using the CATE to target an intervention toward the subgroups most likely to benefit.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| fig-cap: "Posterior-mean ICATE from causal BART against $x_1$, with the true heterogeneous effect $\\tau(x_1) = 2 + 1.5x_1$ overlaid. BART recovers the linear heterogeneity without being told it is linear."
+#| fig-height: 3
+library(bartCause)
+set.seed(14)
+n  <- 1000
+x1 <- rnorm(n); x2 <- rnorm(n)
+pz <- plogis(0.8 * x1 - 0.6 * x2)            # confounded assignment
+Z  <- rbinom(n, 1, pz)
+tau_x <- 2 + 1.5 * x1                          # effect varies with x1
+Y  <- 1 + x1^2 + 2 * x2 - x1 * x2 + tau_x * Z + rnorm(n)
+dat <- data.frame(Y, Z, x1, x2)
+
+fit <- bartc(Y, Z, cbind(x1, x2), data = dat,
+             estimand = "ate", seed = 14, verbose = FALSE)
+est   <- summary(fit)$estimates
+icate <- fitted(fit, type = "icate")           # posterior-mean ICATE per unit
+
+cat("BART ATE:", round(est$estimate, 3),
+    " 95% CI: (", round(est$ci.lower, 3), ",", round(est$ci.upper, 3), ")\n")
+cat("population-average effect E[tau(x1)] = 2 + 1.5*E[x1] = 2\n")
+
+plot(x1, icate, pch = 19, col = rgb(0.1, 0.3, 0.7, 0.35), cex = 0.5,
+     xlab = expression(x[1]), ylab = "treatment effect")
+abline(a = 2, b = 1.5, col = "firebrick", lwd = 2)
+legend("topleft", c("estimated ICATE", "true tau(x1) = 2 + 1.5 x1"),
+       pch = c(19, NA), lty = c(NA, 1),
+       col = c(rgb(0.1, 0.3, 0.7, 0.6), "firebrick"), bty = "n")
+```
+
+b) The BART ATE estimate is $1.847$ with a 95% credible interval of roughly $(1.67, 2.02)$. Since $x_1 \sim N(0,1)$, the population-average effect is $\E{\tau(x_1)} = 2 + 1.5\,\E{x_1} = 2$, so the estimated ATE correctly recovers the average effect despite the confounding, just as in the constant-effect exercise. The ATE alone, however, hides the fact that the per-unit effect ranges from strongly negative to well above $3$.
+
+```{r}
+cat("cor(estimated ICATE, true tau):", round(cor(icate, tau_x), 3), "\n")
+co <- coef(lm(icate ~ x1))
+cat("ICATE ~ x1:  intercept =", round(co[1], 3),
+    " slope =", round(co[2], 3), "  (true 2 and 1.5)\n")
+```
+
+c) The estimated ICATE correlates with the true $\tau(x_1)$ at $r = 0.966$. Regressing estimated ICATE on $x_1$ gives an intercept of $1.886$ and a slope of $1.425$, close to the true values $2$ and $1.5$. BART recovers the linear heterogeneity pattern even though it was never told the effect is linear: it discovers this structure from the sum-of-trees fit. The fitted slope is slightly below $1.5$ because the regularization priors shrink the most extreme effects toward the middle, visible as the mild flattening at the tails of the plot.
+
+```{r}
+qs  <- quantile(x1, c(0.25, 0.75))
+bot <- x1 < qs[1]; top <- x1 > qs[2]
+cat("bottom quartile (x1 <", round(qs[1], 2), "):  mean ICATE =",
+    round(mean(icate[bot]), 3), " mean true tau =", round(mean(tau_x[bot]), 3), "\n")
+cat("top    quartile (x1 >", round(qs[2], 2), "):  mean ICATE =",
+    round(mean(icate[top]), 3), " mean true tau =", round(mean(tau_x[top]), 3), "\n")
+```
+
+d) In the bottom quartile of $x_1$ (below $-0.76$), the mean estimated ICATE is $-0.088$, matching the true subgroup mean of $-0.02$: this subgroup sees essentially no benefit. In the top quartile ($x_1 > 0.70$), the mean estimated ICATE is $3.774$, matching the true subgroup mean of $3.988$: this subgroup benefits substantially. A resource-constrained policy should target high-$x_1$ individuals rather than apply the intervention uniformly. The single ATE of about $1.85$ is an accurate population average but a misleading guide for targeting, exactly the kind of heterogeneity the chapter argues the ICATE is designed to expose.
+
+:::
+:::
+
+::::

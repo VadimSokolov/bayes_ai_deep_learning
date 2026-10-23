@@ -1,0 +1,10 @@
+%%{init: {'flowchart': {'wrappingWidth': 300, 'rankSpacing': 25}}}%%
+flowchart TB
+    P[Pre-trained Model] --> SFT[Supervised Fine-Tuning]
+    SFT --> Gen[Generate Responses]
+    Gen --> H[Human Ranking]
+    H --> RM[Reward Model]
+    RM --> PPO[Policy Optimization]
+    PPO --> AM[Aligned Model]
+
+    style AM fill:#ccffcc,stroke:#00cc00

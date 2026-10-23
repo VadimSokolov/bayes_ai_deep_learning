@@ -1,0 +1,41 @@
+flowchart TB
+    %% Keys column
+    k1["$$k_1$$"] 
+    k2["$$k_2$$"]
+    km["$$k_m$$"]
+    
+    %% Attention weights (functions)
+    alpha1["$$\alpha(q, k_1)$$"]
+    alpha2["$$\alpha(q, k_2)$$"]
+    alpham["$$\alpha(q, k_m)$$"]
+    
+    %% Query
+    q["$$q$$"]
+    
+    %% Values column
+    v1["$$v_1$$"]
+    v2["$$v_2$$"]
+    vm["$$v_m$$"]
+    
+    %% Output
+    output["$$\sum_{i=1}^m \alpha(q, k_i) v_i$$"]
+    
+    %% Connections from keys to attention weights
+    k1 --> alpha1
+    k2 --> alpha2
+    km --> alpham
+    
+    %% Query to attention weights
+    q --> alpha1
+    q --> alpha2
+    q --> alpham
+    
+    %% Attention weights to values (dashed lines)
+    alpha1 -.-> v1
+    alpha2 -.-> v2
+    alpham -.-> vm
+    
+    %% Values to output
+    v1 --> output
+    v2 --> output
+    vm --> output

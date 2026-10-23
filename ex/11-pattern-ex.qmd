@@ -1,0 +1,360 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## MLE for Bernoulli
+
+Derive the maximum likelihood estimator for the Bernoulli distribution.
+
+Given $n$ observations $y_1, \ldots, y_n$ where $y_i \in \{0, 1\}$ and $P(Y=1) = \theta$:
+
+a) Write the likelihood function $L(\theta)$.
+b) Write the log-likelihood $\ell(\theta)$.
+c) Find the MLE $\hat{\theta}$ by solving $\frac{d\ell}{d\theta} = 0$.
+d) Verify this is a maximum by checking the second derivative.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Likelihood: $L(\theta) = \prod_{i=1}^n \theta^{y_i}(1-\theta)^{1-y_i} = \theta^{\sum y_i}(1-\theta)^{n-\sum y_i}$
+
+b) Log-likelihood: $\ell(\theta) = \sum y_i \log\theta + (n - \sum y_i)\log(1-\theta)$
+
+c) First derivative:
+$$\frac{d\ell}{d\theta} = \frac{\sum y_i}{\theta} - \frac{n - \sum y_i}{1-\theta} = 0$$
+
+Solving: $\hat{\theta} = \frac{\sum y_i}{n} = \bar{y}$ (sample proportion)
+
+d) Second derivative: $\frac{d^2\ell}{d\theta^2} = -\frac{\sum y_i}{\theta^2} - \frac{n-\sum y_i}{(1-\theta)^2} < 0$ ✓
+:::
+:::
+
+::: {#exr-}
+## Confusion Matrix
+
+A spam classifier produces the following results on 1000 emails:
+
+|                | Predicted Spam | Predicted Not Spam |
+|----------------|----------------|-------------------|
+| Actual Spam    | 80             | 20                |
+| Actual Not Spam| 50             | 850               |
+
+a) Calculate accuracy.
+b) Calculate precision and recall.
+c) Calculate the F1 score.
+d) If missing spam costs \$1 and a false alarm costs \$0.10, which metric matters more?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+TP <- 80; FN <- 20; FP <- 50; TN <- 850
+
+# a) Accuracy
+accuracy <- (TP + TN) / (TP + TN + FP + FN)
+cat("Accuracy:", accuracy, "\n")
+
+# b) Precision and Recall
+precision <- TP / (TP + FP)
+recall <- TP / (TP + FN)
+cat("Precision:", round(precision, 3), "\n")
+cat("Recall:", round(recall, 3), "\n")
+
+# c) F1 Score
+f1 <- 2 * precision * recall / (precision + recall)
+cat("F1 Score:", round(f1, 3), "\n")
+```
+
+d) Missing spam (FN) costs more than false alarms (FP), so **recall** matters more. We want to minimize FN, catching as much spam as possible even if some legitimate emails are flagged.
+:::
+:::
+
+::: {#exr-}
+## Cross-Validation
+
+You have 100 data points and want to compare two models.
+
+a) Explain the difference between 5-fold CV and leave-one-out CV.
+b) Which has higher variance in the error estimate? Why?
+c) If each model takes 10 seconds to train, how long does 5-fold CV take? LOOCV?
+d) When is a simple train-test split preferred over cross-validation?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **5-fold CV**: Split data into 5 parts, train on 4 parts (80%), test on 1 part (20%), repeat 5 times.
+   **LOOCV**: Train on 99 samples, test on 1, repeat 100 times.
+
+b) **LOOCV has higher variance** because:
+   - Training sets overlap heavily (99 samples in common)
+   - Test sets are correlated (single observations)
+   - 5-fold has more independent estimates
+
+c) Time:
+   - 5-fold: 5 models × 10s = **50 seconds**
+   - LOOCV: 100 models × 10s = **1000 seconds** (~17 minutes)
+
+d) Prefer train-test split when:
+   - Dataset is very large (>10,000 samples)
+   - Training is computationally expensive
+   - Low variance in error estimate is sufficient
+:::
+:::
+
+::: {#exr-}
+## MSE vs MAE
+
+Given predictions $\hat{y} = (2, 3, 4, 5, 20)$ and actual values $y = (2, 4, 4, 6, 6)$:
+
+a) Calculate MSE.
+b) Calculate MAE.
+c) Which metric is more affected by the outlier prediction (20 vs 6)?
+d) When would you prefer MAE over MSE?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+y_hat <- c(2, 3, 4, 5, 20)
+y <- c(2, 4, 4, 6, 6)
+errors <- y - y_hat
+
+# a) MSE
+mse <- mean(errors^2)
+cat("MSE:", mse, "\n")
+
+# b) MAE
+mae <- mean(abs(errors))
+cat("MAE:", mae, "\n")
+
+# c) Effect of outlier
+cat("Errors:", errors, "\n")
+cat("Squared errors:", errors^2, "\n")
+cat("Outlier contributes", errors[5]^2, "/", sum(errors^2), "=", 
+    round(errors[5]^2/sum(errors^2)*100, 1), "% of MSE\n")
+```
+
+c) **MSE is much more affected** by the outlier. The error of 14 becomes 196 when squared, dominating the total.
+
+d) Prefer MAE when:
+- Data have outliers or heavy-tailed distributions
+- Equal treatment of all errors is desired
+- The cost of errors is linear, not quadratic
+:::
+:::
+
+
+
+::: {#exr-}
+## True/False: Pattern Matching
+
+a) Maximum likelihood estimation always produces unbiased estimates.
+
+b) Cross-entropy loss is the negative log-likelihood for classification.
+
+c) A model with 100% training accuracy is always a good model.
+
+d) MSE and MLE under normal errors give the same parameter estimates.
+
+e) Higher accuracy always means a better classifier.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. MLE can be biased, especially in small samples. Example: MLE for variance divides by $n$, not $n-1$.
+
+b) **TRUE**. For classification with probabilities $p_i$, cross-entropy is: $-\sum_i \left[ y_i \log p_i + (1-y_i)\log(1-p_i) \right]$.
+
+c) **FALSE**. 100% training accuracy often indicates overfitting. Test accuracy is what matters.
+
+d) **TRUE**. If $y \sim N(f(x), \sigma^2)$, maximizing likelihood = minimizing MSE.
+
+e) **FALSE**. For imbalanced data, accuracy is misleading. A model predicting all "negative" can have 99% accuracy if only 1% are positive.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-composition-vs-addition}
+## Composition versus Addition: Why Depth Captures Interactions
+
+The chapter's *Complex Functions* section contrasts the composition structure of deep learning, $f = f_L(\cdots f_1(x))$ with $f_i(x) = \sigma(W_i x + b_i)$, against the addition structure of the traditional models in @tbl-traditional, such as the generalized additive model $y = \beta_0 + f_1(x_1) + \cdots + f_k(x_k)$. This exercise makes the practical difference concrete on a purely interactive target.
+
+a) Simulate $n = 400$ observations with two independent predictors $x_1, x_2 \sim \text{Uniform}(-1,1)$ and a purely interactive response
+$$
+y = 4 x_1 x_2 + \varepsilon, \qquad \varepsilon \sim N(0, 0.3^2).
+$$
+Note that $\E{y \mid x_1} = 4 x_1 \E{x_2} = 0$ and likewise $\E{y \mid x_2} = 0$: neither predictor has any marginal effect on its own, the entire signal is in how $x_1$ and $x_2$ act together. Confirm that the sample correlations $\Cor{y, x_1}$ and $\Cor{y, x_2}$ are both near zero, then split the data into a 70% training set and a 30% test set (use `set.seed(11)`).
+
+b) Fit the additive model $\hat y = f_1(x_1) + f_2(x_2)$ with `mgcv::gam(y ~ s(x1) + s(x2))`, mirroring the GAM row of @tbl-traditional. Report the test MSE and compare it to the test MSE of the mean rule $\hat y = \bar y$ from the start of the chapter. Inspect `summary()` of the fit: what do the estimated degrees of freedom and $p$-values of the two smooth terms say?
+
+c) Fit the composition $\hat y = f_2(f_1(x))$ with a small one-hidden-layer network, `nnet::nnet(y ~ x1 + x2, size = 8, linout = TRUE, decay = 0.001)`. Here the hidden layer computes $f_1(x) = \sigma(W_1 x + b_1)$ exactly as in the chapter, mixing $x_1$ and $x_2$ together before the nonlinearity. Report its test MSE on the same split and compare it to (b).
+
+d) Explain the gap between (b) and (c) from the functional forms alone. Show that for any additive model $\hat y = f_1(x_1) + f_2(x_2)$ the mixed partial derivative $\partial^2 \hat y / (\partial x_1 \partial x_2) \equiv 0$, no matter how flexible $f_1$ and $f_2$ are individually. Since the true surface has $\partial^2 y / (\partial x_1 \partial x_2) = 4 \neq 0$, argue why this is a structural limitation of addition rather than a shortage of data or flexibility, and why composition, through the linear mixing $W_1 x$ inside $f_1$, removes it.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| message: false
+#| warning: false
+library(mgcv)
+library(nnet)
+
+set.seed(11)
+n <- 400
+x1 <- runif(n, -1, 1)
+x2 <- runif(n, -1, 1)
+y  <- 4 * x1 * x2 + rnorm(n, 0, 0.3)
+dat <- data.frame(y, x1, x2)
+
+# neither predictor is correlated with y on its own
+cat(sprintf("cor(y, x1) = %.3f   cor(y, x2) = %.3f   var(y) = %.3f\n",
+            cor(y, x1), cor(y, x2), var(y)))
+
+# 70/30 train/test split
+tr <- sample(n, 0.7 * n)
+train <- dat[tr, ]; test <- dat[-tr, ]
+
+# baselines and the two competing structures
+mse_mean <- mean((test$y - mean(train$y))^2)                 # mean rule
+gam_fit  <- gam(y ~ s(x1) + s(x2), data = train)             # addition
+mse_gam  <- mean((test$y - predict(gam_fit, test))^2)
+net      <- nnet(y ~ x1 + x2, data = train, size = 8,        # composition
+                 linout = TRUE, decay = 0.001, trace = FALSE)
+mse_net  <- mean((test$y - predict(net, test))^2)
+
+cat(sprintf("mean rule    test MSE = %.3f\n", mse_mean))
+cat(sprintf("additive GAM test MSE = %.3f\n", mse_gam))
+cat(sprintf("1-layer net  test MSE = %.3f  (%.1fx smaller, R^2 = %.2f)\n",
+            mse_net, mse_gam / mse_net, 1 - mse_net / mse_mean))
+
+# the GAM smooths detect nothing: edf ~ 1, both non-significant
+sg <- summary(gam_fit)
+cat(sprintf("GAM smooths: edf = %.2f, %.2f   p = %.3f, %.3f\n",
+            sg$edf[1], sg$edf[2], sg$s.pv[1], sg$s.pv[2]))
+```
+
+a) The response is a deterministic function of both predictors yet uncorrelated with either one alone: the simulation gives $\Cor{y, x_1} = 0.018$ and $\Cor{y, x_2} = -0.096$, both essentially zero. The sample variance is $\Var{y} = 1.679$, close to the population value $16 \Var{X_1} \Var{X_2} + \Var{\varepsilon} = 16 (\tfrac13)(\tfrac13) + 0.09 \approx 1.87$ (a Uniform$(-1,1)$ variable has variance $\tfrac13$, and $\E{X_1 X_2} = 0$).
+
+b) The additive GAM's test MSE is $1.711$, essentially identical to the mean rule's $1.697$ (in fact marginally worse). `summary(gam_fit)` shows both smooths are flat and non-significant: estimated degrees of freedom $1.12$ and $1.61$, barely above the $1$ of a straight line, with $p$-values $0.589$ and $0.253$. The additive model has detected no signal at all. This is not a fitting failure: since $\E{y \mid x_1} = \E{y \mid x_2} = 0$ exactly, the best possible function of $x_1$ alone (or $x_2$ alone) really is the constant zero, so a correctly fit GAM collapses to the mean rule here however flexible its smooths are allowed to be.
+
+c) The 8-unit single-hidden-layer composition achieves test MSE $0.083$, about $20.6$ times smaller than the GAM/mean rule and an $R^2$ of $0.95$ relative to the mean rule. Each hidden unit $\sigma(w_1 x_1 + w_2 x_2 + b)$ responds to a linear combination of both inputs, and a weighted sum of eight such units approximates the bilinear surface $4 x_1 x_2$ well.
+
+d) For $\hat y = f_1(x_1) + f_2(x_2)$, $\partial \hat y / \partial x_1 = f_1'(x_1)$ depends on $x_1$ only, so $\partial^2 \hat y / (\partial x_1 \partial x_2) = 0$ identically, for every choice of $f_1$ and $f_2$, however nonlinear each is on its own. The true surface has constant mixed partial $\partial^2 y / (\partial x_1 \partial x_2) = 4$, so no additive model can reproduce it: the gap between (b) and (c) cannot be closed with more data, smoother splines, or tuned hyperparameters, it is a mismatch of functional form. Composition escapes the limitation because the pre-activation $W_1 x + b_1$ is a genuine linear combination of both coordinates; passing that combination through $\sigma$ and recombining several hidden units in the next layer manufactures exactly the cross term an additive model cannot express. This is the concrete payoff of the chapter's composition-versus-addition contrast: composition lets features interact, addition does not.
+:::
+:::
+
+::: {#exr-r2-two-regimes}
+## Why $R^2$ Should Be Avoided: Two Regimes
+
+The chapter argues that $R^2$ can be arbitrarily low when a model is completely correct, and arbitrarily close to 1 when a model is completely wrong. This exercise makes both claims concrete by simulation.
+
+a) Simulate $n = 300$ observations from a *correctly specified* linear model $y = 2 + 3x + \epsilon$, with $x \sim N(0,1)$ and noise $\epsilon \sim N(0, \sigma^2)$ using a large noise standard deviation $\sigma = 50$. Fit `lm(y ~ x)` and report $R^2$. Confirm the fitted slope is still close to the true value $\beta_1 = 3$, even though $R^2$ is tiny.
+
+b) Simulate $n = 300$ observations from a *misspecified* relationship: $x \sim \text{Uniform}(1, 10)$ and $y = 5 + 10\sqrt{x} + \epsilon$, with $\epsilon \sim N\bigl(0, (0.4x)^2\bigr)$, so the mean function is nonlinear, and the noise variance grows with $x$. Fit `lm(y ~ x)` anyway and report $R^2$.
+
+c) For the model in (b), compute $\Cor{|e|, x}$, where $e$ is the vector of residuals. What does a nonzero value tell you about an assumption of the fitted linear model, an assumption the high $R^2$ from (b) gave no hint of violating?
+
+d) Using (a)-(c), explain in two or three sentences why $R^2$ measures neither correct specification nor predictive usefulness. Which metrics from this chapter would you report instead?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(11)
+n <- 300
+
+# (a) correctly specified linear model, high noise
+x_a <- rnorm(n, 0, 1)
+y_a <- 2 + 3 * x_a + rnorm(n, 0, 50)
+fit_a <- lm(y_a ~ x_a)
+cat(sprintf("R^2 (correct model, high noise): %.4f | slope: %.3f (true = 3)\n",
+            summary(fit_a)$r.squared, coef(fit_a)[2]))
+
+# (b) misspecified nonlinear, heteroskedastic relationship
+x_b <- runif(n, 1, 10)
+y_b <- 5 + 10 * sqrt(x_b) + rnorm(n, 0, 0.4 * x_b)
+fit_b <- lm(y_b ~ x_b)
+cat(sprintf("R^2 (wrong model, nonlinear + heteroskedastic): %.4f\n", summary(fit_b)$r.squared))
+
+# (c) heteroskedasticity the high R^2 conceals
+cat(sprintf("cor(|resid|, x): %.3f\n", cor(abs(residuals(fit_b)), x_b)))
+```
+
+a) $R^2 \approx 0.003$, essentially zero, yet the fitted slope (3.035) recovers the true slope (3) almost exactly. The linear model is exactly correct here. $R^2$ is small only because the noise variance ($\sigma^2 = 2500$) is enormous relative to the signal variance ($\beta_1^2 \Var{X} = 3^2 \cdot 1 = 9$ at the population level).
+
+b) $R^2 \approx 0.83$, a strong-looking fit, yet the true mean function is a square root (curved, not linear) and the noise variance grows with $x$ (heteroskedastic). Two assumptions of the fitted linear model are wrong, and $R^2$ does not say so.
+
+c) $\Cor{|e|, x} \approx 0.36$, clearly positive: larger $x$ goes with larger absolute residuals, the signature of heteroskedasticity. Nothing in $R^2 = 0.83$ warned us this was present.
+
+d) Regime (a) shows a fully correct model can have $R^2$ near 0. Regime (b) shows a model with the wrong mean structure and the wrong error structure can have $R^2$ over 0.8. $R^2$ is a statement about the ratio of explained to total variance in one particular sample, not a statement about whether the functional form is right or whether predictions will generalize. Report MSE, MAE, or cross-validated error instead, together with residual diagnostics like the one in (c).
+:::
+:::
+
+::: {#exr-mean-knn-linear}
+## Comparing the Mean Rule, k-NN, and Linear Regression
+
+This chapter introduces the mean rule and the nearest-neighbor rule as two extremes of the bias-variance spectrum, with linear regression, a parametric model richer than the mean rule, between them. Here we compare all three directly on the built-in `mtcars` data ($n = 32$), predicting `mpg` from `wt` (weight in 1000 lbs).
+
+a) Because $n = 32$ is small, use 5-fold cross-validation rather than a single train/test split, as the chapter recommends for small samples. Write a short function that performs $k$-nearest-neighbor regression by hand: for each test point $x_0$, average the $y$-values of the $k$ training points whose $x$ is closest to $x_0$.
+
+b) For each of the 5 folds, fit (i) the mean rule, (ii) $k$-NN with $k=3$, and (iii) linear regression on the training portion of the fold, and evaluate the mean squared error on the held-out portion. Report the average cross-validated MSE (CV-MSE) for each method.
+
+c) Rank the three methods by CV-MSE. Relate the ranking to the chapter's description of the mean rule as "high bias, low variance" and the nearest-neighbor rule as "low bias, high variance."
+
+d) Recompute the $k$-NN CV-MSE for $k \in \{1, 3, 5, 10\}$. Describe the pattern as $k$ grows. What value of $k$ makes $k$-NN's prediction identical to the mean rule for every test point, and why?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(11)
+data(mtcars)
+x <- mtcars$wt; y <- mtcars$mpg; n <- length(y)
+
+knn_predict <- function(x_tr, y_tr, x_te, k) {
+  sapply(x_te, function(x0) mean(y_tr[order(abs(x_tr - x0))[1:k]]))
+}
+
+folds <- sample(rep(1:5, length.out = n))
+mse_mean <- mse_knn <- mse_lm <- numeric(5)
+
+for (f in 1:5) {
+  tr <- which(folds != f); te <- which(folds == f)
+  mse_mean[f] <- mean((y[te] - mean(y[tr]))^2)
+  pred_knn    <- knn_predict(x[tr], y[tr], x[te], k = 3)
+  mse_knn[f]  <- mean((y[te] - pred_knn)^2)
+  fit         <- lm(y[tr] ~ x[tr])
+  pred_lm     <- coef(fit)[1] + coef(fit)[2] * x[te]
+  mse_lm[f]   <- mean((y[te] - pred_lm)^2)
+}
+
+cat(sprintf("Mean rule  CV-MSE: %.2f\n", mean(mse_mean)))
+cat(sprintf("k-NN (k=3) CV-MSE: %.2f\n", mean(mse_knn)))
+cat(sprintf("Linear reg CV-MSE: %.2f\n\n", mean(mse_lm)))
+
+for (kk in c(1, 3, 5, 10, 26)) {
+  mse_k <- sapply(1:5, function(f) {
+    tr <- which(folds != f); te <- which(folds == f)
+    pred <- knn_predict(x[tr], y[tr], x[te], k = min(kk, length(tr)))
+    mean((y[te] - pred)^2)
+  })
+  cat(sprintf("k = %d  CV-MSE = %.2f\n", kk, mean(mse_k)))
+}
+```
+
+b) Mean rule: CV-MSE $\approx 36.6$. $k$-NN ($k=3$): CV-MSE $\approx 13.5$. Linear regression: CV-MSE $\approx 10.1$.
+
+c) Linear regression wins, $k$-NN is second, and the mean rule is far worse. Weight and mileage are strongly, and nearly linearly, related, so ignoring $x$ entirely, as the mean rule does, throws away real signal: that is the cost of its high bias. Linear regression's straight-line assumption matches the true relationship well, so it pays little bias cost and, with only 32 points, keeps variance low too. $k$-NN with $k=3$ also uses $x$, so its bias is low, but averaging only 3 of roughly 26 training points per prediction makes it noisier (higher variance) than the fitted line, exactly the "low bias, high variance" character the chapter attributes to the nearest-neighbor rule.
+
+d) CV-MSE traces a U-shape in $k$: $k=1$ gives $\approx 21.0$ (each prediction copies a single neighbor, high variance), $k=5$ gives the minimum $\approx 10.0$ (essentially tied with linear regression), and $k=10$ rises to $\approx 14.9$ (predictions start blending in dissimilar cars, more bias). Once $k$ reaches the size of the training fold (25 or 26 points here), every prediction averages *all* training points, which is exactly the mean rule; the simulation confirms this exactly, since the CV-MSE at $k=26$ (36.64) equals the mean rule's CV-MSE (36.64) to two decimal places. The mean rule and $k$-NN are therefore not two unrelated methods but the two ends of one continuum indexed by $k$.
+:::
+:::
+
+::::

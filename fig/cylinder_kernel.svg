@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="721pt" height="523pt" viewBox="0 0 721 523">
+<defs>
+<clipPath id="clip_0">
+<path transform="matrix(1,0,0,-1,0,523)" d="M28.8 28.8H707.04V509.03999H28.8Z"/>
+</clipPath>
+<clipPath id="clip_1">
+<path transform="matrix(1,0,0,-1,0,523)" d="M28.8 28.8H707.04V509.03999H28.8Z"/>
+</clipPath>
+</defs>
+<path transform="matrix(1,0,0,-1,0,523)" d="M0 0H721.44V523.44H0Z" fill="#ffffff"/>
+<g clip-path="url(#clip_0)">
+</g>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M53.92 28.8H681.92"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M53.92 28.8V21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M179.52 28.8V21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M305.12 28.8V21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M430.72 28.8V21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M556.32 28.8V21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M681.92 28.8V21.6"/>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="45.58 52.252004 55.588006">0.0</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="171.18 177.85199 181.18799">0.2</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="296.78 303.452 306.788">0.4</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="422.38 429.052 432.388">0.6</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="547.98 554.652 557.988">0.8</tspan></text>
+<text xml:space="preserve" transform="matrix(1 0 -0 1 0 523)" font-size="12" font-family="Helvetica"><tspan y="-2.88" x="673.58 680.252 683.588">1.0</tspan></text>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 46.59V491.25"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 46.59H21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 135.52H21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 224.45H21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 313.39H21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 402.32H21.6"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 491.25H21.6"/>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="38.25 44.922 48.258005">0.0</tspan></text>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="127.18 133.852 137.188">0.2</tspan></text>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="216.11 222.782 226.118">0.4</tspan></text>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="305.05 311.722 315.05799">0.6</tspan></text>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="393.98 400.652 403.988">0.8</tspan></text>
+<text xml:space="preserve" transform="matrix(0 -1 1 0 0 523)" font-size="12" font-family="Helvetica"><tspan y="11.52" x="482.91 489.582 492.918">1.0</tspan></text>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 28.8H707.04V509.04H28.8V28.8"/>
+<g clip-path="url(#clip_1)">
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M305.12 28.8V509.04"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M430.72 28.8V509.04"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 224.45H707.04"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M28.8 313.39H707.04"/>
+<path transform="matrix(1,0,0,-1,0,523)" d="M305.12 224.45H430.72V313.38H305.12Z" fill="#0000ff"/>
+<path transform="matrix(1,0,0,-1,0,523)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M305.12 224.45H430.72V313.38H305.12Z"/>
+</g>
+</svg>

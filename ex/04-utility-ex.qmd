@@ -1,0 +1,824 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Two Gambles
+
+In an experiment, subjects were given the choice between two gambles:
+
+| Experiment 1        |           |                     |        |
+|:-------------------:|:---------:|:-------------------:|:------:|
+| Gamble $\mathcal{G}_A$ |           | Gamble $\mathcal{G}_B$ |        |
+| Win                 | Chance    | Win                 | Chance |
+| $2500               | 0.33      | $2400               | 1      |
+| $2400               | 0.66      |                     |        |
+| $0                  | 0.01      |                     |        |
+
+Suppose that a person is an expected utility maximizer. Set the utility scale so that $u(\$0) = 0$ and $u(\$2500) = 1$. Whether a utility maximizing person would choose Option A or Option B depends on the person's utility for \$2400. For what values of $u(\$2400)$ would a rational person choose Option A? For what values would a rational person choose Option B?
+
+
+| Experiment 2        |           |                     |        |
+|:-------------------:|:---------:|:-------------------:|:------:|
+| Gamble $\mathcal{G}_C$ |           | Gamble $\mathcal{G}_D$ |        |
+| Win                 | Chance    | Win                 | Chance |
+| $2500               | 0.33      | $2400               | 0.34   |
+| $0                  | 0.67      | $0                  | 0.66   |
+
+For what values of u($2400) would a person choose Option C? For what values would a person choose Option D? Explain why no expected utility maximizer would prefer B and C.
+
+
+
+This problem is a version of the famous Allais paradox, named after the prominent critic of subjective expected utility theory who first presented it. Kahneman and Tversky found that 82% of subjects preferred B over A, and 83% preferred C over D. Explain why no expected utility maximizer would prefer both B in Gamble 1 and C in Gamble 2. (A utility maximizer might prefer B in Gamble 1. A different utility maximizer might prefer C in Gamble 2. But the same utility maximizer would not prefer both B in Gamble 1 and C in Gamble 2.)
+
+Discuss these results. Why do you think many people prefer B in Gamble 1 and C in Gamble 2? Do you think this is reasonable even if it does not conform to expected utility theory?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Define $x = u(\$2400)$, the utility of \$2400. 
+
+For A versus B:
+
+- Expected utility of A is 0.33* (1) + 0.66*(x) + 0.01*(0)
+- Expected utility of B is x
+
+Setting them equal and solving for x tells us the value of x for which an expected utility maximizer would be indifferent between the two options
+$$0.33* (1) + 0.66*(x) + 0.01*(0) = x$$
+$$x = 0.33/0.34.$$
+
+For C versus D:
+
+- Expected utility of C is 0.33* (1) + 0.67*(0)
+- Expected utility of D is 0.34*(x)
+
+Setting them equal and solving for x tells us the value of x for which an expected utility maximizer would be indifferent between the two options
+$$0.33* (1) = 0.34*(x)$$
+$$x = 0.33/0.34$$
+
+If x < 33/34, then an expected utility maximizer would choose option C. If x>33/34, an expected utility maximizer would choose option D.
+
+
+Why no utility maximizer would prefer B and C?
+
+
+A utility maximizer would pick B if x>33/34, and would pick C if x<33/34. These regions do not overlap. By definition, an expected utility maximizer has a consistent utility value for a given payout regardless of the probability structure. Therefore, no utility maximizer would prefer B and C. A utility maximizer would be indifferent among all four of these gambles if x = 33/34. But no utility maximizer would strictly prefer B over A, and C over D.
+
+
+Many people's choices violate subjective expected utility theory in this problem. In fact, Allais carefully crafted this problem to exploit what Kahneman and Tversky called the "certainty effect." In the choice of A vs B, many prefer a sure gain to a small chance of no gain. On the other hand, in the choice of C vs D, there is no certainty, and so people are willing to reduce their chances of winning by what feels like a small amount to give themselves a chance to win a larger amount. When given an explanation for why these choices are inconsistent with "economic rationality," some people say they made an error and revise their choices, but others stand firmly by their choices and reject expected utility theory.
+
+It is also interesting to look at how people respond to a third choice:
+
+Experiment 3:
+
+This is a two-stage problem. In the first stage there is a 66% chance you will win nothing and quit. There is a 34% chance you will go on to the second stage. In the second stage you may choose between the following two options.
+
+
+| Gamble | Payout | Probability |
+| :----- | :------ | :--------- |
+| E      | $2500   | 33/34      |
+| E      | $0      | 1/34       |
+| F      | $2400   | 1          |
+
+
+Experiment 3 is mathematically equivalent to Experiment 2. That is, the probability distributions of the outcomes for E and C are the same, and the probability distributions of the outcomes for F and D are the same. In experiments, the most common pattern of choices on these problems is to prefer B, C, and F.
+There is an enormous literature on the Allais paradox and related ways in which people systematically violate the principles of expected utility theory. For more information see [Wikipedia on Allais paradox](http://en.wikipedia.org/wiki/Allais_paradox).
+
+:::
+:::
+
+::: {#exr-newcomb-predictor-accuracy}
+## How Accurate Must the Newcomb Demon Be?
+
+Consider a general version of Newcomb's problem (@exm-newcomb). The opaque box contains $M$ dollars if the demon predicted one-boxing and $0$ otherwise; the transparent box always holds $k$ dollars, with $0 < k < M$. The demon predicts correctly with probability $1-\varepsilon$, so $\prob{\text{demon predicts option}_i \mid \text{option}_i} = 1-\varepsilon$ for $\varepsilon \in [0, 1/2]$.
+
+a) Write the conditional expected payoff of one-boxing and of two-boxing as functions of $\varepsilon$, $M$, and $k$.
+
+a) Solve for the threshold $\varepsilon^\star$ at which the two conditional expected payoffs are equal, and show that $\varepsilon^\star = \tfrac12\left(1 - k/M\right)$.
+
+a) Evaluate $\varepsilon^\star$ for the book's numbers, $M = \$1{,}000{,}000$ and $k = \$1{,}000$. How accurate must the demon be before conditional expected utility favors one-boxing?
+
+a) The dominance argument for two-boxing does not depend on $\varepsilon$ at all: two-boxing yields $k$ more than one-boxing for any fixed content of the opaque box. Reconcile this with your answer to (c). Under what assumption about the relationship between your choice and the box's content does the dominance argument's silence on $\varepsilon$ stop being a strength and become a weakness? Relate your answer to the distinction between causal and evidential decision theory discussed in the chapter.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Condition on your own choice, using the demon's accuracy $1-\varepsilon$. If you one-box, the opaque box holds $M$ with probability $1-\varepsilon$ (the demon predicted correctly) and $0$ with probability $\varepsilon$, so
+$$
+\E{\text{payoff}\mid \text{one-box}} = (1-\varepsilon)M + \varepsilon\cdot 0 = (1-\varepsilon)M.
+$$
+If you two-box, you always collect the transparent $k$; the opaque box holds $0$ when the demon predicted two-boxing (probability $1-\varepsilon$) and $M$ when it predicted incorrectly (probability $\varepsilon$), so
+$$
+\E{\text{payoff}\mid \text{two-box}} = (1-\varepsilon)k + \varepsilon(M+k) = k + \varepsilon M.
+$$
+
+b) Setting $(1-\varepsilon)M = k + \varepsilon M$ gives $M - k = 2\varepsilon M$, hence
+$$
+\varepsilon^\star = \frac{M-k}{2M} = \frac12\left(1 - \frac{k}{M}\right).
+$$
+Because $\E{\text{payoff}\mid\text{one-box}} - \E{\text{payoff}\mid\text{two-box}} = M - k - 2\varepsilon M$ decreases in $\varepsilon$, one-boxing has the larger conditional expected payoff exactly when $\varepsilon < \varepsilon^\star$.
+
+c) With $M = 1{,}000{,}000$ and $k = 1{,}000$, $\varepsilon^\star = \tfrac12(1 - 0.001) = 0.4995$. Two-boxing wins on conditional expected payoff only when the demon is wrong more than $49.95\%$ of the time, that is, only when its accuracy $1-\varepsilon$ falls below $50.05\%$. Any predictor better than a coin flip by even a whisker tips conditional expected utility toward one-boxing: the $1000{:}1$ payoff ratio $M/k$ overwhelms all but a negligible edge in predictive accuracy.
+
+d) The dominance argument implicitly assumes your action carries no information about the box's already-fixed content (act-state independence). A predictor with accuracy above $1/2$ breaks precisely that assumption: your choice is correlated with, though it does not cause, the box's content. Causal decision theory keeps the dominance verdict because causal independence still holds (your choice cannot reach back and alter a box already sealed), so its silence on $\varepsilon$ is a feature. Evidential decision theory rejects it because the correlation still carries information, so ignoring $\varepsilon$ discards exactly the fact that makes one-boxing attractive. Part (c) shows how extreme the conflict becomes: dominance still recommends two-boxing even when one-boxing's conditional expected payoff exceeds two-boxing's by a factor approaching $M/k = 1000$ (about $\$1{,}000{,}000$ versus $\$1{,}000$ as $\varepsilon \to 0$).
+:::
+:::
+
+::: {#exr-ellsberg-maxmin}
+## Resolving Ellsberg with Ambiguity Aversion
+
+Recall the Ellsberg setup (@exm-ellberg): urn A holds 50 red and 50 black balls; urn B holds 100 balls in an unknown red/black mix. Suppose all you are told about urn B is that its probability of drawing red, $p$, satisfies $p \in [0.3, 0.7]$, with no information about where in that range $p$ lies. Each bet pays \$1 if the named color is drawn and \$0 otherwise.
+
+a) Show algebraically that no single value of $p \in [0.3, 0.7]$ can simultaneously make $\E{\text{1A}} > \E{\text{1B}}$ and $\E{\text{2A}} > \E{\text{2B}}$ under ordinary (single-prior) expected utility, reproducing the chapter's contradiction.
+
+a) Now suppose the decision maker evaluates a bet on urn B by its worst case over the ambiguity set: its value is $\min_{p \in [0.3,0.7]}$ of its expected payoff, computed separately for each bet. Compute the maxmin value of bet 1B and of bet 2B, and compare each to the (unambiguous) value of the corresponding bet on urn A.
+
+a) Show that under the maxmin criterion both $\text{1A} \succ \text{1B}$ and $\text{2A} \succ \text{2B}$ hold at once with no contradiction, and explain in a sentence why maxmin escapes the argument in (a) even though it never assigns urn B a single probability.
+
+a) Consider instead a symmetric ambiguity interval $[0.5 - \delta,\, 0.5 + \delta]$ for $\delta \in (0, 0.5]$. Show that maxmin predicts strict ambiguity aversion (both A-bets strictly preferred) for every such $\delta$, and describe what happens as $\delta \to 0$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Since urn A is a fair 50/50 mix, $\E{\text{1A}} = \E{\text{2A}} = 0.5$. For urn B, $\E{\text{1B}} = p$ and $\E{\text{2B}} = 1 - p$. Preferring 1A over 1B requires $0.5 > p$; preferring 2A over 2B requires $0.5 > 1 - p$, i.e., $p > 0.5$. No single $p$ satisfies both $p < 0.5$ and $p > 0.5$, which is exactly the chapter's contradiction.
+
+b) The maxmin value of bet 1B is $\min_{p \in [0.3,0.7]} p = 0.3$, attained at the low end $p = 0.3$. The maxmin value of bet 2B is $\min_{p \in [0.3,0.7]} (1 - p) = 1 - 0.7 = 0.3$, attained at the high end $p = 0.7$. Both equal $0.3$, strictly below the value $0.5$ of the corresponding urn-A bet.
+
+c) Since $0.3 < 0.5$ in both comparisons, $\text{1A} \succ \text{1B}$ and $\text{2A} \succ \text{2B}$ hold simultaneously, with no contradiction. Maxmin escapes part (a) because it evaluates each bet at its own worst-case $p$ (a low $p$ is worst for betting on red, a high $p$ is worst for betting on black), rather than forcing one common $p$ to govern both bets, which is the single-prior assumption that part (a) rules out.
+
+d) On $[0.5 - \delta,\, 0.5 + \delta]$ the worst-case value of 1B is $\min p = 0.5 - \delta$ and the worst-case value of 2B is $\min(1 - p) = 1 - (0.5 + \delta) = 0.5 - \delta$. Both fall short of the urn-A value $0.5$ whenever $\delta > 0$, so strict ambiguity aversion holds for every $\delta \in (0, 0.5]$. As $\delta \to 0$ the ambiguity set collapses to the single point $p = 0.5$, both worst-case values rise to $0.5$, and the strict preference for the A-bets disappears: maxmin expected utility reduces to ordinary expected utility once ambiguity vanishes, so it nests standard expected utility as the special case of a singleton prior set.
+:::
+:::
+
+::: {#exr-}
+## Decisions
+
+You are sponsoring a fund raising dinner for your favorite political candidate. There is uncertainty about the number of people who will attend (the random variable $X$), but based on past dinners, you think that the probability function looks like this:
+
+         $x$ 100   200   300   400   500
+  ---------- ----- ----- ----- ----- -----
+    $P_X(x)$ 0.1   0.2   0.3   0.2   0.2
+
+a) Calculate $E(X)$, the expected number of people who will attend.
+a) The owner of the venue is going to charge you \$1500 for rental and  other miscellaneous costs. You know that you will make a profit     (after per person costs) of \$40 for each person attending.     Calculate the expected profit after the rental cost.
+a) The owner of the venue proposes an alternative pricing scheme. Instead of charging \$1500, she will charge you either \$5 per     person or \$2100, whichever is smaller. So if 100 people come, you     only pay \$500. If 500 come, you pay \$2100. Calculate the expected     profit under this scheme (still assuming \$40 per plate profit     before you pay the owner).
+a) Let $Y_1$ be your profit under the first scheme, and $Y_2$ be your profit under the second. If you do the calculations, it turns out     that the standard deviations of these profits are:     $$\sigma_{Y_1} = 4996 \qquad \sigma_{Y_2} = 4488$$ Using the     expected values calculated above, explain which of the two scenarios     you prefer.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $E(X) = 100(.1) + 200(.2) + 300(.3) + 400(.2) +500(.2) = 320$
+a) $Y=40X-1500$
+    $E(Y) = E(40X-1500) = 40 E(X) -1500  = 40(320) -1500 = 11300$
+a) Profit = $40X - \min(2100, 5X)$. Note that the profit formula is not
+    linear (just like in the newspaper example). Consequently, you need
+    to re-calculate profit for each of the five cases to get the
+    expected value.
+
+      $x$                       100    200    300     400     500
+      ------------------------- ------ ------ ------- ------- -------
+      $p_X(x)$                  0.1    0.2    0.3     0.2     0.2
+      costs                     500    1000   1500    2000    2100
+      gross                     4000   8000   12000   16000   20000
+      profit = gross - costs    3500   7000   10500   14000   17900
+
+    $E(profit) = 3500(.1) + 7000(.2) + 10500(.3) + 14000(.2) + 17900(.2)
+    = 11280$
+a) The profit and standard deviation are larger in (b) than in (c). If
+    you are risk averse, go for (c) (less uncertainty). If you are a
+    gambler, go for (b) (higher average return). Since the difference in
+    $\sigma$ (508) is much larger than the difference in the mean (\$20), a
+    risk-averse decision maker should clearly prefer scheme (c).
+
+:::
+:::
+
+::: {#exr-}
+## Marjorie Visit
+Marjorie is worried about whether it is safe to visit a vulnerable relative during a pandemic. She is considering whether to take an at-home test for the virus before visiting her relative. Assume the test has sensitivity 85% and specificity 92%. That is, the probability that the test will be positive is about 85% if an individual is infected with the virus, and the probability that test will be negative is about 92% if an individual is not infected.
+
+
+Further, assume the following losses for Marjorie
+
+| Event                               | Loss |
+| :---------------------------------- | :--- |
+| Visit relative, not infected        | 0    |
+| Visit relative, infected            | 100  |
+| Do not visit relative, not infected | 1    |
+| Do not visit relative, infected     | 5    |
+
+a) Assume that about 2 in every 1,000 persons in the population is currently infected. What is the posterior probability that an individual with a positive test has the disease?
+a) Suppose case counts have decreased substantially to about 15 in 100,000. What is the posterior probability that an individual with a positive test has the disease?
+a) Suppose Marjorie is deciding whether to visit her relative and if so whether to test for the disease before visiting. If the prior probability that Marjorie has the disease is 200 in 100,000, find the policy that minimizes expected loss. That is, given each of the possible test results, should Marjorie visit her relative? Find the EVSI. Repeat for a prior probability of 15 in 100,000. Discuss.
+a) For the decision of whether Marjorie should visit her relative, find the range of prior probabilities for which taking the at-home test results in lower expected loss than ignoring or not taking the test (assuming the test is free). Discuss your results.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) For a person in the given population, we have the following probabilities for the test
+outcome:
+
+| Condition       | Positive | Negative |
+| :-------------- | :------- | :------- |
+| Disease present | 0.85     | 0.15     |
+| Disease absent  | 0.08     | 0.92     |
+
+
+Prior Probability: P(Disease present) = 0.002 and P(Disease absent)=0.998
+
+We can calculate the posterior probability that the individual has the disease as follows:
+
+First, we calculate the probability of a positive test (this will be the denominator of Bayes' rule):
+
+
+P(Positive) = P(Positive | Present) * P(Present)+P(Positive | Absent) * P(Absent) = $0.85\times 0.002 + 0.08\times 0.998 = 0.08154$
+
+Then, we calculate the posterior probability that the individual is has the disease by applying Bayes' rule:
+
+P(Present | Positive) = P(Positive | Present) * P(Present)/P(Positive) = 0.85 * 0.002/0.08154 = 0.0208
+
+The posterior probability that an individual who tests positive has the disease is 0.0208.
+
+b) The sensitivity and specificity of the test are the same as above:
+
+| Condition       | Positive | Negative |
+| :-------------- | :------- | :------- |
+| Disease present | 0.85     | 0.15     |
+| Disease absent  | 0.08     | 0.92     |
+
+But the prior probability is different:
+
+P(Disease present) = 0.00015 and P(Disease absent)=0.99985
+
+Again, we calculate the probability of a positive test (this will be the denominator of Bayes' rule):
+
+P(Positive) = P(Positive | Present) * P(Present)+P(Positive | Absent) * P(Absent) = 0.85 * 0.00015 + 0.08 * 0.99985 = 0.0801155
+
+Then, we calculate the posterior probability that the individual is has the disease by applying Bayes' rule:
+
+P(Present | Positive) = P(Positive | Present) * P(Present)/P(Positive) = 0.85 * 0.00015/0.0801155 = 0.00159
+
+The posterior probability that an individual who tests positive has the disease is
+0.00159.
+
+In both cases, the posterior probability that the individual has the disease is small, even after taking the at-home test. But it is important to note that the probability has increased by more than a factor of 10, from 2 in 1000 to more than 2% in the first case, and from 15 in 100,000 to more than 15 in 10,000 in the second case. When the prior probability is lower, so is the posterior probability.
+
+Some students who are inexperienced with Bayesian reasoning are surprised at how small the posterior probability is after a positive test. Untrained people often expect the probability to be closer to 85%, the sensitivity of the test. I have found that a good way to explain these results to people who have trouble with it is to ask them to imagine a population of 100,000 people. For part a, we would expect 200 have the disease. Of these, we expect about 85%, or 170 people, to test positive, and 15%, or only 30 people, to test negative. So the test identified most of the ill people. But now let's consider the 99,800 people who do not have the disease. We expect only 8% of these to test positive, but this is 7984 people testing positive. We expect 92%, or 91,816 people, to test negative. Of those who test positive, 170 have the disease and 7,984 do not. So even though most ill people test positive and most well people test negative, because there are so many more people who do not have the disease, most of the ones testing positive actually do not have the disease.
+
+A helpful way to visualize the role of the prior probability is to plot the posterior probability as a function of the prior probability (this was not required as part of the assignment). For prior probabilities near zero, a positive test increases the probability of the disease, but it remains very low because the positives are dominated by false positives. But once the prior probability reaches 10%, there is a better than even chance that someone testing positive has the disease; at a 20% prior probability, the posterior probability is over 70%.
+
+```{r}
+p = seq(0.0001, 0.2, length.out = 100)
+posterior = 0.85*p/(0.85*p + 0.08*(1-p))
+plot(p, posterior, type = "l", xlab = "Prior Probability", ylab = "Posterior Probability")
+```
+
+c) We will consider two different prior probabilities:
+
+High prevalence: P(Present) = 0.002 and P( Absent ) = 0.998 \
+Low prevalence: P(Present) = 0.00015 and P( Absent ) = 0.99985
+
+To calculate EVSI, we do the following:
+
+Calculate the expected loss if we do not do the test. To do this, we use the prior probability to calculate the expected loss if we visit and if we don't. The minimum of these is the expected loss if we do not do the test.
+
+EL[visit] = 100*p + 0*(1-p)\
+EL[no visit] = 5*p + 1*(1-p)
+
+Here, p is either 0.002 (part a) or 0.00015 (part b)
+
+Calculate the expected loss if we do the test as follows:
+
+a. Assume the test is positive. Using the posterior probability of disease,
+calculate the expected loss of visiting and not visiting. The minimum
+of these is the expected loss if the test is positive.
+b. Assume the test is negative. Using the posterior probability of disease,
+calculate the expected loss of visiting and not visiting. The minimum
+of these is the expected loss if the test is negative.
+c. Use the Law of Total Probability to find the probability of a positive
+test. (We already found this in Problems 1 and 2 - it's the denominator of Bayes' rule.) Combine the results from a and b using the probability of disease as follows:\
+E(L | test) = P(positive)E(L | positive)+P(negative)E(L | negative)
+
+Now, the EVSI is how much doing the test reduces our expected loss: 
+
+EVSI = E(L | no test) - E(L | test)
+
+We will now apply these steps for the two base rates. The table below shows the results.
+
+|                                                      | High prevalence                  | Low prevalence                   |
+| :--------------------------------------------------- | :------------------------------- | :------------------------------- |
+| Probability of positive test                         | 0.08154                          | 0.08012                          |
+| Posterior probability of disease given positive test | 0.0208                           | 0.00159                          |
+| Posterior probability of disease given negative test | 0.00033                          | 0.0000245                        |
+| Expected loss - no test                              | Visit: 0.2 No visit: 1.008       | Visit: 0.015 No visit: 1.0006    |
+| Expected loss if positive                            | Visit: 2.0849 No visit: 1.0834   | Visit: 0.15915 No visit: 1.00637 |
+| Expected loss if negative                            | Visit: 0.03266 No visit: 1.00131 | Visit: 0.00245 No visit: 1.0001  |
+| Expected loss with test                              | 0.11834                          | 0.015                            |
+| Expected loss - no test                              | Visit: 0.2 No visit: 1.008       | Visit: 0.015 No visit: 1.0006    |
+| EVSI                                                 | 0.2-0.11834 = 0.08166            |        0.015-0.015 = 0           |
+
+
+In the high prevalence case, it is better to test and follow the test result. The EVSI is
+0.08166; there is 0.08166 lower loss from testing than from not testing. In the low prevalence case, however, the optimal decision is to visit no matter what the result of the test, because the posterior probability is so low even if the test is positive. Therefore, the
+expected loss is the same for doing or not doing the test because we ignore the test result and visit anyway. Therefore, the EVSI is zero in the low prevalence case.
+
+d)   Prior Probability: P(Disease present) = p and P( Disease absent ) = 1- p
+
+If we do not do the test, we cannot use the test result, so we have two choices: visit or do not visit.
+The expected loss of visiting is: E(L|V) = 100p + 0(1-p) = 100p\
+The expected loss of not visiting (lose 5 if ill, 1 if not ill): E(L|N) = 5p + (1-p)
+
+Now consider the strategy of doing the test and visiting if the test is negative. We get the following losses 
+
+
+| Patient status | Test result | Action   | Loss (L) | Probability |
+| :------------- | :---------- | :------- | :------- | :---------- |
+| No disease     | Negative    | visit    | 0        | (1-p)*0.92  |
+| No disease     | Positive    | no visit | 1        | (1-p)*0.08  |
+| Disease        | Negative    | visit    | 100      | p*0.15      |
+| Disease        | Positive    | no visit | 5        | p*0.85      |
+
+
+The total expected loss of this strategy is:\
+E(L|T) = 0 + 1*0.08*(1-p) + 100*0.15*p + 5*0.85p = 0.08 - 0.08p + 15p + 4.25p = 0.08 + 19.17p
+
+Find strategy regions. With a little algebra, we can find where the lines intersect and then find the regions of optimality. These are:
+
+| Range                  | Policy                                                 |
+| :--------------------- | :----------------------------------------------------- |
+| $0 \le p < 0.00099$    | Optimal policy is visit regardless of test             |
+| $0.00099 < p < 0.0606$ | Optimal policy is to do the test and visit if negative |
+| $0.0606 < p \le 1$     | Optimal policy is to stay home regardless of test      |
+|                        |                                                        |
+
+The graph below shows the plots of expected loss for the three policies. I show results only for probabilities up to 0.1 in order to have a better view of the results for small probabilities.
+```{r}
+p = seq(0.0001, 0.1, length.out = 100)
+ELV = 100*p
+ELN = 5*p + (1-p)
+ELT = 0.08 + 19.17*p
+plot(p, ELV, type = "l", xlab = "Prior Probability", ylab = "Expected Loss", col = "red", lwd = 2)
+lines(p, ELN, col = "blue", lwd = 2)
+lines(p, ELT, col = "green", lwd = 2)
+legend("topleft", legend = c("Visit", "No Visit", "Test and Visit if Negative"), col = c("red", "blue", "green"), lwd = 2, cex = 0.7)
+```
+
+Therefore, in the range of values 0.00099 < p < 0.0606, doing the test has lower
+expected loss than either just visiting or just staying home.
+For the high prevalence situation, the prior probability of 0.002 is larger than 0.00099 and lower than 0.0606, so it is optimal to take the test and follow the result. For the low prevalence situation, the prior probability of 0.00015 is below 0.00099, and it is optimal just to visit without considering the test. That is, in very low prevalence situations, there is no point in doing the test, because even if it is positive, the posterior probability
+would still be low enough that it is optimal to visit.
+On the other hand, if Marjorie is experiencing symptoms or knows she has been exposed, that would increase the probability of having the disease. Even in a low prevalence situation, if symptoms or exposure increase the prior probability to above 0.00099 but below 0.0606, then she should take the test and follow the result. If symptoms or exposure increase the prior probability to above 0.0606, then she should
+not bother with the test and just stay home.
+
+:::
+:::
+
+::: {#exr-winners-curse-conditioning}
+## The Winner's Curse: Conditioning on Actually Winning
+
+Return to the claiming-race setup of @exm-Curse: a horse's true value $V$ is \$0 (never wins) or \$50,000 (improves), each with prior probability $1/2$, and the claiming price is a fixed \$20,000. Before deciding whether to claim, you receive a private scouting signal $S \in \{\text{Buy}, \text{Pass}\}$ with $\prob{S = \text{Buy} \mid V = 50{,}000} = 0.9$ and $\prob{S = \text{Buy} \mid V = 0} = 0.2$.
+
+a) Using Bayes' rule, compute $\prob{V = 50{,}000 \mid S = \text{Buy}}$ and $\E{V \mid S = \text{Buy}}$. Judging by your own signal alone, does claiming look profitable?
+
+a) Suppose exactly one rival claimant observes an independent signal with the same accuracies, conditionally independent of yours given $V$. Institutional rules award you the horse only if you signal Buy and your rival signals Pass; call this event $W$ (you win). Compute $\prob{W \mid V = 50{,}000}$, $\prob{W \mid V = 0}$, and hence $\prob{V = 50{,}000 \mid W}$ and $\E{V \mid W}$.
+
+a) Compare (a) and (b). Once you correctly condition on actually winning rather than on your own signal alone, does claiming still look profitable? Explain in words why the two calculations differ.
+
+a) Now suppose the signal is symmetric:
+$$
+\prob{S = \text{Buy} \mid V = 50{,}000} = \prob{S = \text{Pass} \mid V = 0} = q
+$$
+for some $q \in (0,1)$. Show that $\prob{V = 50{,}000 \mid W} = 1/2$ for every $q$. Explain intuitively why a symmetric scouting signal leaves you no net information once you condition on winning, however accurate it is.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) By Bayes' rule,
+$$
+\prob{V = 50{,}000 \mid \text{Buy}} = \frac{0.9 \cdot 0.5}{0.9 \cdot 0.5 + 0.2 \cdot 0.5} = \frac{0.45}{0.55} = \frac{9}{11} \approx 0.818,
+$$
+so $\E{V \mid \text{Buy}} \approx 0.818 \times 50{,}000 \approx \$40{,}909$. This far exceeds the \$20,000 price, so on the strength of your own signal claiming looks highly profitable.
+
+b) You win only if you signal Buy and the rival signals Pass. Because the two signals are conditionally independent given $V$,
+$$
+\prob{W \mid V = 50{,}000} = 0.9 \times (1 - 0.9) = 0.09, \qquad
+\prob{W \mid V = 0} = 0.2 \times (1 - 0.2) = 0.16.
+$$
+Then
+$$
+\prob{V = 50{,}000 \mid W} = \frac{0.09 \cdot 0.5}{0.09 \cdot 0.5 + 0.16 \cdot 0.5} = \frac{0.09}{0.25} = 0.36,
+$$
+so $\E{V \mid W} = 0.36 \times 50{,}000 = \$18{,}000$.
+
+c) The naive figure of $\$40{,}909$ from part (a) suggested a clear profit, but conditioning on winning gives $\E{V \mid W} = \$18{,}000 < \$20{,}000$: correctly accounting for what winning implies turns an apparent \$20,909 expected gain into a \$2,000 expected loss. The two calculations differ because winning requires your rival to Pass, and a rival Pass is comparatively more likely when the horse is worthless (a Pass has probability $0.8$ when $V = 0$, versus only $0.1$ when the horse is good). Conditioning on $W$ therefore tilts the pool of horses you actually acquire toward low value, even though your own signal alone was optimistic. This is the winner's curse: $\E{V \mid W} < \E{V \mid \text{Buy}}$.
+
+d) With $\prob{\text{Buy} \mid V = 50{,}000} = q$ and $\prob{\text{Buy} \mid V = 0} = 1 - q$,
+$$
+\prob{W \mid V = 50{,}000} = q(1 - q), \qquad \prob{W \mid V = 0} = (1 - q)q,
+$$
+which are identical for every $q$. Hence
+$$
+\prob{V = 50{,}000 \mid W} = \frac{q(1-q)\cdot 0.5}{q(1-q)\cdot 0.5 + q(1-q)\cdot 0.5} = \frac12,
+$$
+the prior, for any $q$. Winning requires you to be right exactly where your rival is wrong (or the reverse), and a symmetric test is equally likely to make either party the better-informed one, so conditioning on the win washes out every bit of information the signal carried, no matter how sharp it is.
+:::
+:::
+
+::: {#exr-minimax-bayes-risk}
+## Minimax versus Bayes Risk
+
+Consider a decision problem with two possible states of nature, $\theta_1$ and $\theta_2$, and two available actions, $a_1$ and $a_2$, with loss table
+
+| $\mathcal{L}(\theta,a)$ | $a_1$ | $a_2$ |
+|:---:|:---:|:---:|
+| $\theta_1$ | 0 | 10 |
+| $\theta_2$ | 8 | 2 |
+
+a) Let $\pi = \prob{\theta_1}$ and $1-\pi = \prob{\theta_2}$ be a prior on the two states. Write the Bayes risk $r(\pi,a_i) = \E[\pi]{\mathcal{L}(\theta,a_i)}$ of each action as a function of $\pi$. Find Bayes' rule (the action with the smaller Bayes risk) and the Bayes risk under the prior $\pi = 0.5$.
+
+b) Repeat part (a) for the prior $\pi = 0.2$.
+
+c) Find the *least favorable prior* $\pi^\star$: the value of $\pi$ at which $r(\pi,a_1) = r(\pi,a_2)$, so the statistician is indifferent between the two actions. What is the common Bayes risk at $\pi^\star$?
+
+d) Now restrict attention to *pure* (non-randomized) minimax decisions: for each action compute its worst-case risk $\max_\theta \mathcal{L}(\theta,a_i)$, and choose the action that minimizes this worst-case risk. Is the resulting minimax risk the same as the Bayes risk you found at $\pi^\star$ in part (c)?
+
+e) Suppose instead the statistician may randomize, choosing $a_1$ with probability $q$ and $a_2$ with probability $1-q$. Find the value of $q$ that minimizes the worst-case (over $\theta$) expected loss, and show that at this $q$ the resulting rule has the *same* expected loss regardless of which state is true (an equalizer rule). Compare this randomized minimax value to your answers in (c) and (d). When does the (possibly randomized) minimax rule coincide with Bayes' rule against the least favorable prior?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $r(\pi,a_1) = \pi \cdot 0 + (1-\pi)\cdot 8 = 8-8\pi$, and $r(\pi,a_2) = \pi\cdot 10 + (1-\pi)\cdot 2 = 2+8\pi$. At $\pi=0.5$: $r(0.5,a_1)=4$ and $r(0.5,a_2)=6$. Since $4<6$, Bayes' rule is $a_1$, with Bayes risk $4$.
+
+b) At $\pi=0.2$: $r(0.2,a_1) = 8-1.6=6.4$ and $r(0.2,a_2)=2+1.6=3.6$. Since $3.6<6.4$, Bayes' rule is now $a_2$, with Bayes risk $3.6$. Bayes' rule depends on the prior: a small enough prior probability of $\theta_1$ makes $a_2$ preferable, even though $a_1$ was optimal at $\pi=0.5$.
+
+c) Setting $8-8\pi=2+8\pi$ gives $6=16\pi$, so $\pi^\star=0.375$. The common Bayes risk there is $8-8(0.375)=5$ (check: $2+8(0.375)=5$). Viewed as a function of $\pi$, the Bayes risk of Bayes' rule, $\min\{r(\pi,a_1),r(\pi,a_2)\}$, equals $2+8\pi$ for $\pi<\pi^\star$ and $8-8\pi$ for $\pi>\pi^\star$: a tent-shaped function of $\pi$ that increases up to $\pi^\star$ and decreases after it. So $\pi^\star$ is exactly where this envelope is *maximized* over priors, which is why it is called the least favorable prior: it is the prior that forces the largest unavoidable Bayes risk on the statistician.
+
+d) The worst-case risk of $a_1$ is $\max(0,8)=8$, and of $a_2$ is $\max(10,2)=10$. Since $8<10$, the pure-strategy minimax rule is $a_1$, with minimax risk $8$. This is *larger* than the Bayes risk of $5$ found at $\pi^\star$ in part (c): restricting to non-randomized actions makes the minimax criterion strictly more conservative than the least-favorable-prior Bayes risk.
+
+e) If $a_1$ is chosen with probability $q$, the expected loss is $0\cdot q + 10(1-q) = 10-10q$ if $\theta_1$ is true, and $8q+2(1-q)=2+6q$ if $\theta_2$ is true. The randomized minimax rule chooses $q$ to minimize $\max(10-10q,\,2+6q)$; since the first expression decreases and the second increases in $q$, the minimum of the max occurs where the two cross: $10-10q=2+6q \Rightarrow q=0.5$. At $q=0.5$, both expressions equal $5$: flipping a fair coin between $a_1$ and $a_2$ gives expected loss exactly $5$ *no matter which state is true*, an equalizer rule. Its worst-case risk of $5$ strictly improves on the best pure-strategy minimax risk of $8$ from part (d), and it exactly matches the Bayes risk under the least favorable prior $\pi^\star=0.375$ from part (c). This is the minimax theorem at work: the same statistician-versus-nature zero-sum game described in the chapter's discussion of minimax and Bayes risk, once randomized rules are allowed, has a value equal to the maximum Bayes risk over all priors (attained at the least favorable prior), and the minimax-optimal rule is a Bayes' rule against that prior. The two notions coincide precisely when Bayes' rule against the least favorable prior turns out to have constant risk across $\theta$ (an equalizer rule): here that required randomizing, since neither pure action alone has constant risk across $\theta_1$ and $\theta_2$. Whenever a Bayes' rule can be shown to have constant risk, that alone certifies it as minimax, without having to check every competing rule.
+:::
+:::
+
+::: {#exr-crra-elicitation}
+## Eliciting a CRRA Utility Function
+
+Recall the CRRA (constant relative risk aversion) utility family from @exm-risk, $U_\gamma(w) = \dfrac{w^{1-\gamma}-1}{1-\gamma}$ for $\gamma\neq 1$, with $U_1(w)=\log(w)$. A subject with current wealth $\$100{,}000$ is offered a fair coin-flip gamble: with probability $1/2$ her wealth becomes $\$150{,}000$, and with probability $1/2$ it becomes $\$50{,}000$. She states that she is indifferent between taking this gamble and simply receiving $\$75{,}000$ for certain, so her certainty equivalent for the gamble is $CE=\$75{,}000$.
+
+a) For a 50/50 gamble between wealth levels $w_1$ and $w_2$, show that the CRRA certainty equivalent, defined by $U_\gamma(CE) = \tfrac12 U_\gamma(w_1) + \tfrac12 U_\gamma(w_2)$, satisfies
+$$
+CE(\gamma) = \left(\tfrac12 w_1^{1-\gamma} + \tfrac12 w_2^{1-\gamma}\right)^{1/(1-\gamma)}, \qquad \gamma\neq 1,
+$$
+and that $CE(1) = \sqrt{w_1 w_2}$ under log utility. [Hint: $CE(\gamma)$ is a power mean of $w_1,w_2$ of order $1-\gamma$.]
+
+b) Using $w_1=50{,}000$ and $w_2=150{,}000$, show that $\gamma=2$ exactly rationalizes the subject's stated certainty equivalent of $\$75{,}000$. [Hint: for $\gamma=2$, part (a)'s formula reduces to a familiar named average of $w_1$ and $w_2$.]
+
+c) Using the elicited $\gamma=2$, predict this subject's certainty equivalent for a new 50/50 gamble between $\$60{,}000$ and $\$300{,}000$. What risk premium (expected wealth minus $CE$) does this imply?
+
+d) The arithmetic, geometric, and harmonic means of two positive numbers always satisfy $\text{AM}\geq\text{GM}\geq\text{HM}$, with equality only when $w_1=w_2$. Using part (a), explain why this inequality guarantees that, for any fixed 50/50 gamble, the certainty equivalent must (weakly) decrease as $\gamma$ increases through $0$ (risk neutral), $1$ (log utility), and $2$. Verify this ordering numerically for both gambles in this problem.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The indifference condition $U_\gamma(CE) = \tfrac12 U_\gamma(w_1) + \tfrac12 U_\gamma(w_2)$ reads
+$$
+\frac{CE^{1-\gamma}-1}{1-\gamma} = \frac12\cdot\frac{w_1^{1-\gamma}-1}{1-\gamma} + \frac12\cdot\frac{w_2^{1-\gamma}-1}{1-\gamma}.
+$$
+Multiplying both sides by $1-\gamma$ (nonzero since $\gamma\neq 1$) and adding $1$ to both sides gives $CE^{1-\gamma} = \tfrac12 w_1^{1-\gamma} + \tfrac12 w_2^{1-\gamma}$, hence
+$$
+CE(\gamma) = \left(\tfrac12 w_1^{1-\gamma} + \tfrac12 w_2^{1-\gamma}\right)^{1/(1-\gamma)},
+$$
+the power mean of $w_1,w_2$ of order $r=1-\gamma$ with equal weights. For $\gamma=1$, log utility gives $U_1(CE) = \tfrac12\log(w_1) + \tfrac12\log(w_2)$ directly, i.e., $\log(CE) = \log(\sqrt{w_1w_2})$, so $CE(1) = \sqrt{w_1w_2}$: this is the $r\to 0$ case of the power mean (the geometric mean), consistent with part (a)'s formula.
+
+b) At $\gamma=2$, $r=1-\gamma=-1$, so
+$$
+CE(2) = \left(\tfrac12 w_1^{-1} + \tfrac12 w_2^{-1}\right)^{-1} = \frac{2}{1/w_1+1/w_2},
+$$
+the harmonic mean of $w_1,w_2$. With $w_1=50{,}000$ and $w_2=150{,}000$: $1/w_1+1/w_2 = 4/150{,}000$, so $CE(2) = 2\times150{,}000/4 = 75{,}000$, exactly the subject's stated certainty equivalent. So $\gamma=2$ is the CRRA coefficient consistent with her stated preferences.
+
+c) The harmonic mean of $\$60{,}000$ and $\$300{,}000$ is
+$$
+CE(2) = \frac{2\times 60{,}000\times 300{,}000}{60{,}000+300{,}000} = \frac{3.6\times10^{10}}{360{,}000} = 100{,}000.
+$$
+Expected wealth is $\tfrac12(60{,}000+300{,}000)=180{,}000$, so the implied risk premium is $180{,}000-100{,}000=\$80{,}000$: this subject would give up \$80,000 in expectation to avoid the risk in this more spread-out gamble.
+
+d) By part (a), $CE(0)$ ($r=1$) is the arithmetic mean, $CE(1)$ ($r=0$) is the geometric mean, and $CE(2)$ ($r=-1$) is the harmonic mean of $w_1,w_2$. The inequality $\text{AM}\geq\text{GM}\geq\text{HM}$ therefore says precisely $CE(0)\geq CE(1)\geq CE(2)$: certainty equivalents fall as risk aversion rises, with equality only in the degenerate case $w_1=w_2$ (no actual risk). Numerically, for $\{50{,}000,150{,}000\}$: $AM=100{,}000 > GM=\sqrt{50{,}000\times150{,}000}\approx 86{,}603 > HM=75{,}000$. For $\{60{,}000,300{,}000\}$: $AM=180{,}000 > GM=\sqrt{60{,}000\times300{,}000}\approx 134{,}164 > HM=100{,}000$. Both confirm the predicted ordering, matching the pattern already visible in the chapter's CRRA table in @exm-risk: higher $\gamma$ always pulls the certainty equivalent toward the worse outcome of the gamble.
+:::
+:::
+
+::: {#exr-st-petersburg-bounded}
+## The St. Petersburg Paradox and Bounded Utility
+
+Consider a modified St. Petersburg game (compare @exm-stpetersburg): a fair coin is flipped until the first head appears, on flip $N$. Instead of the payoff $2^N$ from the chapter, this casino pays $X=3^N$ dollars.
+
+a) Show that the expected monetary payoff $\E{X}$ diverges. More generally, for a payoff $X=c^N$ with $c>1$, show that $\E{X}$ diverges whenever $c\geq 2$, and converges to a finite value when $1<c<2$ (find that value).
+
+b) For $c=3$, using log utility $U(x)=\log(x)$, find the certain dollar amount $x^\star$ (the certainty equivalent) that gives the same expected utility as playing this game. [Hint: you will need $\E{N} = \sum_{k=1}^\infty k(1/2)^k$; recall $\sum_{k=1}^\infty kx^k = x/(1-x)^2$ for $|x|<1$.] Show more generally that for a payoff $c^N$, the log-utility certainty equivalent is $x^\star=c^2$, so the classical game ($c=2$) recovers the chapter's $x^\star=4$.
+
+c) Bounded utility is often cited as the fully general resolution of St. Petersburg-type paradoxes. If $U$ is bounded above (say $U(x)\le M$ for every payoff $x$ in the support of $X$), explain why $\E{U(X)}$ is finite no matter how fast the payoffs $X$ grow, so a finite certainty equivalent always exists.
+
+d) Log utility is unbounded above, so it cannot be a fully general fix, only a fix for games that do not grow too fast. Show this concretely using the following "Super-St. Petersburg" payoff, due to the mathematician Karl Menger (1934): $X=2^{2^N}$. Show that even $\E{\log X}$ diverges, so log utility fails to resolve this faster-growing paradox, while a bounded utility function still would (by part c).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The first head occurs on flip $k$ with probability $\prob{N=k}=(1/2)^k$, $k=1,2,\ldots$, so
+$$
+\E{X} = \sum_{k=1}^\infty \left(\frac12\right)^k c^k = \sum_{k=1}^\infty \left(\frac{c}{2}\right)^k.
+$$
+This is a geometric series with ratio $c/2$, which diverges whenever $c/2\geq 1$, i.e., $c\geq 2$ (at $c=2$ every term equals $1$, and a sum of infinitely many $1$'s is infinite, recovering the classical paradox exactly; for $c>2$ the terms grow without bound). For $1<c<2$, the ratio $c/2\in(0,1)$ and the series converges to $\dfrac{c/2}{1-c/2} = \dfrac{c}{2-c}$. Since $c=3\geq 2$, $\E{X}=\sum(3/2)^k$ diverges, even more dramatically than the classical $c=2$ case, since its terms grow rather than merely fail to shrink.
+
+b) With $\prob{N=k}=(1/2)^k$,
+$$
+\E{\log X} = \sum_{k=1}^\infty \left(\frac12\right)^k \log(c^k) = \log(c)\sum_{k=1}^\infty k\left(\frac12\right)^k = \log(c)\cdot\frac{1/2}{(1-1/2)^2} = 2\log(c) = \log(c^2).
+$$
+Setting $\log(x^\star)=\log(c^2)$ gives $x^\star=c^2$. For $c=3$: $x^\star=9$ dollars (for $c=2$: $x^\star=4$, matching @exm-stpetersburg). So a log-utility gambler would pay at most \$9 to play the tripling version of the game, compared to \$4 for the doubling version, even though both games have infinite expected monetary value.
+
+c) If $U(x)\le M$ for every payoff $x$ that $X$ can take, then $U(X)\le M$ pointwise, so
+$$
+\E{U(X)} = \sum_{k=1}^\infty \prob{N=k}\,U(c^k) \le \sum_{k=1}^\infty \prob{N=k}\,M = M < \infty,
+$$
+term by term, no matter how quickly $c^k$ grows. A bounded utility caps how much any single outcome, however large in dollars, can contribute to expected utility, so no reweighting of a monetarily divergent series can make the expected *utility* diverge. Since $\E{U(X)}$ is always finite (and, for increasing $U$, bounded between $U$ of the smallest possible payoff and $M$), the certainty equivalent $x^\star=U^{-1}(\E{U(X)})$ always exists and is finite, regardless of how the payoffs are constructed.
+
+d) With $X=2^{2^N}$ and $\prob{N=k}=(1/2)^k$,
+$$
+\E{\log X} = \sum_{k=1}^\infty \left(\frac12\right)^k \log\left(2^{2^k}\right) = \log(2)\sum_{k=1}^\infty \left(\frac12\right)^k 2^k = \log(2)\sum_{k=1}^\infty 1 = \infty,
+$$
+since every term of the last sum equals exactly $1$. So even log utility, which gave a finite certainty equivalent for the original and the $c=3$ paradox, assigns this faster-growing game *infinite* expected utility: a log-utility gambler should in principle pay any finite amount to play it. This is Menger's Super-St. Petersburg paradox: for any unbounded utility function, a fast-enough-growing payoff scheme can be constructed to defeat it and make its expected utility infinite again, whereas a genuinely bounded utility function resolves every such paradox at once, by the argument in part (c), since it is boundedness itself, not the specific growth rate of $U$, that caps $\E{U(X)}$.
+:::
+:::
+
+::: {#exr-mixed-strategy-tokens}
+## Mixed-Strategy Equilibrium in a Token Game
+
+Consider a variant of the marble game of @exm-titfortat. Players $A$ and $B$ each secretly present one of two tokens, Sun or Moon. If both present Sun, $A$ wins \$5; if both present Moon, $A$ wins \$2; if the tokens differ, $B$ wins \$3 (and $A$ wins nothing). Let $p = \prob{A \text{ plays Sun}}$ and $p_1 = \prob{B \text{ plays Sun}}$.
+
+a) Following the chapter's derivation for the marble game, write $A$'s and $B$'s expected-payoff functions $f_A(p, p_1)$ and $f_B(p, p_1)$.
+
+a) Find the mixed-strategy Nash equilibrium $(p^\star, p_1^\star)$ two ways: (i) by setting $\partial f_A/\partial p = 0$ and $\partial f_B/\partial p_1 = 0$ as in the chapter, and (ii) directly, by requiring each player be indifferent between their two pure actions given the other's equilibrium mixture. Confirm the two methods agree.
+
+a) Compute each player's expected payoff at $(p^\star, p_1^\star)$. Which player is favored, and does the direction match the book's original marble game?
+
+a) Now modify the game so that a mismatch pays $B$ different amounts: $B$ wins \$3 when $A$ shows Sun and $B$ shows Moon, but $B$ wins \$5 when $A$ shows Moon and $B$ shows Sun (all matching payoffs unchanged). Recompute the equilibrium. Which player's equilibrium mixing probability changes and which stays the same? Explain, in terms of whose indifference condition pins down which probability, why a change to $B$'s payoffs shifts $A$'s equilibrium probability rather than $B$'s.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Player $A$ collects \$5 only on (Sun, Sun) and \$2 only on (Moon, Moon), and nothing on a mismatch; player $B$ collects \$3 only on a mismatch:
+$$
+f_A(p, p_1) = 5\, p\, p_1 + 2(1 - p)(1 - p_1), \qquad
+f_B(p, p_1) = 3\big[p(1 - p_1) + (1 - p)p_1\big].
+$$
+
+b) *Calculus.* $\partial f_A/\partial p = 5p_1 - 2(1 - p_1) = 7p_1 - 2 = 0$ gives $p_1^\star = 2/7$, and $\partial f_B/\partial p_1 = 3\big[-p + (1 - p)\big] = 3(1 - 2p) = 0$ gives $p^\star = 1/2$.
+
+*Indifference.* Given $p_1$, $A$'s pure-Sun payoff is $5p_1$ and pure-Moon payoff is $2(1 - p_1)$; equating them gives $7p_1 = 2$, so $p_1^\star = 2/7$. Given $p$, $B$'s pure-Sun payoff is $3(1 - p)$ (a mismatch needs $A$ to play Moon) and pure-Moon payoff is $3p$; equating them gives $p^\star = 1/2$. Both methods yield $(p^\star, p_1^\star) = (1/2,\, 2/7)$. At these values each player's two pure actions pay equally (for $A$, $5 \cdot \tfrac27 = 2 \cdot \tfrac57 = \tfrac{10}{7}$; for $B$, $3 \cdot \tfrac12 = \tfrac32$), so neither can gain by deviating.
+
+c) At $(1/2,\, 2/7)$,
+$$
+f_A = 5 \cdot \tfrac12 \cdot \tfrac27 + 2 \cdot \tfrac12 \cdot \tfrac57 = \tfrac{10}{7} \approx 1.43, \qquad
+f_B = 3\big[\tfrac12 \cdot \tfrac57 + \tfrac12 \cdot \tfrac27\big] = \tfrac32 = 1.5.
+$$
+Since $f_B > f_A$, player $B$ is favored, matching the book's marble game, where the mismatch player $B$ likewise ends up with the higher equilibrium payoff.
+
+d) The new mismatch payoffs give
+$$
+f_B(p, p_1) = 3\, p(1 - p_1) + 5(1 - p)p_1, \qquad
+\frac{\partial f_B}{\partial p_1} = -3p + 5(1 - p) = 5 - 8p = 0 \;\Rightarrow\; p^\star = \tfrac58,
+$$
+so $A$'s equilibrium probability moves from $1/2$ to $5/8$. Player $A$'s payoff $f_A$ is unchanged, so $\partial f_A/\partial p = 7p_1 - 2 = 0$ still gives $p_1^\star = 2/7$: $B$'s mixing probability does not move. This is the hallmark of mixed-strategy equilibria: each player's own probability is fixed by making the *other* player indifferent. Here $p_1^\star$ is set by $A$'s indifference condition, which involves only $A$'s (unchanged) payoffs, so it cannot move; $p^\star$ is set by $B$'s indifference condition, which now involves the new asymmetric payoffs, so it must adjust to keep $B$ indifferent between Sun and Moon.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-certainty-equivalent}
+## Certainty Equivalent and Risk Premium
+
+Return to the fundraiser dinner of the "Decisions" exercise above. Attendance $X$ takes values $100, 200, 300, 400, 500$ with probabilities $0.1, 0.2, 0.3, 0.2, 0.2$, and profit under the flat-fee rental scheme is $Y_1 = 40X - 1500$, with $\E{Y_1} = 11{,}300$. A risk-neutral organizer values the dinner at $\E{Y_1}$, but a risk-averse organizer values it less. Suppose the organizer's preferences follow a CARA (constant absolute risk aversion) utility function
+$$
+u(w) = \frac{1 - e^{-aw}}{a}, \qquad a > 0,
+$$
+where the coefficient $a = -u''(w)/u'(w)$ is the (constant) coefficient of absolute risk aversion.
+
+a) Write an R function for $u(w,a)$ and compute the expected utility $\E{u(Y_1)}$ for $a = 0.0002$.
+b) The certainty equivalent $CE$ is the sure amount satisfying $u(CE) = \E{u(Y_1)}$. Show that
+$$
+CE = -\frac{1}{a}\log\left(1 - a\,\E{u(Y_1)}\right),
+$$
+and compute $CE$ and the risk premium $\E{Y_1} - CE$ for $a = 0.0002$.
+c) Compute $CE(a)$ over a grid of $a$ from near $0$ to $0.0015$ and plot the risk premium $\E{Y_1} - CE(a)$ against $a$. What happens to the risk premium as $a \to 0$? As $a$ grows, what value does $CE$ approach, and why does that make sense?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+x <- c(100, 200, 300, 400, 500)
+p <- c(0.1, 0.2, 0.3, 0.2, 0.2)
+w <- 40 * x - 1500                     # profit Y1, flat $1500 fee (previous exercise)
+EW <- sum(p * w)
+
+u  <- function(w, a) (1 - exp(-a * w)) / a
+ce <- function(a) -log(1 - a * sum(p * u(w, a))) / a
+
+a0 <- 0.0002
+cat(sprintf("E[u(Y1)] at a=%.4f: %.4f\n", a0, sum(p * u(w, a0))))
+cat(sprintf("CE = %.1f, Risk premium = %.1f\n", ce(a0), EW - ce(a0)))
+
+a_grid <- seq(0.00002, 0.0015, length.out = 200)
+RP <- EW - sapply(a_grid, ce)
+
+plot(a_grid, RP, type = "l", lwd = 2, col = "blue",
+     xlab = "Risk aversion coefficient a", ylab = "Risk premium ($)",
+     main = "Risk premium vs. CARA risk aversion")
+abline(h = EW - min(w), lty = 2, col = "gray40")
+```
+
+a) At $a = 0.0002$, $\E{u(Y_1)} \approx 4{,}160.77$.
+b) Solving $u(CE) = \E{u(Y_1)}$ gives $1 - e^{-a\,CE} = a\,\E{u(Y_1)}$, hence $CE = -\log\left(1 - a\,\E{u(Y_1)}\right)/a \approx \$8{,}924$, so the risk premium $\E{Y_1} - CE \approx \$2{,}376$: the organizer would accept about \$2,376 less than the expected profit in exchange for a sure payment.
+c) As $a \to 0$, $u$ becomes linear (risk neutral), so $CE \to \E{Y_1} = \$11{,}300$ and the risk premium shrinks to zero. As $a$ grows, $CE$ falls toward $\$2{,}500$, the worst outcome in the support of $Y_1$ (100 attendees): a highly risk-averse organizer prices the gamble near its worst case, pushing the risk premium toward $\E{Y_1} - \min(Y_1) = \$8{,}800$. This gives a dollar value to the informal comparison of standard deviations in the "Decisions" exercise: CARA utility converts the extra risk in $Y_1$ into an amount the organizer should be willing to pay to avoid it.
+
+:::
+:::
+
+::: {#exr-kelly-criterion}
+## The Kelly Criterion and Long-Run Growth
+
+Consider a favorable repeated bet, in the spirit of @exm-kelly: at each round you wager a fraction $f\in(0,1)$ of your current wealth. With probability $p$ you win, and your wealth is multiplied by $1+bf$ (the wager is returned along with $b$ times its size as profit); with probability $q=1-p$ you lose, and your wealth is multiplied by $1-f$. Take $p=0.4$ and $b=2$ (a "2 to 1" payout), so the bet has a positive edge per dollar wagered, $pb-q = 0.4(2)-0.6=0.2$.
+
+a) Show that the expected log-growth rate of wealth per round is
+$$
+G(f) = p\log(1+bf) + q\log(1-f),
+$$
+and, by solving $G'(f)=0$, derive the optimal (full-Kelly) fraction $f^\star = p - q/b$. Verify $G''(f)<0$ everywhere, confirming this is a maximum, and evaluate $f^\star$ numerically for $p=0.4, b=2$.
+
+b) In R, define `G(f)` and confirm numerically, by a grid search or `optimize()`, that its maximizer matches your formula for $f^\star$.
+
+c) Simulate $N=5{,}000$ independent paths of $T=200$ bets each, starting from wealth $W_0=1$, for three betting fractions: full Kelly $f^\star$, half Kelly $f^\star/2$, and an over-betting fraction $3f^\star$. Report, for each fraction, the median terminal wealth, the median terminal log-wealth, and the *ruin frequency*, defined as the fraction of paths whose wealth ever drops below $1\%$ of $W_0$. Set a seed.
+
+d) Compare $\text{median}(\log W_T)/T$ from your simulation to the theoretical $G(f)$ from part (a) for each fraction. Discuss the trade-off between growth rate and ruin risk as you move from half-Kelly to full-Kelly to over-betting.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Wealth after one round is $W_0(1+bf)$ with probability $p$ and $W_0(1-f)$ with probability $q$, so the per-round log-wealth increment is i.i.d. with mean $G(f)=p\log(1+bf)+q\log(1-f)$; by the law of large numbers, $\frac1T\log(W_T/W_0)\to G(f)$ almost surely, so $G(f)$ is exactly the long-run exponential growth rate. Differentiating,
+$$
+G'(f) = \frac{pb}{1+bf} - \frac{q}{1-f}.
+$$
+Setting $G'(f)=0$: $pb(1-f) = q(1+bf) \Rightarrow pb-q = bf(p+q) = bf$ (using $p+q=1$), so
+$$
+f^\star = \frac{pb-q}{b} = p - \frac{q}{b}.
+$$
+For $p=0.4, b=2, q=0.6$: $f^\star = 0.4-0.6/2=0.1$. The second derivative $G''(f) = -pb^2/(1+bf)^2 - q/(1-f)^2$ is a sum of two strictly negative terms for any feasible $f\in(0,1)$, so $G$ is strictly concave and $f^\star$ is the unique maximizer.
+
+```{r}
+#| echo: true
+p <- 0.4; b <- 2; q <- 1 - p
+f_star <- p - q / b                                   # analytical Kelly fraction
+G <- function(f) p * log(1 + b * f) + q * log(1 - f)  # expected log-growth rate
+
+f_grid <- seq(0.0001, 0.7, length.out = 20000)
+f_hat <- f_grid[which.max(G(f_grid))]                  # numerical check
+cat(sprintf("f* (formula) = %.4f   f* (grid search) = %.4f\n", f_star, f_hat))
+
+fractions <- c(full = f_star, half = f_star / 2, over = 3 * f_star)
+round(sapply(fractions, G), 6)
+```
+
+b) The output above confirms $f^\star=0.1000$ from both the closed-form formula and a $20{,}000$-point grid search of $G(f)$. The theoretical growth rates at the three regimes are $G(f^\star)=0.009712$, $G(f^\star/2)=0.007348$ (about $76\%$ of the full-Kelly rate, close to the folklore that half-Kelly gives roughly three-quarters of full Kelly's growth), and $G(3f^\star)=-0.026004$: tripling the Kelly fraction turns a bet with positive expected value each round into a long-run *loser*.
+
+```{r}
+#| echo: true
+set.seed(2024)
+simulate_kelly <- function(f, Tn = 200, N = 5000, W0 = 1, ruin_level = 0.01) {
+  wins <- matrix(runif(N * Tn) < p, nrow = N, ncol = Tn)
+  mult <- ifelse(wins, 1 + b * f, 1 - f)
+  logW <- t(apply(log(mult), 1, cumsum))
+  W    <- W0 * exp(logW)
+  term <- W[, Tn]
+  minW <- apply(W, 1, min)
+  c(median_logWT = median(log(term)), median_WT = median(term),
+    ruin_freq = mean(minW < ruin_level))
+}
+round(sapply(fractions, simulate_kelly), 4)
+```
+
+```{r}
+#| echo: true
+#| fig-cap: "Median log-wealth path for full-Kelly, half-Kelly, and 3x-Kelly (over-betting), N = 2,000 paths, T = 200 bets."
+set.seed(2024)
+track_median_path <- function(f, Tn = 200, N = 2000) {
+  wins <- matrix(runif(N * Tn) < p, nrow = N, ncol = Tn)
+  mult <- ifelse(wins, 1 + b * f, 1 - f)
+  logW <- t(apply(log(mult), 1, cumsum))
+  apply(logW, 2, median)
+}
+paths <- sapply(fractions, track_median_path)
+matplot(1:200, paths, type = "l", lty = 1, lwd = 2, col = c("blue", "darkgreen", "red"),
+        xlab = "Bet number", ylab = "Median log-wealth")
+legend("bottomleft", legend = c("full Kelly", "half Kelly", "over-betting (3x)"),
+       col = c("blue", "darkgreen", "red"), lwd = 2, bty = "n")
+abline(h = 0, lty = 2, col = "gray50")
+```
+
+c) With seed `2024`, $N=5{,}000$ paths of $T=200$ bets: median terminal wealth is $\$6.98$ for full Kelly, $\$4.35$ for half Kelly, and $\$0.0055$ for the $3f^\star$ over-betting fraction (from an initial $\$1$). The corresponding ruin frequencies (wealth ever below $1\%$ of $W_0$) are $0.04\%$, $0.00\%$, and $70.5\%$.
+
+d) The simulated $\text{median}(\log W_T)/T$ matches the theoretical $G(f)$ almost exactly in every case (e.g., $1.9425/200=0.009712$ for full Kelly, $-5.2007/200=-0.026004$ for over-betting), confirming the analytical growth rates. Half-Kelly sacrifices about a quarter of the long-run growth rate for a large reduction in tail risk (an already-small ruin frequency at full Kelly becomes literally zero across $5{,}000$ simulated paths at half Kelly), while over-betting at $3f^\star$ produces a *higher* per-round variance but a strictly negative long-run growth rate, so its median wealth collapses toward zero. High volatility is not the same as high long-run return: betting beyond the fraction where $G(f)$ turns negative guarantees eventual ruin with probability 1, since $\log W_T = \sum_t \log(\text{multiplier}_t) \to -\infty$ by the strong law of large numbers whenever $G(f)<0$.
+:::
+:::
+
+::: {#exr-evpi-evsi}
+## Value of Information: EVPI and EVSI
+
+An energy company must decide whether to drill an exploratory well at a new site (all payoffs below are in \$ millions). If oil is present, drilling yields a net payoff of $40$; if the site is dry, drilling yields a net payoff of $-10$ (the sunk cost of drilling with no return); not drilling always yields $0$ regardless of the true state. A geological assessment gives a prior probability $\prob{\text{Oil}} = 0.3$.
+
+a) Using the prior alone, find the expected monetary value (EMV) of the optimal decision (drill or do not drill), with no additional information.
+
+b) The expected value of perfect information (EVPI) is the expected payoff if the company could learn the true state before deciding, minus the EMV from part (a). Compute EVPI in R and interpret it as the maximum amount worth paying for a perfect signal about the site.
+
+c) A seismic survey is available, with $\prob{\text{Positive}\mid\text{Oil}} = 0.80$ and $\prob{\text{Negative}\mid\text{Dry}} = 0.75$; the survey costs $2$ (\$ million). In R, compute $\prob{\text{Positive}}$ and $\prob{\text{Negative}}$, the posterior probability of oil given each result, the optimal action and its expected payoff given each result, and the overall expected value with sample information (EVSI, before subtracting the survey's cost). Should the company purchase the survey?
+
+d) Confirm numerically that $0\leq\text{EVSI}\leq\text{EVPI}$. Then run a Monte Carlo check of your analytic EVSI: simulate the true state, the (correlated) test result, and the resulting test-contingent decision for a large number of draws, and compare the simulated average payoff to your analytic answer. Explain intuitively why a perfect signal can never be worth less than an imperfect one about the same uncertainty.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| echo: true
+p_oil <- 0.3; p_dry <- 1 - p_oil
+payoff_drill_oil <- 40; payoff_drill_dry <- -10; payoff_nodrill <- 0
+
+EMV_drill <- p_oil * payoff_drill_oil + p_dry * payoff_drill_dry
+EMV_prior <- max(EMV_drill, payoff_nodrill)
+
+best_if_oil <- max(payoff_drill_oil, payoff_nodrill)
+best_if_dry <- max(payoff_drill_dry, payoff_nodrill)
+EV_perfect  <- p_oil * best_if_oil + p_dry * best_if_dry
+EVPI        <- EV_perfect - EMV_prior
+
+cat(sprintf("EMV(Drill) = %.2f, EMV(No Drill) = %.2f, EMV_prior = %.2f\n",
+            EMV_drill, payoff_nodrill, EMV_prior))
+cat(sprintf("EV(perfect information) = %.2f, EVPI = %.2f\n", EV_perfect, EVPI))
+```
+
+a) Drilling has expected value $0.3(40)+0.7(-10)=5$ versus $0$ for not drilling, so the optimal action using the prior alone is to drill, with $EMV_{\text{prior}} = 5$ (\$5 million).
+
+b) With perfect information the company drills only when oil is truly present and skips otherwise: $EV_{\text{perfect}} = 0.3(40)+0.7(0) = 12$, so $\text{EVPI} = 12-5=7$ (\$7 million): the company should be willing to pay up to \$7 million for a perfectly accurate signal.
+
+```{r}
+#| echo: true
+sens <- 0.80; spec <- 0.75
+
+p_pos <- sens * p_oil + (1 - spec) * p_dry
+p_neg <- 1 - p_pos
+
+post_oil_pos <- sens * p_oil / p_pos
+post_oil_neg <- (1 - sens) * p_oil / p_neg
+
+EV_drill_pos <- post_oil_pos * payoff_drill_oil + (1 - post_oil_pos) * payoff_drill_dry
+EV_drill_neg <- post_oil_neg * payoff_drill_oil + (1 - post_oil_neg) * payoff_drill_dry
+value_pos <- max(EV_drill_pos, payoff_nodrill)
+value_neg <- max(EV_drill_neg, payoff_nodrill)
+
+EV_sample <- p_pos * value_pos + p_neg * value_neg
+EVSI      <- EV_sample - EMV_prior
+
+cat(sprintf("P(+) = %.4f, P(-) = %.4f\n", p_pos, p_neg))
+cat(sprintf("P(Oil | +) = %.4f, P(Oil | -) = %.4f\n", post_oil_pos, post_oil_neg))
+cat(sprintf("E[Drill | +] = %.4f (act: %s), E[Drill | -] = %.4f (act: %s)\n",
+            EV_drill_pos, ifelse(EV_drill_pos > 0, "Drill", "No Drill"),
+            EV_drill_neg, ifelse(EV_drill_neg > 0, "Drill", "No Drill")))
+cat(sprintf("EV(sample information) = %.4f, EVSI = %.4f\n", EV_sample, EVSI))
+
+test_cost <- 2
+cat(sprintf("Net value of survey = EVSI - cost = %.4f -> %s\n",
+            EVSI - test_cost, ifelse(EVSI > test_cost, "purchase it", "skip it")))
+```
+
+c) $\prob{\text{Positive}} = 0.415$ and $\prob{\text{Negative}}=0.585$. By Bayes' rule, $\prob{\text{Oil}\mid\text{Positive}} = 0.5783$ and $\prob{\text{Oil}\mid\text{Negative}}=0.1026$. Given a positive result the expected payoff of drilling is $18.92$ (still optimal to drill); given a negative result the expected payoff of drilling is $-4.87$, so the optimal action is not to drill (value $0$). Averaging over the two possible test outcomes, $EV_{\text{sample}} = 0.415(18.9157)+0.585(0) = 7.85$, so $\text{EVSI} = 7.85-5=2.85$ (\$2.85 million). Since the survey costs \$2 million, its net value is $2.85-2=\$0.85$ million: the company should purchase it.
+
+```{r}
+#| echo: true
+set.seed(42)
+cat(sprintf("Check: 0 <= EVSI (%.2f) <= EVPI (%.2f): %s\n",
+            EVSI, EVPI, (EVSI >= 0) && (EVSI <= EVPI)))
+
+N <- 2e6
+state_oil  <- rbinom(N, 1, p_oil)
+test_pos   <- ifelse(state_oil == 1, rbinom(N, 1, sens), rbinom(N, 1, 1 - spec))
+drill      <- test_pos == 1
+payoff_sim <- ifelse(drill, ifelse(state_oil == 1, payoff_drill_oil, payoff_drill_dry), payoff_nodrill)
+
+cat(sprintf("Monte Carlo EV under test-contingent policy (N = %.0e): %.4f (analytic: %.4f)\n",
+            N, mean(payoff_sim), EV_sample))
+```
+
+d) The check confirms $0\leq\text{EVSI}\,(2.85)\leq\text{EVPI}\,(7.00)$. The Monte Carlo estimate of the expected payoff under the test-contingent policy ($7.877$ at $N=2\times10^6$ simulated sites) matches the analytic $EV_{\text{sample}}$ of $7.85$ to within ordinary simulation noise (the payoff has standard deviation about $18.4$ here, giving a Monte Carlo standard error of roughly $18.4/\sqrt{2\times10^6}\approx 0.013$, so the observed gap of about two standard errors is unremarkable). Intuitively, EVSI can never exceed EVPI because perfect information is the best possible signal about the state: with an imperfect test, the company sometimes acts on a false positive or false negative and makes the wrong decision relative to the true state, which perfect information never does. Any imperfect signal is, formally, a garbled version of the perfect signal, and averaging over a garbled version of the truth cannot be worth more, in expectation, than knowing the truth outright; EVSI reaches EVPI only in the limit of a perfectly accurate test ($\text{sens}=\text{spec}=1$).
+:::
+:::
+
+::::

@@ -1,0 +1,48 @@
+%%{init: {"flowchart": {"padding": 5, "nodeSpacing": 25, "rankSpacing": 20}}}%%
+graph TB
+    %% Input nodes
+    X["x = 2<br/>∇x = w × v3(1-v3)"]
+    W["w = 3<br/>∇w = x × v3(1-v3)"]
+    B["b = 5<br/>∇b = v3(1-v3)"]
+
+    %% Computation nodes
+    V1["v1 = w × x = 6<br/>∇v1 = v3(1-v3)"]
+    V2["v2 = v1 + b = 11<br/>∇v2 = v3(1-v3)"]
+    NEG["-v2 = -11<br/>∇(-v2) = -v3(1-v3)"]
+    EXP["exp(-v2) = 1.67e-05<br/>∇exp = -v3²"]
+    ONE["1"]
+    ADD1["1 + exp(-v2) = 1.0000<br/>∇add = -v3²"]
+    V3["v3 = 1/(1+exp(-v2)) = 0.99998<br/>∇v3 = 1"]
+
+    %% Forward pass connections (solid arrows)
+    X --> V1
+    W --> V1
+    V1 --> V2
+    B --> V2
+    V2 --> NEG
+    NEG --> EXP
+    ONE --> ADD1
+    EXP --> ADD1
+    ADD1 --> V3
+
+    %% Backward pass connections (dashed arrows - gradient flow)
+    V3 -.-> ADD1
+    ADD1 -.-> EXP
+    ADD1 -.-> ONE
+    EXP -.-> NEG
+    NEG -.-> V2
+    V2 -.-> V1
+    V2 -.-> B
+    V1 -.-> W
+    V1 -.-> X
+
+    %% Styling
+    classDef input fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef computation fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef constant fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef output fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+
+    class X,W,B input
+    class V1,V2,NEG,EXP,ADD1 computation
+    class ONE constant
+    class V3 output

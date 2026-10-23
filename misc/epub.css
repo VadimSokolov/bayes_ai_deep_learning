@@ -1,0 +1,38 @@
+/* EPUB-only stylesheet.
+
+   Reflowable EPUB clips anything wider than the page. Two things in this book
+   overflow: MathML, which has no automatic line breaking, so a long single-line
+   display equation runs off the right edge (101 of them are over 170 characters
+   with no manual break); and the wider tables. Neither can be reflowed, so make
+   the overflow scrollable rather than silently cut off. */
+
+math[display="block"] {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Quarto wraps display math in these; the scroll container has to be the
+   element that actually establishes the box, so set it on both. */
+div.math.display,
+p .math.display {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Code listings wrap rather than run off the page. */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

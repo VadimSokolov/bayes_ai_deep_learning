@@ -1,0 +1,801 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Sigmoid Function Properties
+
+The logistic (sigmoid) function is $\sigma(z) = \frac{1}{1+e^{-z}}$.
+
+a) Show that $\sigma(-z) = 1 - \sigma(z)$.
+b) Prove that $\sigma'(z) = \sigma(z)(1 - \sigma(z))$.
+c) What are the values of $\sigma(0)$, $\sigma(2)$, and $\sigma(-2)$?
+d) At what value of $z$ is $\sigma'(z)$ maximized?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Proof:
+$$
+\sigma(-z) = \frac{1}{1+e^{z}} = \frac{e^{-z}}{e^{-z}+1} = \frac{e^{-z}}{1+e^{-z}}
+$$
+$$
+1 - \sigma(z) = 1 - \frac{1}{1+e^{-z}} = \frac{e^{-z}}{1+e^{-z}} = \sigma(-z) \quad \checkmark
+$$
+
+b) Let $\sigma(z) = (1+e^{-z})^{-1}$. Using chain rule:
+$$
+\sigma'(z) = -1 \cdot (1+e^{-z})^{-2} \cdot (-e^{-z}) = \frac{e^{-z}}{(1+e^{-z})^2}
+$$
+$$
+= \frac{1}{1+e^{-z}} \cdot \frac{e^{-z}}{1+e^{-z}} = \sigma(z) \cdot \frac{e^{-z}}{1+e^{-z}} = \sigma(z)(1-\sigma(z)) \quad \checkmark
+$$
+
+c) Values:
+```{r}
+sigmoid <- function(z) 1 / (1 + exp(-z))
+cat("sigma(0) =", sigmoid(0), "\n")
+cat("sigma(2) =", round(sigmoid(2), 4), "\n")
+cat("sigma(-2) =", round(sigmoid(-2), 4), "\n")
+```
+
+d) The derivative $\sigma'(z) = \sigma(z)(1-\sigma(z))$ is maximized when $\sigma(z) = 0.5$, which occurs at $z = 0$.
+```{r}
+z_grid <- seq(-5, 5, by = 0.1)
+deriv <- sigmoid(z_grid) * (1 - sigmoid(z_grid))
+plot(z_grid, deriv, type = "l", xlab = "z", ylab = "sigma'(z)",
+     main = "Derivative of Sigmoid")
+abline(v = 0, lty = 2, col = "red")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Log-Odds Interpretation
+
+A logistic regression model predicts whether a customer will churn (leave) based on their monthly usage (hours) and contract type (month-to-month = 0, annual = 1):
+
+$$
+\log\left(\frac{p}{1-p}\right) = -1.5 + 0.8 \times \text{usage} - 2.0 \times \text{annual}
+$$
+
+a) For a customer with 5 hours monthly usage on a month-to-month contract, calculate the probability of churning.
+b) Calculate the odds ratio for switching from month-to-month to annual contract.
+c) How much would usage need to increase to double the odds of churning?
+d) Plot the probability of churning as a function of usage for both contract types.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Probability calculation:
+```{r}
+log_odds <- -1.5 + 0.8 * 5 - 2.0 * 0
+prob_churn <- 1 / (1 + exp(-log_odds))
+cat("P(churn | usage=5, month-to-month) =", round(prob_churn, 4), "\n")
+```
+
+b) Odds ratio for annual vs month-to-month:
+```{r}
+# Coefficient for annual is -2.0
+odds_ratio <- exp(-2.0)
+cat("Odds ratio (annual vs month-to-month):", round(odds_ratio, 4), "\n")
+cat("Annual contract reduces churn odds by", round((1 - odds_ratio) * 100, 1), "%\n")
+```
+
+c) To double the odds, need: $e^{0.8 \times \Delta\text{usage}} = 2$
+```{r}
+delta_usage <- log(2) / 0.8
+cat("Usage increase to double odds:", round(delta_usage, 2), "hours\n")
+```
+
+d) Plot:
+```{r}
+usage <- seq(0, 10, by = 0.1)
+prob_monthly <- 1 / (1 + exp(-(-1.5 + 0.8 * usage)))
+prob_annual <- 1 / (1 + exp(-(-1.5 + 0.8 * usage - 2.0)))
+
+plot(usage, prob_monthly, type = "l", col = "red", lwd = 2,
+     xlab = "Monthly Usage (hours)", ylab = "P(Churn)",
+     main = "Churn Probability by Usage and Contract Type", ylim = c(0, 1))
+lines(usage, prob_annual, col = "blue", lwd = 2)
+legend("bottomright", c("Month-to-month", "Annual"), col = c("red", "blue"), lwd = 2, bty = "n")
+abline(h = 0.5, lty = 2, col = "gray")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Confusion Matrix and Metrics
+
+A credit card fraud detection model produces the following confusion matrix on a test set:
+
+|                    | Predicted Fraud | Predicted Legit |
+|--------------------|-----------------|-----------------|
+| Actual Fraud       | 85              | 15              |
+| Actual Legitimate  | 50              | 4850            |
+
+a) Calculate accuracy, precision, recall, and F1 score.
+b) Why is accuracy a poor metric for this problem?
+c) If missing a fraud costs \$500 and a false alarm costs \$10, which metric should you optimize?
+d) What threshold adjustment would increase recall at the expense of precision?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+TP <- 85
+FN <- 15
+FP <- 50
+TN <- 4850
+
+# a) Metrics
+accuracy <- (TP + TN) / (TP + TN + FP + FN)
+precision <- TP / (TP + FP)
+recall <- TP / (TP + FN)
+f1 <- 2 * precision * recall / (precision + recall)
+
+cat("Accuracy:", round(accuracy, 4), "\n")
+cat("Precision:", round(precision, 4), "\n")
+cat("Recall (Sensitivity):", round(recall, 4), "\n")
+cat("F1 Score:", round(f1, 4), "\n")
+```
+
+b) Accuracy is poor because:
+- The dataset is highly imbalanced: 100 frauds vs 4900 legitimate
+- A naive model predicting all "legitimate" would have accuracy = 4900/5000 = 98%
+- Yet it would catch 0% of frauds!
+- Accuracy = 98.7% sounds good but hides 15 missed frauds
+
+c) With asymmetric costs:
+```{r}
+# Cost of current model
+cost_current <- FN * 500 + FP * 10
+cat("Current cost: $", cost_current, "\n")
+
+# Missed fraud (FN) costs 50x more than false alarm (FP)
+# Should optimize for high recall (sensitivity)
+# A weighted F1 or custom cost function would be better
+```
+
+Since missing fraud costs 50× more than false alarms, you should optimize for **recall** (minimizing FN), accepting more false alarms.
+
+d) To increase recall:
+- Lower the classification threshold (e.g., from 0.5 to 0.3)
+- Classify as fraud when P(fraud) > 0.3 instead of > 0.5
+- This catches more true positives but also more false positives
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Logistic Regression
+
+a) Logistic regression coefficients represent the change in probability for a one-unit increase in the predictor.
+
+b) The decision boundary in logistic regression is always linear in the space of variables that enter the linear predictor, even when that space is a nonlinear transform of the original inputs (as in the kernel trick).
+
+c) Logistic regression can perfectly separate linearly separable classes.
+
+d) If a logistic regression model gives P(Y=1) = 0.7 for an observation, changing the classification threshold won't affect this probability.
+
+e) The odds ratio for a predictor is always positive.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. Coefficients represent the change in **log-odds**, not probability. The relationship between coefficients and probability is nonlinear (S-shaped).
+
+b) **TRUE**. The decision boundary is where $P(Y=1) = 0.5$, i.e., where $\beta_0 + \beta_1 x_1 + \cdots = 0$: a hyperplane in the space of variables that the model combines linearly. When that space is a nonlinear transform of the original inputs (polynomial features, or the kernel trick's implicit feature map), the same linear boundary can look nonlinear back in the original input space.
+
+c) **TRUE** (but problematic). With perfectly separable data, the MLE doesn't exist: coefficients go to $\pm\infty$. Regularization is needed to prevent this.
+
+d) **TRUE**. The probability is a property of the model. The threshold only affects the **classification decision**, not the predicted probability.
+
+e) **TRUE**. The odds ratio is $e^\beta$, and $e^x > 0$ for all $x$. However, the odds ratio can be less than 1 (meaning decreased odds) if $\beta < 0$.
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## ROC Curve
+
+A logistic regression model outputs the following probabilities for 10 test cases (5 positive, 5 negative):
+
+| True Label | Predicted Prob |
+|------------|----------------|
+| Positive   | 0.95           |
+| Positive   | 0.85           |
+| Negative   | 0.75           |
+| Positive   | 0.65           |
+| Negative   | 0.55           |
+| Positive   | 0.45           |
+| Negative   | 0.35           |
+| Negative   | 0.25           |
+| Positive   | 0.15           |
+| Negative   | 0.05           |
+
+a) At threshold 0.5, calculate TPR and FPR.
+b) Calculate the points on the ROC curve for thresholds 0.0, 0.2, 0.4, 0.6, 0.8, 1.0.
+c) Sketch the ROC curve and estimate the AUC.
+d) What does an AUC of 0.5 represent?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+true_labels <- c(1, 1, 0, 1, 0, 1, 0, 0, 1, 0)  # 1=positive, 0=negative
+probs <- c(0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05)
+
+# a) At threshold 0.5
+threshold <- 0.5
+pred <- ifelse(probs >= threshold, 1, 0)
+TP <- sum(pred == 1 & true_labels == 1)
+FP <- sum(pred == 1 & true_labels == 0)
+TN <- sum(pred == 0 & true_labels == 0)
+FN <- sum(pred == 0 & true_labels == 1)
+
+TPR <- TP / (TP + FN)
+FPR <- FP / (FP + TN)
+cat("At threshold 0.5: TPR =", TPR, ", FPR =", FPR, "\n")
+
+# b) ROC points
+thresholds <- c(0, 0.2, 0.4, 0.6, 0.8, 1.0)
+roc_points <- data.frame(threshold = thresholds, TPR = NA, FPR = NA)
+
+for (i in 1:length(thresholds)) {
+  pred <- ifelse(probs >= thresholds[i], 1, 0)
+  TP <- sum(pred == 1 & true_labels == 1)
+  FP <- sum(pred == 1 & true_labels == 0)
+  FN <- sum(pred == 0 & true_labels == 1)
+  TN <- sum(pred == 0 & true_labels == 0)
+  roc_points$TPR[i] <- TP / (TP + FN)
+  roc_points$FPR[i] <- FP / (FP + TN)
+}
+print(roc_points)
+
+# c) Plot ROC
+plot(roc_points$FPR, roc_points$TPR, type = "b", pch = 19,
+     xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "False Positive Rate", ylab = "True Positive Rate",
+     main = "ROC Curve")
+abline(0, 1, lty = 2, col = "gray")
+
+# Approximate AUC using trapezoidal rule
+# Sort by FPR
+ord <- order(roc_points$FPR)
+fpr_sorted <- roc_points$FPR[ord]
+tpr_sorted <- roc_points$TPR[ord]
+auc <- sum(diff(fpr_sorted) * (tpr_sorted[-1] + tpr_sorted[-length(tpr_sorted)]) / 2)
+cat("\nApproximate AUC:", round(auc, 3), "\n")
+```
+
+d) AUC = 0.5 represents a random classifier (the diagonal line). It means the model has no discriminative ability, equivalent to random guessing.
+
+:::
+:::
+
+::: {#exr-}
+## Multinomial Logistic Regression
+
+A model predicts customer choice among three products (A, B, C) based on price difference and brand loyalty score. Using C as the reference category:
+
+$$
+\log\frac{P(A)}{P(C)} = -0.5 + 0.3 \times \text{loyalty} - 0.8 \times \text{price\_diff}
+$$
+$$
+\log\frac{P(B)}{P(C)} = 0.2 + 0.4 \times \text{loyalty} - 0.5 \times \text{price\_diff}
+$$
+
+For a customer with loyalty = 5 and price_diff = 2:
+
+a) Calculate the log-odds for A vs C and B vs C.
+b) Calculate $P(A)$, $P(B)$, and $P(C)$.
+c) Which product is most likely to be chosen?
+d) What loyalty score makes A and C equally likely (holding price_diff = 2)?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+# Given values
+loyalty <- 5
+price_diff <- 2
+
+# a) Log-odds
+log_odds_AC <- -0.5 + 0.3 * loyalty - 0.8 * price_diff
+log_odds_BC <- 0.2 + 0.4 * loyalty - 0.5 * price_diff
+
+cat("log(P(A)/P(C)) =", log_odds_AC, "\n")
+cat("log(P(B)/P(C)) =", log_odds_BC, "\n")
+
+# b) Probabilities using softmax
+# P(A) = exp(log_odds_AC) / (1 + exp(log_odds_AC) + exp(log_odds_BC))
+# P(B) = exp(log_odds_BC) / (1 + exp(log_odds_AC) + exp(log_odds_BC))
+# P(C) = 1 / (1 + exp(log_odds_AC) + exp(log_odds_BC))
+
+denom <- 1 + exp(log_odds_AC) + exp(log_odds_BC)
+P_A <- exp(log_odds_AC) / denom
+P_B <- exp(log_odds_BC) / denom
+P_C <- 1 / denom
+
+cat("\nP(A) =", round(P_A, 4), "\n")
+cat("P(B) =", round(P_B, 4), "\n")
+cat("P(C) =", round(P_C, 4), "\n")
+cat("Sum =", round(P_A + P_B + P_C, 4), "\n")
+
+# c) Most likely
+probs <- c(A = P_A, B = P_B, C = P_C)
+cat("\nMost likely:", names(which.max(probs)), "\n")
+
+# d) A = C means log_odds_AC = 0
+# -0.5 + 0.3*loyalty - 0.8*2 = 0
+# 0.3*loyalty = 0.5 + 1.6 = 2.1
+loyalty_equal <- 2.1 / 0.3
+cat("\nLoyalty for P(A) = P(C):", round(loyalty_equal, 2), "\n")
+```
+
+:::
+:::
+
+
+::: {#exr-}
+## Credit Scoring
+
+Use the German loan/default data (`credit.csv`) containing borrower and loan characteristics.
+
+a) Fit a logistic regression predicting `Default` from loan characteristics.
+b) Use 10-fold cross-validation to estimate the model's out-of-sample error rate.
+c) If we gain $0.25 on every dollar when a loan is paid and lose the entire amount when it defaults, derive why we should use $p = 1/5$ as the cut-off rule for issuing a loan.
+d) Calculate sensitivity and specificity at thresholds $p = 1/2$ and $p = 1/5$.
+e) Interpret the ROC curve. Why do we choose a cut-off that is sensitive but not specific?
+f) Refit the model from (a) with a probit link (`family = binomial(link = "probit")`) in place of the logit link. Compare the estimated coefficients and the fitted default probabilities to the logit model. Do the substantive conclusions change?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(boot)
+
+credit <- read.csv("data/credit.csv", stringsAsFactors = TRUE)
+
+# Recode variables
+credit$history <- factor(credit$history, levels = c("A30", "A31", "A32", "A33", "A34"))
+levels(credit$history) <- c("good", "good", "poor", "poor", "terrible")
+
+# a) Logistic regression
+log_model <- glm(Default ~ duration + amount + installment + age + history,
+                 family = binomial, data = credit)
+
+# b) Cross-validation for logistic regression
+cv_error <- cv.glm(credit, log_model, K = 10)$delta[1]
+cat("Logistic regression 10-fold CV error:", round(cv_error, 4), "\n")
+
+# c) Optimal cutoff derivation
+cat("\nExpected value if we issue loan with default probability p:\n")
+cat("E[Value] = (1-p) × $0.25 - p × $1.00 = $0.25 - $1.25p\n")
+cat("Issue loan when E[Value] > 0: $0.25 > $1.25p → p < 0.20 = 1/5\n")
+
+# d) Sensitivity and specificity at different thresholds
+pred <- predict(log_model, type = "response")
+default <- credit$Default
+
+calc_metrics <- function(threshold) {
+  pred_class <- ifelse(pred > threshold, 1, 0)
+  TP <- sum(pred_class == 1 & default == 1)
+  TN <- sum(pred_class == 0 & default == 0)
+  FP <- sum(pred_class == 1 & default == 0)
+  FN <- sum(pred_class == 0 & default == 1)
+  sens <- TP / (TP + FN)
+  spec <- TN / (TN + FP)
+  return(c(sensitivity = sens, specificity = spec))
+}
+
+cat("\nAt p = 1/2:", calc_metrics(0.5), "\n")
+cat("At p = 1/5:", calc_metrics(0.2), "\n")
+
+# e) ROC interpretation
+cat("\nWhy sensitive but not specific?\n")
+cat("- Missing a default costs $1.00\n")
+cat("- False alarm costs only $0.25 in lost profit\n")
+cat("- We need to be 4× more careful about defaults\n")
+cat("- High sensitivity catches more defaults\n")
+cat("- Lower specificity = more rejected good borrowers (acceptable)\n")
+
+# Plot ROC curve
+n_pos <- sum(default == 1)
+n_neg <- sum(default == 0)
+thresholds <- seq(0.01, 0.99, by = 0.01)
+tpr <- sapply(thresholds, function(t) sum(pred >= t & default == 1) / n_pos)
+fpr <- sapply(thresholds, function(t) sum(pred >= t & default == 0) / n_neg)
+
+plot(fpr, tpr, type = "l", xlab = "FPR", ylab = "TPR", main = "ROC Curve")
+abline(0, 1, lty = 2, col = "gray")
+# Add markers for key thresholds
+metrics_05 <- calc_metrics(0.5)
+metrics_02 <- calc_metrics(0.2)
+points(1 - metrics_05["specificity"], metrics_05["sensitivity"], pch = 19, col = "blue")
+points(1 - metrics_02["specificity"], metrics_02["sensitivity"], pch = 19, col = "red")
+legend("bottomright", c("p=0.5", "p=0.2"), col = c("blue", "red"), pch = 19)
+
+# f) Probit vs logit link
+probit_model <- glm(Default ~ duration + amount + installment + age + history,
+                    family = binomial(link = "probit"), data = credit)
+
+round(coef(log_model) / coef(probit_model), 3)
+
+pred_probit <- predict(probit_model, type = "response")
+cat("Correlation of fitted probabilities:", round(cor(pred, pred_probit), 4), "\n")
+cat("Mean abs difference in fitted probabilities:", round(mean(abs(pred - pred_probit)), 4), "\n")
+cat("Classification agreement at 0.5 cutoff:",
+    round(mean((pred > 0.5) == (pred_probit > 0.5)), 4), "\n")
+```
+The logit coefficients are consistently about 1.6 to 1.7 times the probit coefficients, close to the ratio of standard deviations between the logistic distribution ($\pi/\sqrt{3}\approx 1.81$) and the standard normal, a rule of thumb for converting rough magnitudes between the two scales. Despite this rescaling, the fitted probabilities from the two links are nearly identical (correlation above 0.999) and agree on the classification decision for more than 99% of borrowers. The two links tell the same substantive story here; the choice between them is a matter of convention, not conclusions.
+:::
+:::
+
+
+::: {#exr-}
+## Spam Email Classification
+
+Use the `spam.csv` data containing 4,601 emails with word/character frequencies.
+
+a) Fit a logistic regression predicting `spam` from all other variables.
+b) Interpret the coefficients for "word_free" and "word_george". Which words are strong spam/non-spam indicators?
+c) Perform out-of-sample validation: randomly hold out 1,000 observations, train on the rest, and predict on the holdout.
+d) Calculate the out-of-sample deviance and R² (compare to null model deviance).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+email <- read.csv("data/spam.csv")
+
+# a) Fit full model
+spammy <- glm(spam ~ ., data = email, family = "binomial")
+
+# b) Interpret key coefficients
+b <- coef(spammy)
+cat("Coefficient for 'word_free':", round(b["word_free"], 3), "\n")
+cat("  Odds ratio:", round(exp(b["word_free"]), 2), 
+    "- word 'free' strongly indicates SPAM\n\n")
+
+cat("Coefficient for 'word_george':", round(b["word_george"], 3), "\n")
+cat("  Odds ratio:", round(exp(b["word_george"]), 4), 
+    "- word 'george' strongly indicates NOT spam\n")
+cat("  (The dataset is from someone named George)\n")
+
+# c) Out-of-sample validation
+set.seed(42)
+leaveout <- sample(1:nrow(email), 1000)
+spamtrain <- glm(spam ~ ., data = email[-leaveout, ], family = "binomial")
+pspam <- predict(spamtrain, newdata = email[leaveout, ], type = "response")
+
+# Visualization
+boxplot(pspam ~ email$spam[leaveout],
+        xlab = "Actual", ylab = "Predicted P(spam)",
+        col = c("navy", "red"), names = c("Not Spam", "Spam"))
+
+# d) Deviance calculation
+deviance_fn <- function(y, pred, family = "binomial") {
+  if (family == "binomial") {
+    y_num <- as.numeric(y)
+    -2 * sum(y_num * log(pred) + (1 - y_num) * log(1 - pred))
+  } else {
+    sum((y - pred)^2)
+  }
+}
+
+D <- deviance_fn(email$spam[leaveout], pspam)
+ybar <- mean(email$spam[leaveout])
+D0 <- deviance_fn(email$spam[leaveout], rep(ybar, length(leaveout)))
+
+cat("\n\nOut-of-sample deviance:", round(D, 1), "\n")
+cat("Null deviance:", round(D0, 1), "\n")
+cat("OOS R² (pseudo):", round(1 - D/D0, 3), "\n")
+```
+
+**Key Finding**: The model achieves an OOS R² around 0.6-0.7, indicating strong predictive power. Words like "free", "money", and "!" indicate spam, while personal names indicate legitimate email.
+:::
+:::
+
+
+::: {#exr-down-payment-logistic}
+## Down Payment Logistic Regression
+
+Use the `homes2004.csv` data (the same file as the linear regression exercises in Chapter 12) to model whether a home buyer made a down payment of at least 20% of the purchase price.
+
+a) Create a binary response equal to 1 if $(\text{LPRICE} - \text{AMMORT})/\text{LPRICE} \geq 0.2$ (down payment at least 20% of price), 0 otherwise.
+b) Fit a logistic regression of this indicator on `FRSTHO` (first-time buyer) and `BATHS` (number of bathrooms).
+c) Interpret the odds ratio for `BATHS`.
+d) Compute in-sample classification accuracy at a 0.5 cutoff.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+homes <- read.csv("data/homes2004.csv")
+
+# a) Binary response: down payment >= 20% of price
+homes$gt20dwn <- as.numeric((homes$LPRICE - homes$AMMORT) / homes$LPRICE >= 0.2)
+
+# b) Logistic regression
+down_model <- glm(gt20dwn ~ FRSTHO + BATHS, family = binomial, data = homes)
+summary(down_model)
+
+# c) Odds ratio for BATHS
+or_baths <- exp(coef(down_model)["BATHS"])
+cat("Odds ratio for BATHS:", round(or_baths, 3), "\n")
+cat("Each additional bathroom multiplies the odds of a 20%+ down payment by",
+    round(or_baths, 3), "\n")
+
+# d) In-sample classification accuracy at 0.5 cutoff
+pred_prob <- predict(down_model, type = "response")
+pred_class <- as.numeric(pred_prob > 0.5)
+accuracy <- mean(pred_class == homes$gt20dwn)
+cat("In-sample accuracy at 0.5 cutoff:", round(accuracy, 4), "\n")
+```
+
+**Key Finding**: Each additional bathroom is associated with about 42% higher odds of a 20%-or-more down payment, and the model correctly classifies about 70% of buyers in-sample.
+:::
+:::
+
+
+::: {#exr-circle-kernel-trick}
+## Kernel Trick for Circularly Separable Data
+
+The `circle.csv` data contain 200 points with a binary `label` and features `x1`, `x2`, built like the `gencircledata()` construction in the Kernel Trick section: one class near the origin, the other in a surrounding ring. This exercise shows how an explicit feature map turns a problem with no linear solution into one that logistic regression solves exactly, and connects that map to the polynomial kernel.
+
+a) Load the data with `read.csv("data/circle.csv")` and scatter-plot `x2` against `x1`, colored by `label`. Confirm visually that no straight line separates the two classes.
+b) Fit `glm(label ~ x1 + x2, family = binomial, data = d)`. Report in-sample accuracy at a 0.5 cutoff and explain, in terms of the linear boundary $\beta_0 + \beta_1 x_1 + \beta_2 x_2 = 0$, why raw logistic regression cannot beat chance here.
+c) Construct the transformed features $z_1 = x_1^2$, $z_2 = \sqrt{2}\,x_1 x_2$, $z_3 = x_2^2$ from the Kernel Trick section and fit `glm(label ~ z1 + z2 + z3, family = binomial, data = d)`. Report the new accuracy. R prints a warning about fitted probabilities of 0 or 1; explain what this says about separability in $z$-space and connect it to the True/False exercise item on perfectly separable data.
+d) Draw two rows with `set.seed(1); idx <- sample(1:200, 2)`. Compute the inner product $z_i^\top z_j$ from the part-(c) features and, separately, the polynomial-kernel value $(x_i^\top x_j)^2$ from the raw features. Confirm they agree, verifying $K(x,y) = (x^\top y)^2 = \langle \phi(x), \phi(y)\rangle$ for this $\phi$.
+e) Using the fitted coefficients from (c), write the boundary $\omega_1 x_1^2 + \omega_2 \sqrt{2}\,x_1 x_2 + \omega_3 x_2^2 = 0$ back in the original $(x_1, x_2)$ plane and argue that it traces a near-circular ellipse around the origin, matching how the data were generated.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The label-0 points form a disk near the origin while the label-1 points form a ring around them. No straight line can wrap around the inner disk, so the classes are not linearly separable.
+```{r}
+#| fig-cap: "Circle data: an inner disk (label 0) surrounded by an outer ring (label 1), not separable by any straight line."
+d <- read.csv("data/circle.csv")
+plot(d$x1, d$x2, col = d$label + 1, pch = 19, xlab = "x1", ylab = "x2", ylim = c(-10, 17))
+legend("top", legend = c("label 0", "label 1"),
+       col = c(1, 2), pch = 19, horiz = TRUE, bty = "n")
+```
+
+b) A linear logistic model classifies no better than a coin flip.
+```{r}
+m1 <- glm(label ~ x1 + x2, family = binomial, data = d)
+acc1 <- mean((predict(m1, type = "response") > 0.5) == d$label)
+cat("Linear logistic accuracy:", round(acc1, 3), "\n")
+round(coef(m1), 4)
+```
+The boundary $\beta_0 + \beta_1 x_1 + \beta_2 x_2 = 0$ is a straight line that splits the plane into two half-planes. Because class 0 is completely surrounded by class 1, no half-plane can hold one class without the other, so accuracy stays essentially at chance (0.525 here) and the fitted coefficients are all close to zero.
+
+c) In the quadratic feature space the classes separate perfectly.
+```{r}
+d$z1 <- d$x1^2
+d$z2 <- sqrt(2) * d$x1 * d$x2
+d$z3 <- d$x2^2
+m2 <- glm(label ~ z1 + z2 + z3, family = binomial, data = d)
+acc2 <- mean((predict(m2, type = "response") > 0.5) == d$label)
+cat("Quadratic logistic accuracy:", round(acc2, 3), "\n")
+round(coef(m2), 4)
+```
+Accuracy jumps to 1.00. The warning that fitted probabilities are numerically 0 or 1 (accompanied here by a non-convergence warning) signals that the classes are perfectly linearly separable in $z$-space, so the MLE for $\beta$ diverges toward $\pm\infty$ and `glm` never converges. This is exactly the pathology flagged in the True/False exercise item on perfectly separable data: with separable data the MLE does not exist, and in practice one adds an $L_2$ (ridge) penalty to stabilize the fit.
+
+d) The explicit inner product and the kernel evaluation agree to machine precision.
+```{r}
+set.seed(1)
+idx <- sample(1:200, 2)
+i <- idx[1]; j <- idx[2]
+zi <- c(d$z1[i], d$z2[i], d$z3[i])
+zj <- c(d$z1[j], d$z2[j], d$z3[j])
+xi <- c(d$x1[i], d$x2[i]); xj <- c(d$x1[j], d$x2[j])
+cat("inner product z_i . z_j:", round(sum(zi * zj), 4), "\n")
+cat("kernel (x_i . x_j)^2  :", round((sum(xi * xj))^2, 4), "\n")
+```
+Both equal 5.7259 for this pair (rows 68 and 167), confirming $K(x,y) = (x^\top y)^2 = \langle \phi(x), \phi(y)\rangle$: the kernel returns the higher-dimensional inner product directly, without ever forming $\phi$.
+
+e) The fitted coefficients are $\omega_1 \approx 0.957$, $\omega_2 \approx 0.011$, $\omega_3 \approx 0.915$ with intercept $\approx -37.45$. Because $\omega_1 \approx \omega_3$ and $\omega_2 \approx 0$, the boundary $\omega_1 x_1^2 + \omega_2 \sqrt{2}\,x_1 x_2 + \omega_3 x_2^2 = -\beta_0$ collapses to $x_1^2 + x_2^2 \approx \text{constant}$: a near-circular ellipse centered at the origin.
+```{r}
+w <- coef(m2)
+r2 <- -w["(Intercept)"] / mean(w[c("z1", "z3")])
+cat("boundary x1^2 + x2^2 =", round(r2, 1),
+    " (radius approx", round(sqrt(r2), 2), ")\n")
+```
+The implied radius of about 6.3 sits in the empty gap between the inner disk and the outer ring, so the learned ellipse encircles class 0 and excludes class 1, reproducing the radial rule used to generate the data.
+:::
+:::
+
+
+::: {#exr-warpbreaks-poisson}
+## Fabric Breaks: A Poisson GLM and the Likelihood-Ratio Test
+
+The built-in `warpbreaks` dataset records the number of breaks (`breaks`) in yarn during weaving, for two types of wool (`wool`, levels A and B) and three tension settings (`tension`, levels L, M, H). Since `breaks` is a non-negative count, a Poisson GLM with a log link is the natural choice, extending the logistic (Bernoulli) GLM used throughout this chapter to another member of the exponential family (@sec-glm).
+
+a) Fit the full model `breaks ~ wool + tension` with `glm(..., family = poisson)`. Exponentiate the coefficients to get rate ratios. By what factor does the expected number of breaks change from low to high tension?
+b) Fit the reduced (nested) model `breaks ~ wool`, dropping `tension`.
+c) Compare the two nested models with `anova(reduced, full, test = "Chisq")`. Report the deviance difference, its degrees of freedom, and the $p$-value. Does tension improve the fit?
+d) Compute the dispersion statistic $\sum_i r_i^2/(n-p)$ from the Pearson residuals (`residuals(full, type = "pearson")`) of the full model. Is there evidence of overdispersion, and what does this imply about the standard errors and the $p$-value reported in (c)?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+data(warpbreaks)
+
+# a) Full model
+full_model <- glm(breaks ~ wool + tension, family = poisson, data = warpbreaks)
+round(exp(coef(full_model)), 4)
+```
+Going from low to high tension multiplies the expected number of breaks by about 0.60 (a 40% reduction), holding wool type fixed; wool B has about 19% fewer breaks than wool A.
+
+```{r}
+# b) Reduced model
+reduced_model <- glm(breaks ~ wool, family = poisson, data = warpbreaks)
+```
+
+```{r}
+# c) Likelihood-ratio test
+anova(reduced_model, full_model, test = "Chisq")
+```
+The residual deviance drops from 281.33 on 52 degrees of freedom to 210.39 on 50 degrees of freedom, a difference of 70.94 on 2 degrees of freedom, with $p \approx 4\times 10^{-16}$. Tension has a large, highly significant effect: the reduced model is firmly rejected in favor of the model that includes tension.
+
+```{r}
+# d) Dispersion check
+pearson_resid <- residuals(full_model, type = "pearson")
+dispersion <- sum(pearson_resid^2) / df.residual(full_model)
+round(dispersion, 2)
+```
+The dispersion statistic is about 4.3, far above the value of 1 assumed by the Poisson model. This is overdispersion: the variance of `breaks` exceeds its mean by more than the Poisson distribution allows. Point estimates of the coefficients remain consistent, but `summary()` and the deviance test in (c) assume dispersion equal to 1, so the reported standard errors are too small and the $p$-value in (c) is optimistic. In practice one would refit with `family = quasipoisson`, which rescales standard errors by $\sqrt{\text{dispersion}}$, or move to a negative binomial GLM.
+:::
+:::
+
+
+::: {#exr-gamma-loan-amount}
+## Gamma Regression for Loan Amounts
+
+The German credit data (`credit.csv`, the file used in the Credit Scoring exercise) records each loan `amount`, a strictly positive and right-skewed quantity. This exercise extends the GLM family of @sec-glm beyond the Bernoulli (logistic) and Poisson (@exr-warpbreaks-poisson) cases to the Gamma model for positive continuous responses.
+
+a) Plot a histogram of `amount` and compare its mean to its median. Why does this make `amount` a natural candidate for Gamma regression rather than ordinary least squares on the raw scale?
+b) Recode `history` into good/poor/terrible as in the Credit Scoring exercise, then fit `glm(amount ~ duration + installment + age + history, family = Gamma(link = "log"), data = credit)`. Exponentiate the coefficient on `duration` and interpret it as a multiplicative effect on expected loan amount, holding the other predictors fixed.
+c) Fit the reduced model `amount ~ duration + installment + age`, dropping `history`. Compare the reduced and full models with `anova(reduced, full, test = "F")` and with `AIC()`. Does credit history add explanatory power for loan amount once duration, installment rate, and age are in the model?
+d) Fit the log-linear OLS model `lm(log(amount) ~ duration + installment + age + history)`. Compare its coefficients to the Gamma GLM's, and compare fitted values on the original scale (exponentiate the OLS fitted values). Are the two practically equivalent here? What is conceptually different between modeling $\E{Y \mid x}$ directly through a Gamma GLM with a log link and modeling $\E{\log Y \mid x}$ with OLS?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The distribution is right-skewed, so the mean sits well above the median.
+```{r}
+#| fig-cap: "Loan amounts are strictly positive and right-skewed, with a long tail toward large loans."
+credit <- read.csv("data/credit.csv", stringsAsFactors = TRUE)
+hist(credit$amount, breaks = 30, col = "lightblue", border = "white",
+     main = "", xlab = "Loan amount")
+cat("mean:", round(mean(credit$amount), 0),
+    " median:", median(credit$amount),
+    " max:", max(credit$amount), "\n")
+```
+The mean (about 3271) exceeds the median (about 2320), with a long right tail out to 18424. A strictly positive, right-skewed response is better matched by a Gamma (or lognormal) model than by Normal-errors OLS on the raw scale, which assumes constant variance and can produce negative fitted amounts.
+
+b) Multiplicative effect of loan duration.
+```{r}
+credit$history <- factor(credit$history,
+                         levels = c("A30", "A31", "A32", "A33", "A34"))
+levels(credit$history) <- c("good", "good", "poor", "poor", "terrible")
+full <- glm(amount ~ duration + installment + age + history,
+            family = Gamma(link = "log"), data = credit)
+round(exp(coef(full)), 4)
+```
+With a log link, $\exp(\beta_j)$ is the multiplicative change in expected amount per unit of predictor $j$. Here $\exp(\hat\beta_{\text{duration}}) \approx 1.043$: each additional month of loan duration is associated with about a 4% increase in expected loan amount, holding installment rate, age, and history fixed. The installment rate has the opposite sign, $\exp(-0.255) \approx 0.775$, roughly a 22% drop in expected amount per one-unit increase.
+
+c) History adds nothing once duration, installment, and age are present.
+```{r}
+reduced <- glm(amount ~ duration + installment + age,
+               family = Gamma(link = "log"), data = credit)
+anova(reduced, full, test = "F")
+cat("AIC reduced:", round(AIC(reduced), 1),
+    " AIC full:", round(AIC(full), 1), "\n")
+```
+Adding `history` lowers the residual deviance only from 290.19 to 289.89, and the $F$-test is far from significant ($p \approx 0.68$). AIC rises from 17236.3 to 17239.2, penalizing the two extra parameters. Credit history carries negligible information about loan amount once duration, installment rate, and age are accounted for, so the reduced model is preferred.
+
+d) The Gamma GLM and log-linear OLS agree closely here.
+```{r}
+ols <- lm(log(amount) ~ duration + installment + age + history, data = credit)
+round(rbind(gamma = coef(full), ols = coef(ols)), 4)
+cat("correlation of original-scale fitted values:",
+    round(cor(fitted(full), exp(fitted(ols))), 4), "\n")
+```
+The coefficients are numerically close (duration 0.042 for the Gamma GLM versus 0.043 for OLS), and the fitted values on the original scale correlate above 0.999. They match because the dispersion is modest. Conceptually, though, the two models target different quantities: the Gamma GLM with a log link sets $\log \E{Y \mid x} = x^\top\beta$, modeling $\E{Y \mid x}$ directly, whereas log-linear OLS sets $\E{\log Y \mid x} = x^\top\beta$. By Jensen's inequality $\E{\log Y \mid x} \le \log \E{Y \mid x}$, so naively exponentiating OLS fitted values understates $\E{Y \mid x}$ in general, unless a bias correction such as Duan's smearing estimator is applied.
+:::
+:::
+
+
+::: {#exr-polya-gamma-nba}
+## Polya-Gamma Gibbs Sampler for the NBA Spread Model
+
+@sec-bayes-logistic derives a Gibbs sampler for Bayesian logistic regression using Polya-Gamma data augmentation and implements it in the function `bayesian_logit_pg()`. Here we reuse that exact sampler on the NBA point-spread data from @exm-nba, where the frequentist fit was $\hat\beta = 0.156$ for the no-intercept model $\mathrm{logit}(P(\text{favwin}=1)) = \beta \cdot \text{spread}$.
+
+a) Load `NBAspread.csv` and reuse the chapter's `bayesian_logit_pg()` function (reproduced below) to sample from the posterior of $\beta$ for the model `favwin ~ spread - 1`. Run `n_iter = 3000` iterations with a `burn_in` of 500, and set a seed.
+b) Report the posterior mean, posterior standard deviation, and a 95% credible interval for $\beta$.
+c) Fit the same model by maximum likelihood with `glm(favwin ~ spread - 1, family = binomial, data = NBA)`. Compare the MLE and its standard error to the posterior mean and standard deviation from (b). Should these agree closely, and why?
+d) Plot a histogram of the posterior draws of $\beta$, marking the posterior mean and the MLE.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(BayesLogit)
+library(MASS)
+
+# Reused from the chapter's Polya-Gamma section
+bayesian_logit_pg <- function(y, X, n_iter = 5000, burn_in = 1000) {
+  n <- length(y)
+  p <- ncol(X)
+  beta_prior_mean <- rep(0, p)
+  beta_prior_prec <- diag(0.01, p)
+
+  beta_samples <- matrix(0, n_iter, p)
+  beta <- rep(0, p)
+
+  for (iter in 1:n_iter) {
+    psi <- X %*% beta
+    omega <- rpg(n, h = 1, z = psi)
+
+    V_omega <- solve(t(X) %*% diag(omega) %*% X + beta_prior_prec)
+    kappa <- y - 0.5
+    m_omega <- V_omega %*% (t(X) %*% kappa + beta_prior_prec %*% beta_prior_mean)
+
+    beta <- mvrnorm(1, m_omega, V_omega)
+    beta_samples[iter, ] <- beta
+  }
+  beta_samples[(burn_in + 1):n_iter, , drop = FALSE]
+}
+
+# a) Fit to the NBA spread data
+set.seed(202)
+NBA <- read.csv("data/NBAspread.csv")
+X <- matrix(NBA$spread, ncol = 1)
+y <- NBA$favwin
+beta_draws <- bayesian_logit_pg(y, X, n_iter = 3000, burn_in = 500)
+```
+
+```{r}
+# b) Posterior summary
+post_mean <- mean(beta_draws)
+post_sd <- sd(beta_draws)
+ci <- quantile(beta_draws, c(0.025, 0.975))
+cat("Posterior mean:", round(post_mean, 4), "\n")
+cat("Posterior sd:", round(post_sd, 4), "\n")
+cat("95% credible interval:", round(ci[1], 4), "to", round(ci[2], 4), "\n")
+```
+
+```{r}
+# c) Compare to the MLE
+mle_fit <- glm(favwin ~ spread - 1, family = binomial, data = NBA)
+cat("MLE:", round(coef(mle_fit), 4), "\n")
+cat("MLE SE:", round(summary(mle_fit)$coefficients[, "Std. Error"], 4), "\n")
+```
+The posterior mean (0.1572) nearly matches the MLE (0.156), and the posterior sd (0.0135) is close to the MLE's standard error (0.0138). With $n = 553$ games and a diffuse prior (precision 0.01, i.e., prior variance 100), the likelihood dominates the posterior, so the Bayesian and frequentist estimates of $\beta$ should agree closely. This is the usual large-sample equivalence between the posterior and the sampling distribution of the MLE.
+
+```{r}
+# d) Posterior histogram vs MLE
+hist(beta_draws, breaks = 30, col = "lightblue", border = "white",
+     main = "", xlab = expression(beta[spread]))
+abline(v = post_mean, col = "blue", lwd = 2)
+abline(v = coef(mle_fit), col = "red", lwd = 2, lty = 2)
+legend("topright", legend = c("Posterior mean", "MLE"),
+       col = c("blue", "red"), lwd = 2, lty = c(1, 2), bty = "n")
+```
+:::
+:::
+
+::::

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="700" height="550" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            .matrix-text { font-family: Arial, sans-serif; font-size: 16px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+            .label-text { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+            .title-text { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #2c3e50; }
+            .subtitle-text { font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; fill: #7f8c8d; }
+            .axis-text { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #34495e; }
+            .section-text { font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+        </style>
+    </defs>
+    
+    <!-- Background -->
+    <rect x="1.5" y="1.5" width="697" height="547" fill="#f8f9fa" stroke="#2c3e50" stroke-width="3" rx="12"/>
+    
+    <!-- Column labels - Encoder sequence (Keys/Values) -->
+    <text x="175" y="105" class="label-text" fill="#27ae60">The</text>
+    <text x="300" y="105" class="label-text" fill="#27ae60">cat</text>
+    <text x="425" y="105" class="label-text" fill="#27ae60">sleeps</text>
+    <text x="550" y="105" class="label-text" fill="#27ae60">&lt;EOS&gt;</text>
+    
+    <!-- Row labels - Decoder sequence (Queries) -->
+    <text x="75" y="162.5" class="label-text" fill="#e74c3c">Le</text>
+    <text x="75" y="262.5" class="label-text" fill="#e74c3c">chat</text>
+    <text x="75" y="362.5" class="label-text" fill="#e74c3c">dort</text>
+    
+    <!-- Matrix cells with cross-attention weights -->
+    
+    <!-- Row 1: "Le" attending to English words -->
+    <!-- Le -> The (strong alignment - both determiners) -->
+    <rect x="125" y="125" width="100" height="75" fill="rgba(231, 76, 60, 0.95)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="175" y="162.5" class="matrix-text" fill="white">0.85</text>
+    
+    <!-- Le -> cat -->
+    <rect x="250" y="125" width="100" height="75" fill="rgba(231, 76, 60, 0.25)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="300" y="162.5" class="matrix-text" fill="black">0.10</text>
+    
+    <!-- Le -> sleeps -->
+    <rect x="375" y="125" width="100" height="75" fill="rgba(231, 76, 60, 0.15)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="425" y="162.5" class="matrix-text" fill="black">0.03</text>
+    
+    <!-- Le -> <EOS> -->
+    <rect x="500" y="125" width="100" height="75" fill="rgba(231, 76, 60, 0.12)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="550" y="162.5" class="matrix-text" fill="black">0.02</text>
+    
+    <!-- Row 2: "chat" attending to English words -->
+    <!-- chat -> The -->
+    <rect x="125" y="225" width="100" height="75" fill="rgba(52, 152, 219, 0.2)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="175" y="262.5" class="matrix-text" fill="black">0.08</text>
+    
+    <!-- chat -> cat (strong alignment - both mean "cat") -->
+    <rect x="250" y="225" width="100" height="75" fill="rgba(52, 152, 219, 0.9)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="300" y="262.5" class="matrix-text" fill="white">0.80</text>
+    
+    <!-- chat -> sleeps -->
+    <rect x="375" y="225" width="100" height="75" fill="rgba(52, 152, 219, 0.25)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="425" y="262.5" class="matrix-text" fill="black">0.10</text>
+    
+    <!-- chat -> <EOS> -->
+    <rect x="500" y="225" width="100" height="75" fill="rgba(52, 152, 219, 0.12)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="550" y="262.5" class="matrix-text" fill="black">0.02</text>
+    
+    <!-- Row 3: "dort" attending to English words -->
+    <!-- dort -> The -->
+    <rect x="125" y="325" width="100" height="75" fill="rgba(46, 204, 113, 0.15)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="175" y="362.5" class="matrix-text" fill="black">0.05</text>
+    
+    <!-- dort -> cat -->
+    <rect x="250" y="325" width="100" height="75" fill="rgba(46, 204, 113, 0.3)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="300" y="362.5" class="matrix-text" fill="black">0.15</text>
+    
+    <!-- dort -> sleeps (strong alignment - both verbs) -->
+    <rect x="375" y="325" width="100" height="75" fill="rgba(46, 204, 113, 0.85)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="425" y="362.5" class="matrix-text" fill="white">0.75</text>
+    
+    <!-- dort -> <EOS> -->
+    <rect x="500" y="325" width="100" height="75" fill="rgba(46, 204, 113, 0.2)" stroke="#2c3e50" stroke-width="2"/>
+    <text x="550" y="362.5" class="matrix-text" fill="black">0.05</text>
+    
+    <!-- Axis labels -->
+    <text x="350" y="85" class="axis-text" fill="#27ae60">Encoder Keys/Values (Source Language) →</text>
+    <text x="45" y="255" class="axis-text" fill="#e74c3c" transform="rotate(-90, 45, 255)">← Decoder Queries (Target Language)</text>
+    
+
+    
+    <!-- Legend and explanation -->
+    <rect x="50" y="450" width="600" height="85" fill="rgba(255,255,255,0.95)" stroke="#bdc3c7" stroke-width="2" rx="8"/>
+    
+    <text x="70" y="470" style="font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #2c3e50;">Cross-Attention Pattern Analysis:</text>
+    
+    <text x="70" y="490" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
+        • <tspan fill="#e74c3c" font-weight="bold">"Le"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"The"</tspan> (0.85) - determiner alignment across languages
+    </text>
+    
+    <text x="70" y="505" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
+        • <tspan fill="#e74c3c" font-weight="bold">"chat"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"cat"</tspan> (0.80) - direct semantic translation
+    </text>
+    
+    <text x="70" y="520" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
+        • <tspan fill="#e74c3c" font-weight="bold">"dort"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"sleeps"</tspan> (0.75) - verb alignment for action concepts
+    </text>
+    
+</svg>

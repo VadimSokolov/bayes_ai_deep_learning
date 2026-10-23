@@ -1,0 +1,174 @@
+# book.yaml: the facts about the book, kept in one place.
+# bookrepo.py generates RESULTS.md, CITATION.cff, the README block and the summary blocks from this file and results.yaml.
+# The books website reads it too. Guide: references/repository.md of the book-writing skill.
+
+slug: bayes_ai_deep_learning                     # lowercase letters, digits and underscores; also the name of the book's page on the site
+title: "Bayes, Artificial Intelligence, and Deep Learning"
+subtitle: "Foundations of Data Science"
+authors:
+  - given: "Nick"
+    family: "Polson"
+    orcid: ""                    # optional: 0000-0000-0000-0000 when the author has one
+    affiliation: "Booth School of Business, University of Chicago"
+  - given: "Vadim"
+    family: "Sokolov"
+    orcid: "0000-0002-6618-2965"
+    affiliation: "George Mason University"
+credit_names: ""                 # how a citation names the authors, e.g. "Polson and Sokolov"; empty: built from the family names
+year: 2026
+edition: "1"
+version: "1.0.0"                 # the release tag is v<version>
+date_released: "2026-10-23"      # YYYY-MM-DD, set at release (23 October 2026; move it if the release is later)
+publisher: "Independently published"                    # "Independently published" (the imprint KDP shows for a free KDP ISBN)
+# no isbn: a free KDP ISBN may be used only on KDP, so it goes on the ISBN line of kdp.md (private) and is printed
+# only in the print edition (kdp.py interior); this file is published (references/publishing.md)
+doi: ""                          # this edition's DOI; zenodo.py reserve writes it before the final build
+license_text: CC-BY-4.0          # text, figures and PDF
+license_code: MIT
+repository: https://github.com/VadimSokolov/bayes_ai_deep_learning   # the public repository, named after the slug like the other books (22 Oct 2026)
+site_page: https://vsokolov.org/books/bayes_ai_deep_learning/    # the book page on the website; the PDF is served next to it
+language: en
+print_url: ""                    # where to buy the printed book (optional)
+cover_image: ""                  # front cover image (PNG or JPEG, about 1600 px tall) in the repository, e.g. pdf/cover.png
+pdf: pdf/bayes_ai_deep_learning.pdf              # the released PDF; bookrepo.py pdf copies the build here
+keywords:                        # 5 to 12 search terms
+  - "Bayesian learning"
+  - "deep learning"
+  - "statistical learning"
+  - "large language models"
+  - "neural networks"
+  - "probabilistic inference"
+  - "reinforcement learning"
+  - "data science foundations"
+  - "AI agents"
+  - "transformer models"
+  - "decision theory"
+  - "Gaussian processes"
+short_description: "A textbook that develops Bayesian reasoning, statistical learning and deep learning as one probabilistic framework, from Bayes' rule and decision theory to neural networks, transformers and AI agents, with code in R and Python."
+description: |
+  Modern AI rests on one principle: learning from data under uncertainty. This book builds that principle from the ground up, from Bayes' rule and decision theory to the transformers behind today's large language models.
+
+  Three parts follow the way the ideas developed. Bayesian learning covers probability, utility and decisions, A/B testing, hypothesis testing, stochastic processes, Gaussian processes and reinforcement learning. Statistical learning covers data and pattern matching, regression, logistic regression, tree models, forecasting and model selection. Deep learning covers neural networks, stochastic gradient descent, convolutional networks, language models and AI agents. Worked examples come from finance, sports, medicine, marketing and operations, with code in R and Python and exercises at the end of every chapter.
+
+  Unlike treatments that present machine learning as a toolbox of algorithms, this book treats uncertainty as a first class concern and shows how linear regression, logistic regression and neural networks sit inside one probabilistic framework. Readers learn to quantify what a model does not know, to turn a prediction into a decision, and to see why large language models hallucinate.
+
+  The book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes calculus and basic probability and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.
+source:
+  format: quarto
+  dir: .
+  main: index.qmd
+  aux: index.aux       # kept by the PDF build when _quarto.yml sets latex-clean: false
+  toc: index.toc
+  pdf: _book/Bayes,-Artificial-Intelligence,-and-Deep-Learning.pdf  # the built PDF; its name follows the book title or output-file
+  meta: bookmeta.yml   # generated: book-doi, book-version ...; list it under metadata-files in _quarto.yml
+macros: misc/preamble.tex        # the file that defines the book's macros
+code_dir: code             # empty if the book has no code
+environments: {res: Section}      # printed names of id prefixes: res- marks a catalogued statement in a plain div, which Quarto does not number, so the aux holds its section number
+related_papers:                  # the authors' own papers that results come from; KEY is used in results.yaml origin
+  - key: maharaj2023kramnik
+    citation: "Maharaj, Polson and Sokolov (2023), Kramnik vs Nakamura or Bayes vs P Value, SSRN 4648621"
+    url: https://doi.org/10.2139/ssrn.4648621
+  - key: polson2014bellman
+    citation: "Polson and Witte (2014), A Bellman View of Jesse Livermore, arXiv:1407.2642"
+    url: https://arxiv.org/abs/1407.2642
+  - key: jacquier2013asset
+    citation: "Jacquier and Polson (2013), Asset Allocation in Finance: A Bayesian Perspective, in Bayesian Theory and Applications, Oxford University Press, pages 501 to 515"
+    url: https://doi.org/10.1093/acprof:oso/9780199695607.003.0025
+  - key: polson2013bayesian
+    citation: "Polson, Scott and Windle (2013), Bayesian Inference for Logistic Models Using Pólya Gamma Latent Variables, Journal of the American Statistical Association 108(504), 1339 to 1349"
+    url: https://doi.org/10.1080/01621459.2013.829001
+  - key: polson2014bayesianb
+    citation: "Polson, Scott and Windle (2014), The Bayesian Bridge, Journal of the Royal Statistical Society Series B 76(4), 713 to 733"
+    url: https://doi.org/10.1111/rssb.12042
+  - key: polson2016mixtures
+    citation: "Polson and Scott (2016), Mixtures, Envelopes and Hierarchical Duality, Journal of the Royal Statistical Society Series B 78(4), 701 to 727"
+    url: https://doi.org/10.1111/rssb.12130
+  - key: polson2018posterior
+    citation: "Polson and Ročková (2018), Posterior Concentration for Sparse Deep Learning, Advances in Neural Information Processing Systems 31, arXiv:1803.09138"
+    url: https://arxiv.org/abs/1803.09138
+  - key: polson2024generative
+    citation: "Polson, Ruggeri and Sokolov (2024), Generative Bayesian Computation for Maximum Expected Utility, Entropy 26(12), 1076"
+    url: https://doi.org/10.3390/e26121076
+#  - key: smith2026x
+#    citation: "Smith and Jones (2026), Title of the paper, arXiv:2601.00001"
+#    url: https://arxiv.org/abs/2601.00001
+chapters:                        # from bookrepo.py scan; a key of capital letters is an appendix (appendix: true or false overrides)
+  - key: "1"
+    title: "Probability and Uncertainty"
+    stem: 01_probability_and_uncertainty
+  - key: "2"
+    title: "Bayes' Rule"
+    stem: 02_bayes_rule
+  - key: "3"
+    title: "Bayesian Learning"
+    stem: 03_bayesian_learning
+  - key: "4"
+    title: "Utility, Risk and Decisions"
+    stem: 04_utility_risk_and_decisions
+  - key: "5"
+    title: "A/B Testing"
+    stem: 05_a_b_testing
+  - key: "6"
+    title: "Bayesian Hypothesis Testing"
+    stem: 06_bayesian_hypothesis_testing
+  - key: "7"
+    title: "Stochastic Processes"
+    stem: 07_stochastic_processes
+  - key: "8"
+    title: "Gaussian Processes"
+    stem: 08_gaussian_processes
+  - key: "9"
+    title: "Reinforcement Learning"
+    stem: 09_reinforcement_learning
+  - key: "10"
+    title: "Unreasonable Effectiveness of Data"
+    stem: 10_unreasonable_effectiveness_of_data
+  - key: "11"
+    title: "Pattern Matching"
+    stem: 11_pattern_matching
+  - key: "12"
+    title: "Linear Regression"
+    stem: 12_linear_regression
+  - key: "13"
+    title: "Logistic Regression and Generalized Linear Models"
+    stem: 13_logistic_regression_and_generalized_linear_models
+  - key: "14"
+    title: "Tree Models"
+    stem: 14_tree_models
+  - key: "15"
+    title: "Forecasting"
+    stem: 15_forecasting
+  - key: "16"
+    title: "Model Selection"
+    stem: 16_model_selection
+  - key: "17"
+    title: "Statistical Learning Theory and Regularization"
+    stem: 17_statistical_learning_theory_and_regularization
+  - key: "18"
+    title: "Neural Networks"
+    stem: 18_neural_networks
+  - key: "19"
+    title: "Theory of Deep Learning"
+    stem: 19_theory_of_deep_learning
+  - key: "20"
+    title: "Gradient Descent"
+    stem: 20_gradient_descent
+  - key: "21"
+    title: "Quantile Neural Networks"
+    stem: 21_quantile_neural_networks
+  - key: "22"
+    title: "Convolutional Neural Networks"
+    stem: 22_convolutional_neural_networks
+  - key: "23"
+    title: "Natural Language Processing"
+    stem: 23_natural_language_processing
+  - key: "24"
+    title: "Large Language Models"
+    stem: 24_large_language_models
+  - key: "25"
+    title: "AI Agents"
+    stem: 25_ai_agents
+style:
+  forbid: ["—", "–"]             # characters that may not appear in published text
+  no_hyphenated_words: true
+  allow_hyphenated: []           # words that keep their hyphen, e.g. names

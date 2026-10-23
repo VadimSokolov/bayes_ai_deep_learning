@@ -1,0 +1,661 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## OLS Derivation
+
+For the linear regression model $y = X\beta + \epsilon$, where $X$ is an $n \times p$ design matrix:
+
+a) Derive the OLS estimator $\hat{\beta} = (X^TX)^{-1}X^Ty$ by minimizing the sum of squared errors.
+b) Show that $\E{\hat{\beta}} = \beta$ (unbiasedness).
+c) Derive the variance $\Var{\hat{\beta}} = \sigma^2(X^TX)^{-1}$.
+d) For simple linear regression ($p=2$ including intercept), express $\hat{\beta}_1$ in terms of sample means and variances.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Minimize $L(\beta) = (y - X\beta)^T(y - X\beta)$
+
+Take derivative:
+$$
+\frac{\partial L}{\partial \beta} = -2X^Ty + 2X^TX\beta = 0
+$$
+Solving: $X^TX\beta = X^Ty$, so $\hat{\beta} = (X^TX)^{-1}X^Ty$
+
+b) $\E{\hat{\beta}} = \E{(X^TX)^{-1}X^Ty} = (X^TX)^{-1}X^T\E{y}$
+
+Since $\E{y} = X\beta$:
+$$
+\E{\hat{\beta}} = (X^TX)^{-1}X^TX\beta = \beta
+$$
+
+c) $\Var{\hat{\beta}} = \Var{(X^TX)^{-1}X^Ty}$
+
+Since $\Var{y} = \sigma^2 I$:
+$$
+\Var{\hat{\beta}} = (X^TX)^{-1}X^T \cdot \sigma^2 I \cdot X(X^TX)^{-1} = \sigma^2(X^TX)^{-1}
+$$
+
+d) For simple regression:
+$$
+\hat{\beta}_1 = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2} = \frac{S_{xy}}{S_{xx}} = \frac{\Cov{x,y}}{\Var{x}}
+$$
+
+```{r}
+# Verification with example
+set.seed(42)
+n <- 100
+x <- rnorm(n)
+y <- 2 + 3*x + rnorm(n, 0, 0.5)
+
+# Manual calculation
+beta1_manual <- cov(x, y) / var(x)
+beta0_manual <- mean(y) - beta1_manual * mean(x)
+
+# lm() calculation
+fit <- lm(y ~ x)
+
+cat("Manual: beta0 =", round(beta0_manual, 4), ", beta1 =", round(beta1_manual, 4), "\n")
+cat("lm():   beta0 =", round(coef(fit)[1], 4), ", beta1 =", round(coef(fit)[2], 4), "\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Residual Analysis
+
+Given the following regression output for predicting house prices (\$1000s) from square footage:
+
+```
+Call: lm(price ~ sqft)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  50.2345    12.3456   4.071 0.000125 ***
+sqft          0.1234     0.0089  13.865  < 2e-16 ***
+
+Residual standard error: 45.67 on 98 degrees of freedom
+Multiple R-squared: 0.6621
+```
+
+a) Interpret the slope coefficient.
+b) What is the predicted price for a 2000 sq ft house?
+c) Calculate the 95% confidence interval for the slope.
+d) If a residual plot shows a clear parabolic pattern, what would you recommend?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The slope of 0.1234 means: for each additional square foot, the predicted house price increases by \$123.40 (the coefficient is in \$1000s, so $0.1234 \times 1000 = \$123.40$).
+
+b) Predicted price:
+```{r}
+price <- 50.2345 + 0.1234 * 2000
+cat("Predicted price for 2000 sq ft: $", round(price, 2), "thousand = $", round(price * 1000, 0), "\n")
+```
+
+c) 95% CI for slope:
+```{r}
+beta1 <- 0.1234
+se_beta1 <- 0.0089
+df <- 98
+
+t_crit <- qt(0.975, df)
+ci_lower <- beta1 - t_crit * se_beta1
+ci_upper <- beta1 + t_crit * se_beta1
+cat("95% CI for slope: [", round(ci_lower, 4), ",", round(ci_upper, 4), "]\n")
+```
+
+d) A parabolic pattern in residuals indicates that a linear model is inadequate. Recommendations:
+1. Add a quadratic term: `price ~ sqft + I(sqft^2)`
+2. Consider log transformation: `log(price) ~ sqft` or `log(price) ~ log(sqft)`
+3. Use polynomial regression or splines for flexibility
+
+:::
+:::
+
+::: {#exr-}
+## Log Transformations
+
+The relationship between a company's advertising spending ($x$, in \$millions) and revenue ($y$, in \$millions) is believed to follow a power law: $y = ax^b$.
+
+You have the following data:
+| Advertising | 1 | 2 | 4 | 8 | 16 |
+|------------|---|---|---|---|-----|
+| Revenue    | 5 | 8 | 14| 25| 45  |
+
+a) Transform the model to a linear form using logs.
+b) Fit the linear model and estimate $a$ and $b$.
+c) Interpret the coefficient $b$.
+d) Predict revenue when advertising spending is \$10 million.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Take logs of both sides:
+$$
+\log(y) = \log(a) + b \log(x)
+$$
+This is linear in $\log(x)$ and $\log(y)$.
+
+b) Fit the model:
+```{r}
+advertising <- c(1, 2, 4, 8, 16)
+revenue <- c(5, 8, 14, 25, 45)
+
+# Log-log transformation
+log_ad <- log(advertising)
+log_rev <- log(revenue)
+
+fit <- lm(log_rev ~ log_ad)
+summary(fit)
+
+# Extract a and b
+b <- coef(fit)[2]
+log_a <- coef(fit)[1]
+a <- exp(log_a)
+
+cat("\nEstimated a =", round(a, 4), "\n")
+cat("Estimated b =", round(b, 4), "\n")
+```
+
+c) Interpretation of $b$: This is an elasticity. A 1% increase in advertising spending is associated with a $b$% increase in revenue. 
+
+If $b \approx 0.75$, then advertising has diminishing returns (doubling spending increases revenue by $2^{0.75} \approx 1.68$ times, not double).
+
+d) Predict revenue at \$10 million:
+```{r}
+ad_new <- 10
+log_rev_pred <- predict(fit, newdata = data.frame(log_ad = log(ad_new)))
+rev_pred <- exp(log_rev_pred)
+cat("Predicted revenue at $10M advertising: $", round(rev_pred, 2), "M\n")
+
+# Or directly: y = a * x^b
+rev_direct <- a * ad_new^b
+cat("Direct calculation: $", round(rev_direct, 2), "M\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## CAPM and Fama-French
+
+You analyze monthly returns for a tech stock. Using CAPM:
+$$
+r_i - r_f = \alpha + \beta(r_m - r_f) + \epsilon
+$$
+
+Regression output:
+```
+            Estimate Std.Error t value
+(Intercept)   0.005    0.003    1.67
+Market        1.35     0.12    11.25
+```
+
+a) Interpret the beta of 1.35.
+b) Test whether alpha is significantly different from zero at the 5% level.
+c) If the risk-free rate is 0.5% monthly and expected market return is 1% monthly, what is the expected return on this stock?
+d) For the Fama-French 3-factor model, you estimate coefficients SMB = 0.4 and HML = -0.3. What do these values tell you about the stock?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Beta = 1.35 means:
+- The stock is 35% more volatile than the market
+- When the market goes up 1%, this stock is expected to go up 1.35%
+- Systematic risk is higher than the market average
+- Tech stocks typically have high betas
+
+b) Test H0: α = 0
+```{r}
+alpha <- 0.005
+se_alpha <- 0.003
+t_stat <- alpha / se_alpha
+p_value <- 2 * (1 - pt(abs(t_stat), df = 58))  # Assume 60 months
+
+cat("t-statistic:", round(t_stat, 2), "\n")
+cat("p-value:", round(p_value, 4), "\n")
+cat("At 5% level:", ifelse(p_value < 0.05, "Reject H0", "Fail to reject H0"), "\n")
+```
+
+The alpha is not significantly different from zero at the 5% level.
+
+c) Expected return:
+```{r}
+rf <- 0.005  # 0.5% monthly
+rm <- 0.01   # 1% monthly
+beta <- 1.35
+
+expected_return <- rf + beta * (rm - rf)
+cat("Expected monthly return:", round(expected_return * 100, 2), "%\n")
+cat("Annualized:", round((1 + expected_return)^12 - 1, 4) * 100, "%\n")
+```
+
+d) Fama-French interpretation:
+- **SMB = 0.4** (positive): Stock behaves like small-cap stocks. Small-cap stocks tend to outperform large-cap historically, so this exposure adds expected return.
+- **HML = -0.3** (negative): Stock behaves like growth stocks (low book-to-market). Growth stocks have historically underperformed value stocks on average, but this is a tech stock characteristic.
+
+This is consistent with a small/mid-cap tech growth stock.
+
+:::
+:::
+
+::: {#exr-}
+## Cross-Validation
+
+You have 100 observations and want to compare three models:
+
+- Model A: Linear (2 parameters)
+- Model B: Quadratic (3 parameters)  
+- Model C: Degree-5 polynomial (6 parameters)
+
+You perform 5-fold cross-validation and get these MSE results:
+
+| Fold | Model A | Model B | Model C |
+|------|---------|---------|---------|
+| 1    | 12.3    | 10.1    | 11.5    |
+| 2    | 11.8    | 9.8     | 14.2    |
+| 3    | 13.1    | 10.5    | 12.8    |
+| 4    | 12.0    | 9.5     | 15.1    |
+| 5    | 11.5    | 10.8    | 13.0    |
+
+a) Calculate the average CV-MSE for each model.
+b) Which model would you select and why?
+c) What does the high variance in Model C's fold results suggest?
+d) How would you expect the results to change with 10-fold CV instead of 5-fold?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Average CV-MSE:
+```{r}
+mse_A <- c(12.3, 11.8, 13.1, 12.0, 11.5)
+mse_B <- c(10.1, 9.8, 10.5, 9.5, 10.8)
+mse_C <- c(11.5, 14.2, 12.8, 15.1, 13.0)
+
+cat("Model A: mean MSE =", round(mean(mse_A), 2), ", sd =", round(sd(mse_A), 2), "\n")
+cat("Model B: mean MSE =", round(mean(mse_B), 2), ", sd =", round(sd(mse_B), 2), "\n")
+cat("Model C: mean MSE =", round(mean(mse_C), 2), ", sd =", round(sd(mse_C), 2), "\n")
+```
+
+b) **Select Model B (Quadratic)** because:
+- Lowest average CV-MSE (10.14)
+- Lowest variance across folds (most stable)
+- Good balance of complexity and fit
+
+c) Model C's high variance suggests:
+- **Overfitting**: The model is too flexible and fits noise in each training set
+- Performance is very sensitive to which data are in training vs validation
+- The model has high variance (in the bias-variance sense)
+
+d) With 10-fold CV:
+- Larger training sets (90% vs 80%)
+- Lower bias (each fold's model is closer to the one fit on the full data)
+- Potentially higher variance in average MSE (the 10 trained models are more correlated with each other)
+- Model B would likely still win, possibly with more separation from Model C
+
+:::
+:::
+
+::: {#exr-quantile-median-regression}
+## Quantile Regression and Robustness to Outliers
+
+For the linear model $y_i = x_i^\top\beta + \epsilon_i$, $i=1,\ldots,n$, and a target quantile $\tau \in (0,1)$, recall the check-loss (pinball loss) function
+$$
+\rho_{\tau}(u) = u\left(\tau - \mathbb{I}(u<0)\right).
+$$
+
+a) Write the quantile regression estimator $\hat\beta_\tau$ as the solution to the minimization problem
+$$
+\mini_{\beta}\sum_{i=1}^n \rho_\tau(y_i - x_i^\top\beta).
+$$
+Show that $\rho_\tau(u) = \tau u$ for $u \geq 0$ and $\rho_\tau(u) = (1-\tau)|u|$ for $u < 0$, and explain why this means positive and negative residuals are penalized asymmetrically whenever $\tau \neq 1/2$.
+
+b) Show that at $\tau = 1/2$, $\rho_{1/2}(u) = \tfrac{1}{2}|u|$ for every $u$, so that minimizing $\sum_{i=1}^n \rho_{1/2}(y_i - x_i^\top\beta)$ has the same minimizer as the least absolute deviations objective $\sum_{i=1}^n |y_i - x_i^\top\beta|$. This is median regression.
+
+c) The check loss is not differentiable at $u=0$, so use its subgradient
+$$
+\rho_\tau'(u) = \begin{cases} \tau & u > 0 \\ \tau - 1 & u < 0 \\ [\tau - 1, \tau] & u = 0 \end{cases}
+$$
+to derive the first-order optimality condition for $\hat\beta_\tau$. Then specialize to the intercept-only case ($x_i \equiv 1$, i.e., estimating a single unconditional quantile of $y$, as in this chapter's own derivation of the median) and show that, ignoring ties, the fraction of observations lying below the fitted quantile equals $\tau$.
+
+d) Explain why median regression ($\tau = 1/2$) is more robust to outliers than OLS. Connect your answer to Chapter 10's account of Boscovich, who developed a least-absolute-deviations method in 1757, roughly half a century before Legendre's 1805 least-squares paper.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The quantile regression estimator $\hat\beta_\tau$ solves
+$$
+\mini_{\beta}\sum_{i=1}^n \rho_\tau(y_i - x_i^\top\beta).
+$$
+By definition $\rho_\tau(u) = u(\tau - \mathbb{I}(u<0))$. For $u \geq 0$, $\mathbb{I}(u<0) = 0$, so $\rho_\tau(u) = \tau u$. For $u < 0$, $\mathbb{I}(u<0)=1$, so $\rho_\tau(u) = u(\tau - 1) = -u(1-\tau) = (1-\tau)|u|$, using $|u|=-u$ when $u<0$. So an under-prediction ($y_i > x_i^\top\beta$, i.e., $u>0$) is penalized at rate $\tau$ per unit of error, while an over-prediction ($u<0$) is penalized at rate $1-\tau$ per unit of error. When $\tau \neq 1/2$ these two rates differ, so $\rho_\tau$ penalizes the two directions of error asymmetrically: a large $\tau$ (e.g., $\tau=0.9$) penalizes under-prediction heavily and pushes the fit up toward the upper tail of $y$, and a small $\tau$ does the reverse.
+
+b) At $\tau = 1/2$: for $u\geq0$, $\rho_{1/2}(u) = \tfrac12 u = \tfrac12|u|$; for $u<0$, $\rho_{1/2}(u) = (1-\tfrac12)|u| = \tfrac12|u|$. So $\rho_{1/2}(u) = \tfrac12|u|$ for every $u$, with no asymmetry between the two branches. Consequently
+$$
+\sum_{i=1}^n \rho_{1/2}(y_i - x_i^\top\beta) = \frac{1}{2}\sum_{i=1}^n |y_i - x_i^\top\beta|,
+$$
+a positive constant multiple of the least absolute deviations objective. Multiplying an objective by a positive constant does not change its minimizer, so $\hat\beta_{1/2}$ is exactly the least absolute deviations (median regression) estimator.
+
+c) Write $R(\beta) = \sum_{i=1}^n \rho_\tau(u_i(\beta))$ where $u_i(\beta) = y_i - x_i^\top\beta$. Since $u_i(\beta)$ is affine in $\beta$ with gradient $-x_i$, the chain rule for subgradients of a convex function composed with an affine map gives
+$$
+\partial_\beta \rho_\tau(u_i(\beta)) = -x_i\, \rho_\tau'(u_i(\beta)),
+$$
+so
+$$
+\partial_\beta R(\beta) = -\sum_{i=1}^n x_i\, \rho_\tau'(y_i - x_i^\top\beta).
+$$
+At a minimizer $\hat\beta_\tau$, zero must be a subgradient, i.e., there exist $s_i \in \partial\rho_\tau(y_i-x_i^\top\hat\beta_\tau)$ (equal to $\tau$, $\tau-1$, or a value in $[\tau-1,\tau]$ according to the sign of the residual) such that
+$$
+\sum_{i=1}^n x_i\, s_i = 0. \tag{$*$}
+$$
+This is the quantile-regression analog of the OLS normal equations $X^\top(y-X\hat\beta)=0$: instead of weighting each residual by its own signed magnitude, ($*$) weights each observation by the sign-dependent constant $s_i$.
+
+Now specialize to $x_i \equiv 1$ (no covariates, so $\hat\beta_\tau$ is a single unconditional quantile of $y$, as in the chapter's own derivation of the median). Condition ($*$) becomes the scalar equation $\sum_{i=1}^n s_i = 0$. Assuming no ties (no $y_i$ exactly equal to $\hat\beta_\tau$), let
+$$
+n_+ = \sum_{i=1}^n \mathbb{I}(y_i > \hat\beta_\tau), \qquad n_- = \sum_{i=1}^n \mathbb{I}(y_i < \hat\beta_\tau), \qquad n_+ + n_- = n.
+$$
+Then
+$$
+\sum_{i=1}^n s_i = \tau n_+ + (\tau-1)n_- = \tau(n_++n_-) - n_- = \tau n - n_- = 0 \implies n_- = \tau n,
+$$
+so
+$$
+\frac{n_-}{n} = \tau,
+$$
+that is, the fraction of observations below the fitted quantile equals $\tau$. At $\tau=1/2$ this recovers the familiar median property that half the data lie on each side, and it reconciles with the chapter's own subgradient $\sum_i \operatorname{sign}(y_i-\beta)$ for the median: since $\operatorname{sign}(u) = 2\rho_{1/2}'(u)$, the two optimality conditions differ only by the harmless factor of 2 already noted in part (b).
+
+d) OLS squares each residual, so a single observation with a large residual contributes a term that grows quadratically and can dominate the objective, pulling the fitted line toward that one point. The check-loss objective instead grows only linearly in the size of each residual, and by part (c) the optimum depends on the residuals only through their signs, not their magnitudes. An outlier can flip whether one residual counts toward $n_+$ or $n_-$, but once its sign is fixed, moving it further away leaves the optimality condition ($*$) unchanged. This is exactly the property Boscovich exploited: two years after the 1755 meridian-arc survey with Christopher Maire, he abandoned simple averaging of the ten pairwise slopes (one of which, between the Cape of Good Hope and Rome, was badly thrown off by measurement error and came out negative) in favor of a least-absolute-deviations method, roughly half a century before Legendre's 1805 least-squares paper. Least absolute deviations tolerates such gross errors precisely because a single wild observation shifts the median fit by only one vote among $n$, unlike the least squares fit, which it can shift arbitrarily far.
+
+To see this concretely:
+
+```{r}
+set.seed(1)
+n <- 20
+x <- seq_len(n)
+y <- 2 + 0.5 * x + rnorm(n, sd = 1)
+y[n] <- y[n] + 50  # one large outlier
+
+ols_fit <- lm(y ~ x)
+
+if (requireNamespace("quantreg", quietly = TRUE)) {
+  med_fit <- quantreg::rq(y ~ x, tau = 0.5)
+  med_coef <- coef(med_fit)
+} else {
+  check_loss <- function(par, x, y, tau) {
+    r <- y - (par[1] + par[2] * x)
+    sum(r * (tau - (r < 0)))
+  }
+  med_coef <- optim(c(0, 0), check_loss, x = x, y = y, tau = 0.5)$par
+}
+
+cat("True:   intercept = 2,     slope = 0.5\n")
+cat("OLS:    intercept =", round(coef(ols_fit)[1], 3), ", slope =", round(coef(ols_fit)[2], 3), "\n")
+cat("Median: intercept =", round(med_coef[1], 3), ", slope =", round(med_coef[2], 3), "\n")
+
+resid_med <- y - (med_coef[1] + med_coef[2] * x)
+cat("Fraction of y_i below the median fit:", mean(resid_med < 0), "\n")
+```
+
+With one point moved 50 units above its true value, the OLS slope is pulled from the true value of 0.5 up to about 1.24 (and the intercept swings from 2 to about $-3$), while the median regression fit stays close to the truth (slope about 0.54, intercept about 2.11), and the fraction of points falling below the fitted line is exactly 0.5, confirming part (c).
+
+:::
+:::
+
+::: {#exr-bayes-ridge-map}
+## Bayesian Linear Regression and the Ridge Estimator
+
+Consider the linear model $y = X\beta + \epsilon$, where $X$ is an $n \times p$ design matrix and $\epsilon \sim N(0,\sigma^2 I)$. Place an independent Gaussian prior on the coefficients, $\beta \sim N(0,\tau^2 I)$.
+
+a) Write the likelihood $p(y \mid \beta, X)$ and the prior $p(\beta)$ as (unnormalized) Gaussian densities in $\beta$, and show that the log-posterior satisfies
+$$
+\log p(\beta \mid X,y) = -\frac{1}{2\sigma^2}(y-X\beta)^\top(y-X\beta) - \frac{1}{2\tau^2}\beta^\top\beta + \text{const},
+$$
+where the constant does not depend on $\beta$.
+
+b) By completing the square in $\beta$, show that the posterior is Gaussian, $\beta \mid X, y \sim N(\bar\beta, A^{-1})$, and derive the posterior precision matrix $A$ and posterior mean $\bar\beta$.
+
+c) Let $\lambda = \sigma^2/\tau^2$. Show algebraically that
+$$
+\bar\beta = (X^\top X + \lambda I)^{-1}X^\top y,
+$$
+which is the ridge estimator with penalty $\lambda$. Explain in a sentence or two why this shows that ridge regression is exactly the Bayesian MAP estimator under a Gaussian prior.
+
+d) What happens to $\bar\beta$ as $\tau^2 \to \infty$ and as $\tau^2 \to 0$? Interpret both limits.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Since $y \mid \beta \sim N(X\beta, \sigma^2 I)$,
+$$
+p(y \mid \beta, X) = (2\pi\sigma^2)^{-n/2}\exp\left(-\frac{1}{2\sigma^2}(y-X\beta)^\top(y-X\beta)\right),
+$$
+and since $\beta \sim N(0,\tau^2 I)$,
+$$
+p(\beta) = (2\pi\tau^2)^{-p/2}\exp\left(-\frac{1}{2\tau^2}\beta^\top\beta\right).
+$$
+By Bayes' rule, $p(\beta\mid X,y) \propto p(y\mid\beta,X)\,p(\beta)$. Taking logs and absorbing every term that does not depend on $\beta$ (the normalizing constants $(2\pi\sigma^2)^{-n/2}$, $(2\pi\tau^2)^{-p/2}$, and the marginal likelihood $p(y\mid X)$) into "const" gives the stated expression.
+
+b) Expand the quadratic form in the log-posterior:
+$$
+(y-X\beta)^\top(y-X\beta) = y^\top y - 2\beta^\top X^\top y + \beta^\top X^\top X\beta,
+$$
+so, up to an additive constant not involving $\beta$,
+$$
+-2\log p(\beta\mid X,y) = \beta^\top\left(\frac{1}{\sigma^2}X^\top X + \frac{1}{\tau^2}I\right)\beta - \frac{2}{\sigma^2}\beta^\top X^\top y.
+$$
+Define the posterior precision matrix
+$$
+A \defeq \frac{1}{\sigma^2}X^\top X + \frac{1}{\tau^2}I,
+$$
+so that $-2\log p(\beta\mid X,y) = \beta^\top A\beta - 2\beta^\top(\sigma^{-2}X^\top y) + \text{const}$. For any vector $b$, completing the square gives the identity $\beta^\top A\beta - 2\beta^\top b = (\beta - A^{-1}b)^\top A(\beta-A^{-1}b) - b^\top A^{-1}b$. Setting $b = \sigma^{-2}X^\top y$ and defining
+$$
+\bar\beta \defeq A^{-1}\sigma^{-2}X^\top y,
+$$
+gives $-2\log p(\beta\mid X,y) = (\beta-\bar\beta)^\top A(\beta-\bar\beta) + \text{const}$, so
+$$
+p(\beta\mid X,y) \propto \exp\left(-\frac12(\beta-\bar\beta)^\top A(\beta-\bar\beta)\right),
+$$
+which is the kernel of a $N(\bar\beta, A^{-1})$ density. Hence $\beta\mid X,y \sim N(\bar\beta, A^{-1})$ with precision $A = \sigma^{-2}X^\top X+\tau^{-2}I$ and mean $\bar\beta = A^{-1}\sigma^{-2}X^\top y$. This is the same conjugate Gaussian-Gaussian computation as the chapter's Bayes Regression section (there written with a general prior covariance $\Sigma$), specialized to the isotropic prior $\Sigma = \tau^2 I$ and to the standard $n\times p$ design-matrix convention used in the OLS Derivation exercise above.
+
+c) Substituting $A$ into $\bar\beta$,
+$$
+\bar\beta = \left(\frac{1}{\sigma^2}X^\top X + \frac{1}{\tau^2}I\right)^{-1}\frac{1}{\sigma^2}X^\top y.
+$$
+Factor $\sigma^{-2}$ out of the matrix being inverted: $\sigma^{-2}X^\top X + \tau^{-2}I = \sigma^{-2}\left(X^\top X + \frac{\sigma^2}{\tau^2}I\right)$, so $\left(\sigma^{-2}X^\top X + \tau^{-2}I\right)^{-1} = \sigma^2\left(X^\top X + \frac{\sigma^2}{\tau^2}I\right)^{-1}$. Substituting,
+$$
+\bar\beta = \sigma^2\left(X^\top X + \frac{\sigma^2}{\tau^2}I\right)^{-1}\frac{1}{\sigma^2}X^\top y = \left(X^\top X + \lambda I\right)^{-1}X^\top y, \qquad \lambda \defeq \frac{\sigma^2}{\tau^2}.
+$$
+This is exactly the ridge estimator: minimizing the penalized sum of squares $\|y-X\beta\|^2 + \lambda\|\beta\|^2$ and setting the derivative to zero gives $-2X^\top y + 2X^\top X\beta + 2\lambda\beta = 0$, i.e., $(X^\top X+\lambda I)\beta = X^\top y$, the same equation. Since the posterior in (b) is Gaussian, its mean and its mode coincide, so $\bar\beta$ is simultaneously the posterior mean and the maximum a posteriori (MAP) estimate. Equivalently, from part (a), maximizing the log-posterior over $\beta$ is, after multiplying by $-2\sigma^2$, the same optimization problem as minimizing $\|y-X\beta\|^2 + (\sigma^2/\tau^2)\|\beta\|^2$. So ridge regression is exactly Bayesian MAP estimation under a Gaussian prior, with the penalty $\lambda$ determined by the ratio of noise variance to prior variance.
+
+d) As $\tau^2 \to \infty$ (a flat, uninformative prior), $\lambda = \sigma^2/\tau^2 \to 0$, so $\bar\beta \to (X^\top X)^{-1}X^\top y = \hat\beta_{\text{OLS}}$: with no prior information, the Bayes estimate agrees with OLS. As $\tau^2 \to 0$ (a prior tightly concentrated at zero, i.e., a strong belief that $\beta = 0$), $\lambda \to \infty$ and $\bar\beta \to 0$: the prior dominates and shrinks the estimate entirely to zero. This matches the chapter's own description of $\bar\beta$ as a compromise between the data and the prior.
+
+:::
+:::
+
+
+::: {#exr-}
+## True/False: Linear Regression
+
+a) The OLS estimator minimizes the sum of absolute residuals.
+
+b) Adding more predictors to a regression always increases $R^2$.
+
+c) If $R^2 = 0.9$, then the correlation between $y$ and $\hat{y}$ is 0.95.
+
+d) Multicollinearity affects the unbiasedness of OLS estimates.
+
+e) The residual standard error has degrees of freedom $n - p - 1$ where $p$ is the number of predictors (excluding intercept).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. OLS minimizes the sum of **squared** residuals, not absolute residuals. Minimizing absolute residuals gives the Least Absolute Deviations (LAD) estimator.
+
+b) **TRUE**. Adding any predictor (even noise) cannot decrease $R^2$. It can only stay the same or increase. This is why adjusted $R^2$ or cross-validation is preferred for model selection.
+
+c) **TRUE**. For simple linear regression: $R^2 = r_{y,\hat{y}}^2$, so $r_{y,\hat{y}} = \sqrt{R^2} = \sqrt{0.9} \approx 0.949$. (Note: the sign is positive since $\hat{y}$ is positively related to $y$.)
+
+d) **FALSE**. Multicollinearity does NOT affect unbiasedness. OLS remains unbiased. However, it increases the variance of coefficient estimates, making them unstable and hard to interpret individually.
+
+e) **TRUE**. With $n$ observations and $p+1$ parameters (including intercept), the degrees of freedom is $n - (p+1) = n - p - 1$.
+
+:::
+:::
+
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## House Data Analysis
+
+Use the `homes2004.csv` data file (variable dictionary in `homes2004code.txt`).
+
+a) Plot relationships between home value and 2-3 predictors. Tell a story about what drives home prices.
+b) Regress `log(VALUE)` onto all variables except mortgage (`AMMORT`) and purchase price (`LPRICE`). 
+c) How many coefficients are significant at the 10% level?
+d) Re-run regression with only significant covariates and compare MSE to the full model.
+e) Fit your model from (d) on homes worth >$100k only. Compare in-sample MSE to out-of-sample MSE when predicting homes worth $\le \$100$k.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+homes <- read.csv("data/homes2004.csv")
+
+# a) Exploratory plots
+p1 <- ggplot(homes, aes(x = factor(BATHS), y = VALUE)) +
+  geom_boxplot(fill = "steelblue") +
+  coord_cartesian(ylim = c(0, 500000)) +
+  labs(title = "Value by Bathrooms", x = "Baths", y = "Value ($)")
+
+p2 <- ggplot(homes, aes(x = ZINC2, y = VALUE)) +
+  geom_point(alpha = 0.3) + geom_smooth(method = "lm", color = "red") +
+  coord_cartesian(ylim = c(0, 500000)) +
+  labs(title = "Value vs Income", x = "Household Income", y = "Value ($)")
+
+print(p1)
+print(p2)
+# Story: More bathrooms and higher income strongly predict higher home values
+
+# b) Full regression
+full_model <- glm(log(VALUE) ~ . - AMMORT - LPRICE, data = homes)
+summary(full_model)
+
+# c) Significant coefficients
+pvals <- summary(full_model)$coef[-1, 4]
+n_sig <- sum(pvals < 0.1)
+cat("Coefficients significant at 10%:", n_sig, "\n")
+
+# d) Reduced model comparison
+# Use term-level p-values to build a valid reduced formula
+term_table <- drop1(full_model, test = "Chisq")
+sig_terms <- rownames(term_table)[
+  rownames(term_table) != "<none>" & term_table$`Pr(>Chi)` < 0.1
+]
+
+if (length(sig_terms) == 0) {
+  sig_terms <- attr(terms(full_model), "term.labels")
+}
+
+formula_reduced <- reformulate(sig_terms, response = "log(VALUE)")
+reduced_model <- glm(formula_reduced, data = homes)
+
+mse_full <- mean(residuals(full_model)^2)
+mse_reduced <- mean(residuals(reduced_model)^2)
+cat("Full MSE:", round(mse_full, 6), "\nReduced MSE:", round(mse_reduced, 6), "\n")
+cat("MSE increase:", round((mse_reduced - mse_full)/mse_full * 100, 2), "%\n")
+
+# e) Out-of-sample prediction
+gt100 <- homes$VALUE > 1e5
+model_gt100 <- glm(formula_reduced, data = homes[gt100, ])
+
+mse_insample <- mean(residuals(model_gt100)^2)
+
+# Predict on homes <= 100k
+pred_lt100 <- predict(model_gt100, newdata = homes[!gt100, ])
+actual_lt100 <- log(homes$VALUE[!gt100])
+mse_outsample <- mean((pred_lt100 - actual_lt100)^2)
+
+cat("\nIn-sample MSE (>$100k):", round(mse_insample, 4), "\n")
+cat("Out-of-sample MSE (<= $100k):", round(mse_outsample, 4), "\n")
+cat("Ratio:", round(mse_outsample / mse_insample, 2), "x\n")
+```
+
+**Interpretation**: The out-of-sample MSE is many times larger than the in-sample MSE (often an order of magnitude or more, as the printed ratio shows), indicating that a model trained on expensive homes generalizes poorly to cheaper homes. The fitted model must extrapolate below its training range, and different value drivers apply across price segments.
+::: 
+:::
+
+
+::: {#exr-}
+## Orange Juice Price Elasticity
+
+Use the `oj_thin.csv` data containing weekly sales of three OJ brands (Dominicks, Minute Maid, Tropicana) across stores. Variables include `sales`, `price`, `brand`, and `feat` (whether the brand was featured in ads).
+
+a) Fit a log-log regression: `log(sales) ~ log(price) + brand`. Interpret the price coefficient as an elasticity.
+b) Add an interaction `log(price)*brand`. How do brand-specific elasticities differ?
+c) Fit a 3-way interaction: `log(sales) ~ log(price)*brand*feat`. Calculate elasticities for each combination of brand and featured status.
+d) Why do brand elasticities change when we control for `feat`? (Hint: examine the relationship between ads and brand.)
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+oj <- read.csv("data/oj_thin.csv")
+
+# a) Simple log-log regression
+reg1 <- glm(log(sales) ~ log(price) + brand, data = oj)
+summary(reg1)
+cat("Price elasticity:", round(coef(reg1)["log(price)"], 2), "\n")
+cat("Interpretation: 1% price increase leads to", 
+    round(coef(reg1)["log(price)"], 2), "% decrease in sales\n")
+
+# b) Brand-specific elasticities
+reg2 <- glm(log(sales) ~ log(price) * brand, data = oj)
+b <- coef(reg2)
+cat("\nBrand-specific elasticities:\n")
+cat("Dominicks:", round(b["log(price)"], 2), "\n")
+cat("Minute Maid:", round(b["log(price)"] + b["log(price):brandminute.maid"], 2), "\n")
+cat("Tropicana:", round(b["log(price)"] + b["log(price):brandtropicana"], 2), "\n")
+
+# c) 3-way interaction with featured
+reg3 <- glm(log(sales) ~ log(price) * brand * feat, data = oj)
+b3 <- coef(reg3)
+
+# Elasticity table
+cat("\n3-Way Elasticity Table:\n")
+cat("Brand\t\t\tNot Featured\tFeatured\n")
+cat("Dominicks\t\t", round(b3["log(price)"], 2), "\t\t", 
+    round(b3["log(price)"] + b3["log(price):feat"], 2), "\n")
+cat("Minute Maid\t\t", 
+    round(b3["log(price)"] + b3["log(price):brandminute.maid"], 2), "\t\t",
+    round(b3["log(price)"] + b3["log(price):brandminute.maid"] + 
+          b3["log(price):feat"] + b3["log(price):brandminute.maid:feat"], 2), "\n")
+cat("Tropicana\t\t", 
+    round(b3["log(price)"] + b3["log(price):brandtropicana"], 2), "\t\t",
+    round(b3["log(price)"] + b3["log(price):brandtropicana"] + 
+          b3["log(price):feat"] + b3["log(price):brandtropicana:feat"], 2), "\n")
+
+# d) Why elasticities change - confounding
+cat("\n\nSales by Featured and Brand:\n")
+salestable <- tapply(oj$sales, oj[, c("feat", "brand")], sum)
+print(round(prop.table(salestable, 2) * 100, 1))
+cat("\nConclusion: Premium brands (Minute Maid, Tropicana) are featured more often.\n")
+cat("Ads increase sales, making these brands appear less price-sensitive.\n")
+cat("Controlling for 'feat' reveals true price sensitivity.\n")
+```
+
+**Key Insight**: Advertising is confounded with brand. Premium brands advertise more, which makes them appear less price-sensitive. Once we control for advertising, all brands show similar (more elastic) price sensitivity.
+:::
+:::
+
+::::

@@ -1,0 +1,1269 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Manchester
+While watching a game of Champions League football in a cafe, you observe someone who is clearly supporting Manchester United in the game. What is the probability that they were actually born within 20 miles of Manchester? Assume that you have the following base rate probabilities
+
+a) The probability that a randomly selected person in a typical local bar environment is born within 20 miles of Manchester is 1/20
+a) The chance that a person born within 20 miles of Manchester actually supports United is 7/10
+a) The probability that a person not born within 20 miles of Manchester supports United with probability 1/10
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Define\
+
+- B - event that the person is born within 20 miles of Manchester\
+- U - event that the person supports United.\
+
+We want $P(B\mid U)$. By Bayes' Theorem,
+$$
+P(B\mid U) = \frac{P(U\mid B)P(B)}{P(U\mid B)P(B) + P(U\mid NB)P(NB)} = 0.269
+$$
+
+
+:::
+:::
+
+
+::: {#exr-}
+## Lung Cancer
+According to the Center for Disease Control (CDC), we know that "compared to nonsmokers, men who smoke are about $23$ times more likely to develop lung cancer and women who smoke are about $13$ times more likely" You are also given the information that $17.9$% of women in 2016 smoke.
+
+If you learn that a woman has been diagnosed with lung cancer, and you know nothing else, what's the probability she is a smoker?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+If we draw the decision tree we get
+
+![Lung Cancer Tree.](fig/lungcancer.png){width="35%"}
+
+If $y$ is the fraction of women who smoke, and $x$ is the fraction of nonsmokers who get lung cancer, the number of smokers who get cancer is proportional to 13xy, and the number of nonsmokers who get lung cancer is proportional to x(1-y).
+
+Of all women who get lung cancer, the fraction who smoke is $13xy / (13xy + x(1-y))$.
+
+The x's cancel, so it turns out that we don't actually need to know the absolute risk of lung cancer, just the relative risk. But we do need to know y, the fraction of women who smoke. According to the CDC, y was 17.9% in 2016. So we just have to compute
+$$
+13y / (13y + 1-y) \approx 74\%
+$$ 
+This is higher than most people guess.
+
+:::
+:::
+
+
+
+::: {#exr-}
+## Tesla Chip
+Tesla purchases a particular chip called the *HW 5.0 auto chip* from three suppliers: Matsushita Electric, Philips
+Electronics, and Hitachi. From historical experience, we know that 30% of the chips are purchased from Matsushita; 20% from Philips and the
+remaining 50% from Hitachi. The manufacturer has extensive histories on the reliability of the chips. We know that 3% of the Matsushita chips are defective; 5% of the Philips and 4% of the Hitachi chips are defective.
+
+A chip is later found to be defective; what is the probability it was manufactured by each of the manufacturers?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let $A_1$ denotes the event that the chip is purchased from Matsushita. Similarly $A_2$ and $A_3$. Let $D$ be the event that the chip is defective and $\bar{D}$ is not. We know
+$$
+P( D \mid A_1 ) = 0.03 \; \; P( D \mid A_2 ) = 0.05 \; \; P( D \mid A_3 ) = 0.04 \; \;
+$$ 
+and
+$$
+P( A_1 ) = 0.30 \; \; P( A_2 ) = 0.20 \; \; P( A_3 ) = 0.50
+$$
+
+The probability that it was manufactured by Philips given that its defective is given by Bayes' rule which gives
+$$
+P( A_2 \mid D ) = \frac{ P( D \mid A_2  ) P( A_2 ) }{P( D \mid A_1  )P( A_1 ) +P( D \mid A_2  ) P( A_2 ) + P( D \mid A_3  ) P( A_3 ) }
+$$ 
+That is
+$$
+P( A_2 \mid D ) = \frac{ 0.20 \times 0.05 }{  0.30 \times 0.03 +0.20 \times 0.05 + 0.50 \times 0.04 } = \frac{10}{39}
+$$ 
+Similarly,
+$P( A_1 \mid D ) = 9 / 39$ and $P( A_3 \mid D  ) = 20/39$
+
+:::
+:::
+
+::: {#exr-}
+## Light Aircraft
+Seventy percent of the light aircraft that disappear while in flight in a certain country are subsequently discovered. Of the aircraft that are discovered, 60% have an emergency locator, whereas 90% of the aircraft not discovered do not have such a locator. Suppose that a light aircraft has disappeared. If it has an emergency locator, what is the probability that it will be discovered?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let D = {The disappearing aircraft is discovered.} and E = {The aircraft has an emergency locator}. Given:
+$$
+P(D) = 0.70 \quad P(\bar D) = 1- P(D) = 0.30 \quad P(E\mid D) = 0.60
+$$
+$$
+P(\bar E\mid \bar D) = 0.90 \quad P(E\mid\bar D) = 1 - P(\bar E\mid\bar D) = 0.10
+$$ 
+Then,
+$$
+\begin{aligned}
+P(D\mid E) &=& \frac{P(D  \text{ and }E)}{P(E)}\\
+&=& \frac{P(D) \times P(E\mid D)}{P(D) \times P(E\mid D) + P(\bar D) \times P(E\mid\bar D)}\\
+&=& \frac{0.70 \times 0.60}{(0.70\times0.60) + (0.30 \times 0.10)} = 0.93
+\end{aligned}
+$$
+
+:::
+:::
+
+::: {#exr-}
+## Floyd Landis
+Floyd Landis was disqualified after winning the 2006 Tour de France. This was due to a urine sample that the French national anti-doping laboratory flagged after Landis had won stage $17$ because it showed a high ratio of testosterone to epitestosterone. Because he was among the leaders, he provided $8$ pairs of urine samples---so there were $8$ opportunities for a true positive and $8$ opportunities for a false positive.
+
+a) Assume that the test has a specificity of $95$%. What's the probability of all $8$ samples being labeled "negative"?
+a) Now assume the specificity is $99$%. What's the false positive rate for the test
+a) Based on these data, explain how you would assess the probability of guilt of Landis in a court hearing.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) We're given that     $0.95= \frac{ \text{number of true negatives}}{\text{number of true negatives + false positives}}.$\     \     $P( \text{8 negatives} \mid \text{not guilty})= P(\text{8 true negatives})=0.95^8$.
+a) False Positive rate =     $\frac {\text{False positives}}{\text{False positives + True negatives}}=\frac{1}{100}=0.01.$
+a) $P(8 negatives\mid \text{not guilty})=P(\text{8 true negatives})=0.95^8$     (or $0.99^8$ if we follow the part 2).\     $P(\text{at least 1 positive}\mid\text{not guilty})=1-P(\text{8 negatives}\mid\text{not guilty})=1-0.95^8\approx 0.34$.     Hence, if the specificity is 0.95, the chance of a false positive is     0.34, which is pretty large.
+
+:::
+:::
+
+::: {#exr-forensic-match-odds}
+## Forensic Match: The Odds Form of Bayes' Rule
+
+A crime-scene hair sample is compared to a suspect's hair using a forensic matching procedure. Validation studies show the procedure returns a "match" ($E$) with probability $P(E \mid G) = 0.90$ when the suspect really is the source (guilty, $G$), and with probability $P(E \mid \neg G) = 0.02$ when the suspect is not the source (innocent). Before any forensic evidence is considered, detectives judge from other circumstances that the suspect has a 1-in-200 chance of being guilty.
+
+Work this problem in the odds form of Bayes' rule, $O(G \mid E) = BF \times O(G)$, introduced in this chapter.
+
+a) Compute the Bayes factor $BF = P(E \mid G) / P(E \mid \neg G)$ and state in words how many times more likely a match is under guilt than under innocence.
+b) Convert the prior probability of guilt into prior odds $O(G) = P(G)/P(\neg G)$.
+c) Use the odds form to find the posterior odds of guilt given the match.
+d) Convert the posterior odds back into a posterior probability $P(G \mid E)$.
+e) Check your answer to (d) against the direct probability form,
+$$
+P(G \mid E) = \frac{P(E \mid G)P(G)}{P(E \mid G)P(G) + P(E \mid \neg G)P(\neg G)},
+$$
+and confirm the two forms agree.
+f) A second, conditionally independent piece of evidence, an eyewitness identification, carries its own Bayes factor of $3$ in favor of guilt. Starting from the posterior odds in (c), update once more to find $O(G \mid E_1, E_2)$ and the corresponding posterior probability $P(G \mid E_1, E_2)$.
+g) Even combining both pieces of evidence, is the posterior probability of guilt high enough to convict "beyond a reasonable doubt"? Relate your answer to the reasoning in the Prosecutor's Fallacy (@exm-prosecutors-fallacy), the Island Problem (@exm-island), and the Nakamura case (@exm-nakamura), and explain why the odds form is especially convenient once there is more than one piece of evidence to combine.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The Bayes factor is
+$$
+BF = \frac{P(E \mid G)}{P(E \mid \neg G)} = \frac{0.90}{0.02} = 45.
+$$
+A match is $45$ times more likely to be seen if the suspect is the true source than if not.
+
+b) With $P(G) = 1/200 = 0.005$ and $P(\neg G) = 199/200 = 0.995$,
+$$
+O(G) = \frac{P(G)}{P(\neg G)} = \frac{0.005}{0.995} = \frac{1}{199} \approx 0.00503,
+$$
+roughly $1$-to-$199$ against guilt.
+
+c) The odds form multiplies the Bayes factor by the prior odds,
+$$
+O(G \mid E) = BF \times O(G) = 45 \times \frac{1}{199} = \frac{45}{199} \approx 0.226,
+$$
+about $1$-to-$4.4$ against guilt.
+
+d) Converting posterior odds back to a probability with $P = O/(1+O)$,
+$$
+P(G \mid E) = \frac{O(G \mid E)}{1 + O(G \mid E)} = \frac{45/199}{1 + 45/199} = \frac{45}{244} \approx 0.184,
+$$
+about $18.4\%$.
+
+e) The direct form gives
+$$
+P(G \mid E) = \frac{0.90 \times 0.005}{0.90 \times 0.005 + 0.02 \times 0.995} = \frac{0.0045}{0.0244} \approx 0.184,
+$$
+identical to (d). The odds form and the direct form are algebraically the same calculation; the odds form simply separates the evidence (Bayes factor) from the prior belief (prior odds).
+
+f) Because the eyewitness evidence $E_2$ is conditionally independent of the forensic match $E_1$ given guilt status, the posterior odds after $E_1$ serve as the prior odds for $E_2$, so we multiply in the new Bayes factor:
+$$
+O(G \mid E_1, E_2) = BF_2 \times O(G \mid E_1) = 3 \times \frac{45}{199} = \frac{135}{199} \approx 0.678.
+$$
+The corresponding probability is
+$$
+P(G \mid E_1, E_2) = \frac{135/199}{1 + 135/199} = \frac{135}{334} \approx 0.404,
+$$
+about $40.4\%$.
+
+g) No. Even a seemingly decisive $45\times$ forensic match together with corroborating eyewitness evidence ($3\times$) raises the probability of guilt only to about $40\%$, well short of any "beyond a reasonable doubt" standard. The reason is the same base-rate lesson as the Prosecutor's Fallacy (@exm-prosecutors-fallacy), the Island Problem (@exm-island), and the Nakamura case (@exm-nakamura): a small prior probability of guilt cannot be overturned by a single strong likelihood ratio. Confusing $P(E \mid G)$ (large) with $P(G \mid E)$ (still modest) is exactly the fallacy those examples warn against. The payoff of the odds form is that each new, conditionally independent piece of evidence contributes its own Bayes factor multiplicatively, $O(G \mid E_1, \dots, E_k) = BF_k \times \cdots \times BF_1 \times O(G)$, so evidence accumulates sequentially without recomputing a marginal probability from scratch each time. This is precisely the sequential accounting Turing used in Banburismus and that the Nakamura analysis relies on.
+:::
+:::
+
+::: {#exr-}
+## BRCA1
+Approximately $1$% of woman aged 40--50 have breast cancer. A woman with breast cancer has a $90$% chance of a positive mammogram test and a $10$% chance of a false positive result. Given that someone has a positive test, what's the posterior probability that they have breast cancer?
+
+
+If you have the BRCA1 gene mutation, you have a $90$% chance of developing breast cancer. The prevalence of mutations at BRCA1 has been estimated to be 0.04% to 0.20% in the general population. The genetic test for a mutation of this gene has a $99.9$% chance of finding the mutation. The false positive rate is unknown, but you are willing to assume it's still $10$%.
+
+Given that someone tests positive for the BRCA1 mutation, what's the posterior probability that they have breast cancer?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+We know $P(C) = 0.01$ and $P(T\mid C) = 0.9$, $P(T\mid \bar C) = 0.1$,
+$$
+P(C\mid T) = \frac{P(T\mid C)P(C)}{P(T\mid C)P(C) + P(T\mid \bar C)P(\bar C)} = \frac{0.9 \times 0.01}{0.9 \times 0.01 + 0.1 \times 0.99} = 0.083
+$$
+```{r}
+0.9*0.01/(0.9*0.01 + 0.1*0.99)
+```
+
+
+For part 2, we know $P(C\mid B) = 0.9$,  $P(B) \in [0.0004,0.002]$, $P(BT\mid B) = 0.999$, $P(BT\mid \bar B) = 0.1$, then 
+
+$$
+P(C\mid BT) = \frac{P(BT, C)}{P(BT)} 
+$$
+We will do the calculation for the low-end of the BRCA1 mutation $P(B) = 0.0004$
+The total probability of a positive test is given by
+$$
+P(BT) = P(BT\mid B)P(B) + P(BT\mid \bar B)P(\bar B) =  0.999*0.0004 + 0.1*0.9996 = 0.1003596
+$$
+
+We can calculate joint over $BT$ and $C$ by marginalizing $B$ from the joint distribution of $B$ and $C$ and $BT$.
+$$
+P(BT,C,B) = P(BT\mid B,C)P(B,C) = P(BT\mid B)P(C\mid B)P(B)
+$$
+Here we used the fact that $BT$ is conditionally independent of $C$ given $B$. Now we can marginalize over $B$ to get
+$$
+P(BT,C) = P(BT,C,\bar B) + P(BT,C,B) = P(BT\mid \bar B)P(\bar B)P(C\mid \bar B) + P(BT\mid B)P(B)P(C\mid B) = 0.1*0.9996*P(C\mid \bar B) + 0.999*0.0004*0.9
+$$
+We can find $P(C\mid \bar B)$ from the total probability 
+$$
+P(C) = P(C\mid B)P(B) + P(C\mid \bar B)P(\bar B) = 0.9*0.0004 + P(C\mid \bar B)*0.9996
+$$
+$$
+P(C\mid \bar B) = (0.01 - 0.9*0.0004)/0.9996 = 0.009643858
+$$
+$$
+P(BT,C)  = 0.1*0.9996*0.009643858 + 0.999*0.0004*0.9 = 0.00132364
+$$
+
+$$
+P(C\mid BT) = \frac{P(BT, C)}{P(BT)} = 0.00132364/0.1003596 = 0.01318897
+$$
+A small probability of 1.32%. 
+
+For the high-end of the BRCA1 mutation $P(B) = 0.002$, we get
+$$
+P(C\mid BT) = 0.02571956
+$$
+Slightly large probability of 2.57%.
+
+```{r}
+PB = seq(0.0004,0.002, by = 0.0001)
+PBT = 0.999*PB + 0.1*(1-PB)
+PCBT = (0.1*(1-PB)*(0.01 - 0.9*PB)/(1-PB) + 0.999*PB*0.9) / PBT
+plot(PB,PCBT, type = "l", xlab = "P(B)", ylab = "P(C|BT)")
+```
+
+:::
+:::
+
+
+::: {#exr-}
+
+## Another Cancer Test
+Bayes is particularly useful when predicting outcomes that depend strongly on prior knowledge.
+
+Suppose that a woman is her forties takes a mammogram test and receives the bad news of a positive outcome. Since not every positive outcome is real, you assess the following probabilities. The base rate for a woman is her forties to have breast cancer is $1.4$%. The probability of a positive test given breast cancer is $75$%, and the probability of a false positive is $10$%.
+
+Given the positive test, what's the probability that she has breast cancer?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We have $P(C) = 0.014$, $P(+\mid C) = 0.75$, and $P(+\mid\bar{C}) = 0.10$.
+We want $P(C\mid+)$.
+$$
+P(C\mid+) = \frac{P(+\mid C)P(C)}{P(+\mid C)P(C) + P(+\mid\bar{C})P(\bar{C})}
+$$
+$$
+P(C\mid+) = \frac{0.75 \times 0.014}{0.75 \times 0.014 + 0.10 \times 0.986} = \frac{0.0105}{0.0105 + 0.0986} = \frac{0.0105}{0.1091} \approx 0.0962
+$$
+So the probability is about 9.6%.
+:::
+:::
+
+::: {#exr-}
+## Bayes' Rule: Hit and Run Taxi
+A certain town has two taxi companies: Blue Birds, whose cabs are blue,
+and Uber, whose cabs are black. Blue Birds has 15 taxis in its fleet,
+and Uber has 75. Late one night, there is a hit-and-run accident
+involving a taxi.
+
+The town's taxis were all on the streets at the time of the accident. A
+witness saw the accident and claims that a blue taxi was involved. The
+witness undergoes a vision test under conditions similar to those on the
+night in question. Presented repeatedly with a blue taxi and a black
+taxi, in random order, they successfully identify the color of the taxi
+4 times out of 5.
+
+Which company is more likely to have been involved in the accident?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We need to know $P(Blue \mid \mbox{identified Blue})$ and $P(Black \mid \mbox{identified Blue})$.
+
+First of all, write down some probability statements given in the problem. $P(Blue) = 16.7\% \mbox{ and } P(Black) = 83.3\%$
+$$
+P(\mbox{identified Blue} \mid Blue) = 80\% \mbox{ and } P(\mbox{identified Black} \mid Blue) = 20\%
+$$
+$$
+P(\mbox{identified Black} \mid Black) = 80\% \mbox{ and } P(\mbox{identified Blue} \mid Black) = 20\%
+$$
+Therefore, by Bayes' rule, 
+$$
+\begin{aligned}
+P(Blue \mid \mbox{identified Blue}) =& \frac{P(\mbox{identified Blue} \mid Blue)*P(Blue) }{P(\mbox{identified Blue})} \\
+=& \frac{P(\mbox{identified Blue} \mid Blue)*P(Blue) }{P(\mbox{identified Blue} \mid Blue)*P(Blue) + P(\mbox{identified Blue} \mid Black)*P(Black) }  \\
+=& 44.5\%
+\end{aligned}
+$$
+$$
+P(Black \mid \mbox{identified Blue}) = 1- P(Blue \mid \mbox{identified Blue}) = 55.5\%
+$$
+
+Therefore, even though the witness said it was a Blue car, the probability that it was a Black car is higher.
+
+:::
+:::
+
+
+::: {#exr-gold}
+## Gold and Silver Coins
+A chest has two drawers. It is known that one drawer has $3$ gold coins and no silver coins. The other drawer is known to contain $1$ gold coin and $2$ silver coins.
+
+You don't know which drawer is which. You randomly select a drawer and, without looking inside, you pull out a coin. It is gold. Show that the probability that the remaining two coins in the drawer are gold is $75$%.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Suppose drawer A contains 3G and drawer B contains 1G2S. We know the probability $P(G \mid A) = 1$ and $P(G \mid B) = 1/3$. Also, it must be either of two drawers, so P(A) = P(B) = 1/2. What we are looking for is $P(A \mid G)$: the probability that it is
+drawer A. By Bayes' rule, 
+$$
+\begin{aligned}
+P(A \mid G) &=& \frac{P(G \mid A)\times P(A)}{P(G)} \\
+&=& \frac{P(G \mid A)\times P(A)}{P(G \mid A)\times P(A) + P(G \mid B)\times P(B)} \mbox{ (Law of total probability)} \\
+&=& \frac{1\times \frac{1}{2}}{1*\frac{1}{2}+\frac{1}{3}\times\frac{1}{2}} = \frac{3}{4}
+\end{aligned}
+$$
+The probability that it is drawer A is 75%.
+
+:::
+:::
+
+
+
+
+::: {#exr-Monty}
+## The Monty Hall Problem
+
+This problem is named after the host of the long-running TV show, *Let's Make a Deal*. A contestant is given a choice of 3 doors. There is a prize (a car, say) behind one of the doors and something worthless behind the other two doors (say two goats).
+
+After the contestant chooses a door, Monty opens one of the other two doors, revealing a goat. The contestant has the choice of switching doors. Is it advantageous to switch doors or not?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+
+Suppose you plan to switch:
+
+You can either pick a winner, a loser, or the other loser when you make your first choice. Each of these options has a probability of $1/3$ and are marked by a "1" below. In each case, Monty will reveal a loser (X). In the first case, he has a choice, but whichever he reveals, you will switch to the other and lose. But in the other two cases, there is only one loser for him to reveal. He must reveal this one, leaving only the winner. So, if you initially pick a loser, you will win by switching. That is, there is a $2/3$ chance of winning if you use the switch strategy.
+
+         W   L   L
+  ----- --- --- ---
+   1/3   1   X  
+   1/3       1   X
+   1/3       X   1
+
+Not convinced?  Try thinking about it this way: Imagine the question with 1000 doors, and Monty will reveal 998 wrong doors after you pick one, so you are left with your choice, and one of the remaining 999 doors. Now do you want to stay or switch?
+
+Again, suppose you are going to switch. Define the events
+
+- W = the one you switch to is a winner
+- FW = your first choice is a winner
+- FL = your first choice is a loser
+
+
+Since you must pick either a winner or loser with your first choice, and cannot pick both, FW and FL are mutually exclusive and collectively exhaustive. By the rule of total probability:
+$$
+P(W) = P(W \text{ and }FW) + P(W \text{ and }FL) = P(W\mid FW)P(FW) + P(W\mid FL)P(FL)
+$$
+$$
+P(W) = 0 \times \frac{1}{3} + 1 \times \frac{2}{3} = \frac{2}{3}
+$$ 
+Why is $P(W\mid FW)=0$? Because if we choose correctly, and we do switch, we must be on a loser.
+
+Why is $P(W\mid FL)=1$? If we first picked a loser, and then switched, we will now have a winner. These both come from above.
+
+There's a longer explanation: Suppose you choose door A and Monty opens B.
+
+Consider the events
+
+- A=prize is behind A
+- B=prize is behind B
+- C=prize is behind C
+- MA=Monty opens A
+- MB=Monty opens B
+- MC=Monty Opens C
+
+Before we choose, each door was equally likely: $P(A)=P(B)=P(C)=1/3$.
+
+In this case, we know Monty opened B. To decide whether to switch, we want to know if $P(A \mid MB)$ and $P(C\mid MB)$ are the same. If they are, then
+there is no gain in switching:
+$$
+P(A\mid MB) = \frac{P(A \text{ and }MB)}{P(MB)} = \frac{P(MB\mid A)P(A)}{P(MB)}
+$$ 
+We need these components: $P(A)=1/3,~P(MB\mid A)=1/2$. This is because you picked A, and Monty can open either B
+or C. He cannot open A. He can open B or C because the condition in this conditional probability is that the prize is actually behind A.
+$$
+\begin{aligned}
+P(MB) & = P(MB \text{ and }A) + P(MB \text{ and }B) + P(MB \text{ and }C)\\
+&= P(MB\mid A)P(A) + P(MB\mid B)P(B) + P(MB\mid C)P(C)\\
+& = \frac{1}{2}\times\frac{1}{3} + 0\times \frac{1}{3} + 1\times \frac{1}{3} = \frac{1}{6} + \frac{1}{3} = \frac{1}{2}
+\end{aligned}
+$$
+I already showed that $Pr(MB \mid A)=1/2$. We have that $Pr(MB\mid B)=0$ because Monty cannot reveal B if this is where the prize is. If the prize is
+behind C, he must open B, since you have picked A.
+
+Putting it all together: $P(A\mid MB) = \frac{P(MB\mid A)P(A)}{P(MB)} = \frac{\frac{1}{2}\times \frac{1}{3}}{\frac{1}{2}} = \frac{1}{3}$
+
+Similarly for C: $P(C\mid MB) = \frac{P(MB\mid C)P(C)}{P(MB)} = \frac{1\times \frac{1}{3}}{\frac{1}{2}} = \frac{2}{3}$
+
+So we are always better off switching!
+
+:::
+:::
+
+::: {#exr-}
+## Medical Testing for HIV
+
+A controversial issue in recent years has been the possible implementation of random drug and/or disease testing (e.g., testing medical workers for HIV virus, which causes AIDS). In the case of HIV testing, the standard test is the Wellcome ELISA test.
+
+The test's effectiveness is summarized by the following two attributes:
+
+-   The *sensitivity* is about 0.993. That is, if someone has HIV, there is a probability of 0.993 that they will test positive.
+-   The *specificity* is about 0.9999. This means that if someone doesn't have HIV, there is a probability of 0.9999 that they will test negative.
+
+In the general population, incidence of HIV is reasonably rare. It is estimated that the chance that a randomly chosen person has HIV is $0.000025$.
+
+To investigate the possibility of implementing a random HIV-testing policy with the ELISA test, calculate the following:
+
+a) The probability that someone will test positive and have HIV.
+a) The probability that someone will test positive and not have HIV.
+a) The probability that someone will test positive.
+a) Suppose someone tests positive. What is the probability that they have HIV?
+
+In light of the last calculation, do you envision any problems in implementing a random testing policy?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+First, introduce some notation: let $H$ = "Has  HIV" and $T$ = "Tests  Positive". We are given the following sensitivities and specificities 
+$$
+P(T\mid H) = 0.993 \; \; \text{ and} \; \; P(\bar{T}\mid\bar{H}) = 0.9999
+$$ 
+The base rate is $P(H) = 0.000025$.
+
+a) $P(T \text{ and }H) = P(T\mid H)P(H) = 0.993*0.000025 = 0.000024825$
+a) $$\begin{aligned}
+    P(T\mid\bar{H})P(\bar{H}) & = (1-P(\bar{T}\mid\bar{H}))(1-P(H))\\
+    & = 0.0001 \times 0.999975 = 0.0000999975
+    \end{aligned}$$
+a) $P(T) = P(T \text{ and }H) + P(T \text{ and }\bar{H}) = 0.000024825 + 0.00009975 = 0.0001248225$
+a) $P(H\mid T) = \frac{P(H \text{ and }T)}{P(T)} = \frac{0.000024825}{0.0001248225} = 0.1988$
+
+This says that if you test positive, you have a 20% chance of having the disease. In other words, 80% of people who test positive will not have the disease. The large number of false positives means that implementing such a policy will be pretty unpopular among the people who have to be tested. Testing high risk people only might be a better idea, as this will increase the $P(H)$ in the population.
+
+:::
+:::
+
+::: {#exr-}
+## The Three Prisoners
+
+An unknown two will be shot, the other freed. Prisoner A asks the warder
+for the name of one other than himself who will be shot, explaining that
+as there must be at least one, the warder won't really be giving
+anything away. The warder agrees, and says that B will be shot. This
+cheers A up a little: his judgmental probability for being shot is now
+1/2 instead of 2/3.
+
+Show (via Bayes' theorem) that
+
+a) A is mistaken - assuming that he thinks the warder is as likely to
+say \"C\" as \"B\" when he can honestly say either; but that
+a) A would be right, on the hypothesis that the warder will say \"B\"
+whenever he honestly can.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) A is mistaken. Let $A, B, C$ be the events that prisoner A, B, or C is pardoned. $P(A)=P(B)=P(C)=1/3$.
+Let $W_B$ be the event the Warder says B is shot.
+$P(W_B\mid A) = 1/2$ (Warder flips coin between B and C).
+$P(W_B\mid B) = 0$ (B is pardoned, so Warder can't say B is shot).
+$P(W_B\mid C) = 1$ (C is pardoned, so B is one of the shot ones, Warder must say B).
+$$
+P(A\mid W_B) = \frac{P(W_B\mid A)P(A)}{P(W_B\mid A)P(A) + P(W_B\mid B)P(B) + P(W_B\mid C)P(C)}
+$$
+$$
+P(A\mid W_B) = \frac{1/2 \times 1/3}{1/2 \times 1/3 + 0 \times 1/3 + 1 \times 1/3} = \frac{1/6}{1/6 + 0 + 1/3} = \frac{1/6}{1/2} = 1/3
+$$
+So A's probability of being pardoned is still 1/3.
+
+b) If Warder says B "whenever he honestly can," then $P(W_B\mid A)=1$ (if A pardoned, he chooses B over C always? Or maybe just 'whenever he can' implies a bias). If we assume $P(W_B\mid A)=1$, then:
+$$
+P(A\mid W_B) = \frac{1 \times 1/3}{1 \times 1/3 + 0 + 1 \times 1/3} = \frac{1/3}{2/3} = 1/2
+$$
+So A would be right.
+:::
+:::
+
+::: {#exr-}
+## The Two Children
+
+You meet Max walking with a boy whom he proudly introduces as his son.
+
+a) What is your probability that his other child is also a boy, if you regard him as equally likely to have taken either child for a walk?
+a) What would the answer be if you regarded him as sure to walk with the boy rather than the girl, if he has one of each?
+a) What would the answer be if you regarded him as sure to walk with the girl rather than the boy, if he has one of each?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) "Max walking with a boy... regard him as equally likely to have taken either child."
+Let events be combinations of children: $BB, BG, GB, GG$ with prob 1/4 each.
+Event $W_B$: Walking with a boy.
+$P(W_B\mid BB) = 1$
+$P(W_B\mid BG) = 0.5$
+$P(W_B\mid GB) = 0.5$
+$P(W_B\mid GG) = 0$
+$P(W_B) = 1/4(1 + 0.5 + 0.5 + 0) = 1/2$.
+We want probability other is boy. If other is boy, and he walks with boy, it must be BB.
+$P(BB\mid W_B) = \frac{P(W_B\mid BB)P(BB)}{P(W_B)} = \frac{1 \times 1/4}{1/2} = 1/2$.
+
+b) "Sure to walk with the boy rather than the girl."
+$P(W_B\mid BG) = 1$, $P(W_B\mid GB) = 1$.
+$P(W_B) = 1/4(1 + 1 + 1 + 0) = 3/4$.
+$P(BB\mid W_B) = \frac{1 \times 1/4}{3/4} = 1/3$.
+
+c) "Sure to walk with the girl rather than the boy."
+$P(W_B\mid BG) = 0$, $P(W_B\mid GB) = 0$.
+$P(W_B) = 1/4(1 + 0 + 0 + 0) = 1/4$.
+$P(BB\mid W_B) = \frac{1 \times 1/4}{1/4} = 1$.
+:::
+:::
+
+::: {#exr-}
+## Medical Exam
+
+As a result of a medical examination, one of the tests revealed a serious
+illness in a person. This test has a high precision of 99% (the
+probability of a positive response in the presence of the disease is
+99%, the probability of a negative response in the absence of the
+disease is also 99%). However, the detected disease is quite rare and
+occurs only in one person per 10,000. Calculate the probability that the
+person being examined does have an identified disease.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let $D$ be the event of disease, $+$ be positive test.
+$P(D) = 0.0001$.
+$P(+\mid D) = 0.99$.
+$P(-\mid\bar{D}) = 0.99 \implies P(+\mid\bar{D}) = 0.01$.
+$$
+P(D\mid+) = \frac{P(+\mid D)P(D)}{P(+\mid D)P(D) + P(+\mid\bar{D})P(\bar{D})}
+$$
+$$
+P(D\mid+) = \frac{0.99 \times 0.0001}{0.99 \times 0.0001 + 0.01 \times 0.9999} = \frac{0.000099}{0.000099 + 0.009999} \approx 0.0098
+$$
+So roughly 1%.
+:::
+:::
+
+::: {#exr-}
+## The Jury
+
+Assume that the probability is 0.95 that a jury selected to try a
+criminal case will arrive at the correct verdict whether innocent or
+guilty. Further, suppose that 80% of people brought to trial are in
+fact guilty.
+
+a) Given that the jury finds a defendant innocent, what's the
+    probability that they are in fact innocent?
+a) Given that the jury finds a defendant guilty, what's the probability
+    that they are in fact guilty?
+a) Do these probabilities sum to one?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let $I$ denote the event of innocence and let $VI$ denote the event that
+the jury proclaims an innocent verdict.
+
+a) We want $P(I\mid VI)$ which is given by Bayes' rule
+    $$
+    P(I\mid VI)=\frac{P(VI\mid I)P(I)}{P(VI)}
+    $$ 
+    where, by the law of total
+    probability $P(VI)=P(VI\mid I)P(I)+P(VI\mid\bar{I})P(\bar{I})$ Hence $P(VI) =0.95\cdot 0.2+0.05\cdot 0.8=0.23$
+    Hence $P(I\mid VI)=\frac{0.95\cdot 0.2}{0.23}=0.83$
+a) Similarly
+    $$
+    P(G\mid VG)=\frac{P(VG\mid G)P(G)}{P(VG)}=\frac{P(VG\mid G)P(G)}{1-P(VI)}=\frac{%
+    0.95\cdot 0.8}{1-0.23}=0.99
+    $$
+a) No. $P(I\mid VI)+P(G\mid{VG})\neq 1$ because they are conditioned on different events.
+
+:::
+:::
+
+::: {#exr-}
+## Oil Company
+An oil company has purchased an option on land in Alaska. Preliminary
+geologic studies have assigned the following probabilities of finding
+oil 
+$$
+P ( \text{ high   quality   oil} ) = 0.50 \; \;
+P ( \text{ medium   quality   oil} ) = 0.20 \; \;
+P ( \text{ no   oil} ) = 0.30 \; \;
+$$ 
+After 200 feet of drilling on the
+first well, a soil test is taken. The probabilities of finding the
+particular type of soil identified by the test are as follows:
+$$
+\begin{aligned}
+P ( \text{ soil} \; \mid \; \text{ high   quality   oil} ) &= 0.20, \\
+P ( \text{ soil} \; \mid \; \text{ medium   quality   oil} ) &= 0.80, \\
+P ( \text{ soil} \; \mid \; \text{ no   oil} ) &= 0.20.
+\end{aligned}
+$$
+
+a) What are the revised probabilities of finding the three different types of oil?
+a) How should the firm interpret the soil test?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+a) Using Bayes' Theorem, we get
+    $$P ( \text{ high   quality   oil} \; \mid \;  \text{ soil}) =
+      \frac{ P ( \text{ soil} \; \mid \; \text{ high   quality   oil} ) P ( \text{ high   quality   oil} )}
+    { P ( \text{ soil} ) }$$ Using the law of total probability
+    $$P ( \text{ soil}) = 0.5 \times 0.2 + 0.2 \times 0.8 + 0.3 \times 0.2 = 0.32$$
+    Hence $$P ( \text{ high   quality   oil} \; \mid \;  \text{ soil}) =
+      \frac{ 0.5 \times 0.2}{ 0.32 } = 0.3125$$ Similarly
+    $$P ( \text{ medium   quality   oil} \; \mid \;  \text{ soil}) =
+      \frac{ 0.8 \times 0.2}{ 0.32 } = 0.50$$
+    $$P ( \text{ no   oil} \; \mid \;  \text{ soil}) =
+      \frac{ 0.3 \times 0.2}{ 0.32 } = 0.1875$$
+a) The firm should interpret the soil test as increasing the
+    probability of medium quality oil, but making both no oil and high
+    quality oil less likely than their initial probabilities.
+
+:::
+:::
+
+::: {#exr-}
+## Hypertension Screening
+
+A screening test for high blood pressure, corresponding to a diastolic
+blood pressure of $90$ mm Hg or higher, produced the following
+probability table
+
+          Hypertension  
+  ------ -------------- --------
+   Test     Present      Absent
+   +ve        0.09        0.03
+   -ve        0.03        0.85
+
+a) What's the probability that a random person has hypertension?
+a) What's the probability that someone tests positive on the test?
+a) Given a person who tests positive, what is the probability that they
+    have hypertension?
+a) What would happen to your probability of having hypertension given
+    you tested positive if you initially thought you had a $50$% chance
+    of having hypertension.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $P(H) = 0.09 + 0.03 = 0.12$
+a) $P(+)=0.09+0.03 =0.12$
+a) $P(H\mid+)=P(+\mid H)P(H)/P(+)= 0.09/0.12 = 0.75$
+a) Now you have to re-calculate $P(+\mid H) = 0.09/0.12 = 0.75$ and
+    $P(+\mid \bar{H}) = 0.03/0.88 = 0.0341$. With the new prior $P(H) = 0.5$,
+    $$P(+) = P( +\mid H)P(H) + P( + \mid \bar{H} )P( \bar{H} ) = 0.75 \times 0.5 + 0.0341 \times 0.5 = 0.392$$
+    Then, by Bayes' rule
+    $$P(H\mid+)= \frac{P(+\mid H)P(H)}{P(+)} = \frac{0.75 \times 0.5}{0.392} \approx 0.957$$
+
+
+:::
+:::
+
+::: {#exr-}
+## Steroids
+
+Suppose that a hypothetical baseball player (call him "Rafael") tests positive for steroids. The test has the following sensitivity and specificity
+
+a) If a player is on Steroids, there's a $95$% chance of a positive result.
+a) If a player is clean, there's a $10$% chance of a positive result.
+
+A respected baseball authority (call him "Bud") claims that $1$% of all baseball players use Steroids. Another player (call him "Jose") thinks that there's a $30$% chance of all baseball players using Steroids.
+
+a) What's Bud's probability that Rafael uses Steroids?
+a) What's Jose's probability that Rafael uses Steroids?
+
+Explain any probability rules that you use.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let $T$ and $\bar{T}$ be positive and negative test results. Let $S$ and $\bar{S}$ be using and not using Steroids, respectively. We have the following conditional probabilities
+$$
+P( T \mid S ) = 0.95 \; \; \text{ and} \; \; P( T \mid \bar{S} ) = 0.10
+$$ 
+For our prior distributions we have $P_{ Bud } ( S  ) = 0.01$ and $P_{ Jose } ( S  ) = 0.30$.
+
+From Bayes' rule and we have
+$$
+P( S \mid T )  = \frac{ P( T \mid S ) P( S )}{ P(T )}
+$$ 
+and by the law of total probability
+$$
+P(T)  = P( T\mid S) P(S) + P( T\mid \bar{S} ) P( \bar{S} )
+$$ 
+Applying these two probability rules gives
+$$
+P_{ Bud} ( S \mid T ) = \frac{ 0.95 \times 0.01 }{  0.95 \times 0.01 + 0.10 \times 0.99 } = 0.0876
+$$
+and
+$$
+P_{ Jose } ( S \mid T ) = \frac{ 0.95 \times 0.3 }{  0.95 \times 0.3 + 0.10 \times 0.7 } = 0.8028
+$$
+
+:::
+:::
+
+::: {#exr-}
+## Breathalyzer Test
+
+A Breathalyzer test is calibrated so that if it is used on a driver whose blood alcohol concentration exceeds the legal limit, it will read positive $99$% of the time, while if the driver is below the limit it will read negative $90$% of the time. Suppose that based on prior experience, you have a prior probability that the driver is above the legal limit of $10$%.
+
+a) If a driver tests positive, what is the posterior probability that they are above the legal limit?
+a) At Christmas, $20$% of the drivers on the road are above the legal limit. If all drivers were tested, what proportion of those testing positive would actually be above the limit
+a) How does your answer to part $1$ change. Explain
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Let the events be defined as follows:
+
+- E - Alcohol concentration exceeds legal limit
+- NE - Alcohol concentration does not exceed legal limit
+- P - Breathalyser reads positive
+- N - Breathalyser reads negative
+
+
+$$
+\begin{aligned}
+P(P\mid E) & = & 0.99\\
+P(N\mid NE) & = & 0.90\\
+P(E) & = & 0.10\end{aligned}
+$$
+
+Based on above, we have $P(P\mid NE)=1-P(N\mid NE)=0.10$ and $P(NE)=1-P(E)=0.90$. Then,
+
+$$
+\begin{aligned}
+P(E\mid P) & = & \frac{P(P\mid E)P(E)}{P(P)}\\
+ & = & \frac{P(P\mid E)P(E)}{P(P\mid E)P(E)+P(P\mid NE)P(NE)}\\
+ & = & \frac{0.99\times0.10}{0.99\times0.10+0.10\times0.90}\\
+ & = & 52.38\%\end{aligned}
+$$
+
+Now, we have $P(E)=0.20$. Thus, $P(NE)=1-P(E)=0.80$. We now calculate
+
+$$
+\begin{aligned}
+P(E\mid P) & = & \frac{P(P\mid E)P(E)}{P(P)}\\
+ & = & \frac{P(P\mid E)P(E)}{P(P\mid E)P(E)+P(P\mid NE)P(NE)}\\
+ & = & \frac{0.99\times0.20}{0.99\times0.20+0.10\times0.80}\\
+ & = & 71.22\%\end{aligned}
+$$
+
+Thus, 71.22% of all the drivers who test positive would be above the legal limit.
+
+Compared to Part 1, the posterior probability increases due to the fact that the probability of a driver testing positive and exceeding the legal limit increases as does the probability of testing positive. However, the increase in the probability of testing positive and exceeding the legal limit is greater than the increase in the probability of testing positive which results in an increase in the posterior probability.
+
+:::
+:::
+
+
+::: {#exr-}
+## Chicago Bearcats
+The Chicago bearcats baseball team plays $60$% of its games at night and $40$% in the daytime. They win $55$% of their night games and only $35$% of their day games. You found out the next day that they won their last game
+
+a) What is the probability that the game was played at night
+a) What is the marginal probability that they will win their next game?
+
+Explain clearly any rules of probability that you use.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We have the following info: 
+
+- $P(Night) = 0.6, \quad P(Day)=0.4$
+- $P(Win\mid Night) = 0.55, \quad P(Lose\mid Night)=0.45$
+- $P(Win\mid Day) = 0.35, \quad P(Lose\mid Day)=0.65$
+a) $$P(Night\mid Win) = \frac{P(Win\mid Night)P(Night)}{P(Win)}$$
+    $$=\frac{P(Win\mid Night)P(Night)}{P(Win\mid Day)P(Day)+P(Win\mid Night)P(Night)}$$
+    $$\frac{0.55*0.6}{0.35*0.4+0.55*0.6}=\frac{0.33}{0.47}=0.7021$$
+a) $P(Win) = P(Win\mid Day)P(Day)+P(Win\mid Night)P(Night)=0.35*0.4+0.55*0.6=0.47$
+
+:::
+:::
+
+::: {#exr-}
+## Spam Filter
+Several spam filters use Bayes' rule. Suppose that you empirically find
+the following probability table for classifying emails with the phrase
+"buy now" in their title as either "spam" or "not spam".
+
+                   Spam   Not Spam
+  --------------- ------ ----------
+     "buy now"     0.02     0.08
+   not "buy now"   0.18     0.72
+
+a) What is the probability that you will receive an email with spam?
+a) Suppose that you are given a new email with the phrase "buy now" in its
+title. What is the probability that this new email is spam?
+a) Explain clearly any rules of probability that you use.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The probability that you will receive an email with spam is:
+$$
+\begin{aligned}
+Pr(Spam) = .02 + .18 = .2
+\end{aligned}
+$$
+a) The posterior probability is 
+$$
+\begin{aligned}
+Pr(Spam\mid buy \; now) = \frac{Pr(Spam\;and\;buy\;now)}{Pr(buy\;now)} = \frac{.02}{.02+.08} = .2
+\end{aligned}
+$$
+a) The marginal probability is given by the law of total probability:
+$P( B) = P(B\mid A)P(A) + P(B\mid\bar{A})P(\bar{A})$. We also use the
+definition of conditional probability (not Bayes' rule)
+$Pr(A\mid B) = \frac{Pr(A\;and\;B)}{Pr(B)}$
+
+:::
+:::
+
+::: {#exr-}
+## Chicago Cubs
+The Chicago Cubs are having a great season. So far they've won $72$ out
+of the $100$ games played so far. You also have the expert opinion of
+Bob, the sports analysis. He tells you that he thinks the Cubs will win.
+Historically, his predictions have a $60$% chance of coming true.
+
+a) Calculate the probability that the Cubs will win given Bob's prediction
+b) Suppose you now learn that it's a home game and that the Cubs win $60$% of their games at Wrigley field. What's your updated probability that the Cubs will win their game?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) First we have 
+$$
+P ( \text{ Win} \mid \text{ Bob} ) = \frac{ 0.72 \times 0.6}{ 0.72 \times 0.6 + 0.28 \times 0.4} = 0.79
+$$
+B) Learning the new information, we use the previous posterior as a prior for the next Bayes update
+$$
+P ( \text{ Win} \mid \text{ home} , \text{ Bob}  ) = \frac{ 0.79 \times 0.60}{ 0.79 \times 0.60 + 0.21 \times 0.40} = 0.85
+$$
+it's highly likely that the Cubs will win!
+
+
+:::
+:::
+
+::: {#exr-}
+## Student-Grade Causality
+
+Consider the following probabilistic model. The student does poorly in a class ($c = 1$) or well ($c = 0$) depending on the presence/absence of depression ($d = 1$ or $d = 0$) and whether he/she partied last night ($v = 1$ or $v = 0$). Participation in the party can also lead to the fact that the student has a headache ($h = 1$). As a result of the poor student's performance, the teacher gets upset ($t = 1$). The probabilities are given by:
+
+:::: {layout-ncol=3 layout-valign="top"}
+
+| $p(c=1\mid d,v)$ |  v  |  d  |
+|:----------------:|:---:|:---:|
+|      0.999       |  1  |  1  |
+|       0.9        |  1  |  0  |
+|       0.9        |  0  |  1  |
+|       0.01       |  0  |  0  |
+
+| $p(h=1\mid v)$ |  v  |
+|:--------------:|:---:|
+|      0.9       |  1  |
+|      0.1       |  0  |
+
+| $p(t=1\mid c)$ |  c  |
+|:--------------:|:---:|
+|      0.95      |  1  |
+|      0.05      |  0  |
+
+::::
+
+$p(v=1)=0.2$, and $p(d=1) = 0.4$.
+
+Draw the causal relationships in the model. Calculate $p(v=1\mid h=1)$,
+$p(v=1\mid t=1)$, $p(v=1\mid t=1,h=1)$.
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Causal Graph:
+$V \to H$
+$V \to C$
+$D \to C$
+$C \to T$
+
+Probabilities: $P(V=1)=0.2$, $P(D=1)=0.4$.
+
+```{r}
+# Define parameters
+P_V1 = 0.2
+P_D1 = 0.4
+P_V0 = 1 - P_V1
+P_D0 = 1 - P_D1
+
+# P(H=1|V)
+P_H1_V1 = 0.9
+P_H1_V0 = 0.1
+
+# P(C=1|V,D)
+P_C1_V1D1 = 0.999
+P_C1_V1D0 = 0.9
+P_C1_V0D1 = 0.9
+P_C1_V0D0 = 0.01
+
+# P(T=1|C)
+P_T1_C1 = 0.95
+P_T1_C0 = 0.05
+
+# 1. P(V=1|H=1)
+P_H1 = P_H1_V1 * P_V1 + P_H1_V0 * P_V0
+P_V1_H1 = (P_H1_V1 * P_V1) / P_H1
+print(paste("P(V=1|H=1) =", round(P_V1_H1, 4)))
+
+# 2. P(V=1|T=1)
+# Need P(T=1) and P(T=1|V=1)
+# P(C=1|V=1) = P(C=1|V=1,D=1)P(D=1) + P(C=1|V=1,D=0)P(D=0)
+P_C1_V1 = P_C1_V1D1 * P_D1 + P_C1_V1D0 * P_D0
+P_C1_V0 = P_C1_V0D1 * P_D1 + P_C1_V0D0 * P_D0
+
+# P(T=1|V) = P(T=1|C=1)P(C=1|V) + P(T=1|C=0)P(C=0|V)
+P_T1_V1 = P_T1_C1 * P_C1_V1 + P_T1_C0 * (1 - P_C1_V1)
+P_T1_V0 = P_T1_C1 * P_C1_V0 + P_T1_C0 * (1 - P_C1_V0)
+
+P_T1 = P_T1_V1 * P_V1 + P_T1_V0 * P_V0
+P_V1_T1 = (P_T1_V1 * P_V1) / P_T1
+print(paste("P(V=1|T=1) =", round(P_V1_T1, 4)))
+
+# 3. P(V=1|T=1, H=1)
+# T and H are conditionally independent given V
+# P(V=1|T=1, H=1) propto P(T=1|V=1)P(H=1|V=1)P(V=1)
+Lik_V1 = P_T1_V1 * P_H1_V1 * P_V1
+Lik_V0 = P_T1_V0 * P_H1_V0 * P_V0
+P_V1_T1H1 = Lik_V1 / (Lik_V1 + Lik_V0)
+print(paste("P(V=1|T=1,H=1) =", round(P_V1_T1H1, 4)))
+```
+:::
+:::
+
+::: {#exr-}
+## True/False
+a) In a sample of $100{,}000$ emails, you found that $550$ are spam. Your next email contains the word "bigger". From historical experience, you know that half of all spam email contains the word "bigger" and only $2$% of non-spam emails contain it. The probability that this new email is spam is approximately $12$%.
+a) Suppose that there's a $5$% chance that it snows tomorrow, an $80$% chance that the Chicago bears play their football game tomorrow given that it snows, and that they are certain to play if it does not snow. The probability that they play tomorrow is then $80$%.
+a) Bayes' rule states that $p(A\mid B) =p(B\mid A)$.
+a) If $P( A  \text{ and }B ) = 0.4$ and $P( B) = 0.8$, then $P( A\mid B ) = 0.5$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) True. $$P(bigger \mid spam) = 50\% \mbox{ and } P(bigger \mid non-spam) = 2\%$$$$P(spam) = 0.55\% \mbox{ and } P(non-spam) = 99.45\%$$$$\begin{aligned}P(spam \mid bigger) &=& \frac{P(bigger \mid spam)*P(spam)}{P(bigger \mid spam)*P(spam) + P(bigger \mid non-spam)*P(non-spam) } \\&=& 12.1\%\end{aligned}$$
+a) False, 99% $$P(Play) = P(Play\mid Snow)P(Snow) + P(Play\mid NoSnow)P(NoSnow)$$$$= 0.8*0.05+1*0.95=0.99$$
+a) False. Recall Bayes' rule:* $$p(A\mid B)=\frac{p(B\mid A)p(A)}{p(B)}$$
+a) True. $P( A\mid B ) =  P( A  \text{ and }B )/P(B)$ by Bayes' rule.
+
+
+:::
+:::
+
+::: {#exr-}
+## Sensitivity and Specificity
+
+The quality of Nvidia's graphics chips is such that the probability that
+a randomly chosen chip is defective is only $0.1$%. You have invented a
+new technology for testing whether a given chip is defective or not.
+This test will always identify a defective chip as defective and will
+only "falsely" identify a good chip as defective with probability $1$%.
+
+a) What are the sensitivity and specificity of your testing device?
+a) Given that the test identifies a defective chip, what's the
+    posterior probability that it is actually defective?
+a) What percentage of the chips will the new technology identify as
+    being defective?
+a) Should you advise Nvidia to go ahead and implement your testing
+    device? Explain.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We have the following probabilities ($D$ represents "defective chip" and
+$T$ represents "test result indicates defective chip"): $$P(D)=0.001$$
+$$P(T|D)=1$$ $$P(T|\bar{D})=0.01$$
+
+a) Sensitivity: $P(T|D)=1$ and Specificity:
+    $P(\bar{T}|\bar{D})=1-P(T|\bar{D})=1-0.01=0.99$
+a) $$P(D|T)=\frac{P(T|D)P(D)}{P(T)}=\frac{P(T|D)P(D)}{P(T|D)P(D)+P(T|\bar{D})P(\bar{D})}$$
+    $$=\frac{(1)(0.001)}{(1)(0.001)+(0.01)(1-0.001)}=0.090992$$
+a) $$P(T) = P(T|D)P(D)+P(T|\bar{D})P(\bar{D})$$
+    $$=(1)(0.001)+(0.01)(1-0.001)=0.01099$$
+a) No, only 9% of those chips indicated to be defective by the test
+    will actually be defective. Essentially, we would be throwing away
+    91% of the chips indicated to be defective even though they are
+    perfectly fine!
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Presidential Election Prediction
+
+Use polling data to predict the winner of a US presidential election using simulations. You can obtain polling data from sources like <http://www.electoral-vote.com/> or use historical data files (`ev.csv` for electoral votes, `state_abbr.csv` for state abbreviations).
+
+a) Load state-level polling averages and electoral vote counts.
+b) Simulate the election 10,000 times, treating each state's outcome as a random draw from a normal distribution centered at the poll average with a realistic polling error (typically 5-7%).
+c) Report the prediction as a 50% confidence interval for each candidate's electoral vote count.
+d) Discuss the limitations of assuming independent state-level polling errors.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(dplyr)
+
+# Load electoral votes
+ev <- read.table("data/ev.csv", header = FALSE, sep = "\t", 
+                 stringsAsFactors = FALSE)
+names(ev) <- c("state", "ev")
+abbr <- read.csv("data/state_abbr.csv", header = TRUE)
+ev <- ev %>% left_join(abbr, by = "state")
+
+# Simulate with example poll data
+# (In practice, load actual polling data)
+set.seed(123)
+n_sims <- 10000
+
+# Example: simplified simulation with random state margins
+states <- c("PA", "MI", "WI", "NC", "GA", "AZ")
+poll_dem <- c(48, 49, 48, 47, 48, 49)  # Democrat poll average
+poll_rep <- c(47, 48, 49, 48, 49, 48)  # Republican poll average
+ev_state <- c(19, 15, 10, 16, 16, 11)  # Electoral votes
+
+polling_error <- 5  # Standard deviation
+
+dem_ev <- numeric(n_sims)
+rep_ev <- numeric(n_sims)
+
+for (i in 1:n_sims) {
+  dem_actual <- rnorm(length(states), poll_dem, polling_error)
+  rep_actual <- rnorm(length(states), poll_rep, polling_error)
+  dem_wins <- dem_actual > rep_actual
+  dem_ev[i] <- sum(ev_state[dem_wins])
+  rep_ev[i] <- sum(ev_state[!dem_wins])
+}
+
+cat("Democrat:\n")
+cat("  Mean EV:", round(mean(dem_ev), 0), "\n")
+cat("  50% CI: [", quantile(dem_ev, 0.25), ",", quantile(dem_ev, 0.75), "]\n\n")
+
+cat("Republican:\n")
+cat("  Mean EV:", round(mean(rep_ev), 0), "\n")
+cat("  50% CI: [", quantile(rep_ev, 0.25), ",", quantile(rep_ev, 0.75), "]\n")
+
+# Visualization
+ymax <- max(hist(dem_ev, breaks = 30, plot = FALSE)$counts, hist(rep_ev, breaks = 30, plot = FALSE)$counts)
+hist(dem_ev, breaks = 30, col = rgb(0, 0, 1, 0.5), ylim = c(0, ymax), 
+     main = "Electoral Votes Distribution", xlab = "Electoral Votes")
+hist(rep_ev, breaks = 30, col = rgb(1, 0, 0, 0.5), add = TRUE)
+legend("topright", c("Dem", "Rep"), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)))
+```
+
+**Limitations of Independence Assumption**:
+
+1. **Correlated polling errors**: If polls underestimate one candidate in Wisconsin, they likely underestimate in Michigan and Pennsylvania too (similar demographics).
+
+2. **Systematic bias**: National mood shifts affect all states in the same direction. The 2016 election showed polls systematically undersampling non-college whites.
+
+3. **Model improvements**: A better model would include regional/demographic correlations between states, uncertainty about the polling error magnitude, and fundamentals-based priors.
+:::
+:::
+
+::: {#exr-naive-bayes-text}
+## Naive Bayes Text Classifier from Scratch
+
+Build a naive Bayes spam filter from scratch, following the same logic as @exm-naivebayes: estimate class priors and per-word likelihoods from a labeled corpus, then combine them through Bayes' rule to classify new messages. Treating every word in a message as conditionally independent given the class label is exactly the "naive" assumption discussed in the chapter.
+
+Training corpus (6 messages labeled spam, 6 labeled ham):
+
+| Spam messages | Ham messages |
+|---|---|
+| win free money now | let us meet for lunch today |
+| free cash prize claim now | are you free for dinner tonight |
+| you win a free prize | can we schedule the meeting today |
+| claim your free money today | let me know about the project |
+| urgent win cash now | meeting agenda for tomorrow project |
+| free entry win prize now | are we still on for lunch |
+
+Held-out test messages, with true labels for scoring accuracy:
+
+| Message | True label |
+|---|---|
+| free money now | spam |
+| let us schedule dinner | ham |
+| win a free prize today | spam |
+| can you meet for the project meeting | ham |
+| claim your prize now | spam |
+| are you free tomorrow for lunch | ham |
+
+a) Tokenize each training message on whitespace (after converting to lower case) and build the vocabulary. Estimate the class priors $P(\text{spam})$ and $P(\text{ham})$ from the label proportions, and estimate every per-word likelihood $P(\text{word}\mid \text{spam})$ and $P(\text{word}\mid \text{ham})$ using Laplace (add-one) smoothing, so that no word ever receives zero probability.
+b) For the test message "free money now," compute the log-posterior $\log P(\text{spam}) + \sum_i \log P(w_i\mid \text{spam})$ and the corresponding quantity for ham explicitly, using your fitted probabilities. Which class wins?
+c) Classify all six held-out test messages using
+$$
+\arg\max_{c \in \{\text{spam},\text{ham}\}} \left[ \log P(c) + \sum_i \log P(w_i \mid c) \right]
+$$
+and report the classifier's accuracy.
+d) The word "free" appears in both a spam message ("free cash prize claim now") and a ham message ("are you free for dinner tonight"). Explain why naive Bayes can still classify correctly even though individual words like this one are ambiguous, and give a concrete reason why treating words as conditionally independent given the class is not literally true of English sentences.
+e) (Optional) The Bernoulli event model. Represent each message by a 0/1 vector $x$ over the vocabulary of part (a), with $x_w=1$ if the word $w$ occurs in the message and $x_w=0$ otherwise (parts (a) to (c) use the multinomial event model, which counts word tokens). Estimate $p_{wc}=P(x_w=1\mid c)=(n_{wc}+1)/(m_c+2)$, where $n_{wc}$ of the $m_c$ training messages of class $c$ contain $w$, and score a message by $\log P(c)+\sum_{w}\left[x_w\log p_{wc}+(1-x_w)\log(1-p_{wc})\right]$, the sum running over all words of the vocabulary. Code this classifier from scratch, classify the six test messages, and compare the predictions with those of part (c).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+spam <- c("win free money now", "free cash prize claim now",
+          "you win a free prize", "claim your free money today",
+          "urgent win cash now", "free entry win prize now")
+ham <- c("let us meet for lunch today", "are you free for dinner tonight",
+         "can we schedule the meeting today", "let me know about the project",
+         "meeting agenda for tomorrow project", "are we still on for lunch")
+tokenize <- function(msg) strsplit(tolower(msg), "\\s+")[[1]]
+train <- data.frame(msg = c(spam, ham), label = rep(c("spam", "ham"), each = 6),
+                     stringsAsFactors = FALSE)
+
+vocab <- sort(unique(unlist(lapply(train$msg, tokenize))))
+V <- length(vocab)
+word_counts <- function(lbl) {
+  words <- unlist(lapply(train$msg[train$label == lbl], tokenize))
+  c(table(factor(words, levels = vocab)))
+}
+cnt_spam <- word_counts("spam"); cnt_ham <- word_counts("ham")
+N_spam <- sum(cnt_spam); N_ham <- sum(cnt_ham)
+prior_spam <- mean(train$label == "spam"); prior_ham <- 1 - prior_spam
+
+# Laplace (add-one) smoothing: P(word | class)
+lik_spam <- (cnt_spam + 1) / (N_spam + V)
+lik_ham <- (cnt_ham + 1) / (N_ham + V)
+
+log_post <- function(msg, lik, prior) {
+  w <- tokenize(msg); w <- w[w %in% vocab]
+  log(prior) + sum(log(lik[w]))
+}
+classify <- function(msg) {
+  lp_s <- log_post(msg, lik_spam, prior_spam)
+  lp_h <- log_post(msg, lik_ham, prior_ham)
+  if (lp_s > lp_h) "spam" else "ham"
+}
+```
+
+There are $V = 34$ vocabulary words, $N_{\text{spam}} = 28$ and $N_{\text{ham}} = 35$ total word tokens, and priors $P(\text{spam}) = P(\text{ham}) = 0.5$ (the corpus is balanced by construction).
+
+Part b: the explicit log-posterior for "free money now."
+
+```{r}
+w <- tokenize("free money now")
+data.frame(word = w, P_spam = round(lik_spam[w], 4), P_ham = round(lik_ham[w], 4), row.names = NULL)
+lp_spam <- log_post("free money now", lik_spam, prior_spam)
+lp_ham <- log_post("free money now", lik_ham, prior_ham)
+c(log_post_spam = round(lp_spam, 4), log_post_ham = round(lp_ham, 4))
+```
+
+$P(\text{free}\mid\text{spam}) = 0.0968$ versus $P(\text{free}\mid\text{ham}) = 0.0290$, and similarly "money" and "now" are both far more likely under spam. Summing the log-likelihoods with the log-prior gives $\log P(\text{spam}) + \sum_i \log P(w_i\mid\text{spam}) = -8.575$ against $\log P(\text{ham}) + \sum_i \log P(w_i\mid\text{ham}) = -12.702$. Since $-8.575 > -12.702$, the message is classified as spam.
+
+Part c: classify the full test set and score accuracy.
+
+```{r}
+test <- data.frame(
+  msg = c("free money now", "let us schedule dinner",
+          "win a free prize today", "can you meet for the project meeting",
+          "claim your prize now", "are you free tomorrow for lunch"),
+  label = c("spam", "ham", "spam", "ham", "spam", "ham"),
+  stringsAsFactors = FALSE)
+test$pred <- vapply(test$msg, classify, character(1))
+test
+mean(test$pred == test$label)
+```
+
+All six held-out messages are classified correctly, an accuracy of 100%.
+
+Part d: naive Bayes does not decide a message's class from any single word. It multiplies the (smoothed) likelihoods of every word the message contains, so one ambiguous word like "free" only nudges the log-posterior; it does not dominate it. In "free money now," the words "money" and "now" are much more spam-indicative than "free" is ham-indicative, so their combined evidence outweighs the one ambiguous word. The conditional-independence assumption itself is false in a literal sense: knowing that a message contains "free" changes the chance that it also contains "prize" or "claim" (spam messages advertising a giveaway tend to use several of these words together), so the words are correlated given the class, not independent. Naive Bayes ignores this correlation and still classifies well here because the errors it introduces are small relative to the size of the log-likelihood gap between classes, which is the trade-off that the chapter describes after the bird example (@exm-naivebayes-birds): the independence assumption can distort the posterior probabilities without changing the predicted class.
+
+Part e: the Bernoulli model needs the number of training messages that contain each word, not the number of word tokens. Each message becomes a 0/1 vector over the 34 vocabulary words, $p_{wc}=(n_{wc}+1)/(m_c+2)$ is computed for every word and class (here $m_{\text{spam}}=m_{\text{ham}}=6$), and the score of a message adds $\log p_{wc}$ for each word it contains and $\log(1-p_{wc})$ for each word it lacks.
+
+```{r}
+bow <- function(msg) as.integer(vocab %in% tokenize(msg))
+X <- t(sapply(train$msg, bow))
+phat <- sapply(c("spam", "ham"), function(lbl) {
+  rows <- train$label == lbl
+  (colSums(X[rows, ]) + 1) / (sum(rows) + 2)
+})
+log_prior <- log(c(spam = prior_spam, ham = prior_ham))
+classify_bern <- function(msg) {
+  x <- bow(msg)
+  score <- log_prior + colSums(x * log(phat) + (1 - x) * log(1 - phat))
+  names(which.max(score))
+}
+test$pred_bern <- vapply(test$msg, classify_bern, character(1))
+test
+```
+
+Both event models classify all six test messages correctly, an accuracy of 100% each, and the column `pred_bern` agrees with the multinomial predictions `pred` of part (c) on every message. The agreement is not automatic, because the two scores differ: the Bernoulli score also counts every one of the 34 vocabulary words that a message lacks, and its smoothing divides by the number of messages plus 2, not by the number of word tokens plus 34. On these six messages the choice of event model does not matter.
+:::
+:::
+
+::::

@@ -1,0 +1,10 @@
+graph TB
+    B[$$\beta$$: Coefficients] --> P[$$\psi$$: Linear Predictor]
+    X[Data X] --> P
+    P --> O[$$\omega$$: Polya-Gamma Auxiliary]
+    P --> Y[$$y$$: Observed Outcomes]
+    O --> Y
+
+    style B fill:#e1f5fe
+    style O fill:#fff9c4
+    style Y fill:#e8f5e9

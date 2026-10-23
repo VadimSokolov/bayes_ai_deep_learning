@@ -1,0 +1,309 @@
+{
+ "edition": "1",
+ "pdf": {
+  "bytes": 38599694,
+  "file": "pdf/bayes_ai_deep_learning.pdf",
+  "pages": 840,
+  "parts": [
+   {
+    "first_page": "i",
+    "key": "",
+    "last_page": "24",
+    "pages": 38,
+    "title": "Front matter"
+   },
+   {
+    "first_page": "27",
+    "key": "1",
+    "last_page": "72",
+    "pages": 46,
+    "title": "Chapter 1. Probability and Uncertainty"
+   },
+   {
+    "first_page": "73",
+    "key": "2",
+    "last_page": "106",
+    "pages": 34,
+    "title": "Chapter 2. Bayes' Rule"
+   },
+   {
+    "first_page": "107",
+    "key": "3",
+    "last_page": "150",
+    "pages": 44,
+    "title": "Chapter 3. Bayesian Learning"
+   },
+   {
+    "first_page": "151",
+    "key": "4",
+    "last_page": "188",
+    "pages": 38,
+    "title": "Chapter 4. Utility, Risk and Decisions"
+   },
+   {
+    "first_page": "189",
+    "key": "5",
+    "last_page": "224",
+    "pages": 36,
+    "title": "Chapter 5. A/B Testing"
+   },
+   {
+    "first_page": "225",
+    "key": "6",
+    "last_page": "264",
+    "pages": 40,
+    "title": "Chapter 6. Bayesian Hypothesis Testing"
+   },
+   {
+    "first_page": "265",
+    "key": "7",
+    "last_page": "296",
+    "pages": 32,
+    "title": "Chapter 7. Stochastic Processes"
+   },
+   {
+    "first_page": "297",
+    "key": "8",
+    "last_page": "308",
+    "pages": 12,
+    "title": "Chapter 8. Gaussian Processes"
+   },
+   {
+    "first_page": "309",
+    "key": "9",
+    "last_page": "344",
+    "pages": 36,
+    "title": "Chapter 9. Reinforcement Learning"
+   },
+   {
+    "first_page": "347",
+    "key": "10",
+    "last_page": "362",
+    "pages": 16,
+    "title": "Chapter 10. Unreasonable Effectiveness of Data"
+   },
+   {
+    "first_page": "363",
+    "key": "11",
+    "last_page": "378",
+    "pages": 16,
+    "title": "Chapter 11. Pattern Matching"
+   },
+   {
+    "first_page": "379",
+    "key": "12",
+    "last_page": "422",
+    "pages": 44,
+    "title": "Chapter 12. Linear Regression"
+   },
+   {
+    "first_page": "423",
+    "key": "13",
+    "last_page": "452",
+    "pages": 30,
+    "title": "Chapter 13. Logistic Regression and Generalized Linear Models"
+   },
+   {
+    "first_page": "453",
+    "key": "14",
+    "last_page": "488",
+    "pages": 36,
+    "title": "Chapter 14. Tree Models"
+   },
+   {
+    "first_page": "489",
+    "key": "15",
+    "last_page": "534",
+    "pages": 46,
+    "title": "Chapter 15. Forecasting"
+   },
+   {
+    "first_page": "535",
+    "key": "16",
+    "last_page": "568",
+    "pages": 34,
+    "title": "Chapter 16. Model Selection"
+   },
+   {
+    "first_page": "569",
+    "key": "17",
+    "last_page": "620",
+    "pages": 52,
+    "title": "Chapter 17. Statistical Learning Theory and Regularization"
+   },
+   {
+    "first_page": "623",
+    "key": "18",
+    "last_page": "640",
+    "pages": 18,
+    "title": "Chapter 18. Neural Networks"
+   },
+   {
+    "first_page": "641",
+    "key": "19",
+    "last_page": "662",
+    "pages": 22,
+    "title": "Chapter 19. Theory of Deep Learning"
+   },
+   {
+    "first_page": "663",
+    "key": "20",
+    "last_page": "686",
+    "pages": 24,
+    "title": "Chapter 20. Gradient Descent"
+   },
+   {
+    "first_page": "687",
+    "key": "21",
+    "last_page": "708",
+    "pages": 22,
+    "title": "Chapter 21. Quantile Neural Networks"
+   },
+   {
+    "first_page": "709",
+    "key": "22",
+    "last_page": "720",
+    "pages": 12,
+    "title": "Chapter 22. Convolutional Neural Networks"
+   },
+   {
+    "first_page": "721",
+    "key": "23",
+    "last_page": "746",
+    "pages": 26,
+    "title": "Chapter 23. Natural Language Processing"
+   },
+   {
+    "first_page": "747",
+    "key": "24",
+    "last_page": "786",
+    "pages": 40,
+    "title": "Chapter 24. Large Language Models"
+   },
+   {
+    "first_page": "787",
+    "key": "25",
+    "last_page": "800",
+    "pages": 14,
+    "title": "Chapter 25. AI Agents"
+   },
+   {
+    "first_page": "801",
+    "key": "",
+    "last_page": "820",
+    "pages": 20,
+    "title": "References"
+   },
+   {
+    "first_page": "821",
+    "key": "",
+    "last_page": "826",
+    "pages": 6,
+    "title": "Index"
+   }
+  ],
+  "sha256": "3ca696b8669d6dad2416315a07e0dc50013ef50584b988f8d2b635534f37ca9a"
+ },
+ "results": {
+  "bayesian_bridge_bartlett_fejer_mixture": {
+   "environment": "res",
+   "file": "17-theoryai.qmd",
+   "fingerprint": "b7dd68815804",
+   "label": "res-bartlett-fejer-mixture",
+   "number": "17.11.1",
+   "page": "602",
+   "printed": "Section 17.11.1",
+   "verified_fingerprint": "b7dd68815804",
+   "verified_on": "2026-10-12"
+  },
+  "bernoulli_beta_option_value_of_learning": {
+   "environment": "res",
+   "file": "04-dec.qmd",
+   "fingerprint": "e573d4e26af4",
+   "label": "res-option-value-of-learning",
+   "number": "4.2.3",
+   "page": "162",
+   "printed": "Section 4.2.3",
+   "verified_fingerprint": "e573d4e26af4",
+   "verified_on": "2026-10-12"
+  },
+  "livermore_maxims_bellman_view": {
+   "environment": "res",
+   "file": "04-dec.qmd",
+   "fingerprint": "031bf89a39e7",
+   "label": "res-livermore-maxims",
+   "number": "4.2.4",
+   "page": "163",
+   "printed": "Section 4.2.4",
+   "verified_fingerprint": "031bf89a39e7",
+   "verified_on": "2026-10-12"
+  },
+  "meu_quantile_network_method": {
+   "environment": "res",
+   "file": "21-qnn.qmd",
+   "fingerprint": "07525994e038",
+   "label": "res-meu-quantile-network",
+   "number": "21.6.1",
+   "page": "700",
+   "printed": "Section 21.6.1",
+   "verified_fingerprint": "07525994e038",
+   "verified_on": "2026-10-23"
+  },
+  "nakamura_streak_posterior_innocence": {
+   "environment": "exm",
+   "file": "02-bayes.qmd",
+   "fingerprint": "80fe21371256",
+   "label": "exm-nakamura",
+   "number": "2.10",
+   "page": "82",
+   "printed": "Example 2.10",
+   "verified_fingerprint": "80fe21371256",
+   "verified_on": "2026-10-23"
+  },
+  "polya_gamma_gibbs_sampler_logistic": {
+   "environment": "res",
+   "file": "13-logistic.qmd",
+   "fingerprint": "6b29e87043dd",
+   "label": "res-polya-gamma-gibbs",
+   "number": "13.7.1",
+   "page": "445",
+   "printed": "Section 13.7.1",
+   "verified_fingerprint": "6b29e87043dd",
+   "verified_on": "2026-10-12"
+  },
+  "polya_gamma_integral_identity": {
+   "environment": "res",
+   "file": "13-logistic.qmd",
+   "fingerprint": "544b46a41ec8",
+   "label": "res-polya-gamma-identity",
+   "number": "13.7.1",
+   "page": "445",
+   "printed": "Section 13.7.1",
+   "verified_fingerprint": "544b46a41ec8",
+   "verified_on": "2026-10-12"
+  },
+  "posterior_concentration_sparse_deep_learning": {
+   "environment": "res",
+   "file": "19-theorydl.qmd",
+   "fingerprint": "f519a45df0ca",
+   "label": "res-posterior-concentration",
+   "number": "19.9.2",
+   "page": "657",
+   "printed": "Section 19.9.2",
+   "verified_fingerprint": "f519a45df0ca",
+   "verified_on": "2026-10-12"
+  },
+  "quantile_trend_filtering_hierarchical_model": {
+   "environment": "res",
+   "file": "21-qnn.qmd",
+   "fingerprint": "d684234314a7",
+   "label": "res-quantile-trend-filtering",
+   "number": "21.8",
+   "page": "702",
+   "printed": "Section 21.8",
+   "verified_fingerprint": "d684234314a7",
+   "verified_on": "2026-10-23"
+  }
+ },
+ "updated": "2026-10-23"
+}

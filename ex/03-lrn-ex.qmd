@@ -1,0 +1,1830 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Beta-Binomial for Allais Gambles
+We've collected data on people's preferences in the two Allais gambles. For this problem, we will assume that responses are independent and identically distributed, and the probability is $\theta$ that a person chooses both B in the first gamble and C in the second gamble.
+
+a) Assume that the prior distribution for $\theta$ is Beta(1, 3). Find the prior mean and standard deviation for $\theta$. Find a 95% symmetric tail area credible interval for the prior probability that a person would choose B and C. Do you think this is a reasonable prior distribution to use for this problem? Why or why not?
+a) In 2009, 19 out of 47 respondents chose B and C. Find the posterior distribution for the probability $\theta$ that a person in this population would choose B and C.
+a) Find the posterior mean and standard deviation. Find a 95% symmetric tail area credible interval for $\theta$.
+a) Make a triplot of the prior distribution, normalized likelihood, and posterior distribution.
+a) Comment on your results.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Part a. It is convenient to use a prior distribution in the Beta family because it is conjugate to the Binomial likelihood function, which simplifies Bayesian updating. A plot of the prior density function is shown below. 
+```{r}
+curve(dbeta(x,1,3),0,1)
+```
+
+The prior distribution has mean $\alpha/(\alpha+\beta) = 0.25$ and standard deviation 
+$$
+\sqrt{\dfrac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}} = 0.194.
+$$
+An expected value of 0.25 would be reasonable if we believed that people were choosing randomly among the four options A&C, B&C, A&D, and B&D. In fact, a Beta(1,3) distribution is the marginal distribution we would obtain if we placed a uniform distribution on all probability vectors $(p_1, p_2, p_3, p_4)$ on the four categories (i.e., a uniform distribution on four non-negative numbers that sum to 1). In other words, this is the prior distribution we might assign if all we knew was that there were four possible responses, and knew nothing about the relative likelihoods of the four responses. However, we actually do know something about the relative probabilities of the categories. According to the research literature, people choose B&C more often than 25% of the time. The center of the prior distribution does not reflect this knowledge. But the prior distribution does show a very high degree of uncertainty about the probability. A 95% symmetric tail area credible interval for the prior distribution of $\Theta$ is [0.008, 0.708]. The virtual count is small in relation to the sample size, so the data will have a large impact on the posterior distribution relative to the prior. Therefore, we won't go too far wrong using this prior distribution, even though we do have knowledge that suggests the prior mean is likely to be higher than 0.25.
+
+Part b. We will use the Binomial/Beta conjugate pair. The prior distribution is a member of the conjugate Beta$(\alpha, \beta)$ family, with $\alpha=1$ and $\beta=3$. Therefore, the posterior distribution is a Beta$(\alpha^*, \beta^*)$ distribution, with $\alpha^*=\alpha+x= 1+19 = 20$, and $\beta^*=\beta+n-x = 3+28 = 31$. The posterior distribution is shown below. 
+```{r}
+curve(dbeta(x,20,31),0,1)
+```
+
+Part c. The posterior mean is $\alpha^*/(\alpha^*+\beta^*) = 20/51 = 0.392$. The posterior standard deviation is
+$$
+\sqrt{\dfrac{\alpha^*\beta^*}{(\alpha^*+\beta^*)^2(\alpha^*+\beta^*+1)}} = 0.068.
+$$
+A 95% symmetric tail area credible interval for the posterior distribution of $\Theta$ is [0.264, 0.528].
+```{r}
+qbeta(c(0.025,0.975),20,31)
+```
+
+Part d. The triplot is shown below. 
+```{r}
+curve(dbeta(x,1,3),0,1,ylab="Density",lty=2,xlim=c(0,1),ylim=c(0,6))
+curve(dbeta(x,20,31),0,1,add=TRUE)
+curve(dbeta(x,19,47-19),0,1,add=TRUE)       # Normalized Likelihood is Beta(x,n-x)
+```
+The triplot shows the prior, normalized likelihood, and posterior distributions. The normalized likelihood is a Beta(19,47-19) density function. The posterior distribution is focused on slightly smaller values and is slightly narrower than the normalized likelihood. This is because the prior mean is smaller than the sample mean, and the posterior distribution has slightly more information than the prior distribution.
+
+:::
+:::
+
+::: {#exr-}
+## Poisson for Car Counts
+Times were recorded at which vehicles passed a fixed point on the M1 motorway in Bedfordshire, England on March 23, 1985.2 The total time was broken into 21 intervals of length 15 seconds. The number of cars passing in each interval was counted. The result was: 
+```{r}
+#| echo: true
+cnt = c(2, 2, 1, 1, 0, 4, 3, 0, 2, 1, 1, 1, 4, 0, 2, 2, 3, 2, 4, 3, 2)
+```
+This can be summarized in the following table, that shows 3 intervals with zero cars, 5 intervals with 1 car, 7 intervals with 2 cars, 3 intervals with 3 cars, and 3 intervals with 4 cars.
+```{r}
+table(cnt)
+```
+
+a) Do you think a Poisson distribution provides a good model for the count data? Justify your answer.
+b) Assume that $\Lambda$, the rate parameter of the Poisson distribution for counts (and the inverse of the mean of the exponential distribution for inter-arrival times), has a discrete uniform prior distribution on 20 equally spaced values between $(0.2, 0.4,\ldots 3.8, 4.0)$ cars per 15-second interval. Find the posterior distribution of $\Lambda$. 
+c) Find the posterior mean and standard deviation of $\Lambda$.
+d) Discuss what your results mean in terms of traffic on this motorway.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) A Poisson distribution is a good model to consider for the arrival counts because:
+   - The data consist of counts of discrete events.
+   - It seems reasonable that the events would be independent.
+   - It seems reasonable that the rate of occurrence would remain constant over the 4+ minutes that the sample was taken.
+
+These are reasons to consider a Poisson distribution, but we still need to investigate how well a Poisson distribution fits the observations. We will do this by comparing the sample frequencies with Poisson probability mass function.
+To do this, we need to estimate the mean of the distribution. We calculate the sample mean by summing these observations (40 total cars passing) and dividing by the number of intervals (21), to obtain an estimated arrival rate of about 1.9 cars per 15 second time interval.
+
+Next, we use the Poisson probability mass function $f(x|\Lambda=1.9) = e^{-1.9} (1.9)^x / x!$ to estimate the probability of each number of cars in a single interval, and multiply by 21 to find the expected number of times each value occurs (Note: for the 5 or more entry, we use $1-F(4|\Lambda=1.9)$, or 1 minus the Poisson cdf at 4. The probability of more than 5 cars in 15 seconds is very small.)
+The expected counts are:
+```{r}
+d = data.frame(cars=0:5,sample=c(3,5,7,3,3,0),expected=c(21*dpois(0:4,1.9),ppois(4,1.9)))
+print(d)
+```
+
+The values in this table seem to show fairly good agreement. We can do a visual inspection by drawing a bar chart, shown below. The bar chart shows good agreement between the empirical and the Poisson probabilities.
+
+```{r}
+barplot(height = t(as.matrix(d[,2:3])),beside=TRUE,legend=TRUE, col = c("lightblue", "coral"))
+```
+
+We can also perform a Pearson chi-square test (this is not required). The test statistic is calculated as:
+$$
+\chi^2 =\sum_i (Y_i -E_i)^2/E_i
+$$
+where $Y_i$ is the observed count for i cars passing, and $E_i$ is the expected number of instances of i cars passing in a sample of size 21. The chi-square test should not be applied when counts are very small. A common (and conservative) rule of thumb is to avoid using the chi-square test if any cell has an expected count less than 5. Other less conservative rules have been proposed.4 We will combine the last two categories to increase the expected count to 2.37.
+To find the expected counts in this last category, we assign it probability 1 minus the cdf at x=3, and multiply by 21. The observed and expected counts are:
+```{r}
+sum(((d$sample-d$expected)^2/d$expected)[1:4]) + (3-2.65)^2/2.65
+```
+
+Next, we find the degrees of freedom, n - p -1, where n is the number of categories and p is the number of parameters estimated. We have 5 categories, and we estimated the mean of the Poisson distribution, so the degrees of freedom are 5 - 1 - 1, or 3. Therefore, we compare our test statistic 0.616 against the critical value of the chi-square distribution with 3 degrees of freedom. The 95th percentile for the chi- square distribution with 3 degrees of freedom is 7.8.
+```{r}
+qchisq(0.95,3)
+```
+Some students have tried a Q-Q plot of the Poisson quantiles against the data quantiles. Because there are only 4 distinct values in the sample, the plot shows most of the dots on top of each other. Comparing empirical and theoretical frequencies to is much more informative for discrete distributions with very few values.
+
+We can also compare the sample mean and sample variance of the observations, recalling that the mean and variance of the Poisson distribution are the same. The sample mean of the observations is 1.90 and the sample variance is 1.59. The standard deviation of the sample mean is approximately equal to the sample standard deviation divided by the square root of the sample size, or $\sqrt{1.59/21} = 0.275$. Therefore, the CI is 
+```{r}
+1.90 + c(-1,1)*0.275*qt(0.975,20)
+```
+The observations seem consistent with the hypothesis that the mean and standard deviation are equal.
+
+You did not need to do everything described in this solution. If you gave a thoughtful argument for whether the Poisson distribution was a good model, and if you used the data in a reasonable way to evaluate the fit of the distribution, you would receive credit for this problem.
+
+b) To find the posterior distribution, we calculate the Poisson likelihood at each of the 20 lambda values, and multiply by the prior probability of 1/20. Then we divide each of these values by their sum. The formula is:
+$$
+p(\lambda|X) = \frac{f(X|\lambda)g(\lambda)}{\sum_{i=1}^{20} f(X|\lambda_i)g(\lambda_i)}
+$$
+We use the constant prior of $g(\lambda) = 1/20$ factors out of both the numerator and denominator, so it is unnecessary to include it. In fact, when the prior distribution is uniform, the posterior distribution is the same as the normalized likelihood.
+
+The posterior pmf is shown in the plot below. 
+```{r}
+lambda = seq(0,4,0.2)
+likelihood=function(lambda) prod(dpois(cnt,lambda))
+l = sapply(lambda,likelihood)
+posterior = l/sum(l)
+barplot(posterior,names.arg=lambda,xlab="lambda",ylab="posterior probability", col = "lightblue")
+```
+
+c)
+```{r}
+m = sum(posterior*lambda)
+print(m)
+sqrt(sum(posterior*(lambda-m)^2))
+```
+
+d) From this analysis, we see that a Poisson distribution provides a good model for counts of cars passing by this point on the roadway. The rate is approximately 2 cars per 15 seconds. There is uncertainty about this rate. There is a 95% chance the rate is less than or equal to 2.4, and there is about a 98% probability that the rate lies between 1.4 and 2.6 cars per 15-second interval. If we gathered more data, we would gain more information about the rate, which would narrow the range of uncertainty.
+
+:::
+:::
+
+::: {#exr-}
+## Car Count Part 2
+This problem continues analysis of the automobile traffic data. As before, assume that counts of cars per 15-second interval are independent and identically distributed Poisson random variables with unknown mean $\Lambda$.
+
+a) Assume that $\Lambda$, the rate parameter of the Poisson distribution for counts, has a continuous gamma prior distribution for $\Lambda$ with shape 1 and scale 10e6. (The gamma distribution with shape 1 tends to a uniform distribution as the scale tends to $\infty$, so this prior distribution is "almost" uniform.) Find the posterior distribution of $\Lambda$. State the distribution type and hyperparameters.
+b) Find the posterior mean and standard deviation of $\Lambda$. Compare your results to Part I. Discuss.
+c) Find a 95% symmetric tail area posterior credible interval for $\Lambda$. Find a 95% symmetric tail area posterior credible interval for $\theta$, the mean time between vehicle arrivals.
+d) Find the predictive distribution for the number of cars passing in the next minute. Name the family of distributions and the parameters of the predictive distribution. Find the mean and standard deviation of the predictive distribution. Find the probability that more than 10 cars will pass in the next minute. (Hint: one minute is four 15-second time intervals.)
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) We observed 40 cars passing in $n$=21 15-second intervals. 
+```{r}
+sum(cnt)
+```
+
+The posterior distribution is a gamma distribution with shape 1 + 40 = 41 
+```{r}
+1+sum(cnt)
+```
+and scale 
+```{r}
+n = length(cnt)
+1/(1e-6 + n)
+```
+The posterior distribution is
+$$
+\Lambda|X \sim \text{Gamma}(41,0.04761905)
+$$
+```{r}
+curve(dgamma(x,shape=41,scale=0.04761905),from=0,to=5)
+```
+b) The posterior mean is 41/21=1.952, and the posterior standard deviation is $\sqrt{41}/21 = 0.304$. Let's compare 
+
+|             | mean   | sd    | mode | median | 95% CI       |
+|-------------|--------|-------|------|--------|--------------|
+| Discretized | 1.95   | 0.305 | 2    | 2      | [1.4, 2.6]   |
+| Continuous  | 1.95   | 0.305 | 1.9  | 1.94   | [1.40, 2.59] |
+
+These values are almost identical. The slight differences in the median and mode are clearly artifacts of discretization. The discretized analysis gives a good approximation to the continuous analysis.
+
+c) The 95% symmetric tail area posterior credible interval for $\Lambda$ is
+```{r}
+qgamma(c(0.025,0.975),shape=41,scale=0.04761905)
+```
+and for $\Theta$ is
+```{r}
+1/qgamma(c(0.975,0.025),shape=41,scale=0.04761905)
+```
+
+d) The Poisson / Gamma predictive distribution is a negative binomial distribution. For this problem, we predict the number of cars in the next four time periods (1 minute is four 15-second blocks). The predictive distribution is negative binomial with the parameters:
+
+- size a = 41
+- scale b = 0.04762 (the posterior gamma scale from Part a)
+- prob p = 1/(1+4b) = 1/(1+4\times 0.04762) = 0.84
+
+The mean is $nab = 4\cdot 41\cdot 0.04762 = 7.81$ and standard deviation of the predictive distribution is
+$$
+\sqrt{nab(1+nb)} = \sqrt{4\cdot 41 \cdot 0.04762\cdot(1+4\cdot 0.04762)} = 3.05
+$$
+The probabilities, as computed by the R `dnbinom` function, are shown in the table. Results from the Poisson probability mass function with mean $4ab = 7.81$ are shown for comparison.
+```{r}
+k = 0:20
+p = dnbinom(k,size=41,prob=1/(1+4/21))
+p = p/sum(p)
+p = round(p,3)
+p = c(p,1-sum(p))
+poisson = round(dpois(k,7.81),3)
+poisson = c(poisson,1-sum(poisson))
+d = cbind(k,p,poisson)
+print(d)
+barplot(t(d[,2:3]),beside=TRUE,names.arg=d[,1],xlab="k",ylab="probability")
+legend("topright",c("negative binomial","poisson"),fill=c("black","white"))
+```
+The difference between the Bayesian predictive distribution and the Poisson distribution using a point estimate of the rate is even more pronounced if we predict for the next 21 time periods (5 1/4 minutes). This was not required, but is interesting to examine. Again, the distribution is negative binomial with: size $a = 41$, and probability $p = 1/(1 + 21b) = 0.5$
+```{r}
+k = 0:65
+p = dnbinom(k,size=41,prob=0.5)
+p = p/sum(p)
+p = c(p,1-sum(p))
+poisson = dpois(k,21*41/21)
+poisson = c(poisson,1-sum(poisson))
+d = cbind(k,p,poisson)
+barplot(t(d[,2:3]),beside=TRUE,names.arg=d[,1],xlab="k",ylab="probability")
+legend("topright",c("negative binomial","poisson"),fill=c("black","white"))
+```
+To summarize, the predictive distribution is negative binomial with size $a = 41$, and probability $p = 1/(1 + nb)$ where $n$ is the number of periods into the future we are predicting. The uncertainty in $\Lambda$ makes the predictive distribution more spread out than the Poisson distribution with the same mean. When n=1, the Poisson and negative binomial probabilities are very similar. The differences become more pronounced as we try to predict further into the future.
+
+:::
+:::
+
+::: {#exr-beta-mixture-defect}
+## Mixture of Beta Priors for a Defect Rate
+
+A quality engineer models the defect probability $\theta$ of a new production line. Historical experience combines two competing beliefs into a mixture prior: with probability $\pi_1 = 0.3$ the line behaves like past *typical* lines, $\theta \sim \text{Beta}(2,2)$ (centered near 0.5), and with probability $\pi_2 = 0.7$ it behaves like past *high-defect* lines, $\theta \sim \text{Beta}(5,1)$ (mass rising toward 1). The prior is therefore
+$$
+\theta \sim \pi_1\,\text{Beta}(2,2) + \pi_2\,\text{Beta}(5,1).
+$$
+You inspect $n=10$ units from the new line and find $y=4$ defective.
+
+a) For each component $k=1,2$, use ordinary Beta-Binomial conjugacy to find the component-specific posterior $\text{Beta}(\alpha_k^*, \beta_k^*)$.
+
+b) The mixture-posterior result derived in the section *Mixtures of Conjugate Priors* requires, for each component, the normalizing constant $Z_k = \int p(y\mid\theta)\,p_k(\theta)\,d\theta$. Show that here $Z_k$ is the Beta-Binomial marginal probability
+$$
+Z_k = \binom{n}{y}\frac{B(\alpha_k+y,\ \beta_k+n-y)}{B(\alpha_k,\beta_k)},
+$$
+and compute $Z_1$ and $Z_2$ numerically.
+
+c) Compute the updated mixture weights $\hat\pi_k = \pi_k Z_k / \sum_j \pi_j Z_j$ and write out the full posterior $p(\theta\mid y) = \hat\pi_1\,\text{Beta}(\theta\mid\alpha_1^*,\beta_1^*) + \hat\pi_2\,\text{Beta}(\theta\mid\alpha_2^*,\beta_2^*)$.
+
+d) Using `curve()` and `dbeta()`, plot the prior mixture density and the posterior mixture density on the same axes. Which component dominates the posterior? Does that match the fact that the observed defect rate $4/10=0.4$ sits close to the $\text{Beta}(2,2)$ component and far from the mode of $\text{Beta}(5,1)$?
+
+e) Check part (c) by numerically integrating the unnormalized posterior contribution of each mixture term with R's `integrate()`, and confirm the two pieces reproduce $\hat\pi_1$ and $\hat\pi_2$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Beta-Binomial conjugacy updates $\text{Beta}(\alpha,\beta)$ to $\text{Beta}(\alpha+y,\ \beta+n-y)$ component by component. With $y=4$ and $n-y=6$,
+$$
+\text{Beta}(2,2)\to\text{Beta}(6,8), \qquad \text{Beta}(5,1)\to\text{Beta}(9,7),
+$$
+with posterior means $6/14 = 0.429$ and $9/16 = 0.5625$.
+
+b) For a single component with prior $p_k(\theta) = \theta^{\alpha_k-1}(1-\theta)^{\beta_k-1}/B(\alpha_k,\beta_k)$ and Binomial likelihood $p(y\mid\theta) = \binom{n}{y}\theta^y(1-\theta)^{n-y}$,
+$$
+Z_k = \int_0^1 \binom{n}{y}\theta^y(1-\theta)^{n-y}\,\frac{\theta^{\alpha_k-1}(1-\theta)^{\beta_k-1}}{B(\alpha_k,\beta_k)}\,d\theta = \frac{\binom{n}{y}}{B(\alpha_k,\beta_k)}\int_0^1 \theta^{\alpha_k+y-1}(1-\theta)^{\beta_k+n-y-1}\,d\theta,
+$$
+and the remaining integral is exactly $B(\alpha_k+y,\ \beta_k+n-y)$, giving the stated formula. Numerically,
+
+```{r}
+n <- 10; y <- 4
+alpha <- c(2, 5); beta_ <- c(2, 1)   # prior components Beta(2,2), Beta(5,1)
+Z <- choose(n, y) * beta(alpha + y, beta_ + n - y) / beta(alpha, beta_)
+Z
+```
+so $Z_1 \approx 0.122$ and $Z_2 \approx 0.023$. The common $\binom{10}{4}$ factor cancels in the weight ratio of part (c).
+
+c)
+```{r}
+pi_k  <- c(0.3, 0.7)
+pihat <- pi_k * Z / sum(pi_k * Z)
+pihat
+```
+so $\hat\pi_1 \approx 0.692$ and $\hat\pi_2 \approx 0.308$, and
+$$
+p(\theta\mid y) = 0.692\,\text{Beta}(\theta\mid 6,8) + 0.308\,\text{Beta}(\theta\mid 9,7).
+$$
+The posterior reverses the prior ranking: the $\text{Beta}(2,2)$ component held only 30% of the prior mass but about 69% of the posterior mass, because $y/n = 0.4$ is far more consistent with a defect probability near 0.5 than with one near 1. The mixture mean drops from the prior value $0.3(0.5) + 0.7(5/6) = 0.733$ to about 0.470, a large downward correction driven entirely by the reweighting:
+```{r}
+sum(pihat * (alpha + y) / (alpha + beta_ + n))   # posterior mixture mean
+```
+
+d)
+```{r}
+#| fig-cap: "Prior mixture (dashed) and posterior mixture (solid) densities for the defect probability. The grey line marks the observed rate y/n = 0.4, which pulls nearly all posterior mass onto the reweighted Beta(6,8) component."
+prior_mix <- function(t) pi_k[1] * dbeta(t, 2, 2) + pi_k[2] * dbeta(t, 5, 1)
+post_mix  <- function(t) pihat[1] * dbeta(t, 6, 8) + pihat[2] * dbeta(t, 9, 7)
+curve(prior_mix, 0, 1, lty = 2, ylim = c(0, 3.7),
+      xlab = expression(theta), ylab = "density")
+curve(post_mix, 0, 1, add = TRUE)
+abline(v = y / n, col = "grey")
+```
+The reweighted $\text{Beta}(6,8)$ component dominates: the posterior is a single hump centered near 0.46, shifted well left of the prior, whose mass piled up toward 1. This matches the intuition that 4 defectives in 10 units looks nothing like a line with defect probability near 1, so the high-defect component is almost extinguished.
+
+e) Integrating each unnormalized term $\pi_k\,p_k(\theta)\,p(y\mid\theta)$ over $\theta$ returns $\pi_k Z_k$, and normalizing the two pieces reproduces the weights:
+```{r}
+piece <- numeric(2)
+for (k in 1:2) {
+  f <- function(t) dbeta(t, alpha[k], beta_[k]) * choose(n, y) * t^y * (1 - t)^(n - y)
+  piece[k] <- pi_k[k] * integrate(f, 0, 1)$value
+}
+piece / sum(piece)
+```
+The numerically integrated weights match the closed-form $\hat\pi_k$ from part (c) to machine precision, confirming the mixture-posterior formula.
+
+:::
+:::
+
+::: {#exr-de-finetti-exchangeability}
+## De Finetti's Exchangeability Theorem
+
+a) Define what it means for a sequence of random variables $Y_1,\ldots,Y_n$ to be *exchangeable*. Contrast this with the assumption that the $Y_i$ are independent and identically distributed (i.i.d.): explain why every i.i.d. sequence is exchangeable, and state whether the converse holds (does exchangeable imply independent?).
+
+b) State de Finetti's representation theorem for an infinite exchangeable sequence of 0-1 random variables (@thm-Representation). From a Bayesian point of view, what does the mixing distribution $P(\theta)$ in the theorem represent, and what is $\theta$?
+
+c) *Polya urn.* An urn starts with 1 red ball and 1 blue ball. At each step, draw a ball uniformly at random, record its color, then return it to the urn along with one additional ball of the same color. Let $Y_i=1$ if the $i$-th draw is red and $Y_i=0$ otherwise.
+   i) Compute $P(Y_2=1\mid Y_1=1)$ and $P(Y_2=1)$, and use these to show that $Y_1$ and $Y_2$ are not independent.
+   ii) Show directly that $(Y_1,Y_2)$ is nonetheless exchangeable, i.e., that $P(Y_1=1,Y_2=0)=P(Y_1=0,Y_2=1)$.
+
+d) Generalize part (c): show that every specific sequence of $n$ draws containing exactly $k$ reds has the same probability, $k!(n-k)!/(n+1)!$, regardless of the order in which the reds and blues appear. This proves the full sequence is exchangeable, not just the first two draws. Sum over the $\binom{n}{k}$ orderings to find $P(K_n=k)$, where $K_n=\sum_{i=1}^n Y_i$ is the number of reds in $n$ draws. What is the name of this distribution?
+
+e) Part (d) shows the Polya urn generates data as if $P(K_n=k)=\int_0^1\binom{n}{k}\theta^k(1-\theta)^{n-k}p(\theta)\,d\theta$, for some mixing density $p(\theta)$. Compare your answer in part (d) to the Beta-Binomial predictive distribution (used elsewhere in this chapter) to identify $p(\theta)$. What does this tell you about the de Finetti mixing measure for the Polya urn: conditional on $\theta$, how do the draws behave, and what is $\theta$ in the limit $n\to\infty$?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) A sequence $Y_1,\ldots,Y_n$ is exchangeable if its joint distribution is unchanged under any permutation of the indices,
+$$
+p(y_1,\ldots,y_n) = p(y_{\pi(1)},\ldots,y_{\pi(n)}) \qquad \text{for every permutation } \pi \text{ of } (1,\ldots,n).
+$$
+If $Y_1,\ldots,Y_n$ are i.i.d., $p(y_1,\ldots,y_n)=\prod_{i=1}^n p(y_i)$, a product that is obviously unchanged by reordering its factors, so every i.i.d. sequence is exchangeable. The converse is false: exchangeability only constrains the joint distribution to be permutation-invariant, it does not require the $Y_i$ to be independent. Part (c) below gives an explicit counterexample: a dependent sequence that is still exchangeable.
+
+b) (@thm-Representation) Let $(Y_1,Y_2,\ldots)$ be an infinite exchangeable sequence of 0-1 random variables. Then there exists a distribution $P$ such that
+$$
+P(Y_1=y_1,\ldots,Y_n=y_n) = \int_0^1 \prod_{i=1}^n \theta^{y_i}(1-\theta)^{1-y_i}\, dP(\theta),
+$$
+where $\theta=\lim_{n\to\infty} n^{-1}\sum_{i=1}^n Y_i$ and $P(\theta)=\lim_{n\to\infty}P\left(n^{-1}\sum_{i=1}^n Y_i\le\theta\right)$. The distribution $P(\theta)$ is exactly the Bayesian prior: de Finetti's theorem shows that assuming only exchangeability, an observable symmetry property with no mention of parameters, forces the existence of a random variable $\theta$ and a prior $p(\theta)$ such that, conditional on $\theta$, the $Y_i$ behave as i.i.d. Bernoulli($\theta$) draws. Here $\theta$ is not an artificial modeling device but the almost-sure limiting frequency of ones in the sequence, and $p(\theta)$ describes uncertainty about that limit before the data are observed.
+
+c) After the first draw the urn holds 2 balls of one color and 1 of the other, so
+$$
+P(Y_2=1\mid Y_1=1)=\frac{2}{3}, \qquad P(Y_2=1\mid Y_1=0)=\frac{1}{3}.
+$$
+i) By the initial symmetry of the urn, $P(Y_1=1)=1/2$, so
+$$
+P(Y_2=1) = P(Y_2=1\mid Y_1=1)P(Y_1=1) + P(Y_2=1\mid Y_1=0)P(Y_1=0) = \frac{2}{3}\cdot\frac12 + \frac13\cdot\frac12 = \frac12.
+$$
+Since $P(Y_2=1\mid Y_1=1)=2/3 \ne 1/2 = P(Y_2=1)$, knowing $Y_1$ changes the probability assigned to $Y_2$: the two draws are not independent.
+
+ii)
+$$
+P(Y_1=1,Y_2=0) = P(Y_1=1)P(Y_2=0\mid Y_1=1) = \frac12\cdot\frac13=\frac16, \qquad P(Y_1=0,Y_2=1)=P(Y_1=0)P(Y_2=1\mid Y_1=0)=\frac12\cdot\frac13=\frac16.
+$$
+The two probabilities are equal, so the joint distribution of $(Y_1,Y_2)$ is unchanged by swapping the indices: $(Y_1,Y_2)$ is exchangeable even though $Y_1$ and $Y_2$ are dependent, the counterexample promised in part (a).
+
+d) At the moment of the $i$-th draw in any sequence, the urn holds $i+1$ balls in total (2 initial balls plus $i-1$ balls added after the previous $i-1$ draws), regardless of the colors drawn so far. If the $i$-th draw is the $j$-th red to appear in the sequence, the urn holds exactly $j$ red balls at that moment (the initial red ball plus the $j-1$ reds already drawn), so that draw has conditional probability $j/(i+1)$; symmetrically, if the $i$-th draw is the $l$-th blue to appear, its conditional probability is $l/(i+1)$. Multiplying the conditional probabilities of all $n$ draws, the numerators run through $1,2,\ldots,k$ (from the red draws, in the order the reds appear) and $1,2,\ldots,n-k$ (from the blue draws), while the denominators run through $2,3,\ldots,n+1$ regardless of color. Hence, for any sequence with exactly $k$ reds,
+$$
+P(\text{that sequence}) = \frac{(1\cdot 2\cdots k)(1\cdot2\cdots(n-k))}{2\cdot3\cdots(n+1)} = \frac{k!\,(n-k)!}{(n+1)!}.
+$$
+This depends only on $k$, not on which positions hold the reds, so every ordering of $k$ reds and $n-k$ blues is equally likely: the sequence is exchangeable for every $n$, not just $n=2$ as in part (c).
+
+Summing over the $\binom{n}{k}$ orderings with $k$ reds,
+$$
+P(K_n=k) = \binom{n}{k}\frac{k!(n-k)!}{(n+1)!} = \frac{n!}{(n+1)!} = \frac{1}{n+1}, \qquad k=0,1,\ldots,n,
+$$
+so $K_n$ has a discrete uniform distribution on $\{0,1,\ldots,n\}$: every possible red count is equally likely, for every $n$.
+
+```{r}
+n <- 4
+seqs <- expand.grid(rep(list(c(1,0)), n))   # all 2^n draw sequences, 1 = red
+path_prob <- function(path) {
+  red <- 1; blue <- 1; p <- 1
+  for (y in path) {
+    tot <- red + blue
+    if (y == 1) { p <- p*red/tot;  red  <- red  + 1 }
+    else        { p <- p*blue/tot; blue <- blue + 1 }
+  }
+  p
+}
+probs <- apply(seqs, 1, path_prob)
+k <- rowSums(seqs)
+tapply(probs, k, sum)   # P(K_4 = k), should all equal 1/5 = 0.2
+```
+
+e) The Beta-Binomial predictive probability of $k$ successes in $n$ trials under a Beta$(\alpha,\beta)$ prior is $\binom{n}{k}B(k+\alpha,n-k+\beta)/B(\alpha,\beta)$. For $\alpha=\beta=1$ (a Uniform$(0,1)$ prior), $B(k+1,n-k+1)=k!(n-k)!/(n+1)!$ and $B(1,1)=1$, so this reduces to $\binom{n}{k}k!(n-k)!/(n+1)! = 1/(n+1)$, exactly matching $P(K_n=k)$ from part (d) for every $n$ and $k$. By the uniqueness of the de Finetti mixing measure, this identifies the Polya urn's mixing distribution as $p(\theta)=1$ on $(0,1)$, i.e., $\theta\sim\text{Beta}(1,1)=\text{Uniform}(0,1)$. Conditional on $\theta$, the draws behave exactly like i.i.d. Bernoulli($\theta$) trials, and $\theta=\lim_{n\to\infty}K_n/n$, the limiting proportion of red draws, is itself a random variable whose distribution, induced entirely by the urn's combinatorics, is uniform on $(0,1)$: the Polya urn is a fully constructive mechanism realizing de Finetti's theorem, with an explicit, non-degenerate prior.
+
+Numeric confirmation, simulating the urn directly rather than assuming the limit:
+```{r}
+set.seed(42)
+simulate_polya <- function(steps) {
+  red <- 1; blue <- 1; y <- numeric(steps)
+  for (i in 1:steps) {
+    tot <- red + blue
+    if (runif(1) < red/tot) { y[i] <- 1; red  <- red  + 1 }
+    else                    { y[i] <- 0; blue <- blue + 1 }
+  }
+  mean(y)
+}
+theta_sim <- replicate(5000, simulate_polya(500))
+c(mean = mean(theta_sim), sd = sd(theta_sim))   # Uniform(0,1): mean 0.5, sd 1/sqrt(12) = 0.289
+hist(theta_sim, breaks = 30, main = "Limiting proportion of red draws", xlab = expression(theta))
+```
+The simulated mean and standard deviation closely match the Uniform$(0,1)$ values ($0.5$ and $0.289$), and the histogram is visibly flat, confirming the mixing measure identified analytically in part (e).
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Lung Disease
+Chronic obstructive pulmonary disease (COPD) is a common lung disease characterized by difficulty in breathing. A substantial proportion of COPD patients admitted to emergency medical facilities are released as outpatients. A randomized, double-blind, placebo-controlled study examined the incidence of relapse in COPD patients released as outpatients as a function of whether the patients received treatment with corticosteroids. A total of 147 patients were enrolled in the study and were randomly assigned to treatment or placebo group on discharge from an emergency facility. Seven patients were lost from the study prior to follow-up. For the remaining 140 patients, the table below summarizes the primary outcome of the study, relapse within 30 days of discharge.
+
+|           | Relapse | No Relapse | Total |
+| :-------- | :------ | :--------- | :---- |
+| Treatment | 19      | 51         | 70    |
+| Placebo   | 30      | 40         | 70    |
+| Total     | 49      | 91         | 140   |
+|           |         |            |       |
+
+a)  Let $Y_1$ and $Y_2$ be the number of patients who relapse in the treatment and placebo groups, respectively. Assume $Y_1$ and $Y_2$  are independent Binomial(70,$\theta_i$ ) distributions, for $i=1,2$. Assume $\theta_1$ and $\theta_2$ have independent Beta prior distributions with shape parameters 1/2 and 1/2 (this is the Jeffreys prior distribution). Find the joint posterior distribution for $\theta_1$ and $\theta_2$. Name the distribution type and its hyperparameters.
+a) Generate 5000 random pairs $(\theta_1, \theta_2)$, $k=1,\ldots,5000$ from the joint posterior distribution. Use this random sample to estimate the posterior probability that the rate of relapse is lower for treatment than for placebo. Discuss your results.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The prior distribution for each condition is $Beta(1/2,1/2)$. Therefore, the posterior distributions for $\theta_1$ and $\theta_2$ are Beta distributions with parameters and quantiles as shown below.
+```{r}
+# Study results
+k.trt=19    # Number of relapses in treatment group
+n.trt=70    # Number of patients in treatment group
+k.ctl=30    # Number of relapses in control group
+n.ctl=70    # Number of patients in control group
+
+#Prior hyperparameters
+alpha.0 =0.5
+beta.0=0.5
+
+# The joint posterior distribution is the product of two independent beta
+# distributions with posterior hyperparameters as shown below
+alpha.trt=alpha.0 + k.trt
+beta.trt=beta.0 + n.trt-k.trt
+alpha.ctl=alpha.0 + k.ctl
+beta.ctl=beta.0 + n.ctl-k.ctl
+
+# Posterior credible intervals
+trt.intrv=qbeta(c(0.025,0.975),alpha.trt,beta.trt)
+ctl.intrv=qbeta(c(0.025,0.975),alpha.ctl,beta.ctl)
+
+d = data.frame(treatment=c(alpha.trt,beta.trt,trt.intrv), control=c(alpha.ctl,beta.ctl,ctl.intrv), row.names=c("alpha","beta","2.5%","97.5%"))
+knitr::kable(t(d))
+```
+
+It is important to remember that the joint density or mass function is a function of all the random variables.
+Because $\theta_1$  and $\theta_2$  are independent and the $Y_i$ are independent conditional on the $\theta_i$, the two posterior distributions are independent. We can see this by writing out the joint distribution of the parameters and observations:
+$$
+Bin(x_1|\theta_1,70)Bin(x_2|\theta_2,70)Be(\theta_1|\tfrac{1}{2},\tfrac{1}{2})Be(\theta_2|\tfrac{1}{2},\tfrac{1}{2}) \propto \theta_1^{19-1/2}(1-\theta_1)^{51-1/2}\,\theta_2^{30-1/2}(1-\theta_2)^{40-1/2}
+$$
+This is proportional to the product of two Beta density functions, the first with parameters (19.5,51.5), and the second with parameters (30.5,40.5).
+
+Conditional on the observations, $\theta_1$  and $\theta_2$  are independent Beta random variables. The
+marginal distribution of $\theta_1$ is Beta(19.5, 51.5) and the marginal distribution of $\theta_2$ is
+Beta(30.5, 40.5).
+
+The joint density function is the product of the individual density functions (remember that if $n$ is an integer, $n! = \Gamma(n+1))$ and $B(\alpha, \beta) = \Gamma(\alpha)\Gamma(\beta)/\Gamma(\alpha+\beta)$
+$$
+Be(\theta_1|20,52)Be(\theta_2\mid 31,41) = \dfrac{\Gamma(20+52)}{\Gamma(20)\Gamma(52)}\theta_1^{19}(1-\theta_1)^{51}\dfrac{\Gamma(31+41)}{\Gamma(31)\Gamma(41)}\theta_2^{30}(1-\theta_2)^{40}
+$$
+A plot of the two posterior density functions is shown below. The 95% credible intervals are shown on the plot as vertical lines
+```{r}
+curve(dbeta(x,19.5,51.5),0,0.6,ylab="Density",lty=2,ylim=c(0,8))
+curve(dbeta(x,30.5,40.5),0,0.6,add=TRUE)
+abline(v=trt.intrv,lty=2, lwd=0.5)
+abline(v=ctl.intrv,lty=2, lwd=0.5)
+```
+
+To visualize the joint density function of $\theta_1$  and $\theta_2$, we can do a surface or contour plot (you were not required to do this).
+The joint density function is a function of two variables, $\theta_1$  and $\theta_2$. To visualize the joint density function, we need either a surface plot or a contour plot (you were not required to do this). A surface plot is shown below.
+
+```{r}
+gs<-200        # grid size
+theta.t<-seq(0.25,0.6,length=gs)   # treatment mean
+theta.c<-seq(0.1,0.45 ,length=gs)  # control mean
+
+dens<-matrix(0,gs,gs)             # density function
+for(i in 1:gs) {
+  dens[i,]=dbeta(theta.t[i],alpha.trt,beta.trt) * dbeta(theta.c,alpha.ctl,beta.ctl)
+}
+
+# Perspective plot
+
+persp(theta.t,theta.c,dens,theta=30,phi=5,xlab="Treatment Relapse Prob",
+      ylab="Control Relapse Prob",zlab="Probability Density",
+      xlim=theta.t[c(1,gs)] ,ylim=theta.c[c(1,gs)],
+      main="3D Plot of Joint Density for Treatment and Control Relapse Probs")
+```
+
+The posterior mean relapse probability for the treatment group is 19.5/71x100% = 27.5%. A 95% symmetric tail area credible interval is [17.8%, 38.3%]. The posterior mean relapse probability for the control group is 30.5/71x100% = 43.0%. A 95% symmetric tail area credible interval is [31.7%, 54.5%].
+
+About 1/4 of the treatment patients relapsed, whereas almost half the control patients relapsed. Most of the posterior density function for the treatment group lies below most of the posterior density function for the control group, but the 95% credible intervals for the two parameters overlap somewhat (you were not required to compute credible intervals). While this analysis suggests that treatment lowers the relapse probability, it does not provide a statistical basis for concluding that it does.
+
+b) The joint posterior distribution is Beta(19.5,51.5)Beta(30.5, 40.5). That is, $\theta_1$  and $\theta_2$ are independent Beta random variables with shape parameters as given in the table above. To sample from this joint distribution, we can draw 5000 random samples from each of these Beta distributions
+```{r}
+set.seed(92) # Kuzy
+nsample=5000
+treat = rbeta(nsample,19.5,51.5)
+contr = rbeta(nsample,30.5,40.5)
+
+diff=treat-contr     # Estimate of difference in relapse probs
+efficacious = diff>0  # If treat > control
+prob.efficacious=sum(efficacious)/nsample
+sd.probefficacious = sd(efficacious)/sqrt(nsample)
+
+#Posterior quantiles, mean and standard deviation of the difference in 
+#relapse rates between treatment and control
+quantile(diff,c(0.05,0.5,0.95))
+mean(diff)
+sd(diff)
+
+#Density Function for Difference in Treatment and Control Relapse Probabilities
+plot(density(diff),main="Kernel Density Estimator",xlab="Difference in Treatment and Control Probabilities",ylab="Posterior Probability Density")
+```
+
+The analysis above provides evidence that there is a lower relapse probability in the treatment than in the control group. We estimate a 97.2% probability that the treatment has a lower relapse probability. The mean of the posterior distribution of the difference in relapse probabilities is approximately 0.155, and an approximate 90% credible interval for the difference in relapse rates is [0.021, 0.287].
+
+:::
+:::
+
+
+::: {#exr-}
+## Normal-Normal (Capstone)
+Concentrations of the pollutants aldrin and hexachlorobenzene (HCB) in nanograms per liter were measured in ten surface water samples, ten mid-depth water samples, and ten bottom samples from the Wolf River in Tennessee. The samples were taken downstream from an abandoned dump site previously used by the pesticide industry. The full data set can be found at http://www.biostat.umn.edu/~lynn/iid/wolf.river.dat. For this problem, we consider only HCB measurements taken at the bottom and the surface. The question of interest is whether the distribution of HCB concentration depends on the depth at which the measurement was taken. The data for this problem are given below.
+
+| Surface | Bottom |
+| :------ | :----- |
+| 3.74    | 5.44   |
+| 4.61    | 6.88   |
+| 4.00    | 5.37   |
+| 4.67    | 5.44   |
+| 4.87    | 5.03   |
+| 5.12    | 6.48   |
+| 4.52    | 3.89   |
+| 5.29    | 5.85   |
+| 5.74    | 6.85   |
+| 5.48    | 7.16   |
+
+Assume the observations are independent normal random variables with unknown depth-specific means $\theta_s$ and $\theta_b$ and precisions $\rho_s  = 1/\sigma^2_s$ and $\rho_b = 1/\sigma_b^2$. Assume independent improper reference priors for the surface and bottom parameters:
+$$
+g(\theta_s,\theta_b ,\rho_s,\rho_b ) = g(\theta_s,\rho_s)g(\theta_b ,\rho_b) \propto \rho_s^{-1}\rho_b^{-1}.
+$$
+
+a) This prior can be treated as the product of two normal-gamma priors with $\mu_s = \mu_b = 0$, $\sigma_s \rightarrow 0$ and $\sigma_b \rightarrow 0$, $a_s = a_b = -1/2$, and $b_s = b_b \rightarrow 0$. (These are not valid normal-gamma distributions, but you can use the usual Bayesian conjugate updating rule to find the posterior distribution.) Find the joint posterior distribution for the parameters $(\theta_s,\theta_b,\rho_s,\rho_b)$. Find 90% posterior credible intervals for $(\theta_s,\theta_b,\rho_s,\rho_b)$. Comment on your results.
+b) Use direct Monte Carlo to sample 10,000 observations from the joint posterior distribution of $(\theta_s,\theta_b,\rho_s,\rho_b)$. Use your Monte Carlo samples to estimate 90% posterior credible intervals for all four parameters. Compare with the result of part a.
+c) Use your direct Monte Carlo sample to estimate the probability that the mean bottom concentration $\theta_b$ is higher than the mean surface concentration $\theta_s$ and to estimate the probability that the standard deviation $\sigma_b$ of the bottom concentrations is higher than the standard deviation $\sigma_s$ of the surface concentrations.
+d) Comment on your analysis. What are your conclusions about the distributions of surface and bottom concentrations? Is the assumption of normality reasonable? Are the means different for surface and bottom? The standard deviations?
+e) Find the predictive distribution for the sample mean of a future sample of size 10 from the surface and a future sample of size 10 from the bottom. Find 95% credible intervals on the sample mean of each future sample. Repeat for future samples of size 40. Compare your results and discuss.
+f) Use direct Monte Carlo to estimate the predictive distribution for the difference in the two sample means for 10 future surface and bottom samples. Plot a kernel density estimator for the density function for the difference in means. Find a 95% credible interval for the difference in the two sample means. Repeat for future samples of 40 surface and 40 bottom observations. Comment on your results.
+g) Repeat part e, but use a model in which the standard deviation is known and equal to the sample standard deviation, and the depth-specific means $\theta_s$ and $\theta_b$ have a uniform prior distribution. Compare the 95% credible intervals for the future sample means for the known and unknown standard deviation models. Discuss.
+h) Assume that experts have provided the following prior information based on previous studies.
+- The unknown means $\theta_s$ and $\theta_b$ are independent and normally distributed with mean $\mu$ and standard deviation $\tau$. The unknown precisions $\rho_s$ and $\rho_b$ are independent of $\theta_s$ and $\theta_b$ and have gamma distributions with shape $a$ and scale $b$.
+- Experts specified a 95% prior credible interval of [3, 9] for $\theta_s$ and $\theta_b$. A good fit to this credible interval is obtained by setting the prior mean to $\mu =6$ and the prior standard deviation to $\tau=1.5$.
+- A 95% prior credible interval of [0.75, 2.0] is given for the unknown standard deviations $\Sigma_s$ and $\Sigma_b$. This translates to a credible interval of [0.25, 1.8] for $\rho_s = \Sigma_s^{-2}$ and $\rho_b = \Sigma_b^{-2}$. A good fit to this credible interval is obtained by setting the prior shape to $a = 4.5$ and the prior scale to $b = 0.19$. 
+Find the following conditional distributions: $p(\theta_s \mid D,\theta_b,\rho_s,\rho_b)$, $p(\theta_b \mid D,\theta_s,\rho_s,\rho_b)$, $p(\rho_s \mid D,\theta_s,\theta_b,\rho_b)$, $p(\rho_b \mid D, \theta_s,\theta_b,\rho_s)$
+i) Using the distributions you found, draw 10,000 Gibbs samples of $(\theta_s,\theta_b,\rho_s,\rho_b)$. Estimate 90% credible intervals for $(\theta_s,\theta_b,\rho_s^{-1/2},\rho_b^{-1/2})$ and $\theta_b-\theta_s$.
+j) Do a traceplot of $\theta_b-\theta_s$. Find the autocorrelation function of $\theta_b-\theta_s$ and the effective sample size for your Monte Carlo sample for $\theta_b-\theta_s$.
+k) Comment on your results. Compare with parts a, b, and c.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+a) The joint posterior distribution for the parameters $(\theta_s,\theta_b,\rho_s,\rho_b)$ is the product of an improper prior density for the surface parameters times an improper prior density for the bottom parameters. The joint posterior density is proportional to the joint prior density times the surface and bottom likelihood functions:
+$$
+g(\theta_s,\theta_b ,\rho_s,\rho_b \mid x_s,x_b) \propto g(\theta_s,\rho_s)g(\theta_b ,\rho_b) g(x_s \mid \theta_s,\rho_s)g(x_b \mid \theta_b,\rho_b) 
+$$
+
+The first two factors are proportional to the posterior density of the surface parameters; the second two factors are proportional to the posterior density of the bottom parameters. Therefore, the surface and bottom parameters are independent given the data with joint posterior density:
+$$
+g(\theta_s,\theta_b ,\rho_s,\rho_b \mid x_s,x_b) \propto g(\theta_s,\rho_s \mid x_s)g(\theta_b ,\rho_b \mid x_b)
+$$
+We will calculate the posterior distributions for the surface and bottom parameters in turn.
+
+The prior density for the surface parameters is $g(\theta_s,\rho_s) \propto \rho_s^{-1}$
+
+This is the limit of the density function for a normal-gamma conjugate prior distribution. We use the Normal-Normal-Gamma update rules. The prior is given by
+$$
+g(\theta,\rho \mid \nu,\mu,a,b) = \sqrt{\frac{\nu\rho}{2\pi}} \exp\left(-\frac{\nu\rho}{2}(\theta-\mu)^2\right) \frac{b^a}{\Gamma(a)}\rho^{a-1}e^{-b\rho}
+$$
+
+
+For prior parameters 
+$\mu_0 =0 ,\, \nu=0,\, \alpha=-0.5 ,\, \beta=0$, the posterior values are 
+$$
+\frac{\nu\mu_0+n\bar{x}}{\nu+n} ,\, \nu+n,\, \alpha+\frac{n}{2},
+\beta + \tfrac{1}{2} \sum_{i=1}^n (x_i - \bar{x})^2 + \frac{n\nu}{\nu+n}\frac{(\bar{x}-\mu_0)^2}{2}
+$$
+Pluggin-in our values $n=10$ and $\bar{x}=4.8$, we get the posterior values for the Surface
+$$
+\mu^* = \frac{0+10*4.8}{0+10} = 4.8 ,\, \nu^* = 0+10=10,\, \alpha^* = -0.5+\frac{10}{2} = 4.5, \, \beta^* = 0 + \tfrac{1}{2} \sum_{i=1}^{10} (x_i - 4.8)^2 = 1.794
+$$
+```{r}
+s = c(3.74,4.61,4.00,4.67,4.87,5.12,4.52,5.29,5.74,5.48)
+b = c(5.44,6.88,5.37,5.44,5.03,6.48,3.89,5.85,6.85,7.16)
+print(mean(s))
+print(mean(b))
+print(0.5*sum((s - mean(s))^2))
+print(0.5*sum((b - mean(b))^2))
+```
+
+Similar calculations for the bottom parameters give us the posterior values
+$$
+\mu^*=\frac{0+10*5.84}{0+10} = 5.84,~ \nu^* = 0+10=10,\, \alpha^* = -0.5+\frac{10}{2} = 4.5, \, \beta^* = 0 + \tfrac{1}{2} \sum_{i=1}^{10} (x_i - 5.84)^2 = 4.627
+$$
+
+To summarise, we have:
+
+|         | $\mu^*$ | $\nu^*$ | $\alpha^*$ | $\beta^*$ |
+| :------ | :------ | :------ | :--------- | :-------- |
+| surface | 4.8     | 10      | 4.5        | 1.794     |
+| bottom  | 5.84    | 10      | 4.5        | 4.627     |
+
+
+The marginal distribution for $\theta_s$ is nonstandard $t$ with center 4.80, spread $1/\sqrt{\nu^*\alpha^*/\beta^*} = 0.20$, and degrees of freedom 9. The marginal distribution for $\theta_s$ is nonstandard $t$ with center 5.84, spread $1/\sqrt{\nu^*\alpha^*/\beta^*} = 0.32$, and degrees of freedom 9. Using the quantiles of the t distribution
+
+```{r}
+qgamma(c(0.05,0.95),4.5,1.794) # marginal posterior for \rho_s
+qgamma(c(0.05,0.95),4.5,4.627) # marginal posterior for \rho_b
+4.8 + c(-1,1)*1.833*(1/sqrt(10*4.5/1.794)) # marginal posterior for \theta_s
+5.84 + c(-1,1)*1.833*(1/sqrt(10*4.5/4.627)) # marginal posterior for \theta_b
+```
+b) 
+```{r}
+set.seed(92) # Kuzy
+# Direct Monte Carlo
+numsim=5000
+rhos=rgamma(numsim,4.5,1.794)
+rhob=rgamma(numsim,4.5,4.627)
+thetas=rnorm(numsim,4.8,1/sqrt(10*rhos))
+thetab=rnorm(numsim,5.84,1/sqrt(10*rhob))
+
+
+# Monte Carlo quantiles
+quantile(rhos,c(0.05,0.95))
+quantile(rhob,c(0.05,0.95))
+quantile(thetas,c(0.05,0.95))
+quantile(thetab,c(0.05,0.95))
+```
+c) 
+```{r}
+# Estimate probability that bottom concentration is larger
+sum(thetab>thetas)/numsim        # Estimated prob bottom mean is larger
+sd(thetab>thetas)/sqrt(numsim)   # Standard error of estimate
+quantile(thetab-thetas, c(0.05,0.95))  # 90% credible interval
+
+# Estimate probability that bottom  precision is smaller
+sum(rhob>rhos)/numsim        # Estimated prob bottom precision is larger
+sd(rhob>rhos)/sqrt(numsim)   # Standard error of estimate
+quantile(rhob-rhos, c(0.05,0.95))  # 90% credible interval
+
+# Estimate probability that bottom standard deviation is larger
+sigmab=1/sqrt(rhob)         # bottom standard deviation
+sigmas=1/sqrt(rhos)         # surfact standard deviation
+sum(sigmab>sigmas)/numsim    # Estimated prob bottom std dev is larger
+sd(sigmab>sigmas)/sqrt(numsim)   # Standard error of estimate
+quantile(sigmab-sigmas, c(0.05,0.95))  # 90% credible interval
+```
+d) The results provide strong evidence that the mean HCB concentration in the bottom samples is larger than the mean HCB concentration in the surface samples. There is also evidence that the surface concentrations may have less variation around the mean than the bottom observations, but because of the small sample size, more evidence is needed to make a definitive assessment of whether the standard deviations are different.
+The $p$-value is 0.93 for the surface observations and 0.53 for the bottom observations, which does not reject the hypothesis of normality. Therefore, it
+seems reasonable to proceed with the assumption that the observations are normally distributed.
+
+```{r}
+#| layout-ncol: 2
+qqnorm(s,main="Normal Q-Q Plot for Surface Data"); qqline(s)
+qqnorm(b,main="Normal Q-Q Plot for Bottom Data"); qqline(b)
+```
+
+e) The posterior-predictive for the sample mean for Normal-Gamma of size $m$ is $t$ distribution with mean $\mu^*$ and spread
+$$
+\dfrac{1}{\sqrt{\dfrac{\nu^*m}{\nu^*+m}\alpha^*/\beta^*}}
+$$
+and degrees of freedom $m-1$. For $m=10$ and the posterior parameters of the surface  data, we have spread
+$$
+\dfrac{1}{\sqrt{\dfrac{10*10}{10+10}*4.5/1.794}} = 0.28
+$$
+```{r}
+ss10 = 1/sqrt(100/20*4.5/1.794)
+sprintf("Spread for surface data with m=10: %.2f",ss10)
+```
+for $m=40$, we have spread
+```{r}
+ss40 = 1/sqrt(400/50*4.5/1.794)
+sprintf("Spread for surface data with m=40: %.2f",ss40)
+```
+For the bottom data, we have spread
+```{r}
+sb10 = 1/sqrt(100/20*4.5/4.627)
+sprintf("Spread for bottom data with m=10: %.2f",sb10)
+sb40 = 1/sqrt(400/50*4.5/4.627)
+sprintf("Spread for bottom data with m=40: %.2f",sb40)
+```
+Now we can calculate 95% credible intervals for the sample mean of each future sample
+```{r}
+4.8+ss10*qt(c(0.025,0.975),9)
+4.8+ss40*qt(c(0.025,0.975),9)
+5.839+sb40*qt(c(0.025,0.975),9)
+5.839+sb10*qt(c(0.025,0.975),9)
+```
+
+As we would expect, the intervals for m=40 are entirely contained within the intervals for m=10, and the intervals for the posterior mean (computed above) lie entirely within the intervals for the corresponding sample means. This is because the posterior mean intervals include uncertainty only about the surface and bottom mean, whereas the intervals in this assignment include uncertainty about both the true means and the observations. The sample mean for 40 observations has less uncertainty than the sample mean for 10 observations. The intervals for surface and bottom sample means overlap more for m=10 than for m=40, and both have more overlap than the posterior mean intervals.
+
+f) 
+We do this two different ways and verify that they give the same results to within sampling error. First draw samples of Theta and Rho, draw ssize observations,  compute the sample mean, and average.
+```{r}
+set.seed(92) # Kuzy
+numsim=10000
+ssize=10
+rhob=rgamma(numsim,4.5,4.627) # sample b precision
+thetab=rnorm(numsim,5.84,1/sqrt(10*rhob))     # sample b precision
+rhos=rgamma(numsim,4.5,1.794) # sample s mean
+thetas=rnorm(numsim,4.8,1/sqrt(10*rhos))     # sample surface mean
+diff = 0     # Difference in sample means - initialize to 0
+dd=0
+for (i in 1:ssize) {
+  diff = diff + 
+    rnorm(numsim,thetab,1/sqrt(rhob)) -    # sample bottom observation
+    rnorm(numsim,thetas,1/sqrt(rhos))      # sample surface observation and subtrace
+  }
+diff = diff / ssize    # Calculate average - divide sum by number of observations
+
+quantile(diff, c(0.025,0.975))   # quantiles
+plot(density(diff),              # kernel density plot
+     main=paste("Density for Difference in Sample Means for m =",ssize))
+
+```
+
+We can also sample from the t distribution (need two independent samples one for surface and one for bottom)
+
+```{r}
+diff1 = 5.84 + rt(numsim,2*4.5)*ss10 -
+  4.8 + rt(numsim,2*4.5)*sb10 
+quantile(diff1,c(0.025,0.975))  # Compare with quantiles from full sampling method
+```
+
+
+g)
+```{r}
+# Known standard deviation model
+
+mu0=0           # prior mean for theta is 0
+tau0=Inf        # prior SD of theta is infinite
+
+sigmas = sd(s) # observation SD is assumed known and equal to sample SD
+sigmab = sd(b) # observation SD is assumed known and equal to sample SD
+n=10
+mus.star =      # Posterior mean for surface
+  (mu0/tau0^2 + sum(s)/sigmas^2)/(1/tau0^2+n/sigmas^2)
+taus.star =     # Posterior SD of surface mean
+  (1/tau0^2+n/sigmas^2)^(-1/2)
+mub.star =      # Posterior mean for bottom
+  (mu0/tau0^2 + sum(b)/sigmab^2)/(1/tau0^2+n/sigmab^2)  
+taub.star =     # Posterior SD of surface mean
+  (1/tau0^2+n/sigmab^2)^(-1/2)
+
+sprintf("Posterior mean for surface: %.2f",mus.star)
+sprintf("Posterior mean for bottom: %.2f",mub.star)
+
+# Predictive intervals
+
+qnorm(c(0.025,0.975),    # Surface, sample size 10
+      mus.star,sqrt(taus.star^2 + sigmas^2/10))
+qnorm(c(0.025,0.975),    # Surface, sample size 40
+      mus.star,sqrt(taus.star^2 + sigmas^2/40))
+qnorm(c(0.025,0.975),    # Surface, sample size 10
+      mub.star,sqrt(taub.star^2 + sigmab^2/10))
+qnorm(c(0.025,0.975),    # Surface, sample size 40
+      mub.star,sqrt(taub.star^2 + sigmab^2/40))
+
+
+# Kernel density plot
+plot(density(diff),main=paste("Density for Difference in Sample Means"))
+```
+
+:::
+:::
+
+::: {#exr-poisson}
+## Gibbs: Bird Feeders (Capstone)
+A biologist counts the number of sparrows visiting six bird feeders placed on a given day.
+
+| Feeder | Number of Birds |
+| :----- | :-------------- |
+| 1      | 11              |
+| 2      | 22              |
+| 3      | 13              |
+| 4      | 24              |
+| 5      | 19              |
+| 6      | 16              |
+|        |                 |
+
+ - Assume that the bird counts are independent Poisson random variables with feeder- dependent means $\lambda_i$, for $i=1,\ldots,6$.
+ - Assume that the means $\lambda_i$ are independent and identically distributed gamma random variables with shape $a$ and scale $b$ (or equivalently, shape $a$ and mean $m = ab$)
+ - The mean $m = ab$ of the Gamma distribution is uniformly distributed on a grid of 200 equally spaced values starting at 5 and ending at 40.
+ - The shape $a$ is independent of the mean $m$ and has a distribution that takes values on a grid of 200 equally spaced points starting at 1 and ending at 50, with prior probabilities proportional to a gamma density with shape $1$ and scale $5$.
+
+a) Use Gibbs sampling to draw 10000 samples from the joint posterior distribution of the mean $m$, the shape parameter $a$, and the six mean parameters $\lambda_i$, $i=1,\ldots,6$, conditional on the observed bird counts. Using your sample, calculate 95% credible intervals for the mean m, the shape a, and the six mean parameters $\lambda_i$, $i=1,\ldots,6$.
+a) Find the effective sample size for the Monte Carlo samples of the mean m, the shape parameter a, and the
+six mean parameters $\lambda_i$, $i=1,\ldots,6$.
+a) Do traceplots for the mean m, the shape parameter a, and the six rate parameters $\lambda_i$, $i=1,\ldots,6$.
+a) The fourth feeder had the highest bird count, and the first feeder had the lowest bird count. Use your Monte Carlo sample to estimate the posterior probability that the first feeder has a smaller mean bird count than the fourth feeder. Explain how you obtained your estimate.
+a) Discuss your results.
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+A plate diagram for this problem is shown at the right.
+Gibbs sampling on this model can be done as follows:
+
+1. Initialize $m^{(0)}$ and $\alpha^{(0)}$. Any initial values will do, but I used the empirical Bayes estimates $m^{(0)}=17.5$ (average of the observations) and $\alpha^{(0)}=11.82$ (square of mean of observations divided by variance of observations). I did not initialize the $\lambda_{i}$ because they are sampled before they are needed.
+2. For $k=1, \ldots, 10{,}000$:
+a. For $i=1, \ldots, 6$:
+
+- Calculate the posterior shape $\alpha_{i}^{*}=\left(\alpha^{(k-1)}+\right.$ $Y_{i}$ ) for the $i^{\text {th }}$ feeder.
+- Calculate the posterior scale $\beta_{i}{ }^{*}=\left(m^{(k-1)} / \alpha_{i}^{(k-}\right.\left.{ }^{1)}+1\right)^{-1}$ for the $i^{\text {th }}$ feeder.
+
+![Feeder Diagram](fig/feeder-diagram.jpg){fig-align="center"} 
+
+
+
+- Simulate $\lambda_{i}{ }^{(k)}$ from a gamma distribution with shape $\alpha_{i}^{*}$ and scale $\beta_{i}^{*}$.
+b. Find the conditional distribution for $m$ given $\alpha^{(k-1)}$ and $\lambda_{i}{ }^{(k)}, i=1, \ldots, 6$. To do this, find the prior times likelihood for each possible value of $m$. Because the prior is uniform, this is the product of the six Gamma likelihoods. Then divide by sum of prior times likelihood. So for each possible value of $m$ :
+- Calculate the six gamma likelihoods $g\left(\lambda_{i}^{(k)} \mid \alpha^{(k-1)}, \alpha^{(k-1)} / m\right)$ evaluated at the current estimate $\lambda_{i}^{(k)}$ with shape $\alpha^{(k-1)}$ and scale $\alpha^{(k-1)} / m$.
+- Multiply these six gamma likelihoods: $l(m)=\Pi_{i} g\left(\lambda_{i}^{(k)} \mid \alpha^{(k-1)}, \alpha^{(k-1)} / m\right)$. Then normalize these values to obtain a probability distribution $p(m)=l(m) /\left(\Sigma_{m^{\prime}} l\left(m^{\prime}\right)\right)$ and sample a new value $m^{(k)}$ with probability $p(m)$.
+c. Find the conditional distribution for $\alpha$ given $m^{(k)}$ and $\lambda_{i}^{(k)}, i=1, \ldots, 6$. To do this, find the prior times likelihood for each possible value of $\alpha$ and normalize to sum to 1 . For each possible value of $\alpha$ :
+- Calculate the six Gamma likelihoods $g\left(\lambda_{i}^{(k)} \mid \alpha, \alpha / m^{(k)}\right)$ evaluated at the current estimate $\lambda_{i}^{(k)}$ with shape $\alpha$ and scale $\alpha / m^{(k)}$.
+- Multiply these six Gamma likelihoods: $l(\alpha)=g\left(\lambda_{i}^{(k)} \mid \alpha, \alpha / m^{(k)}\right)$
+- Multiply this by the prior to obtain prior times likelihood $l(\alpha) g(\alpha)$ where $g(\alpha)$ is the gamma prior density function.
+Then normalize these values to obtain a probability distribution $p(\alpha)=\frac{l(\alpha) / g(\alpha)}{\sum_{\alpha \prime} l(\alpha \prime) / g\left(\alpha^{\prime}\right)}$, and sample a new value $\alpha^{(k)}$ with probability $p(\alpha)$.
+
+3. The result of this process is the requested sample.
+
+R code for doing the sampling is available on Blackboard.
+The table below shows credible intervals calculated from the raw Gibbs samples and credible intervals from a thinned sample with interval 3 (that is, only every third sample is kept). The intervals are almost the same. Due to sampling variation, the intervals will be different each time the sampler is run but your results should be similar.
+
+| Parameter | Gibbs Interval <br> (raw) | Gibbs Interval <br> (thinned x3) |
+| :---: | :---: | :---: |
+| $m$ | $[12.74,27.34]$ | $[12.73,26.98]$ |
+| $\alpha$ | $[2.23,24.64]$ | $[2.23,24.32]$ |
+| $\lambda_{1}$ | $[7.61,19.92]$ | $[7.71,19.5]$ |
+| $\lambda_{2}$ | $[13.71,29.45]$ | $[13.92,29.45]$ |
+| $\lambda_{3}$ | $[8.81,21.55]$ | $[8.76,21.40]$ |
+| $\lambda_{4}$ | $[14.89,31.18]$ | $[14.96,31.13]$ |
+| $\lambda_{5}$ | $[12.12,26.78]$ | $[12.23,26.60]$ |
+| $\lambda_{6}$ | $[10.46,24.21]$ | $[10.48,24.08]$ |
+
+In general, thinning increases the variance of the estimator (because we are throwing away information), but has other advantages: (1) it reduces data storage; (2) it reduces computation for any post-processing of the Monte Carlo samples; (3) it allows use of data processing methods intended for independent and identically distributed data, without having to adjust for the correlation.
+
+It is also common to discard a burn-in sample when doing MCMC. I did not require either thinning or discarding a burnin sample.
+:::
+:::
+
+::: {#exr-poisson-epl}
+## Poisson Distribution for EPL
+We will analyze EPL data. Use `epl.R` as a starting script. This script uses `football-data.org` API to download the results for two EPL teams: Manchester United and Chelsea. Model the `GoalsHome` and `GoalsAway` for each of the teams using Poisson distribution. Given these distributions, calculate the following
+
+a) What's the probability of a nil-nil (0 - 0) draw?
+a) What's the probability that MU wins the match?
+a) Discuss how could you improve your model based on four Poisson distributions.
+a) Use `R` and random number simulation to provide empirical answers. Using a random sample of size N = 10,000, check and see how close you get to the theoretical answers you've found to the questions posed above. Provide histograms of the distributions you simulate.
+
+
+Hint: The difference of two Poisson random variables follows a Skellam distribution, defined in  `skellam` package. You can use `dskellam` to calculate the probability of a draw. You can use `rpois` to simulate draws from Poisson distribution.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Let $X \sim Pois(\lambda_1)$ and $Y \sim Pois(\lambda_2)$ be the goals scored by Home and Away teams.
+The probability of a nil-nil draw is $P(X=0, Y=0) = P(X=0)P(Y=0)$ assuming independence.
+$$
+P(X=0) = \frac{\lambda_1^0 e^{-\lambda_1}}{0!} = e^{-\lambda_1}
+$$
+$$
+P(Y=0) = e^{-\lambda_2}
+$$
+So $P(0-0) = e^{-(\lambda_1+\lambda_2)}$.
+
+b) The probability that MU (Home) wins is $P(X > Y)$.
+This can be computed by summing over cases:
+$$
+P(X > Y) = \sum_{k=1}^{\infty} P(X=k) P(Y < k) = \sum_{k=1}^{\infty} \frac{\lambda_1^k e^{-\lambda_1}}{k!} \sum_{j=0}^{k-1} \frac{\lambda_2^j e^{-\lambda_2}}{j!}
+$$
+Alternatively, using the Skellam distribution, let $D = X - Y$. $D \sim Skellam(\lambda_1, \lambda_2)$. We want $P(D > 0)$.
+
+c) Improving the model: 
+The model assumes constant rates $\lambda$. We could improve this by:
+- Modeling rates as functions of attack and defense strengths of each team (e.g., Dixon-Coles model).
+- Accounting for the dependencies between scores (bivariate Poisson) or inflation of low scores.
+- Using a hierarchical model to pool information across teams.
+
+d) Simulation in R:
+```{r}
+# Example hypothetical rates (since external script is not run)
+lambda_home = 1.8 
+lambda_away = 1.2 
+
+# Exact Probabilities for these rates
+prob_00 = dpois(0, lambda_home) * dpois(0, lambda_away)
+print(paste("Probability of 0-0:", round(prob_00, 4)))
+
+# Simulation
+set.seed(123)
+N = 10000
+sim_home = rpois(N, lambda_home)
+sim_away = rpois(N, lambda_away)
+
+sim_prob_00 = mean(sim_home == 0 & sim_away == 0)
+sim_prob_win = mean(sim_home > sim_away)
+
+print(paste("Simulated Prob 0-0:", sim_prob_00))
+print(paste("Simulated Prob Win:", sim_prob_win))
+
+# Histograms
+par(mfrow=c(1,2))
+hist(sim_home, main="Home Goals", col="lightblue", breaks=seq(-0.5, max(sim_home)+0.5, 1))
+hist(sim_away, main="Away Goals", col="lightcoral", breaks=seq(-0.5, max(sim_away)+0.5, 1))
+par(mfrow=c(1,1))
+```
+:::
+:::
+
+::: {#exr-}
+## Tarone Study
+@tarone1982use reports data from 71 studies on tumor incidence in rats
+
+a) In one of the studies, 2 out of 13 rats had tumors. Assume there are 20 possible tumor
+probabilities: $0.025, 0.075,\ldots, 0.975$. Assume that the tumor probability is uniformly distributed. Find the posterior distribution for the tumor probability given the data for this study.
+b) Repeat Part a for a second study in which 1 in 18 rats had a tumor.
+c) Parts a and b assumed that each study had a different tumor probability, and that these tumor
+probabilities were uniformly distributed a priori. Now, assume the tumor probabilities are the same for the two studies, and that this probability has a uniform prior distribution. Find the posterior distribution for the common tumor probability given the combined results from the two studies.
+d) Compare the three distributions for Parts a, b, and c. Comment on your results.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We assume that tumors occur independently, with a probability of $\Theta$ of a tumor in each rat in the study. Our data $X$ consist of observations on $N$ rats, in which we record which rats have tumors. We can use either of two methods to represent the likelihood of what we have observed:
+
+Method 1: We list, for each observation, whether or not the rat has a tumor. We multiply together the probability of getting the observation we obtained: $\Theta$ if the rat has a tumor, and 1-$\Theta$ if the rat does not have a tumor. If x out of n rats have tumors, the probability of observing this sequence of observations is $\Theta^k(1-\Theta)^{n-k}$. Using Method 1, the posterior distribution for $\Theta$ is given by:
+$$
+g (\theta | x ) = \dfrac{f ( x | \theta ) g (\theta )}{\sum_{i=1}^{20} f ( x | \theta_i ) g (\theta_i )} = \dfrac{\theta^x (1 - \theta )^{n- x}}{\sum_{i=1}^{20} \theta_i^x (1 - \theta_i )^{n - x}}
+$$
+
+Method 2: We count how many of the rats have tumors. We remember from our previous statistics class that if the tumors occur independently with probability $\Theta$, the number of rats with tumors out of a total of $n$ rats will have a Binomial distribution with parameters $n$ and $\Theta$. The probability of getting $k$ tumors is 
+$$
+C_n^k \theta^k (1 - \theta )^{n - k},\quad k = 0, 1, 2, ..., n,\quad \mathrm{where}\quad C_n^k = \dfrac{n!}{k!(n-k)!}
+$$
+Then, the posterior distribution for $\Theta$ is given by:
+$$
+g (\theta | x ) = \dfrac{f ( x | \theta ) g (\theta )}{\sum_{i=1}^{20} f ( x | \theta_i ) g (\theta_i )} = \dfrac{C_n^k \theta^x (1 - \theta )^{n - x}}{\sum_{i=1}^{20} C_n^k \theta_i^x (1 - \theta_i )^{n - x}}
+$$
+
+In Method 1, we are representing the likelihood of getting this exact sequence of observations. In Method 2, we are representing the likelihood of getting this number of tumors.
+
+It is clear that the two methods give the same posterior distribution, because the constant $C_n^k$ cancels out of the numerator and denominator of Bayes' rule. That is, the number of tumors is a sufficient statistic for $\Theta$, and the order in which the tumors occur is irrelevant.
+
+
+Part a. The posterior distribution for $\Theta_1$, the tumor probability in the first study, is:
+$$
+g (\theta | x =2) = \dfrac{\theta^2 (1 - \theta )^{11}}{\sum_{i=1}^{20} \theta_i^2 (1 - \theta_i )^{11}}
+$$
+
+```{r}
+#| layout-ncol: 2
+theta <- seq(0.025, 0.975, 0.05)
+prior <- rep(1/20, 20)
+tarone = function(n,k) {
+    likelihood <- theta^k * (1 - theta)^(n-k)
+    posterior <- likelihood * prior / sum(likelihood * prior)
+    print(knitr::kable(data.frame(theta, likelihood, posterior)))
+    barplot(posterior, names.arg = theta, xlab = expression(theta), ylab = "Pr(theta | X)")
+    return(posterior)
+}
+posta = tarone(13,2)
+```
+Part b. The posterior distribution for $\Theta_2$, the tumor probability in the second study, is: 
+$$
+g (\theta | x =2) = \dfrac{\theta (1 - \theta )^{17}}{\sum_{i=1}^{20} \theta_i(1 - \theta_i )^{17}}
+$$
+```{r}
+#| layout-ncol: 2
+postb  = tarone(18,1)
+```
+
+
+Part c. If the tumor probabilities are the same in the two studies, it is appropriate to treat them as a single study in which 3 rats out of 31 have a tumor. The posterior distribution for $\Theta$, the common tumor probability, is:
+$$
+g (\theta | x =2) = \dfrac{\theta^3 (1 - \theta )^{28}}{\sum_{i=1}^{20} \theta_i^3(1 - \theta_i )^{28}}
+$$
+```{r}
+#| layout-ncol: 2
+postc = tarone(31,3)
+```
+
+
+It is useful to verify that we get the same posterior distribution by using Method 2 to calculate the likelihood of the data. It is also useful to verify that we would get the same results in Part c if we used the posterior distribution from Part a as the prior distribution for Part c, and the likelihood from Part b as the likelihood for part c. That is, we would get the same result from a two-step process, in which we started with a uniform prior distribution, incorporated the results from the first study to obtain a posterior distribution, and then incorporated the results from the second study to get a new posterior distribution.
+
+Part d.
+We can compare the distributions more easily if we plot the prior distribution, the posterior distributions for the parameters of the two individual studies, and the combined posterior distribution together (see below). We see that the posterior distribution from the first study puts more probability on higher values of $\Theta$ than the posterior distribution for the second study. This is not surprising, because a higher proportion of rats in the first study had tumors. There is a great deal of overlap in the two distributions, which suggests that the two probabilities may be the same. Thus, it is reasonable to consider combining the two samples. If there had been very little overlap in the posterior distributions from Parts a and b, it would not have been reasonable to combine the studies. Later in the semester, we will look more carefully at the problem of when to combine probabilities and when to estimate them separately.
+When the studies are combined, the posterior distribution is narrower than the posterior distribution for either of the two individual studies, with less probability on very low and very high values of $\Theta$. Note that the combined distribution is consistent with both of the individual distributions, in the sense that it places high probability on values that also have high probability in the other two distributions. The combined distribution is more concentrated around values close to the combined sample proportion of about 1 in 10.
+```{r}
+allDist=rbind(prior,posta,postb,postc) 
+barplot(allDist,main="Prior and Posterior Distributions for TumorProbability",xlab="Theta",ylab="Probability", col=c("mediumpurple","lightblue","pink","lightgreen"), border=c("darkviolet","darkblue", "red","darkgreen"),names.arg=theta, legend=c("Prior","Study 1", "Study 2", "Both Studies"), beside=TRUE, ylim=c(0,0.4))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Poisson MLE vs Bayes
+You are developing tools for monitoring number of advertisemnt clicks on a website. You have observed the following data: 
+```{r}
+#| echo: true
+y = c(4,1,3,4,3,2,7,3,4,6,5,5,3,2,4,5,4,7,5,2)
+```
+which represents the number of clicks every minute over the last 20 minutes. You assume that the number of clicks per minute follows a Poisson distribution with parameter $\lambda$.
+
+a) Plot likelihood function for $\lambda$.
+b) Estimate $\lambda$ using Maximum Likelihood Estimation (MLE). MLE is the value of $\lambda$ that maximizes the likelihood function or log-likelihood function. Maximizing likelihood is equivalent to maximizing the log-likelihood function (log is a monotonically increasing function). 
+c) Using `barplot`, plot the predicted vs observed probabilities for number of clicks from 1 to 7. Is the model a good fit?
+d) Assume that you know that historically, the average number of clicks per minute is 4 and variance is also 4. Those numbers were calculated over a long period of time. You can use this information as a prior. Assume that the prior distribution is $Gamma(\alpha,\beta)$.  What would be appropriate values for $\alpha$ and $\beta$ that would represent this prior information?
+e) Find the posterior distribution for $\lambda$ and calculate the Bayesian estimate for $\lambda$ as the expectation over the posterior.
+f) After collecting data for a few days, you realized that about 20% of the observations are zero. How this information would change your prior distribution? This is an open-ended question.
+
+*Hint*: For part c, you can use the following code to calculate the predicted probabilities for the number of clicks from 1 to 7. 
+```{r, eval=FALSE}
+#| echo: true
+tb = table(y)
+observed = tb/length(y)
+predicted = dpois(1:7,lambda_mle)
+```
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+a)
+```{r}
+lambda = seq(0, 10, 0.1)
+likelihood = sapply(lambda, function(l) prod(dpois(y, l)))
+plot(lambda, likelihood, type = "l", xlab = expression(lambda), ylab = "Likelihood")
+```
+b)
+```{r}
+lambda_mle = optim(par = 1, fn = function(l) -sum(dpois(y, l, log = TRUE)))$par
+lambda_mle
+```
+Alternatively, the likelihood function is
+$$
+L(\lambda) = \prod_{i=1}^{n} \frac{\lambda^{y_i}e^{-\lambda}}{y_i!}
+$$
+and the log-likelihood function is
+$$
+\log L(\lambda) = \sum_{i=1}^{n} y_i \log(\lambda) - n\lambda
+$$
+The MLE is the value of $\lambda$ that maximizes the log-likelihood function. We can find the MLE by taking the derivative of the log-likelihood function with respect to $\lambda$ and setting it equal to zero. This gives
+$$
+\frac{d}{d\lambda} \log L(\lambda) = \frac{1}{\lambda} \sum_{i=1}^{n} y_i - n = 0
+$$
+Solving for $\lambda$ gives
+$$
+\lambda = \frac{1}{n} \sum_{i=1}^{n} y_i.
+$$
+A simple average of the data gives the MLE for $\lambda$.
+
+```{r}
+mean(y)
+```
+c)
+```{r}
+pred = table(y)/length(y)
+poisson = dpois(1:7,lambda_mle)
+d = cbind(pred, poisson)
+barplot(t(d),names.arg=1:7, xlab = "Clicks", ylab = "Frequency", beside = TRUE)
+```
+d)  We know that $E(X) = \alpha/\beta = 4$ and $Var(X) = \alpha/\beta^2 = 4$. For example, $\alpha = 4$ and $\beta = 1$ would match the historical data.
+e)
+```{r}
+alpha = 4
+beta = 1
+alphas = alpha + sum(y)
+betas = beta + length(y)
+lambda_bayes = alphas/betas
+knitr::kable(data.frame(alpha = alphas, beta = betas, lambda_bayes = lambda_bayes))
+```
+f) We can use a mixture prior with one component concentrated around zero and another component concentrated around the mean that is calculated by removing zeroes from the data. The component weights are 0.2 and 0.8 respectively.
+
+:::
+:::
+
+
+::: {#exr-}
+## Exponential Distribution
+Let $x_1, x_2,\ldots, x_N$ be an independent sample from the exponential distribution with density $p (x | \lambda) = \lambda\exp (-\lambda x)$, $x \ge 0$, $\lambda> 0$. Find the maximum likelihood estimate $\lambda_{\text{ML}}$. Choose the conjugate prior distribution $p (\lambda)$, and find the posterior distribution $p (\lambda | x_1,\ldots, x_N)$ and calculate the Bayesian estimate for $\lambda$ as the expectation over the posterior.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The likelihood of the sample is
+$$
+L(\lambda) = \prod_{i=1}^N \lambda e^{-\lambda x_i} = \lambda^N \exp\left(-\lambda\sum_{i=1}^N x_i\right),
+$$
+so the log-likelihood is $\ell(\lambda) = N\log\lambda - \lambda\sum_{i=1}^N x_i$. Setting the derivative to zero,
+$$
+\frac{d\ell}{d\lambda} = \frac{N}{\lambda} - \sum_{i=1}^N x_i = 0 \quad\Longrightarrow\quad \lambda_{\text{ML}} = \frac{N}{\sum_{i=1}^N x_i} = \frac{1}{\bar x},
+$$
+and $d^2\ell/d\lambda^2 = -N/\lambda^2 < 0$, so this is indeed a maximum.
+
+As a function of $\lambda$, the likelihood $\lambda^N\exp(-\lambda\sum x_i)$ has the same form as a Gamma density, so the conjugate prior is
+$$
+\lambda \sim \text{Gamma}(\alpha,\beta), \qquad p(\lambda) = \frac{\beta^\alpha}{\Gamma(\alpha)}\lambda^{\alpha-1}e^{-\beta\lambda}, \quad \lambda>0.
+$$
+Multiplying prior and likelihood,
+$$
+p(\lambda\mid x_1,\ldots,x_N) \propto \lambda^{\alpha-1}e^{-\beta\lambda}\cdot \lambda^N e^{-\lambda\sum x_i} = \lambda^{\alpha+N-1}e^{-\lambda(\beta+\sum_{i=1}^N x_i)},
+$$
+which is the kernel of a Gamma density with updated hyperparameters:
+$$
+\lambda \mid x_1,\ldots,x_N \sim \text{Gamma}\left(\alpha+N,\ \ \beta+\sum_{i=1}^N x_i\right).
+$$
+The Bayesian estimate (posterior mean) is
+$$
+\E{\lambda\mid x_1,\ldots,x_N} = \frac{\alpha+N}{\beta+\sum_{i=1}^N x_i}.
+$$
+As $N\to\infty$ this converges to $1/\bar x = \lambda_{\text{ML}}$, since the data eventually swamp the fixed prior hyperparameters $\alpha,\beta$.
+
+Numeric check: simulate from an Exponential($\lambda=2$) and compare the MLE with the posterior mean under a Gamma(2,1) prior.
+```{r}
+set.seed(1)
+x = rexp(200000, rate = 2)
+lambda_ml = 1/mean(x)
+alpha0 = 2; beta0 = 1
+lambda_bayes = (alpha0 + length(x))/(beta0 + sum(x))
+c(MLE = lambda_ml, Bayes = lambda_bayes)
+```
+With this much data the prior is overwhelmed by the likelihood, and the two estimates agree to three decimal places.
+
+:::
+:::
+
+::: {#exr-}
+## Bernoulli Bayes
+We have $N$ Bernoulli trials with success probability in each trial being equal to $q$, we observed $k$ successes. Find the conjugate distribution $p (q)$. Find the posterior distribution $p (q | k, N)$ and its expectation.
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The likelihood of observing $k$ successes in $N$ independent Bernoulli($q$) trials is
+$$
+L(q) = q^k(1-q)^{N-k}, \qquad 0<q<1.
+$$
+As a function of $q$, this has the same form as a Beta density, so the conjugate prior is
+$$
+q \sim \text{Beta}(\alpha,\beta), \qquad p(q) = \frac{1}{B(\alpha,\beta)}q^{\alpha-1}(1-q)^{\beta-1}.
+$$
+Multiplying prior and likelihood,
+$$
+p(q\mid k,N) \propto q^{\alpha-1}(1-q)^{\beta-1}\cdot q^k(1-q)^{N-k} = q^{\alpha+k-1}(1-q)^{\beta+N-k-1},
+$$
+which is the kernel of a Beta density with updated hyperparameters:
+$$
+q\mid k,N \sim \text{Beta}(\alpha+k,\ \ \beta+N-k).
+$$
+The posterior expectation is
+$$
+\E{q\mid k,N} = \frac{\alpha+k}{\alpha+\beta+N}.
+$$
+With a uniform prior ($\alpha=\beta=1$) this reduces to Laplace's rule of succession, $(k+1)/(N+2)$, and as $N$ grows the posterior mean approaches the sample proportion $k/N$, the MLE for $q$. This is the same conjugate pair used in the Beta-Binomial exercises earlier in this problem set, written here for a general prior Beta$(\alpha,\beta)$, general sample size $N$, and general count $k$.
+
+Numeric check for $N=20$, $k=7$, and a Beta(2,3) prior: compare the closed-form posterior mean with one obtained by numerically integrating $q$ against the (unnormalized) posterior.
+```{r}
+N = 20; k = 7; a0 = 2; b0 = 3
+post_mean_formula = (a0 + k)/(a0 + b0 + N)
+kernel = function(q) q^(a0-1)*(1-q)^(b0-1)*q^k*(1-q)^(N-k)
+Z = integrate(kernel, 0, 1)$value
+post_mean_numeric = integrate(function(q) q*kernel(q), 0, 1)$value/Z
+c(formula = post_mean_formula, numeric = post_mean_numeric)
+```
+
+:::
+:::
+
+::: {#exr-}
+## Exponential Family (Gamma)
+Write density function of Gamma distribution in a standard exponential family form. Find $Ex$ and $E\log x$ by differentiating the normalizing constant.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The Gamma density with shape $\alpha>0$ and rate $\beta>0$ is
+$$
+p(x\mid\alpha,\beta) = \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha-1}e^{-\beta x}, \qquad x>0.
+$$
+Writing the power of $x$ inside the exponential,
+$$
+p(x\mid\alpha,\beta) = \exp\Big[(\alpha-1)\log x - \beta x - \big(\log\Gamma(\alpha) - \alpha\log\beta\big)\Big],
+$$
+which is in the standard exponential family form $p(x\mid\theta)=h(x)\exp(\eta(\theta)^\top T(x) - A(\theta))$ with
+
+- base measure $h(x) = 1$, $x>0$
+- sufficient statistic $T(x) = (\log x,\ x)$
+- natural parameter $\eta = (\eta_1,\eta_2) = (\alpha - 1,\ -\beta)$
+- log-partition function $A(\theta) = \log\Gamma(\alpha) - \alpha\log\beta$
+
+For an exponential family, differentiating the log-partition function (the log of the normalizing constant) with respect to the natural parameter recovers the moments of the sufficient statistic, $\partial A/\partial \eta_i = \E{T_i(x)}$. Since $\eta_1=\alpha-1$ and $\eta_2=-\beta$, we have $\partial/\partial\eta_1 = \partial/\partial\alpha$ and $\partial/\partial\eta_2 = -\partial/\partial\beta$, so
+$$
+\E{\log x} = \frac{\partial A}{\partial \alpha} = \frac{\partial}{\partial \alpha}\Big[\log\Gamma(\alpha) - \alpha\log\beta\Big] = \psi(\alpha) - \log\beta,
+$$
+where $\psi(\alpha) = d\log\Gamma(\alpha)/d\alpha$ is the digamma function, and
+$$
+\E{x} = -\frac{\partial A}{\partial \beta} = -\frac{\partial}{\partial \beta}\Big[\log\Gamma(\alpha) - \alpha\log\beta\Big] = -\left(-\frac{\alpha}{\beta}\right) = \frac{\alpha}{\beta}.
+$$
+Both match the familiar Gamma moments.
+
+Numeric check by Monte Carlo, $\alpha=4$, $\beta=2.5$:
+```{r}
+alpha = 4; beta = 2.5
+xg = rgamma(2e6, shape = alpha, rate = beta)
+c(Ex_mc = mean(xg), Ex_formula = alpha/beta)
+c(Elogx_mc = mean(log(xg)), Elogx_formula = digamma(alpha) - log(beta))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Exponential Family (Binomial)
+Write density function of Binomial distribution in a standard exponential family form. Find $Ex$ and $Var x$ by differentiating the normalizing constant.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The Binomial($n,\theta$) probability mass function, with $n$ known and $x=0,1,\ldots,n$, is
+$$
+p(x\mid\theta) = \binom{n}{x}\theta^x(1-\theta)^{n-x} = \binom{n}{x}\exp\Big[x\log\theta + (n-x)\log(1-\theta)\Big].
+$$
+Collecting the terms that multiply $x$,
+$$
+p(x\mid\theta) = \binom{n}{x}\exp\left[x\log\frac{\theta}{1-\theta} + n\log(1-\theta)\right],
+$$
+which is in the standard exponential family form $p(x\mid\theta) = h(x)\exp(\eta T(x) - A(\eta))$ with
+
+- base measure $h(x) = \binom{n}{x}$
+- sufficient statistic $T(x) = x$
+- natural (canonical) parameter $\eta = \log\dfrac{\theta}{1-\theta}$, the log-odds of $\theta$
+- log-partition function: writing $\theta = e^\eta/(1+e^\eta)$ so that $\log(1-\theta) = -\log(1+e^\eta)$, we get $A(\eta) = n\log(1+e^\eta)$
+
+Differentiating the log-partition function with respect to the natural parameter gives the mean and variance of the sufficient statistic, $\E{x} = A'(\eta)$ and $\Var{x} = A''(\eta)$:
+$$
+\E{x} = \frac{\partial A}{\partial \eta} = n\frac{e^\eta}{1+e^\eta} = n\theta,
+$$
+using $\theta = e^\eta/(1+e^\eta)$. Differentiating again, and using $d\theta/d\eta = \theta(1-\theta)$ (the derivative of the logistic sigmoid),
+$$
+\Var{x} = \frac{\partial^2 A}{\partial \eta^2} = n\frac{d\theta}{d\eta} = n\theta(1-\theta).
+$$
+Both match the familiar Binomial mean and variance.
+
+Numeric check by Monte Carlo, $n=30$, $\theta=0.35$:
+```{r}
+n = 30; theta = 0.35
+xb = rbinom(2e6, size = n, prob = theta)
+c(Ex_mc = mean(xb), Ex_formula = n*theta)
+c(Varx_mc = var(xb), Varx_formula = n*theta*(1-theta))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Moon, Sky, Telescope, Supernova and Bayes
+A small observatory runs a telescope overnight without staff. The moon is bright with probability 0.4 and dark with probability 0.6. Independently, the sky is clear with probability 0.5, hazy with probability 0.3 and cloudy with probability 0.2. The telescope records a usable image of its target with a probability that depends on both. With a dark moon the probabilities are 0.9 (clear), 0.6 (hazy) and 0.1 (cloudy). With a bright moon they are 0.7, 0.3 and 0.05. The software sends an alert to the astronomers' phones. If the image is usable, the alert goes out with probability 0.6, and if not, with probability 0.1 (a false alarm from the pipeline). Independently of all this, a rare transient, such as a supernova, appears in the field of view with probability 0.002. If it does, the alert goes out with probability 0.95, irrespective of the image quality.
+
+In the morning an astronomer finds that an alert was sent during the night.
+
+(a) What is the probability that the telescope recorded a usable image?
+(b) What is the probability that a transient was present?
+(c) What is the probability that the sky was cloudy?
+(d) What is the probability that the moon was bright?
+
+*Hint*: You can solve this problem in either of two ways: (i) direct simulation in R or Python, or (ii) exact calculation. Use just one of the two. The exact solution, although straightforward, may be messy.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+We introduce the following random variables:
+
+- $M \in \{1, 0\}$: moon (bright, dark)
+- $G\in \{\text{clear},\text{hazy},\text{cloudy}\}$: sky
+- $C \in \{0,1\}$: the image is usable
+- $L \in \{0,1\}$: a transient is present
+- $R\in \{0, 1\}$: an alert is sent
+
+The conditional independence is given by the following graph
+
+![](fig/mermaid/03-bl-sky-alert.png){#fig-sky-alert width=35% fig-align="center" fig-alt="Directed graph in which M and G both point to C, and C and L both point to R."}
+
+so the joint distribution is
+$$
+P(C,G,M,R,L) = P(M)P(G)P(C\mid G,M)P(L)P(R\mid C,L)
+$$
+
+The tables are the ones in the statement. The usable-image probabilities $P(C=1\mid M,G)$ are 0.9, 0.6, 0.1 for a dark moon and 0.7, 0.3, 0.05 for a bright one. The alert probabilities $P(R=1\mid C,L)$ are 0.95 whenever $L=1$, 0.6 for $C=1,L=0$ and 0.1 for $C=0,L=0$.
+
+a) We need $P(C=1\mid R=1) = P(C=1,R=1)/P(R=1)$. Summing out $M$ and $G$ first, the prior probability of a usable image is
+$$
+P(C=1) = 0.4(0.5\cdot 0.7 + 0.3\cdot 0.3 + 0.2\cdot 0.05) + 0.6(0.5\cdot 0.9 + 0.3\cdot 0.6 + 0.2\cdot 0.1) = 0.4\cdot 0.45 + 0.6\cdot 0.65 = 0.57
+$$
+Because $L$ is independent of $C$, $P(R=1\mid C=1) = 0.002\cdot 0.95 + 0.998\cdot 0.6 = 0.6007$ and $P(R=1\mid C=0) = 0.002\cdot 0.95 + 0.998\cdot 0.1 = 0.1017$. Hence
+$$
+P(C=1,R=1) = 0.57\cdot 0.6007 = 0.342399, \quad P(C=0,R=1) = 0.43\cdot 0.1017 = 0.043731
+$$
+$$
+P(R=1) = 0.342399 + 0.043731 = 0.38613
+$$
+$$
+P(C=1\mid R=1) = 0.342399/0.38613 = 0.887
+$$
+```{r}
+m = c(0.4, 0.6) # P(M): bright, dark
+g = c(0.5, 0.3, 0.2) # P(G): clear, hazy, cloudy
+pc = rbind(c(0.7, 0.3, 0.05), c(0.9, 0.6, 0.1)) # P(C=1 | M,G)
+l = c(0.002, 0.998) # P(L=1), P(L=0)
+jmg = outer(m, g) # P(M)P(G)
+c1 = sum(jmg * pc) * sum(l * c(0.95, 0.6)) # P(C=1, R=1)
+c0 = sum(jmg * (1 - pc)) * sum(l * c(0.95, 0.1)) # P(C=0, R=1)
+PR = c1 + c0
+c(c1, c0, PR, c1 / PR)
+```
+We can also check this by Monte Carlo simulation
+```{r simalert}
+set.seed(1)
+N = 1e6
+M = sample(1:2, N, TRUE, c(0.4, 0.6))
+G = sample(1:3, N, TRUE, c(0.5, 0.3, 0.2))
+C = rbinom(N, 1, pc[cbind(M, G)])
+L = rbinom(N, 1, 0.002)
+R = rbinom(N, 1, ifelse(L == 1, 0.95, ifelse(C == 1, 0.6, 0.1)))
+c(mean(R), mean(C[R == 1]))
+```
+
+b) A transient produces an alert with probability 0.95 whatever else happens, so $P(L=1,R=1) = 0.002\cdot 0.95 = 0.0019$ and
+$$
+P(L=1\mid R=1) = \dfrac{0.0019}{0.38613} = 0.00492
+$$
+The alert raises the probability of a transient from 0.002 to about 0.005, a factor of 2.5, but most alerts are still not transients.
+```{r}
+0.002 * 0.95 / PR
+mean(L[R == 1])
+```
+
+c) Given a cloudy sky, $P(C=1\mid G=\text{cloudy}) = 0.4\cdot 0.05 + 0.6\cdot 0.1 = 0.08$, so
+$$
+P(R=1\mid G=\text{cloudy}) = 0.002\cdot 0.95 + 0.998\,(0.08\cdot 0.6 + 0.92\cdot 0.1) = 0.0019 + 0.998\cdot 0.14 = 0.14162
+$$
+$$
+P(G=\text{cloudy}\mid R=1) = \dfrac{0.2\cdot 0.14162}{0.38613} = \dfrac{0.028324}{0.38613} = 0.0734
+$$
+The prior probability of 0.2 drops to 0.073, because a cloudy night rarely produces an alert.
+```{r}
+0.2 * (0.002 * 0.95 + 0.998 * (0.08 * 0.6 + 0.92 * 0.1)) / PR
+mean(G[R == 1] == 3)
+```
+
+d) Given a bright moon, $P(C=1\mid M=1) = 0.5\cdot 0.7 + 0.3\cdot 0.3 + 0.2\cdot 0.05 = 0.45$, so
+$$
+P(R=1\mid M=1) = 0.0019 + 0.998\,(0.45\cdot 0.6 + 0.55\cdot 0.1) = 0.0019 + 0.998\cdot 0.325 = 0.32625
+$$
+$$
+P(M=1\mid R=1) = \dfrac{0.4\cdot 0.32625}{0.38613} = \dfrac{0.1305}{0.38613} = 0.338
+$$
+so the probability that the moon was dark is $1-0.338=0.662$, up from 0.6.
+```{r}
+0.4 * (0.002 * 0.95 + 0.998 * (0.45 * 0.6 + 0.55 * 0.1)) / PR
+mean(M[R == 1] == 1)
+```
+
+:::
+:::
+
+::: {#exr-}
+## Poisson: Website Visits
+A web designer is analyzing traffic on a web site. Assume the number of visitors arriving at the site at a given time of day is modeled as a Poisson random variable with a rate of $\lambda$ visitors per minute. Based on prior experience with similar web sites, the following estimates are given:
+
+- There is a 90% probability that the rate is greater than 5 visitors per minute.
+- The rate is equally likely to be greater than or less than 14 visitors per minute.
+- There is a 90% probability that the rate is less than 27 visitors per minute.
+
+Find a Gamma prior distribution for the arrival rate that fits these judgments as well as possible. Comment on your results. 
+
+Hint: there is no "right" answer to this problem. You can use trial and error to find a distribution that fits as well as possible. You can also use an optimization method such as Excel Solver to minimize a measure of how far apart the given quantiles are from the ones in the target distribution.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+ We can try different values to see whether we can get a result that is close to the given quantiles. Given, there are only 2 parameters, I simply did a grid-search. I generated a grid of 200x200 points and calculated the quantiles for each point. Then I found the point that was closest to the given quantiles. I used sum of absolute value differences to measure the distance between the given and calculated quantiles. You can use squared differences instead. 
+
+```{r gamma-web}
+g = expand.grid(seq(from=0.5,to=7,length=200),seq(from=0.5,to=10,length=200))
+qf = function(th) {
+  qgamma(c(0.1, 0.5, 0.9), shape=th[1], scale=th[2])
+}
+r = apply(g,1,qf)
+target = c(5,14,27)
+ind = which.min((colSums(abs(r-target))))
+print(g[ind,])
+d = data.frame(quantile = c(0.1, 0.5, 0.9), expert = target, calculated = qf(as.numeric(g[ind,])))
+knitr::kable(d)
+```
+
+Notice instead of looping through the grid, I used `expand.grid` combined with `apply` to calculate the quantiles for each point. This is a more efficient way to do the same thing.
+
+
+:::
+:::
+
+
+::: {#exr-}
+## Normal-Likelihood
+
+We observe samples of normal random variable $Y_i\mid \mu,\sigma \sim N(\mu,\sigma^2)$ with known $\sigma$, specify and plot likelihood for $\mu$
+
+a) y = (-4.3,0.7,-19.4), $\sigma=10$
+b) y = (-12,12,-4.5,0.6), $\sigma=6$
+c) y = (-4.3,0.7,-19.4), $\sigma=2$
+d) y = (12.4,12.1), $\sigma=5$
+
+*Hint*: Remember that the normal likelihood is the product of the normal density function evaluated at each observation
+$$
+L(\mu|y,\sigma) = \prod_{i=1}^n \dfrac{1}{\sqrt{2\pi}\sigma}e^{-(y_i-\mu)^2/2\sigma^2} = \dfrac{1}{(2\pi\sigma^2)^{n/2}}e^{-\sum_{i=1}^n(y_i-\mu)^2/2\sigma^2}
+$$
+The expression under the exponent can be simplified to
+$$
+\begin{aligned}
+\sum_{i=1}^n(y_i-\mu)^2 &= \sum_{i=1}^n (\mu^2 - 2\mu y_i + y_i^2) \\
+&= n\mu^2 - 2\mu\sum_{i=1}^n y_i + \sum_{i=1}^n y_i^2 \\
+&= n\mu^2 - 2\mu n\bar{y} + \sum_{i=1}^n y_i^2 \\
+&= n(\mu^2 - 2\mu\bar{y}) + \sum_{i=1}^n y_i^2
+\end{aligned}
+$$
+Now
+$$
+\begin{aligned}
+n(\mu^2 - 2\mu\bar{y}) + \sum_{i=1}^n y_i^2 &= n(\mu^2 - 2\mu\bar{y} + \bar y^2) - n\bar y^2 + \sum_{i=1}^n y_i^2 \\
+&= n(\mu - \bar{y})^2 + \sum_{i=1}^n(y_i-\bar{y})^2
+\end{aligned}
+$$ 
+The last summand does not depend on $\mu$ and can be ignored. Thus, the likelihood is proportional to 
+$$
+e^{\dfrac{-(\mu - \bar{y})^2}{2\sigma^2/n}}
+$$
+
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+Let's implement the likelihood function. We will use two different functions to calculate the likelihood. The first function uses the $\bar y$ as summary statistic and evaluates normal density function to calculate the likelihood for the mean of the data. The second function uses the product of the normal density function to calculate the likelihood for the mean of the data. We will compare the results of the two functions to see if they are consistent.
+
+```{r}
+lhood1 = function(y, mu, sigma) {
+   dnorm(mean(y), mu, sigma/sqrt(length(y))) 
+}
+lhood2 = function(y, mu, sigma) {
+   prod(dnorm(y, mu, sigma))
+}
+mu = seq(-30,30,0.1)
+a1 = lhood1(c(-4.3,0.7,-19.4),mu,10)
+a2 = sapply(mu,lhood2,y=c(-4.3,0.7,-19.4),sigma=10)
+(a1/a2)[1:5]
+plot(mu,a1)
+lines(mu,3253.175*a2,col="red")
+```
+We see that two approaches to calculating the likelihood agree (up to a constant).
+```{r}
+#| fig-height: 4
+par(mfrow = c(2, 2))
+plot(mu,a1,type="l",xlab="mu",ylab="likelihood")
+plot(mu,lhood1(c (-12,12,-4.5,0.6),mu,6),type="l",xlab="mu",ylab="likelihood")
+plot(mu,lhood1(c(-4.3,0.7,-19.4),mu,2),type="l",xlab="mu",ylab="likelihood")
+plot(mu,lhood1(c(12.4,12.1),mu,5),type="l",xlab="mu",ylab="likelihood")
+par(mfrow = c(1, 1))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Normal-Normal for Lock5Data
+`Lock5Data` package (Lock et al. 2016) includes results for a cross-sectional study of hippocampal volumes among 75 subjects (Singh et al. 2014): 25 collegiate football players with a history of concussions (`FBConcuss`), 25 collegiate football players that do not have a history of concussions (`FBNoConcuss`), and 25 control subjects. For our analysis, we'll focus on the subjects with a history of concussions:
+```{r}
+library(Lock5Data)
+data(FootballBrain)
+d = FootballBrain[FootballBrain$Group=="FBConcuss",]
+plot(density(d$Hipp,bw=300), main = "", xlab = "Hippocampal volume")
+```
+
+a) Assume that the hippocampal volumes of the subjects with a history of concussions are independent normal random variables with unknown mean $\mu$ and known standard deviation $\sigma$. Estimate $\sigma$ using the sample standard deviation of the hippocampal volumes (`FBConcuss` group). Calculate the likelihood for $\mu$.
+b) Assume that $\mu$ has a normal prior distribution with mean $\mu_0$ and standard deviation $\sigma_0$. Estimate those parameters using the sample mean and standard error of the hippocampal volumes across all subjects. 
+c) Find the posterior distribution for $\mu$.
+d) Find a 95% posterior credible interval for $\mu$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The sample standard deviation of the hippocampal volumes is
+```{r}
+sigma = sd(d$Hipp)
+print(sigma)
+```
+Thus, the likelihood of $\mu$ is
+$$
+p(y\mid \mu) \propto e^{\dfrac{-(\bar y-\mu)^2}{2\cdot 593.4^2/25}}
+$$
+```{r}
+mu = seq(5000,6500,length.out=200)
+lhood = dnorm(mean(d$Hipp),mu,sigma/sqrt(length(d$Hipp))) 
+plot(mu,lhood,type="l",xlab="mu",ylab="likelihood")
+```  
+
+b) The sample mean and standard error of the hippocampal volumes across all subjects are
+```{r}
+mu0 = mean(FootballBrain$Hipp)
+sigma0 = sd(FootballBrain$Hipp)/sqrt(75) 
+print(mu0)
+print(sigma0)
+```
+Thus, we assume that the prior is
+$$
+\mu \sim N(6598.8, 130.9^2)
+$$
+
+c) The posterior distribution for $\mu$ has mean of
+$$
+\mu^* = \frac{\sigma^2}{n\sigma_0^2 + \sigma^2}\mu_0 + \frac{n\sigma_0^2}{n\sigma_0^2 + \sigma^2}\bar{y}
+$$
+and variance of
+$$
+\sigma^{*2} = \sigma_n^2 = \frac{\sigma^2\sigma_0^2}{n\sigma_0^2 + \sigma^2}
+$$
+```{r}  
+k = 25*sigma0^2 + sigma^2
+mus = sigma^2/k*mu0 + 25*sigma0^2/k*mean(d$Hipp)
+sigmas2 = sigma^2*sigma0^2/k
+print(mus)
+print(sigmas2)
+```
+
+d) A 95% posterior credible interval for $\mu$ is
+```{r}
+qnorm(c(0.025,0.975),mus,sqrt(sigmas2))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Normal-Normal Chest Measurements
+We have chest measurements of 10 000 men. Now, based on memories of my experience as an assistant in a gentlemen's outfitters in my university vacations, I would suggest a prior
+$$
+\mu \sim N(38, 9).
+$$
+Of course, it is open to question whether these men form a random sample from the whole population, but unless I am given information to the contrary I would stick to the prior I have just quoted, except that I might be inclined to increase the variance. My data show that the mean turned out to be 39.8 with a standard deviation of 2.0 for the sample of 10 000. 
+
+a) Calculate the posterior mean for the chest measurements of men in this population
+b) Calculate the predictive  distribution for the next observation $x_{n+1}$
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) 
+```{r}
+mu0 = 38
+sigma0 = 3
+yhat = 39.8
+sigma = 2
+n = 10000
+k = n*sigma0^2 + sigma^2
+mus = sigma^2/k*mu0 + n*sigma0^2/k*yhat
+sigmas2 = sigma^2*sigma0^2/k
+print(mus)
+print(sigmas2)
+```
+Note that the posterior mean is equal to $\bar y = 39.8$ equal to the sample mean and variance is $0.0004$ which is equal to 4/10000, the sample variance. Thus, our posterior is standardized likelihood
+$$
+N(\bar y, \sigma^2/n)
+$$
+Naturally, the closeness of the posterior to the standardized likelihood results from the large sample size, and whatever my prior had been (unless it were very extreme) I would have obtained very much the same result.
+
+More formally, the posterior will be close to the standardized likelihood if the ratio of posterior and prior variances $\sigma_*^2/\sigma_0^2$ is small or in other words when $\sigma_0^2$ is large compared to $\sigma^2/n$.
+
+b) The predictive distribution for the next observation $x_{n+1}$ can be derived by writing
+$$
+x_{n+1}  = (x_{n+1} - \mu) + \mu
+$$
+Now $x_{n+1}-\mu \sim N(0,\sigma^2)$ and $\mu \sim N(\mu^*,\sigma^{*2})$. Thus, the predictive distribution is
+$$
+x_{n+1} \sim N(\mu^*,\sigma^{*2} + \sigma^2)
+$$
+```{r}  
+mu = mus
+sigma = sqrt(sigmas2 + sigma^2)
+print(mu)
+print(sigma)
+```
+
+:::
+:::
+
+::: {#exr-portfolio-correlated-assets}
+## Bayesian Portfolio Updating with Correlated Assets
+
+Coca-Cola (KO) and PepsiCo (PEP) are close competitors whose daily returns are highly correlated, unlike the independent parameter pairs in the Lung Disease and Wolf River problems, where the two groups' parameters are updated separately. Here you extend the conjugate update from the section *Multivariate Normal* to the genuinely multivariate case, where the relationship between two parameters must be tracked with a full covariance matrix, as in @exm-portfolio.
+
+a) Using `quantmod::getSymbols()` for the symbols `"KO"` and `"PEP"` from 2015-01-01 to 2023-12-31 and `dailyReturn()`, compute daily log returns for both stocks. Split the sample into a prior-formation window (2015-01-01 through 2019-12-31, $n_0$ trading days) and a data window (2020-01-01 through 2023-12-31, $n_1$ trading days).
+
+b) From the prior window compute the sample mean return vector and sample covariance matrix. Specify the prior $\theta \sim N(\mu_0, \Sigma_0)$ for the long-run mean daily returns $\theta=(\theta_{KO}, \theta_{PEP})$, taking $\mu_0$ equal to the prior-window sample mean and $\Sigma_0$ equal to the prior-window sample covariance divided by $n_0$ (the sampling covariance of an estimated mean). Do the same on the data window to get the likelihood $y\mid\theta \sim N(\theta,\Sigma)$.
+
+c) Apply the multivariate Normal-Normal update to compute the posterior $\theta\mid y \sim N(\mu_1,\Sigma_1)$ with $\Sigma_1=(\Sigma_0^{-1}+\Sigma^{-1})^{-1}$ and $\mu_1 = \Sigma_1(\Sigma_0^{-1}\mu_0 + \Sigma^{-1}y)$. Report the posterior correlation implied by $\Sigma_1$.
+
+d) Draw 10,000 samples from the joint posterior with `MASS::mvrnorm` and plot them with the 95% joint credible ellipse (radius $\sqrt{\chi^2_{2,\,0.95}}$ applied through the Cholesky factor of $\Sigma_1$). Mark $\mu_0$, $y$, and $\mu_1$, as in @exm-portfolio.
+
+e) Use your posterior draws to estimate $\prob{\theta_{KO} > \theta_{PEP} \mid y}$, the probability that Coca-Cola's long-run mean daily return exceeds Pepsi's.
+
+f) Repeat (c)-(e) but zero out the off-diagonal entries of $\Sigma_0$ and $\Sigma$ before updating (incorrectly treating $\theta_{KO}$ and $\theta_{PEP}$ as independent). Compare the individual posterior standard deviations of $\theta_{KO}$ and $\theta_{PEP}$ with part (c), then compare the resulting $\prob{\theta_{KO} > \theta_{PEP}}$ with part (e). Which comparison changes more, and how does
+$$
+\Var{\theta_{KO} - \theta_{PEP}} = \Var{\theta_{KO}} + \Var{\theta_{PEP}} - 2\,\Cov{\theta_{KO}, \theta_{PEP}}
+$$
+explain the pattern?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) We download the two series and form daily log returns, then split the sample into the prior and data windows.
+```{r}
+#| message: false
+library(quantmod)
+library(MASS)
+getSymbols(c("KO", "PEP"), from = "2015-01-01", to = "2023-12-31")
+ret <- merge(dailyReturn(KO, type = "log"), dailyReturn(PEP, type = "log"))
+colnames(ret) <- c("KO", "PEP")
+prior_win <- ret["2015-01-01/2019-12-31"]
+data_win  <- ret["2020-01-01/2023-12-31"]
+n0 <- nrow(prior_win); n1 <- nrow(data_win)
+c(n0 = n0, n1 = n1)
+```
+The prior window holds about 1258 trading days and the data window about 1006.
+
+b) The prior is centered at the prior-window mean, with covariance equal to the sampling covariance of that mean; the likelihood is built the same way from the data window.
+```{r}
+mu0    <- colMeans(prior_win)   # prior mean vector
+Sigma0 <- cov(prior_win) / n0   # sampling covariance of the prior-window mean
+y      <- colMeans(data_win)    # data mean vector
+Sigma  <- cov(data_win) / n1    # sampling covariance of the data-window mean
+rbind(mu0 = mu0, y = y)
+```
+Both mean vectors are tiny positive daily returns, with PEP slightly above KO in each window. The returns themselves are strongly positively correlated, about 0.70 in the prior window and about 0.77 in the data window:
+```{r}
+c(prior_corr = cov2cor(cov(prior_win))[1, 2],
+  data_corr  = cov2cor(cov(data_win))[1, 2])
+```
+
+c) The conjugate update combines the two precisions and precision-weighted means.
+```{r}
+Sigma1 <- solve(solve(Sigma0) + solve(Sigma))
+mu1    <- Sigma1 %*% (solve(Sigma0) %*% mu0 + solve(Sigma) %*% y)
+cbind(mu1)
+cov2cor(Sigma1)[1, 2]   # posterior correlation
+```
+The posterior mean sits between the prior and data means, and the posterior correlation is about 0.72, inherited from the two strongly positively correlated inputs.
+
+d) We sample from the posterior and overlay the 95% joint credible ellipse.
+```{r}
+#| fig-cap: "Ten thousand draws from the bivariate posterior for the mean daily returns of KO and PEP, with the 95% joint credible ellipse. Prior mean (blue), data mean (red) and posterior mean (green) are marked; the dotted line is theta_KO = theta_PEP. The ellipse tilts along the positive-correlation diagonal rather than lining up with the axes."
+set.seed(1)
+draws <- mvrnorm(10000, mu1, Sigma1)
+ang <- seq(0, 2 * pi, length.out = 200)
+ell <- sweep(sqrt(qchisq(0.95, 2)) * cbind(cos(ang), sin(ang)) %*% chol(Sigma1),
+             2, mu1, "+")
+plot(draws, pch = 16, cex = 0.3, col = "grey70",
+     xlab = expression(theta[KO]), ylab = expression(theta[PEP]))
+lines(ell, lwd = 2)
+points(rbind(mu0, y, as.numeric(mu1)), pch = 19,
+       col = c("blue", "red", "green"), cex = 1.4)
+abline(0, 1, lty = 3)
+```
+The credible region is visibly tilted along the positive-correlation diagonal, not axis-aligned.
+
+e) The event of interest is the fraction of draws on the KO side of the diagonal.
+```{r}
+mean(draws[, 1] > draws[, 2])
+```
+There is only about a 28% posterior probability that Coca-Cola's long-run mean daily return exceeds Pepsi's: most of the posterior mass lies on the PEP side of the $\theta_{KO}=\theta_{PEP}$ diagonal.
+
+f) Now drop the off-diagonal terms before updating and repeat.
+```{r}
+Sigma0_ind <- diag(diag(Sigma0))   # drop prior covariance
+Sigma_ind  <- diag(diag(Sigma))    # drop likelihood covariance
+Sigma1_ind <- solve(solve(Sigma0_ind) + solve(Sigma_ind))
+mu1_ind    <- Sigma1_ind %*% (solve(Sigma0_ind) %*% mu0 + solve(Sigma_ind) %*% y)
+set.seed(1)
+draws_ind <- mvrnorm(10000, mu1_ind, Sigma1_ind)
+
+rbind(correlated  = sqrt(diag(Sigma1)),
+      independent = sqrt(diag(Sigma1_ind)))    # individual posterior SDs
+c(P_correlated  = mean(draws[, 1] > draws[, 2]),
+  P_independent = mean(draws_ind[, 1] > draws_ind[, 2]))
+```
+Zeroing the covariances barely moves the individual posterior standard deviations (they agree to better than 0.5%), because the two matrices being combined have similar relative scale in each coordinate. But the probability that KO beats PEP jumps substantially, from about 0.28 to nearly 0.39. The reason is the identity in part (f): dropping the positive $\Cov{\theta_{KO}, \theta_{PEP}}$ term more than triples the variance of the difference, spreading it out and pulling $\prob{\theta_{KO} > \theta_{PEP}}$ back toward 0.5.
+```{r}
+c(sd_diff_correlated  = sqrt(Sigma1[1, 1] + Sigma1[2, 2] - 2 * Sigma1[1, 2]),
+  sd_diff_independent = sqrt(Sigma1_ind[1, 1] + Sigma1_ind[2, 2]))
+```
+The lesson: marginal credible intervals for the two means look almost identical whether or not you model the correlation, but any comparison or linear combination of the two parameters (a spread trade, a hedge, a difference in means) is highly sensitive to it.
+
+:::
+:::
+
+::: {#exr-}
+## Gibbs Sampler
+
+Suppose we model data using the following model
+$$
+\begin{aligned}
+y_i \sim &N(\mu,\tau^{-1})\\
+\mu \sim & N(0,1)\\
+\tau \sim & Gamma(2,1).
+\end{aligned}
+$$
+
+The goal is to implement a Gibbs sampler for the posterior $\mu,\tau \mid y$, where $y = (y_1,\ldots,y_n)$ is the observed data. The Gibbs sampler iterates between two steps:
+
+a) Sample $\mu_i$ from $\mu \mid \tau_{i-1}, y$
+a) Sample $\tau_i$ from $\tau_i \mid \mu_i, y$
+
+Show that the full conditional distributions are given by
+$$
+\begin{aligned}
+\mu \mid \tau, y \sim & N\left(\dfrac{\tau n\bar y}{1+n\tau},\dfrac{1}{1+n\tau}\right)\\
+\tau \mid \mu,y \sim & \mathrm{Gamma}\left(2+\dfrac{n}{2}, 1+\dfrac{1}{2}\sum_{i=1}^{n}(y_i-\mu)^2\right)
+\end{aligned}
+$$
+
+Use these formulas to implement the Gibbs sampler. The data $y$ is in the file `data/MCMCexampleData.txt`.
+
+Plot samples from the joint distribution over $(\mu,\tau)$ on a scatter plot. Plot histograms for marginal $\mu$ and $\tau$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+First we write the joint distribution of $(y,\tau,\mu)$ as
+\begin{align*}
+p(y,\tau,\mu) &= p(y\mid\tau,\mu) p(\mu) p(\tau)\\
+&=\left(\prod_{i=1}^{n} \frac{\sqrt{\tau}}{\sqrt{2\pi}} e^{-\frac{\tau}{2}(y_i-\mu)^2} \right) \frac{1}{\sqrt{2\pi}} e^{-\frac{1}{2}\mu^2} \frac{1}{\Gamma(2)} \tau e^{-\tau}
+\end{align*}
+Therefore,
+\begin{align*}
+p(\mu\mid\tau,y) &\propto \left(\prod_{i=1}^{n} e^{-\frac{\tau}{2}(y_i-\mu)^2} \right) e^{-\frac{1}{2}\mu^2}\\
+&\propto  e^{-\frac{\tau n+1}{2}\mu^2 + \tau n\bar{y}\mu}\\
+&\sim N\left(\frac{\tau n \bar{y}}{1+\tau n}, \frac{1}{1+\tau n}\right)\\
+p(\tau\mid\mu, y) &\propto \left(\prod_{i=1}^{n} \sqrt{\tau}e^{-\frac{\tau}{2}(y_i-\mu)^2} \right) \tau e^{-\tau}\\
+&= \tau^{1+n/2} e^{-(1+\sum_{i=1}^{n}(y_i-\mu)^2/2)\tau}\\
+&\sim \mathrm{Gamma}\left(2+\frac{n}{2}, 1+\frac{1}{2}\sum_{i=1}^{n}(y_i-\mu)^2\right)
+\end{align*}
+
+```{r}
+#| eval: false
+y <- scan("data/MCMCexampleData.txt")
+n <- length(y)
+ybar <- mean(y)
+
+n_iter <- 5000
+mu_samples <- numeric(n_iter)
+tau_samples <- numeric(n_iter)
+
+# Initialize
+mu_samples[1] <- ybar
+tau_samples[1] <- 1
+
+for (i in 2:n_iter) {
+  # Sample mu | tau, y
+  tau_curr <- tau_samples[i-1]
+  mu_var <- 1 / (1 + n * tau_curr)
+  mu_mean <- tau_curr * n * ybar * mu_var
+  mu_samples[i] <- rnorm(1, mu_mean, sqrt(mu_var))
+
+  # Sample tau | mu, y
+  mu_curr <- mu_samples[i]
+  shape <- 2 + n / 2
+  rate <- 1 + 0.5 * sum((y - mu_curr)^2)
+  tau_samples[i] <- rgamma(1, shape, rate)
+}
+
+# Discard burn-in
+burnin <- 500
+mu_post <- mu_samples[-(1:burnin)]
+tau_post <- tau_samples[-(1:burnin)]
+
+par(mfrow = c(1, 3))
+plot(mu_post, tau_post, pch = ".", xlab = expression(mu), ylab = expression(tau))
+hist(mu_post, breaks = 40, main = expression(mu), xlab = "")
+hist(tau_post, breaks = 40, main = expression(tau), xlab = "")
+```
+
+:::
+:::
+
+::::

@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph Composition
+        direction LR
+        xc[x] --> f1((f1))
+        f1 --> f2((f2))
+        f2 --> f3((f3))
+        f3 --> yc[y]
+    end
+
+    subgraph Addition
+        direction LR
+        xa[x] --> g1((f1))
+        xa --> g2((f2))
+        xa --> g3((f3))
+        g1 --> Sum((+))
+        g2 --> Sum
+        g3 --> Sum
+        Sum --> ya[y]
+    end
+
+    style xc fill:#F0F8FF,stroke:#4682B4,stroke-width:2px
+    style yc fill:#F0F8FF,stroke:#4682B4,stroke-width:2px
+    style xa fill:#F0F8FF,stroke:#4682B4,stroke-width:2px
+    style ya fill:#F0F8FF,stroke:#4682B4,stroke-width:2px
+    style f1 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style f2 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style f3 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style g1 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style g2 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style g3 fill:#E6E6FA,stroke:#9370DB,stroke-width:1.5px
+    style Sum fill:#FFDAB9,stroke:#FFA500,stroke-width:1.5px

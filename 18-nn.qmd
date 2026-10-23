@@ -1,0 +1,541 @@
+{{< include ./misc/common.qmd >}}
+
+# Neural Networks {#sec-nn}
+
+> "*We have a chance to build machines that will be smarter than us. We need to be thoughtful about what we are asking for.*"---Geoffrey Hinton
+
+In 2012, a neural network called AlexNet stunned the computer vision community by winning the ImageNet competition with an error rate nearly half that of the previous year's winner. This breakthrough marked the beginning of deep learning's modern era, a period in which neural networks have transformed fields from medical diagnosis to language translation, from game playing to autonomous driving.
+
+The goal of this chapter is to provide a comprehensive overview of deep learning (DL) methods. From a statistical perspective, deep learning extends the framework of generalized linear models by introducing multiple layers of nonlinear transformations. While traditional statistical models are well-studied and interpretable, they often lack the flexibility to capture complex input-output relationships. *Black-box* predictive methods, such as decision trees and neural networks, offer greater flexibility at the cost of interpretability. Deep learning excels precisely where high-dimensional problems make traditional model selection challenging.
+
+To understand this transition, consider the architectural trade-off between traditional regression and deep learning. Classical statistical methods follow a *wide and shallow* paradigm: we engineer many features (making the model wide) but apply only a single transformation layer, typically a linear combination followed by a link function, as in GLMs. For instance, polynomial regression with interactions creates a wide feature space ($x_1, x_2, x_1^2, x_2^2, x_1x_2, \ldots$) but remains shallow (one layer). In contrast, deep learning adopts a *deep and narrow* architecture: it uses many successive transformations (making the model deep) but potentially fewer units per layer (keeping layers narrow). Rather than manually constructing a vast feature space, deep networks learn hierarchical representations: each layer extracts increasingly abstract features from the layer below. This architectural shift explains why neural networks can model complex relationships without explicit feature engineering: depth provides representational power that compensates for narrower layers, while the hierarchy of transformations discovers features automatically.
+
+Deep learning thus offers a powerful alternative in domains traditionally served by statistical methods, opening rich avenues for future research, including uncertainty quantification, principled architecture selection, and Bayesian deep learning. Although DL models have been most prominently applied to image analysis and natural language processing, they have also demonstrated superior performance in traditional engineering and scientific domains such as spatio-temporal modeling and financial forecasting [@polson2021deep; @polson2017deep; @dixon2019deep; @sokolov2017discussion; @bhadra2021merging; @behnia2023deep; @nareklishvili2022deep; @nareklishvili2023feature; @polson2023generative; @nareklishvili2023generative; @polson2020deep].
+
+In this chapter, we focus on feed-forward neural networks and their applications to regression and classification. We begin with the mathematical foundations, work through illustrative examples, and discuss practical implementation in `R` and `Python`.
+
+Part II largely relied on feature engineering: transforming raw inputs into predictors that make linear or tree-based models effective. Part III shifts that burden onto the model by learning representations jointly with prediction. This transition is powered by regularization ideas (@sec-theoryai) and by optimization methods for large parameter spaces (@sec-sgd), which make it feasible to fit networks with millions or billions of parameters.
+
+## Introduction
+
+Machine learning and statistical analysis share common foundations, but they emphasize different priorities: ML focuses on scalable algorithms and predictive accuracy, while statistics prioritizes interpretability and inferential rigor. Deep learning sits at the intersection, providing powerful pattern-matching capabilities suitable for AI applications such as image recognition and text analysis.
+
+From a computational perspective, images and text can be represented as high-dimensional matrices and vectors, respectively. The challenge of recognizing objects in images or understanding natural language requires learning complex decision boundaries in these high-dimensional input spaces. Deep learning addresses this challenge by using hierarchical layers of transformations that progressively extract meaningful features from raw data. This approach differs from traditional statistical models in that the features are *learned* from data rather than specified *a priori*.
+
+
+There are several deep learning architectures: each has its own uses and purposes. Convolutional Neural Networks (CNN) deal with 2-dimensional input objects, i.e., images, and have been shown to outperform other techniques. Recurrent Neural Networks (RNN) have been widely applied to speech and text analysis tasks.
+
+In general, a neural network can be described as follows. Let $f_1 , \ldots , f_L$ be given univariate activation functions for each of the $L$ layers. Activation functions are nonlinear transformations of weighted data. A nonlinear activation of an affine transformation is then defined by
+$$
+f_l^{W,b} = f_l \left ( \sum_{j=1}^{N_l} W_{lj} X_j + b_l \right ) = f_l ( W_l X_l + b_l )\,
+$$
+which implicitly needs the specification of the number of hidden units $N_l$. Our deep predictor, given the number of layers $L$, then becomes the composite map
+
+$$
+\hat{Y}(X) = F(X) = \left ( f_1^{W_1,b_1} \circ \ldots \circ f_L^{W_L,b_L} \right ) ( X)\,.
+$$
+
+Deep learning's capacity to serve as a universal function approximator has deep mathematical roots, a principle traceable to the functional analysis of the nineteenth century. From a practical perspective, given a large enough dataset, we can empirically learn an optimal predictor. Similar to a classic basis decomposition, the deep approach uses univariate activation functions to decompose a high-dimensional input $X$.
+
+Let $Z^{(l)}$ denote the $l$th layer, and so $X = Z^{(0)}$. The final output $Y$ can be numeric or categorical. The explicit structure of a deep prediction rule is then
+$$
+\begin{aligned}
+\hat{Y} (X) & = W^{(L)} Z^{(L)} + b^{(L)} \\
+Z^{(1)} & = f^{(1)} \left ( W^{(0)} X + b^{(0)} \right ) \\
+Z^{(2)} & = f^{(2)} \left ( W^{(1)} Z^{(1)} + b^{(1)} \right ) \\
+\ldots  & \\
+Z^{(L)} & = f^{(L)} \left ( W^{(L-1)} Z^{(L-1)} + b^{(L-1)} \right )\,.
+\end{aligned}
+$$
+Here $W^{(l)}$ is a weight matrix and $b^{(l)}$ are bias terms that shift the activation functions.
+Designing a good predictor depends directly on the choice of univariate activation functions $f^{(l)}$. The $Z^{(l)}$ are hidden features (or *latent representations*) that the algorithm extracts from the data.
+
+The deep approach employs hierarchical predictors comprising a series of $L$ nonlinear transformations applied to $X$. Each of the $L$ transformations is referred to as a *layer*, where the original input is $X$, the output of the first transformation is the first layer, and so on, with the output $\hat Y$ as the final layer. The layers $1$ to $L$ are called *hidden layers*. The number of layers $L$ represents the depth of our network.
+
+## Mathematical Foundations
+
+Before exploring practical examples, it is instructive to see how neural networks can represent common mathematical operations. Interaction terms such as $x_1 x_2$ and $(x_1 x_2)^2$, as well as max functions like $\max(x_1, x_2)$, can be expressed as nonlinear functions of semi-affine combinations. Specifically:
+
+$$
+x_1x_2 = \frac{1}{4} ( x_1+x_2 )^2 - \frac{1}{4} (x_1-x_2)^2
+$$
+
+$$
+\max(x_1,x_2) = \frac{1}{2} ( x_1+x_2 ) + \frac{1}{2} | x_1-x_2 |
+$$
+
+$$
+(x_1x_2)^2 = \frac{1}{4} ( x_1+x_2 )^4 + \frac{7}{4 \cdot 3^3} (x_1-x_2)^4 - \frac{1}{2 \cdot 3^3} ( x_1+ 2 x_2)^4 - \frac{2^3}{3^3} ( x_1 + \frac{1}{2} x_2 )^4
+$$
+This identity can be verified by expanding the right-hand side; see @diaconis1984nonlinear for generalizations.
+
+These identities reveal that products and maxima, operations central to modeling interactions and thresholds, can be constructed from combinations of univariate functions applied to linear projections of the input. This is precisely what neural networks do.
+
+@diaconis1984nonlinear provides further discussion in the context of *Projection Pursuit Regression*, where the model uses a layered structure $\sum_{i=1}^N f(w_i^\top X)$. Their work on composite iterated functions foreshadowed the modern use of multiple layers to model complex multivariate systems.
+
+### ReLU Networks as Max-Sum Networks
+
+Deep ReLU architectures can be viewed as max-sum networks via a simple identity. Define $x^+ = \max(x,0)$. Let $f_x(b) = (x + b)^+$ where $b$ is an offset. Then $(x + y^+)^+ = \max(0, x, x+y)$. This is generalized in @feller1971introduction (p.272), who shows by induction that
+
+$$
+( f_{x_1} \circ \ldots \circ f_{x_k} ) (0) = ( x_1 + ( x_2 + \ldots + ( x_{k-1} + x_k^+ )^+ )^+ )^+ = \max_{1 \leq j \leq k} ( x_1 + \ldots + x_j )^+
+$$
+
+A composition of max-layers thus reduces to a single-layer max-sum network. This mathematical insight helps explain why deep ReLU networks are so effective: they can efficiently represent a rich class of piecewise linear functions.
+
+## Classification with Neural Networks
+
+To illustrate the concepts introduced above, we apply a feed-forward neural network with one hidden layer to a binary classification problem. Consider the simulated dataset shown below, where points are generated from two distributions: the inner cluster represents one class, while the outer ring represents the other. The goal is to learn a decision boundary that separates these two classes.
+```{r circle-data, echo=F}
+set.seed(43) # Tom Wilson
+numSamples <- 200 # total number of observations
+radius <- 10 # radius of the outer circle
+noise <- 0.0001 # amount of noise to be added to the data
+d <- matrix(0, ncol = 3, nrow = numSamples)
+# matrix to store our generated data
+
+# Generate positive points inside the circle.
+for (i in 1:(numSamples / 2)) {
+  r <- runif(1, 0, radius * 0.4)
+  angle <- runif(1, 0, 2 * pi)
+  x <- r * sin(angle)
+  y <- r * cos(angle)
+  noiseX <- runif(1, -radius, radius) * noise
+  noiseY <- runif(1, -radius, radius) * noise
+  d[i, ] <- c(0, x, y)
+}
+
+# Generate negative points outside the circle.
+for (i in (numSamples / 2 + 1):numSamples) {
+  r <- runif(1, radius * 0.8, radius)
+  angle <- runif(1, 0, 2 * pi)
+  x <- r * sin(angle)
+  y <- r * cos(angle)
+  noiseX <- runif(1, -radius, radius) * noise
+  noiseY <- runif(1, -radius, radius) * noise
+  d[i, ] <- c(1, x, y)
+}
+colnames(d) <- c("label", "x1", "x2")
+# Plot the training dataset
+# plot(d[,2],d[,3], col=d[,1]+2, pch=16, xlab="x1", ylab="x2")
+# utils$save_pdf("~/papers/twocultures/fig/","nn-circle-2")
+x1 <- seq(-11, 11, length.out = 100)
+```
+
+As a baseline, we first attempt to classify the data using logistic regression:
+    
+```{r circle-lr, echo=T}    
+#| fig-width: 3.2
+#| fig-height: 3
+# Fit a logistic regression model
+fit <- glm(label ~ x1 + x2, data = as.data.frame(d), family = binomial(link = "logit"))
+# Plot the training dataset
+plot(d[, 2], d[, 3], col = d[, 1] + 2, pch = 16 + d[, 1], xlab = expression(x[1]), ylab = expression(x[2]), asp = 1)
+th <- fit$coefficients
+# Plot the decision boundary
+abline(-th[1] / th[3], -th[2] / th[3], col = 2)
+```
+Logistic regression fails to distinguish the classes because the data are not linearly separable. However, we can use multiple lines to separate the data. 
+```{r sep-lines}
+#| fig-width: 3.2
+#| fig-height: 3
+plot(d[, 2], d[, 3], col = d[, 1] + 2, pch = 16 + d[, 1], xlab = expression(x[1]), ylab = expression(x[2]), asp = 1)
+# Plot lines that separate once class (red) from another (green)
+lines(x1, -x1 - 6)
+text(-4.6, -3.6, 1)
+lines(x1, -x1 + 6)
+text(4.6, 3.6, 2)
+lines(x1, x1 - 6)
+text(4.6, -3.6, 3)
+lines(x1, x1 + 6)
+text(-3.6, 4.6, 4)
+```
+Now, we do the same thing as in simple logistic regression and apply the logistic function to each of those lines
+```{r circle-logistic}
+#| echo: true
+# Define sigmoid function
+sigmoid <- function(z) exp(z) / (1 + exp(z))
+
+# Define hidden layer of our neural network
+features <- function(x1, x2) {
+  z1 <- 6 + x1 + x2
+  a1 <- sigmoid(z1) # The bias 6 shifts the decision boundaries
+  z2 <- 6 - x1 - x2
+  a2 <- sigmoid(z2)
+  z3 <- 6 - x1 + x2
+  a3 <- sigmoid(z3)
+  z4 <- 6 + x1 - x2
+  a4 <- sigmoid(z4)
+  return(c(a1, a2, a3, a4))
+}
+```
+Using the matrix notation, we have
+$$
+z = \sigma(Wx + b), ~ W = \begin{bmatrix} 1 & 1 \\ -1 & -1 \\ -1 & 1 \\ 1 & -1 \end{bmatrix}, ~ b = \begin{bmatrix} 6 \\ 6 \\ 6 \\ 6 \end{bmatrix}, ~ \sigma(z) = \frac{1}{1+e^{-z}}
+$$
+
+The model shown above is the first layer of our neural network. It takes a two-dimensional input $x$ and produces a four-dimensional output $z$ which is called a feature vector (in the code, `a1`, ..., `a4` are the components of $z$ and `z1`, ..., `z4` the linear terms before the sigmoid). The feature vector is then passed to the output layer, which applies simple logistic regression to the feature vector.
+$$
+\hat{y} = \sigma(w^\top z + b), ~ w = \begin{bmatrix} 1 \\ 1 \\ 1 \\ 1 \end{bmatrix}, ~ b = -3.1, ~ \sigma(z) = \frac{1}{1+e^{-z}}
+$$
+
+The output of the output layer is the probability of the positive class. 
+```{r circle-nn}
+#| echo: true
+# Calculate prediction (classification) using our neural network
+predict_prob <- function(x) {
+  x1 <- x[1]
+  x2 <- x[2]
+  z <- features(x1, x2)
+  mu <- sum(z) - 3.1
+  sigmoid(mu)
+}
+```
+
+We can use our model to do the predictions now 
+```{r circle-pred}
+#| echo: true
+# Predict the probability of the positive class for a given point
+predict_prob(c(0, 0))
+predict_prob(c(0, 10))
+```
+The model generates sensible predictions. We evaluate the model on a grid of 10,000 points (100 values for each of the two inputs), shade each point by the predicted probability, and draw the data and the four numbered lines on top.
+```{r circle-boundary, echo=c(1,2,4,7,10)}
+#| results: hide
+#| fig-width: 3.2
+#| fig-height: 3
+x1 <- seq(-11, 11, length.out = 100)
+x2 <- seq(-11, 11, length.out = 100)
+# Generate all combinations of (x1,x2) values
+gr <- as.matrix(expand.grid(x1, x2))
+dim(gr)
+# Calculate prediction for each point in the grid
+yhat <- apply(gr, 1, predict_prob)
+length(yhat)
+# Plot everything together
+image(x1, x2, matrix(yhat, ncol = 100), col = gray.colors(20, start = 0.6, end = 1), asp = 1, xlab = expression(x[1]), ylab = expression(x[2]))
+lines(d[, 2], d[, 3], pch = c(21, 24)[d[, 1] + 1], bg = "white", xlab = "x1", ylab = "x2", type = "p")
+lines(x1, -x1 - 6)
+text(-4.6, -3.6, 1)
+lines(x1, -x1 + 6)
+text(4.6, 3.6, 2)
+lines(x1, x1 - 6)
+text(4.6, -3.6, 3)
+lines(x1, x1 + 6)
+text(-3.6, 4.6, 4)
+```
+
+
+How about a regression model? We will use a one-layer neural network to fit a quadratic function. We simulate noisy data from the following model
+$$
+y = 0.5 + 0.3x^2 + \epsilon, ~ \epsilon \sim N(0,0.02^2)
+$$
+We use a single hidden layer with 3 units and the ReLU activation function. The output layer is a single linear unit. The model is defined as follows
+```{r regression}
+#| echo: true
+relu <- function(x) max(0, x)
+nn <- function(W, f = relu) {
+  b0 <- W[1]
+  w0 <- W[2:4]
+  b1 <- W[5]
+  w1 <- W[6:8]
+  z0 <- apply(b0 + outer(x, w0, "*"), 1:2, f)
+  yhat <- b1 + z0 %*% w1
+  return(list(yhat = yhat[, 1], z0 = z0))
+}
+```
+
+The hidden layer has three neurons with a shared bias `b0` and uses the ReLU activation function. The output linear layer has a single output with bias `b1`. The prediction `yhat` is a linear combination of the feature vector `z0`. The function `nn` evaluates the network at the inputs `x`, which are created with the training data below. The model has 8 parameters (1 shared hidden bias + 3 weights + 1 output bias + 3 output weights). Let's generate training data and fit the model. We will use the BFGS optimization algorithm to minimize the sum of squared errors, which under Gaussian noise is the negative log-likelihood up to constants.
+
+```{r}
+#| echo: true
+set.seed(99) # gretzky
+params <- c(0, rnorm(3), 0, rnorm(3))
+x <- seq(-1, 1, 0.02)
+y <- 0.5 + 0.3 * x^2 + rnorm(length(x), 0, 0.02)
+loss <- function(W) sum((nn(W)$yhat - y)^2)
+# BFGS is a quasi-Newton optimization method
+res <- optim(params, loss, method = "BFGS")
+res$par
+```
+@fig-relu shows the quadratic function and the neural network model. The solid black line is the neural network model, and the dashed lines are the basis functions. The model fits the data well.
+
+```{r}
+#| label: fig-relu
+#| fig-cap: "Noisy quadratic function approximated by a neural network with ReLU activation function."
+
+o <- nn(res$par)
+plot(x, y)
+lines(x, o$yhat, lwd = 2)
+lines(x, 0.5 + o$z0[, 1], col = 2, lwd = 2, lty = 2)
+lines(x, 0.5 + o$z0[, 2], col = 3, lwd = 2, lty = 2)
+lines(x, 0.5 + o$z0[, 3], col = 4, lwd = 2, lty = 2)
+```
+
+Let's try the $\tanh$ function
+
+```{r}
+#| fig-cap: "Noisy quadratic function approximated by a neural network with tanh activation function."
+set.seed(8) # gretzky
+params <- c(0, rnorm(3), 0, rnorm(3))
+loss <- function(W) mean((nn(W, f = tanh)$yhat - y)^2)
+res <- optim(params, loss, method = "BFGS")
+o <- nn(res$par, f = tanh)
+plot(x, y, ylim = c(0.4, 0.95))
+lines(x, o$yhat, lwd = 2)
+lines(x, 0.5 * o$z0[, 1] + 0.9, lwd = 2, lty = 2, col = 2)
+lines(x, 0.5 * o$z0[, 2] + 0.9, lwd = 2, lty = 2, col = 3)
+lines(x, 0.5 * o$z0[, 3] + 0.9, lwd = 2, lty = 2, col = 4)
+```
+
+Notice that we did not need to explicitly specify a quadratic term; the neural network discovered this structure from the data.
+
+The same approach extends naturally to interaction terms. Consider the following data-generating process:
+$$
+y = 0.5 + 0.1x_1 + 0.2x_2  + 0.5x_1x_2+ \epsilon, ~ \epsilon \sim N(0,0.02^2)
+$$
+We can use a network of the same kind, with two input variables and two hidden units with the tanh activation. We simulate 200 observations with $x_1$ and $x_2$ drawn independently from the uniform distribution on $(-1, 1)$. The model approximately learns the interaction term from the data.
+```{r}
+#| fig-height: 5
+set.seed(99) # ovi
+x1 <- runif(200, -1, 1)
+x2 <- runif(200, -1, 1)
+y <- 0.5 + 0.1 * x1 + 0.2 * x2 + 0.5 * x1 * x2 + rnorm(length(x1), 0, 0.02)
+library("scatterplot3d")
+s3d <- scatterplot3d(x1, x2, y, pch = 16, cex.axis = 0.5, xlab = expression(x[1]), ylab = expression(x[2]), zlab = "y")
+x <- cbind(x1, x2)
+nn <- function(W, f = relu) {
+  b0 <- W[1]
+  w0 <- W[2:5]
+  b1 <- W[6]
+  w1 <- W[7:8]
+  w0 <- matrix(w0, nrow = 2)
+  z0 <- apply(b0 + x %*% w0, 1:2, f)
+  yhat <- b1 + z0 %*% w1
+  return(list(yhat = yhat[, 1], z0 = z0))
+}
+W <- c(0, rnorm(4), 0, rnorm(2))
+loss <- function(W) sum((nn(W, f = tanh)$yhat - y)^2)
+res <- optim(W, fn = loss, method = "BFGS")
+o <- nn(res$par, f = tanh)
+s3d$points3d(x1, x2, o$yhat, col = 2, pch = 1)
+s3d$points3d(x1, x2, 0.5 * o$z0[, 1] + 0.9, col = 3, pch = 2, cex = 0.5)
+s3d$points3d(x1, x2, 0.5 * o$z0[, 2] + 0.9, col = 4, pch = 3, cex = 0.5)
+legend("top", c("data", "network output", "hidden unit 1 (rescaled)", "hidden unit 2 (rescaled)"), pch = c(16, 1, 2, 3), col = c(1, 2, 3, 4), bty = "n", cex = 0.6, ncol = 2, xpd = NA, inset = c(0, -0.16))
+```
+
+Effectively, neural networks serve as flexible function approximators, analogous to nonparametric regression methods but with the key advantage of learning the basis functions directly from data.
+
+## Activation Functions
+The last output layer of a neural network has sigmoid activation function for binary output variable (classification) and no activation function for continuous output variable regression. The hidden layers can have different activation functions. The most common activation functions are the hyperbolic tangent function and the rectified linear unit (ReLU) function. 
+
+A typical approach is to use the same activation function for all hidden layers. The hyperbolic tangent function is defined as
+$$
+\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}
+$$
+The hyperbolic tangent is related to the sigmoid by $\tanh(z) = 2\,\sigma(2z) - 1$, so $\tanh(0) = 0$. It is a smooth function which is differentiable everywhere.
+
+```{r echo=F}
+#| fig-width: 1.74
+#| fig-height: 1.6
+#| layout-ncol: 3
+#| fig-cap:
+#|   - "tanh"
+#|   - "Hard tanh"
+#|   - "softplus"
+#|   - "ReLU"
+#|   - "Leaky ReLU"
+#|   - "sigmoid"
+x <- seq(-2.5, 2.5, 0.05)
+ytanh <- tanh(x)
+yhardtanh <- pmax(-1, pmin(1, x))
+ysoftplus <- log(1 + exp(x))
+yrelu <- pmax(0, x)
+yleakyrelu <- pmax(0.1 * x, x)
+ysigmoid <- 1 / (1 + exp(-x))
+plot(x, ytanh, type = "l", col = 2, lwd = 2, ylim = c(-1, 1), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+plot(x, yhardtanh, type = "l", col = 2, lwd = 2, ylim = c(-1, 1), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+plot(x, ysoftplus, type = "l", col = 2, lwd = 2, ylim = range(0, ysoftplus), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+plot(x, yrelu, type = "l", col = 2, lwd = 2, ylim = range(yrelu), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+plot(x, yleakyrelu, type = "l", col = 2, lwd = 2, ylim = range(yleakyrelu), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+plot(x, ysigmoid, type = "l", col = 2, lwd = 2, ylim = c(0, 1), xlab = "", ylab = "")
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+```
+
+A significant limitation of sigmoid and tanh functions is their tendency to saturate at extreme input values, causing gradients to vanish. When we try to learn the weights of the network, the optimization algorithms make small steps in the space of the parameters and when the weights are large, the small changes won't affect the values of the layers' outputs, and optimization will "stagnate." 
+
+Consequently, the gradients become negligible, causing the optimization process to stagnate (the "vanishing gradient" problem). The ReLU function is defined as
+$$
+\text{ReLU}(z) = \max(0,z)
+$$
+The ReLU function is a piecewise linear function which is computationally efficient and easy to optimize. The ReLU function is the most commonly used activation function in deep learning. The ReLU function is not differentiable at $z=0$, but it is differentiable everywhere else. The derivative of the ReLU function is
+$$
+\text{ReLU}'(z) = \begin{cases} 0 & \text{if } z < 0 \\ 1 & \text{if } z > 0 \end{cases}
+$$
+
+## Unsupervised Learning: Auto-Encoders
+
+Auto-encoding is an important dimensionality reduction technique. An auto-encoder is a neural network architecture designed to replicate its input $X$, i.e., $Y = X$, via a *bottleneck* structure. The model $F^{W,b}(X)$ learns to compress the information required to recreate $X$ into a lower-dimensional representation. @heaton2016deep provide an application to smart indexing in finance.
+
+Suppose that we have $N$ input vectors $X = \{ x_1 , \ldots , x_N \} \in \mathbb{R}^{M\times N}$ where $N$ is the sample size, and $M$ is the feature dimension, and we wish to reconstruct them. Setting biases to zero, for the purpose of illustration, and using only one hidden layer ($L=2$) with $K < M$ factors, gives for $j=1, \ldots, M$:
+
+$$
+Y_j(x) = F_{W} ( X )_j = \sum_{k=1}^K W^{jk}_2 f \left ( \sum_{i=1}^M W^{ki}_1 x_i \right ) =  \sum_{k=1}^K W^{jk}_2 Z_k \quad \text{for } Z_k =  f \left ( \sum_{i=1}^M W^{ki}_1 x_i \right )
+$$
+
+Since, in an auto-encoder, we fit the model $X = F_{W}( X)$, and *train* the weights $W = (W_1, W_2)$ with regularization penalty
+
+$$
+\hat{W}  =  \operatorname{argmin}_W \Vert X - F_W (X) \Vert^2  + \lambda \phi(W)
+$$
+
+with
+
+$$
+\phi(W) = \sum_{i,j,k} | W^{ki}_1 |^2 +  | W^{jk}_2 |^2.
+$$
+
+Writing the deep learning objective as an augmented Lagrangian using the Alternating Direction Method of Multipliers (ADMM) with a hidden factor $Z$ leads to a two-step algorithm: an encoding step (a penalty for $Z$) and a decoding step for reconstructing the output signal via
+
+$$
+\operatorname{argmin}_{W,Z} \Vert X - W_2 Z \Vert^2 + \lambda \phi(Z) + \Vert Z -  f( W_1, X ) \Vert^2,
+$$
+
+where the regularization on $W_1$ induces a penalty on $Z$. The last term is the encoder; the first two the decoder.
+
+If $W_2$ is estimated from the structure of the training data matrix, then we have a traditional factor model, and the $W_1$ matrix provides the factor loadings. Principal Component Analysis (PCA), Partial Least Squares (PLS), and Sliced Inverse Regression (SIR) fall into this category (see Cook 2007 for further discussion). If $W_2$ is trained based on the pair $\hat{X}=\{Y,X\}$ then we have a sliced inverse regression model. If $W_1$ and $W_2$ are simultaneously estimated based on the training data $X$, then we have a two-layer deep learning model.
+
+Auto-encoding demonstrates that deep learning does not directly model variance-covariance matrix explicitly, as the architecture is already in predictive form. Given a hierarchical non-linear combination of deep learners, an implicit variance-covariance matrix exists, but that is not the driver of the algorithm.
+
+### Dynamic Auto-Encoders
+
+Another interesting area for future research involves applying these concepts to time-series, such as using Long Short Term Memory models (LSTMs). For example, a dynamic one layer auto-encoder for a financial time series $(Y_t)$ is a coupled system of the form
+
+$$
+Y_t = W_x X _t + W_y Y_{t-1} \quad \text{and} \quad \begin{pmatrix} X_t \\ Y_{t-1} \end{pmatrix} = W Y_t
+$$
+
+Here, the state equation encodes and the matrix $W$ decodes the $Y_t$ vector into its history $Y_{t-1}$ and the current state $X_t$.
+
+## Modern Deep Learning Architectures
+
+The evolution of deep learning has led to increasingly sophisticated architectural patterns that go beyond simple stacked layers. Modern systems often combine multiple neural networks, reuse pre-trained components, and employ ensemble methods to improve predictive accuracy.
+
+### Transfer Learning and Pre-trained Blocks
+
+One of the most significant developments in deep learning is the recognition that neural networks learn hierarchical representations, where early layers capture general features and deeper layers encode task-specific patterns. This observation has given rise to *transfer learning*, where models trained on large-scale datasets can be adapted to new tasks with limited data.
+
+Consider the analogy of learning to drive different vehicles. Once you learn to drive a car, adapting to a truck requires learning the differences rather than starting from scratch. Similarly, a neural network trained to recognize objects in millions of images has learned fundamental visual features (edges, textures, shapes) that are useful for many computer vision tasks.
+
+The typical transfer learning workflow involves taking a pre-trained model, removing its final layers, and replacing them with new layers appropriate for the target task. For example, a convolutional neural network (CNN) trained on ImageNet [we discuss CNNs in detail in @sec-cnn] can be adapted for medical image classification by freezing the early convolutional layers and retraining only the final classification layers. The mathematical formulation is straightforward. Let $F_{\text{pre}}(X; \theta_{\text{frozen}})$ represent the pre-trained feature extractor with frozen parameters, and $G(Z; \theta_{\text{new}})$ the new task-specific layers. The complete model becomes:
+
+$$
+\hat{Y} = G(F_{\text{pre}}(X; \theta_{\text{frozen}}); \theta_{\text{new}})
+$$
+
+During training, we only optimize $\theta_{\text{new}}$ while keeping $\theta_{\text{frozen}}$ fixed. This approach has several advantages. First, it dramatically reduces the amount of labeled data required for the new task. Second, it decreases training time since we only update a subset of parameters. Third, it often leads to better generalization, especially when target task data are limited.
+
+Modern frameworks make transfer learning accessible. In natural language processing, transformer-based models like BERT [@devlin2018bert] and GPT [@radford2018improving; @brown2020language] are routinely fine-tuned for downstream tasks such as sentiment analysis, named entity recognition, and question answering. These models, pre-trained on billions of tokens, capture rich linguistic representations that transfer across diverse language tasks [we explore transformers and language models in @sec-nlp and @sec-llm].
+
+The practice of using pre-trained blocks extends beyond simple transfer learning. Modern architectures often incorporate multiple pre-trained components as building blocks. For instance, a system for visual question answering might combine a pre-trained CNN for image encoding with a pre-trained transformer for language understanding, with only a small fusion network trained from scratch.
+
+### Mixture of Experts
+
+As models grow in scale and complexity, a natural question arises: must every parameter be active for every input? The *mixture of experts* (MoE) architecture provides an elegant answer by using different sub-networks (experts) for different inputs, with a gating mechanism that decides which experts to activate.
+
+The core idea traces back to work by @jacobs1991adaptive, but has seen renewed interest in modern large-scale systems. Think of a medical diagnosis system where different specialists (cardiologist, neurologist, oncologist) examine patients based on their symptoms. A triage system routes each patient to the appropriate specialist. Similarly, in an MoE model, a gating network routes inputs to specialized expert networks.
+
+Formally, let $f_1, \ldots, f_K$ denote $K$ expert models (networks), each implementing a function $f_k(X; \theta_k)$. A gating network $g(X; \phi)$ produces a probability distribution over experts, for example:
+$$
+g(X; \phi) = \text{softmax}(W_g X + b_g) \in \mathbb{R}^K
+$$
+
+The final output is a weighted combination of expert predictions:
+
+$$
+\hat{Y}(X) = \sum_{k=1}^K g_k(X; \phi) \cdot f_k(X; \theta_k).
+$$
+
+In practice, to improve computational efficiency, only the top-$N$ experts with the highest gating scores are activated for each input, setting others to zero. This sparse activation pattern allows MoE models to have enormous capacity while maintaining reasonable computational costs.
+
+From a statistical perspective, @jiang1999hierarchical provided important theoretical foundations for mixture of experts models, establishing that hierarchical mixtures of experts (HME) are dense in the space of mean functions. In a companion analysis, @jiang1999approximation showed that for smooth mean functions the approximation error decays at a rate of $O(m^{-2/s})$ in $L_p$ norm, where $m$ is the number of experts, and $s$ is the input dimensionality. Together these results establish that MoE models are universal approximators with quantifiable convergence rates, connecting them to the broader statistical literature on nonparametric regression.
+
+The work by @stroud2003nonlinear demonstrates an elegant application of mixture-of-experts principles within Bayesian inference for complex time series models. Their approach addresses the fundamental challenge of estimating hidden states in nonlinear state-space models where exact inference is mathematically intractable. The core innovation lies in using an auxiliary mixture model to approximate the intractable nonlinear components. This auxiliary model functions as a mixture of experts, where each expert is a simple linear regression model of the form $p^{a}(y_{t}\mid x_{t},z_{t}=k) = \mathcal{N}(\alpha_{k}+\beta_{k}x_{t},\tau_{k}^{2})$. These linear experts provide local approximations of the true nonlinear function around specific "knots" in the state space. The gating mechanism employs state-dependent weights $\pi_{k}(x_{t})$ (Stroud's notation for what we call $g_k$ above) determined by Gaussian kernels centered at different locations. The current hidden state value $x_t$ serves as input to this gating network, which determines the relevance of each linear expert for that particular region of the state space.
+
+A critical theoretical challenge with MoE models is *identifiability*: can the model parameters be uniquely determined from the data? @jiang1999identifiability showed that without constraints, MoE models suffer from inherent non-identifiability due to invariant transformations. For example, permuting expert labels or translating gating parameters can yield identical predictions. They established that by imposing order restrictions on expert parameters (such as requiring experts to be ordered by their intercepts) and proper initialization of gating parameters, MoE systems become identifiable.
+
+@fedus2022switch trained a mixture of experts language model with 1.6 trillion parameters, where only a small fraction are active for any given input. The model achieves strong performance while requiring less computation per token than dense models of comparable quality. Similarly, @riquelme2021scaling showed that vision transformers with mixture of experts layers can achieve better accuracy-computation trade-offs than their dense counterparts.
+
+The gating mechanism introduces an interesting learning problem: the network must simultaneously learn to specialize experts and to route inputs appropriately. Various training strategies have been proposed, including auxiliary losses that encourage load balancing across experts and techniques to promote expert specialization [@shazeer2017outrageously].
+
+### Ensembles
+
+While mixture of experts learns a single integrated model with internal routing, *ensemble methods* combine predictions from multiple independently trained models. The rationale is straightforward: different models trained on the same data often make different errors, and averaging their predictions can reduce variance and improve overall performance.
+
+Ensemble methods have a long history in statistics and machine learning. The classical result from @dietterich2000ensemble shows that an ensemble is effective when individual models are accurate and diverse. Consider $M$ models $f_1, \ldots, f_M$. For regression, a simple ensemble averages predictions:
+
+$$
+\hat{Y}_{\text{ensemble}}(X) = \frac{1}{M} \sum_{m=1}^M f_m(X)
+$$
+
+For classification, we can use majority voting or average the predicted probabilities. The bias-variance decomposition provides insight into why ensembles work. The expected squared error of a single model can be written as:
+
+$$
+\E{(Y - f(X))^2} = \text{Bias}^2 + \text{Variance} + \sigma_\epsilon^2
+$$
+
+Here $\sigma_\epsilon^2$ is the variance of the noise in $Y$, the irreducible part of the error that no model can remove. If we average $M$ models with the same bias but independent estimation errors, the variance term reduces by a factor of $M$, assuming the models are uncorrelated. In practice, models are not perfectly independent, but ensembles still reduce variance; see @dietterich2000ensemble for analysis.
+
+In deep learning, several ensemble strategies are commonly employed:
+
+1. *Model averaging*: Train multiple neural networks with different random initializations or architectures, then average their predictions at test time.
+
+2. *Snapshot ensembles* [@huang2017snapshot]: Save model checkpoints at various points during training (particularly at local minima) and ensemble them.
+
+3. *Multi-architecture ensembles*: Combine models with different architectures (e.g., CNNs, transformers, and recurrent networks) to capture complementary patterns.
+
+A particularly effective technique is *dropout as ensemble* [@srivastava2014dropout]. During training, dropout randomly deactivates neurons with probability $p$. At test time, all neurons are active but their outputs are scaled by $(1-p)$. @gal2016dropout showed that this can be interpreted as approximate Bayesian inference, where dropout at test time (called Monte Carlo dropout) produces an ensemble of sub-networks, providing both predictions and uncertainty estimates.
+
+The computational cost of ensembles is their main drawback: inference requires running multiple models. However, the reliability gains are often worth the expense, particularly in high-stakes applications like medical diagnosis, autonomous driving, and financial forecasting. Modern competitions frequently use ensembles: among the 29 winning solutions published on Kaggle's blog in 2015, 17 used XGBoost (a library for gradient-boosted trees), eight of them alone and most of the other nine in an ensemble with neural networks [@chen2016xgboost].
+
+### Architectural Innovations
+
+These three paradigms (pre-trained blocks, mixture of experts, and ensembles) represent different philosophies for building capable systems. Transfer learning emphasizes knowledge reuse, recognizing that representations learned on large datasets are broadly useful. Mixture of experts emphasizes conditional computation, activating only relevant capacity for each input. Ensembles emphasize diversity and robustness, combining multiple perspectives to improve reliability.
+
+
+Modern systems often combine these approaches. For instance, a production system might ensemble multiple models, each of which uses pre-trained components and employs mixture of experts layers for efficiency. The field continues to develop new architectural patterns, but these fundamental ideas (reusing learned knowledge, routing computation dynamically, and aggregating diverse predictions) are likely to remain central to deep learning practice.
+
+## Summary
+
+In this chapter, we introduced the mathematical foundations of neural networks and deep learning. We began by establishing that neural networks are hierarchical compositions of nonlinear transformations, a framework that extends generalized linear models while providing the flexibility to learn complex patterns from data. Key concepts covered include:
+
+- *Feedforward architecture*: A neural network applies successive layers of weighted linear combinations followed by nonlinear activation functions, extracting increasingly abstract features at each layer.
+
+- *Activation functions*: Functions like ReLU, $\tanh$, and sigmoid introduce nonlinearity, enabling networks to approximate arbitrary functions. ReLU has become the default choice for hidden layers due to its computational efficiency and favorable gradient properties.
+
+- *Auto-encoders*: These networks learn compressed representations by training to reconstruct their inputs through a bottleneck layer, enabling unsupervised dimensionality reduction and anomaly detection.
+
+- *Transfer learning and pre-trained blocks*: Knowledge learned on large datasets can be transferred to new tasks, dramatically reducing data and computation requirements.
+
+- *Mixture of experts*: Conditional computation allows models to activate only relevant sub-networks for each input, enabling massive scale with manageable computational costs.
+
+- *Ensemble methods*: Combining diverse models improves robustness and reduces variance, with techniques ranging from simple averaging to dropout-based approximations.
+
+The implementations presented in this chapter, from simple classification problems to regression with learned basis functions, demonstrate that neural networks can be understood through the lens of traditional statistical methods while offering capabilities that extend far beyond them.
+
+Looking ahead, the next two chapters develop the theoretical and computational foundations: @sec-theorydl establishes why deep networks can approximate complex functions so effectively, and @sec-sgd covers the optimization algorithms that make training feasible at scale. With those foundations in place, @sec-cnn covers *convolutional neural networks* (CNNs), which exploit spatial structure in images through weight sharing and local connectivity. @sec-nlp and @sec-llm introduce *transformers* and *large language models*, architectures that have transformed natural language processing through attention mechanisms and massive scale. These architectures build directly on the principles established in this chapter: layered representations, learned features, and the power of deep hierarchical computation.
+
+## Exercises {.unnumbered}
+
+{{< include ./ex/18-nn-ex.qmd >}}

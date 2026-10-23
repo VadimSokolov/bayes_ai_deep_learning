@@ -1,0 +1,43 @@
+# Requirements for Bayesian AI Book Project
+# This file contains Python dependencies for running the code examples,
+# Jupyter notebooks, and Python code blocks in the Quarto book
+
+# NOTE: To get exact versions from your working environment, run:
+# pip freeze > requirements.txt
+# or
+# conda list --export > environment.yml
+
+# Core Scientific Computing
+numpy>=2.0
+pandas
+scipy
+matplotlib
+seaborn
+pyarrow
+
+# Machine Learning and Deep Learning
+torch
+transformers
+scikit-learn
+
+# JAX ecosystem (used extensively in the book)
+jax
+jaxlib
+
+# Jupyter and Notebook support
+jupyter
+ipykernel
+notebook
+
+# Web Scraping and Data Retrieval
+beautifulsoup4
+requests
+
+
+# Natural Language Processing
+nltk
+gensim
+
+# Temporal fusion transformer of chapter 15 (code/15-forecasting-tft.py only)
+lightning
+pytorch-forecasting

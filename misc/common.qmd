@@ -1,0 +1,83 @@
+```{r setup, include=F, cache=FALSE}
+# cache=FALSE is required: this chunk's work is side effects on knitr's global
+# state (the `pars` hook, opts_chunk, options()), not R objects. A cached chunk is
+# never evaluated, it is only lazy-loaded, so caching it silently restores fmt()
+# and friends while dropping the hook, and every later plot falls back to R's
+# default margins. That is what produced squashed figures after a partial re-render.
+knitr::opts_knit$set(global.par = TRUE)
+source("code/common.R")  # libraries, options, getSymbols cache, fmt(): the setup of the stand-alone code files
+
+# Apply the par settings of book_par() before every plot chunk
+knitr::knit_hooks$set(pars = function(before, options, envir) {
+  if (before) book_par()
+})
+
+# Enable the hook globally for all chunks
+knitr::opts_chunk$set(pars = TRUE)
+
+
+# knitr::opts_knit$set(R.options = list(digits = 3))
+# knitr::opts_chunk$set(digits = 3)
+# knitr::opts_chunk$set(fig.width = if (knitr::is_latex_output()) 4.67 else 8)
+
+incgraphfn <- function(fn, html = ".svg") {
+  outputFormat <- knitr:::pandoc_to()
+  if (outputFormat %in% c("latex", "beamer")) {
+    fn <- paste0(fn, ".pdf")
+  } else if (outputFormat == "html") {
+    fn <- paste0(fn, html)
+  }
+  return(fn)
+}
+
+
+# https://stackoverflow.com/questions/22524822/how-can-i-remove-the-prefix-index-indicator-1-in-knitr-output
+# Make sure to keep the default for normal processing.
+default_output_hook <- knitr::knit_hooks$get("output")
+
+# Output hooks handle normal R console output.
+knitr::knit_hooks$set(output = function(x, options) {
+  comment <- knitr::opts_current$get("comment")
+  if (is.na(comment)) comment <- ""
+  can_null <- grepl(paste0(comment, "\\s*\\[\\d?\\]"),
+    x,
+    perl = TRUE
+  )
+  do_null <- isTRUE(knitr::opts_current$get("null_prefix"))
+  if (can_null && do_null) {
+    # By default R print output aligns at the right brace.
+    align_index <- regexpr("\\]", x)[1] - 1
+    # Two cases: start or newline
+    re <- paste0("^.{", align_index, "}\\]")
+    rep <- comment
+    x <- gsub(re, rep, x)
+    re <- paste0("\\\n.{", align_index, "}\\]")
+    rep <- paste0("\n", comment)
+    x <- gsub(re, rep, x)
+  }
+
+  default_output_hook(x, options)
+})
+
+# KDP wants every font of the interior embedded and R's pdf device only names Helvetica and Symbol: embed them in each PDF figure as it is written.
+source("misc/embed-fonts.R")
+default_plot_hook <- knitr::knit_hooks$get("plot")
+knitr::knit_hooks$set(plot = function(x, options) {
+  embed_pdf_fonts(x)
+  default_plot_hook(x, options)
+})
+
+knitr::opts_template$set("kill_prefix" = list(comment = NA, null_prefix = TRUE))
+
+# Output of chunks that are not run at render (eval: false) is kept in results/<chapter>/ and shown from there. NAME is "chapter/chunk";
+# the code that makes it is in code/. Figures are NAME-1.png, NAME-2.png, ... (PNG for HTML and EPUB, vector PDF for print), text is NAME.txt, tables are NAME.md.
+cached_files <- function(name, ext) {
+  f <- Sys.glob(file.path("results", sprintf("%s-*.%s", name, ext)))
+  k <- suppressWarnings(as.integer(sub(sprintf("\\.%s$", ext), "", substring(basename(f), nchar(basename(name)) + 2))))
+  if (all(is.na(k))) stop("no cached ", ext, " files for ", name, " in results/")
+  f[!is.na(k)][order(k[!is.na(k)])]
+}
+cached_fig <- function(name) knitr::include_graphics(cached_files(name, if (knitr::is_latex_output()) "pdf" else "png"))
+cached_text <- function(name) cat(readLines(file.path("results", paste0(name, ".txt"))), sep = "\n")
+cached_md <- function(name) cat(readLines(file.path("results", paste0(name, ".md"))), sep = "\n")
+```

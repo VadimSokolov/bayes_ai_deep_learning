@@ -1,0 +1,800 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## James-Stein Estimation
+
+Consider the normal means problem: $y_i \mid \theta_i \sim N(\theta_i, 1)$ for $i = 1, \ldots, p$ with $p = 5$. You observe $y = (3, -1, 2, 0, 1)^T$.
+
+a) Write the MLE estimator $\hat{\theta}_{\text{MLE}}$ and compute the risk $R(\theta, \hat{\theta}_{\text{MLE}}) = \E{\lVert \hat{\theta} - \theta \rVert^2}$.
+b) The James-Stein estimator is:
+$$
+\hat{\theta}_i^{JS} = \left(1 - \frac{p - 2}{\lVert y \rVert^2}\right) y_i
+$$
+Compute $\hat{\theta}^{JS}$ for the observed $y$.
+c) Compute the shrinkage factor $(p-2)/\lVert y \rVert^2$. What fraction of the MLE is retained?
+d) Explain why the James-Stein estimator does not dominate the MLE when $p \leq 2$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The MLE is $\hat{\theta}_{\text{MLE}} = y = (3, -1, 2, 0, 1)^T$. The risk is $R = p \cdot 1 = 5$ (sum of $p$ unit variances).
+
+b) Compute:
+$$
+\lVert y \rVert^2 = 9 + 1 + 4 + 0 + 1 = 15
+$$
+Shrinkage factor: $(p-2)/\lVert y \rVert^2 = 3/15 = 0.2$.
+
+$\hat{\theta}^{JS} = (1 - 0.2) \cdot y = 0.8 \cdot (3, -1, 2, 0, 1) = (2.4, -0.8, 1.6, 0, 0.8)$.
+
+c) The shrinkage factor is 0.2, so 80% of the MLE is retained. Each estimate is pulled 20% toward zero.
+
+d) The JS shrinkage factor is $(p-2)/\lVert y \rVert^2$. For $p = 2$, the numerator $(p-2) = 0$, so the shrinkage factor is zero and JS equals the MLE exactly (no improvement). For $p = 1$, the numerator $(p-2) = -1$ is negative, meaning JS would *expand* estimates away from zero rather than shrink them, which increases risk rather than decreasing it. The JS dominance result requires $p \geq 3$ because only then does the positive shrinkage factor $(p-2) > 0$ produce a guaranteed risk reduction. This is Stein's paradox: inadmissibility of the MLE is a fundamentally multivariate phenomenon that requires at least three dimensions.
+:::
+:::
+
+::: {#exr-posterior-mean-optimality}
+## Optimality of the Posterior Mean under Squared Error Loss
+
+The chapter's risk-decomposition subsection asserts that, under squared error estimation loss, the optimal Bayes' rule is "simply the posterior mean" $\delta^\star(x) = \E{\theta \mid x}$ (see @sec-unbiasedness-optimality). This exercise supplies the derivation that every later shrinkage estimator (James-Stein, ridge, horseshoe, spike-and-slab posterior means) implicitly relies on. Work with an arbitrary posterior $p(\theta\mid x)$ for a scalar $\theta$ (not necessarily normal), squared error loss $\mathcal{L}(\theta,\delta) = (\theta-\delta)^2$, and the posterior Bayes risk
+$$
+R_n(\pi,\delta) = \int_x m(x)\left\{\int_\Theta \mathcal{L}(\theta,\delta(x))\,p(\theta\mid x)\,d\theta\right\}dx .
+$$
+
+a) Fix $x$ and let $\delta = \delta(x)$ be any real number. By adding and subtracting $m \defeq \E{\theta\mid x}$ inside the square, show that
+$$
+\E{(\theta-\delta)^2 \mid x} = \Var{\theta\mid x} + (\delta - \E{\theta\mid x})^2 .
+$$
+Conclude that the inner (posterior expected) loss is minimized, for every $x$, uniquely at $\delta^\star(x) = \E{\theta\mid x}$, with minimum value $\Var{\theta\mid x}$.
+
+b) Explain why minimizing the inner integral pointwise in $x$, as in part (a), also minimizes $R_n(\pi,\delta)$ over all decision rules $\delta(\cdot)$: why does "minimize separately at every $x$" give the same answer as "minimize jointly over the whole function $\delta$"? Use $m(x)\ge0$ and the fact that the value $\delta(x)$ chosen at one $x$ does not affect the loss incurred at any other $x$.
+
+c) Specialize to $y\mid\theta \sim N(\theta,\sigma^2)$ with prior $\theta\sim N(\mu_0,\tau^2)$. Write $\E{\theta\mid y}$ explicitly and confirm it has the shrinkage form $wy + (1-w)\mu_0$ for some $w\in(0,1)$. In one or two sentences, explain why the *general* result of parts (a) and (b), not the conjugate normal-normal algebra, is what guarantees that no unshrunk rule, in particular the MLE $\delta(y)=y$, can beat this shrinkage rule in Bayes risk under this prior.
+
+d) Now take absolute error loss $\mathcal{L}(\theta,\delta)=|\theta-\delta|$. Without repeating the algebra of part (a), state what $\delta^\star(x)$ becomes (you may use the standard fact that a median minimizes mean absolute deviation), and explain why this is a second instance of the same principle from part (b): the optimal rule is determined entirely by the loss together with the posterior $p(\theta\mid x)$, regardless of which likelihood or prior produced that posterior.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Let $m \defeq \E{\theta\mid x}$ and expand
+$$
+(\theta-\delta)^2 = \big((\theta-m)+(m-\delta)\big)^2 = (\theta-m)^2 + 2(\theta-m)(m-\delta) + (m-\delta)^2 .
+$$
+Taking the posterior expectation $\E{\cdot\mid x}$ term by term: the first gives $\E{(\theta-m)^2\mid x} = \Var{\theta\mid x}$; the cross term gives $2(m-\delta)\,\E{\theta-m\mid x} = 0$, since $\E{\theta\mid x} = m$; the last is constant given $x$. Hence
+$$
+\E{(\theta-\delta)^2\mid x} = \Var{\theta\mid x} + (\delta-m)^2 \;\ge\; \Var{\theta\mid x},
+$$
+with equality if and only if $\delta = m$. So the pointwise minimizer is unique, $\delta^\star(x) = \E{\theta\mid x}$, with minimum value $\Var{\theta\mid x}$.
+
+b) Write the inner posterior expected loss as $g(x,\delta(x)) \defeq \int_\Theta \mathcal{L}(\theta,\delta(x))\,p(\theta\mid x)\,d\theta$, so $R_n(\pi,\delta) = \int_x m(x)\,g(x,\delta(x))\,dx$. The number $\delta(x)$ enters the integrand only through $g(x,\delta(x))$ and appears in $g(x',\cdot)$ for no other $x'\neq x$: the decision rule is an *unconstrained* function, so its values at different points are chosen independently. By part (a), for every $x$ and every competing rule $\delta$, $g(x,\delta^\star(x)) \le g(x,\delta(x))$; multiplying by the nonnegative weight $m(x)$ preserves the inequality, and integrating preserves it as well, giving $R_n(\pi,\delta^\star) \le R_n(\pi,\delta)$. Thus pointwise minimization equals global minimization. (This coupling-free argument fails if $\delta$ is restricted to a parametric class, e.g., linear rules, because then the value at one $x$ constrains the values at others and the pointwise minimizer need not be attainable.)
+
+c) Conjugate normal-normal updating gives $\theta\mid y \sim N(m, s^2)$ with
+$$
+\E{\theta\mid y} = \frac{y/\sigma^2 + \mu_0/\tau^2}{1/\sigma^2 + 1/\tau^2} = \frac{\tau^2}{\sigma^2+\tau^2}\,y + \frac{\sigma^2}{\sigma^2+\tau^2}\,\mu_0 ,
+$$
+i.e., $w = \tau^2/(\sigma^2+\tau^2) \in (0,1)$. (For $\sigma^2=1,\tau^2=2,\mu_0=0.5,y=3$ this is $w=2/3$ and $\E{\theta\mid y}=2.167$, versus the MLE $y=3$.) Parts (a) and (b) show that this posterior mean is the unique Bayes-risk minimizer among *all* rules $\delta(y)$, not merely among shrinkage-shaped candidates; so the unshrunk MLE $\delta(y)=y$, which differs from $\E{\theta\mid y}$ whenever $w<1$, has strictly larger Bayes risk under this prior. It is this general optimality fact, not the specific conjugate algebra, that underlies why ridge- and James-Stein-type shrinkage dominate the MLE in Bayes risk. (Domination in frequentist risk at every $\theta$ simultaneously, as in Stein's paradox, is a separate and stronger statement requiring $p\ge3$.)
+
+d) Under absolute error loss, $\delta^\star(x) = \operatorname{median}(\theta\mid x)$, the posterior median, because the median minimizes mean absolute deviation for any distribution. This is the same two-step logic as part (b): minimize the posterior expected loss pointwise (now a different functional of the posterior, the median instead of the mean), and note that pointwise minimization equals global minimization since the rule is unconstrained. Only the functional changes with the loss; the optimal rule depends on the loss and the posterior alone, matching the chapter's summary that squared error yields the posterior mean while absolute error yields the posterior median.
+:::
+:::
+
+::: {#exr-}
+## Ridge Regression Derivation
+
+Consider the penalized least squares problem:
+$$
+\hat{\beta}_{\text{ridge}} = \arg\min_\beta \lVert y - X\beta \rVert_2^2 + \lambda \lVert \beta \rVert_2^2
+$$
+
+a) Take the gradient with respect to $\beta$, set it to zero, and derive the closed-form solution.
+b) Show that as $\lambda \to 0$, the solution approaches the OLS estimator, and as $\lambda \to \infty$, the solution approaches zero.
+c) Show that Ridge regression is equivalent to the MAP estimate under the prior $\beta \sim N(0, \sigma_\beta^2 I)$ with $\lambda = \sigma^2 / \sigma_\beta^2$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The objective is $L(\beta) = (y - X\beta)^T(y - X\beta) + \lambda \beta^T \beta$.
+
+Taking the gradient:
+$$
+\nabla_\beta L = -2X^T(y - X\beta) + 2\lambda\beta = 0
+$$
+$$
+X^T X \beta + \lambda \beta = X^T y
+$$
+$$
+(X^T X + \lambda I)\beta = X^T y
+$$
+$$
+\hat{\beta}_{\text{ridge}} = (X^T X + \lambda I)^{-1} X^T y
+$$
+
+b) As $\lambda \to 0$: $(X^T X + 0 \cdot I)^{-1} X^T y = (X^T X)^{-1} X^T y = \hat{\beta}_{\text{OLS}}$.
+
+As $\lambda \to \infty$: $(X^T X + \lambda I)^{-1} \approx \lambda^{-1} I$, so $\hat{\beta} \approx \lambda^{-1} X^T y \to 0$.
+
+c) Under the Gaussian likelihood $y \mid \beta \sim N(X\beta, \sigma^2 I)$ and prior $\beta \sim N(0, \sigma_\beta^2 I)$:
+$$
+-\log p(\beta \mid y) = \frac{1}{2\sigma^2}\lVert y - X\beta \rVert^2 + \frac{1}{2\sigma_\beta^2}\lVert \beta \rVert^2 + \text{const}
+$$
+Minimizing is equivalent to minimizing:
+$$
+\lVert y - X\beta \rVert^2 + \frac{\sigma^2}{\sigma_\beta^2}\lVert \beta \rVert^2
+$$
+which is Ridge regression with $\lambda = \sigma^2/\sigma_\beta^2$.
+:::
+:::
+
+::: {#exr-}
+## Prior-Penalty Duality
+
+Show that the Lasso penalty corresponds to a Laplace (double exponential) prior on the regression coefficients.
+
+a) Write the Laplace prior density: $p(\beta_j \mid b) = \frac{1}{2b}\exp(-|\beta_j|/b)$.
+b) For $p$ independent coefficients, write $-\log p(\beta)$ and show it equals $\frac{1}{b}\sum_j |\beta_j|$ plus a constant.
+c) Combine with the Gaussian log-likelihood to show that the MAP estimate is the Lasso solution. What is $\lambda$ in terms of model parameters?
+d) Explain why the Laplace prior produces *exact* zeros (sparsity) while the Gaussian prior (Ridge) does not.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $p(\beta_j \mid b) = \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)$
+
+b) For independent coefficients:
+$$
+-\log p(\beta) = -\sum_{j=1}^p \log p(\beta_j) = \sum_{j=1}^p \left(\log(2b) + \frac{|\beta_j|}{b}\right) = p\log(2b) + \frac{1}{b}\sum_{j=1}^p |\beta_j|
+$$
+
+c) The negative log-posterior is:
+$$
+\frac{1}{2\sigma^2}\lVert y - X\beta \rVert^2 + \frac{1}{b}\sum_j |\beta_j| + \text{const}
+$$
+Multiplying by $2\sigma^2$:
+$$
+\lVert y - X\beta \rVert^2 + \frac{2\sigma^2}{b}\lVert \beta \rVert_1
+$$
+This is the Lasso with $\lambda = 2\sigma^2/b$.
+
+d) The Laplace prior has a cusp (non-differentiable point) at $\beta_j = 0$. The subdifferential at zero is the interval $[-1/b, 1/b]$. If the data gradient at $\beta_j = 0$ falls within this interval, the optimum stays at zero. The Gaussian prior has a smooth (differentiable) density everywhere, so the gradient is always well-defined and the optimum is generically nonzero.
+:::
+:::
+
+::: {#exr-}
+## True/False: Regularization
+
+a) The zero-centered (original) James-Stein estimator always shrinks toward the origin (zero vector).
+
+b) Ridge regression can set coefficients exactly to zero.
+
+c) Empirical Bayes estimates the hyperparameters $(\mu, \tau^2)$ from the marginal likelihood rather than placing a prior on them.
+
+d) The data weight in the normal-normal model is $\tau^2/(\sigma^2 + \tau^2)$, which approaches 1 when $\tau^2 \gg \sigma^2$.
+
+e) In the normal means problem, the MLE is admissible for $p = 2$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) True. The zero-centered (original) JS estimator shrinks toward zero. The positive-part JS estimator and generalized versions (e.g., the grand-mean-centered estimator in the Computing exercises) can shrink toward other targets.
+
+b) False. Ridge regression shrinks coefficients toward zero but never reaches exactly zero. Only Lasso ($\ell_1$ penalty) produces exact zeros.
+
+c) True. Empirical Bayes uses the data to estimate hyperparameters via maximum marginal likelihood: $(\hat{\mu}, \hat{\tau}^2) = \arg\max m(y \mid \mu, \tau^2)$. This avoids specifying a full hierarchical prior on the hyperparameters.
+
+d) True. The data weight $\tau^2/(\sigma^2 + \tau^2) \to 1$ when $\tau^2 \gg \sigma^2$: the prior is diffuse, so the data dominate and the posterior mean is close to the MLE. The complementary shrinkage weight $\sigma^2/(\sigma^2 + \tau^2) \to 0$ in this limit.
+
+e) True. For $p \leq 2$, the MLE is admissible under squared error loss. Stein's paradox (inadmissibility of MLE) requires $p \geq 3$.
+:::
+:::
+
+::: {#exr-horseshoe-shrinkage}
+## Horseshoe Shrinkage Factors
+
+Consider the normal means problem $y_i \mid \beta_i \sim N(\beta_i, 1)$ for $i = 1, \ldots, p$, with the horseshoe prior [@carvalho2010horseshoe]
+$$
+\beta_i \mid \lambda_i \sim N(0, \lambda_i^2), \qquad \lambda_i \sim \text{Cauchy}^+(0,1),
+$$
+where $\text{Cauchy}^+(0,1)$ has density $p(\lambda_i) = \dfrac{2}{\pi(1+\lambda_i^2)}$ for $\lambda_i > 0$ (the global scale $\tau$ is fixed at 1 throughout, for simplicity). Define the shrinkage weight
+$$
+\kappa_i \defeq \frac{1}{1+\lambda_i^2} \in (0,1),
+$$
+so that $\kappa_i \to 0$ corresponds to no shrinkage and $\kappa_i \to 1$ corresponds to complete shrinkage toward zero.
+
+a) Using conjugate Normal-Normal updating, show that conditional on $\lambda_i$,
+$$
+\E{\beta_i \mid y_i, \lambda_i} = (1-\kappa_i)y_i, \qquad \Var{\beta_i \mid y_i, \lambda_i} = 1-\kappa_i.
+$$
+
+b) Using the change of variables $\kappa_i = 1/(1+\lambda_i^2)$, derive the induced prior density of $\kappa_i$ and show that $\kappa_i \sim \text{Beta}(1/2,1/2)$:
+$$
+p(\kappa_i) = \frac{1}{\pi}\kappa_i^{-1/2}(1-\kappa_i)^{-1/2}, \qquad \kappa_i \in (0,1).
+$$
+Explain why this density has (integrable) spikes at $\kappa_i=0$ and $\kappa_i=1$, and interpret this "horseshoe"-shaped prior as a statement about each coefficient being either almost pure signal or almost pure noise.
+
+c) In the canonical (orthogonal) basis, Ridge places a single fixed prior $\beta_i \sim N(0,\sigma_\beta^2)$ on every coefficient. Using the prior-penalty duality $\lambda_{\text{pen}} = 1/\sigma_\beta^2$ (noise variance 1), derive the implied shrinkage weight $\kappa^{\text{ridge}}$ in the same $(1-\kappa)y_i$ parametrization as part (a). Contrast the distribution of $\kappa^{\text{ridge}}$ with that of $\kappa_i$ from part (b): what does it mean for one to be a point mass and the other $\text{Beta}(1/2,1/2)$?
+
+d) Using the fact that, marginalizing over $\beta_i$, $y_i \mid \lambda_i \sim N(0, 1+\lambda_i^2)$, argue informally that as $|y_i| \to \infty$ the posterior of $\lambda_i$ given $y_i$ concentrates on increasingly large values, so that $\E{\kappa_i \mid y_i} \to 0$ and
+$$
+\E{\beta_i \mid y_i} = (1 - \E{\kappa_i \mid y_i})\, y_i \; \longrightarrow \; y_i.
+$$
+Contrast this with Ridge, for which $\E{\beta_i \mid y_i} = (1-\kappa^{\text{ridge}})y_i$ for the same fixed $\kappa^{\text{ridge}}$ regardless of $|y_i|$. Which estimator is asymptotically unbiased for large signals, and which one shrinks every signal by the same proportion no matter how large it is?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Given $\lambda_i$, we have the conjugate pair $y_i \mid \beta_i \sim N(\beta_i,1)$ and $\beta_i \mid \lambda_i \sim N(0,\lambda_i^2)$. Standard Normal-Normal conjugacy gives
+$$
+\beta_i \mid y_i, \lambda_i \sim N\left(\frac{\lambda_i^2}{1+\lambda_i^2}y_i, \; \frac{\lambda_i^2}{1+\lambda_i^2}\right).
+$$
+Since $\kappa_i = 1/(1+\lambda_i^2)$, we have $1-\kappa_i = \lambda_i^2/(1+\lambda_i^2)$, so both the posterior mean and posterior variance equal $(1-\kappa_i)$ times $y_i$ and $1$ respectively:
+$$
+\E{\beta_i \mid y_i,\lambda_i} = (1-\kappa_i) y_i, \qquad \Var{\beta_i \mid y_i,\lambda_i} = 1-\kappa_i.
+$$
+
+b) The map $\lambda_i \mapsto \kappa_i = 1/(1+\lambda_i^2)$ is a strictly decreasing bijection from $(0,\infty)$ to $(0,1)$, with inverse $\lambda_i = \sqrt{(1-\kappa_i)/\kappa_i}$. Differentiating $\lambda_i^2 = \kappa_i^{-1}-1$ gives $2\lambda_i \, d\lambda_i = -\kappa_i^{-2}d\kappa_i$, so
+$$
+\left|\frac{d\lambda_i}{d\kappa_i}\right| = \frac{1}{2\lambda_i \kappa_i^2}.
+$$
+By the change-of-variables formula, and using $1+\lambda_i^2 = 1/\kappa_i$,
+$$
+p(\kappa_i) = p(\lambda_i)\left|\frac{d\lambda_i}{d\kappa_i}\right| = \frac{2}{\pi(1+\lambda_i^2)}\cdot\frac{1}{2\lambda_i\kappa_i^2} = \frac{2\kappa_i}{\pi}\cdot\frac{1}{2\kappa_i^2\lambda_i} = \frac{1}{\pi\kappa_i\lambda_i}.
+$$
+Substituting $\lambda_i = \sqrt{(1-\kappa_i)/\kappa_i}$,
+$$
+p(\kappa_i) = \frac{1}{\pi \kappa_i}\sqrt{\frac{\kappa_i}{1-\kappa_i}} = \frac{1}{\pi}\kappa_i^{-1/2}(1-\kappa_i)^{-1/2}.
+$$
+Since $B(1/2,1/2) = \Gamma(1/2)^2/\Gamma(1) = \pi$, this is exactly the $\text{Beta}(1/2,1/2)$ density. The exponents $-1/2$ on both $\kappa_i$ and $1-\kappa_i$ produce integrable singularities at the two endpoints (each behaves like $x^{-1/2}$ near a boundary, and $\int_0^\epsilon x^{-1/2}dx < \infty$), so the density is a proper distribution despite blowing up at $0$ and $1$; this U-shape, high density near the endpoints and low density in the middle, is the origin of the "horseshoe" name. A priori, the model expects most $\kappa_i$ to sit near $0$ (essentially no shrinkage, a real signal) or near $1$ (essentially total shrinkage, pure noise), and assigns little prior mass to intermediate, partial shrinkage. This bimodal prior is precisely the mechanism that lets some coordinates escape shrinkage almost entirely while others are killed almost entirely.
+
+c) With noise variance 1 and prior $\beta_i \sim N(0,\sigma_\beta^2)$, conjugacy gives posterior mean $\E{\beta_i \mid y_i} = \frac{\sigma_\beta^2}{1+\sigma_\beta^2}y_i$. Writing $\sigma_\beta^2 = 1/\lambda_{\text{pen}}$,
+$$
+\E{\beta_i \mid y_i} = \frac{1/\lambda_{\text{pen}}}{1+1/\lambda_{\text{pen}}}y_i = \frac{1}{1+\lambda_{\text{pen}}}y_i,
+$$
+so in the $(1-\kappa)y_i$ parametrization, $\kappa^{\text{ridge}} = 1 - \dfrac{1}{1+\lambda_{\text{pen}}} = \dfrac{\lambda_{\text{pen}}}{1+\lambda_{\text{pen}}}$. Because $\lambda_{\text{pen}}$ is a single number chosen once (e.g., by cross-validation) and shared by every coefficient, $\kappa^{\text{ridge}}$ is a degenerate random variable, a point mass at one value, identical across $i$: there is no mechanism by which one coefficient can receive less shrinkage than another. The horseshoe's $\kappa_i \sim \text{Beta}(1/2,1/2)$, by contrast, is drawn independently for each coordinate and then updated by that coordinate's own data $y_i$, so some coefficients can end up with $\kappa_i$ near 0 while others end up near 1. Ridge can only dial a single global shrinkage knob for all coefficients simultaneously; the horseshoe adapts locally, coefficient by coefficient.
+
+d) Marginalizing over $\beta_i$, $y_i \mid \lambda_i \sim N(0,1+\lambda_i^2)$, so the posterior density of $\lambda_i$ given $y_i$ is proportional to
+$$
+\pi(\lambda_i \mid y_i) \propto \frac{1}{\sqrt{1+\lambda_i^2}}\exp\left(-\frac{y_i^2}{2(1+\lambda_i^2)}\right)\cdot\frac{1}{1+\lambda_i^2}.
+$$
+For fixed, moderate $\lambda_i = O(1)$, the exponential factor decays like a Gaussian tail as $|y_i|\to\infty$ and becomes negligible unless $1+\lambda_i^2$ is comparably large, i.e., unless $\lambda_i$ grows with $|y_i|$. Because the half-Cauchy prior on $\lambda_i$ has heavy, polynomial tails (not exponential), there is enough prior mass at large $\lambda_i$ to support this reallocation: the posterior shifts mass toward $\lambda_i = \Theta(|y_i|)$ as $|y_i|$ grows. Since $\kappa_i = 1/(1+\lambda_i^2) \to 0$ as $\lambda_i \to \infty$, this posterior concentration forces $\E{\kappa_i \mid y_i} \to 0$, and therefore
+$$
+\E{\beta_i \mid y_i} = (1-\E{\kappa_i\mid y_i})\,y_i \; \longrightarrow \; y_i.
+$$
+The horseshoe estimator is asymptotically unbiased for large signals: the relative bias $\left(\E{\beta_i\mid y_i} - y_i\right)/y_i \to 0$. Ridge, on the other hand, keeps $\kappa^{\text{ridge}}$ fixed no matter how large $y_i$ is, so $\E{\beta_i \mid y_i} = (1-\kappa^{\text{ridge}})y_i$ always, an absolute bias of $\kappa^{\text{ridge}} y_i$ that grows without bound as $|y_i|\to\infty$, and a relative bias of exactly $-\kappa^{\text{ridge}}$ regardless of signal size. Ridge shrinks every signal by the same fixed proportion; the horseshoe shrinks only the coefficients for which the data supply evidence of noise.
+:::
+:::
+
+::: {#exr-bridge-score-oracle}
+## Bridge Regression: Score Functions, Redescending Penalties, and the Oracle Property
+
+Consider the bridge penalty $\phi_\alpha(\beta) = |\beta|^\alpha$ for $\alpha\in(0,2]$, with the exponential-power prior $p(\beta\mid\alpha,\tau) = \frac{1}{2\tau\Gamma(1+1/\alpha)}\exp(-|\beta/\tau|^\alpha)$ from @eq-exponential-power-prior. Work in the orthogonal-design reduction used throughout the chapter, where a single coefficient is observed as $z\mid\beta \sim N(\beta,\sigma^2)$.
+
+a) Write $-\log p(\beta\mid z)$ up to an additive constant and show the MAP estimate solves
+$$
+\min_\beta\; \tfrac12(z-\beta)^2 + \lambda|\beta|^\alpha, \qquad \lambda = \sigma^2/\tau^\alpha .
+$$
+Verify that $\alpha=2$ recovers the closed-form ridge estimator $\hat\beta = z/(1+2\lambda)$, and that $\alpha=1$ recovers the Lasso soft-thresholding rule of @exr-spike-slab-thresholding (b).
+
+b) Define the penalty score $s_\alpha(\beta) = \frac{d}{d\beta}|\beta|^\alpha = \alpha\,\text{sign}(\beta)\,|\beta|^{\alpha-1}$ for $\beta\neq0$, the marginal cost of a further unit increase in $|\beta|$. Evaluate $\lim_{|\beta|\to\infty} s_\alpha(\beta)$ for $\alpha=2$, $\alpha=1$, and $0<\alpha<1$. Then compute $\frac{d\,s_\alpha}{d|\beta|} = \alpha(\alpha-1)|\beta|^{\alpha-2}$ and show its sign is positive for $\alpha=2$, zero for $\alpha=1$, and negative for $0<\alpha<1$. Explain in words why $0<\alpha<1$ penalties are called *redescending*.
+
+c) Using part (b), argue informally why, for $0<\alpha<1$ and a true coefficient large relative to the noise, the bridge estimator's bias shrinks toward $0$ as the signal grows (in contrast to Lasso's constant bias in @exr-spike-slab-thresholding (d)), while small or null coefficients are still shrunk aggressively toward zero because $s_\alpha(\beta)\to\infty$ as $\beta\to0$ for $\alpha<1$. A qualitative argument based on the geometry of $\tfrac12(z-\beta)^2 + \lambda|\beta|^\alpha$ near $\beta=0$ and near $\beta=z$ suffices; no closed form for $\hat\beta$ is needed. This combination is the informal content of the oracle property.
+
+d) The bridge penalty is non-convex for $\alpha<1$. Using part (b)'s second-derivative computation, explain why this non-convexity is the unavoidable price of having $s_\alpha(\beta)\to0$ as $|\beta|\to\infty$, and connect it to the chapter's statement that the Bayesian bridge posterior can be multimodal for correlated predictors, and why the chapter recommends MCMC (which explores all modes) over direct optimization (which can get stuck in one) for $\alpha<1$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) With the Gaussian likelihood and the exponential-power prior of @eq-exponential-power-prior,
+$$
+-\log p(\beta\mid z) = \frac{1}{2\sigma^2}(z-\beta)^2 + \left|\frac{\beta}{\tau}\right|^\alpha + \text{const}.
+$$
+Multiplying by $\sigma^2$ (which does not change the minimizer) gives the equivalent objective $\tfrac12(z-\beta)^2 + \sigma^2\tau^{-\alpha}|\beta|^\alpha$, so $\lambda = \sigma^2/\tau^\alpha$. At $\alpha=2$ the objective $\tfrac12(z-\beta)^2 + \lambda\beta^2$ has derivative $-(z-\beta)+2\lambda\beta = 0$, giving $\hat\beta = z/(1+2\lambda)$. At $\alpha=1$ the objective $\tfrac12(z-\beta)^2 + \lambda|\beta|$ is exactly the univariate Lasso of @exr-spike-slab-thresholding (b), with solution the soft-thresholding operator $\hat\beta = \text{sign}(z)(|z|-\lambda)_+$. (Numerically, at $z=2.3,\lambda=0.7$: $\alpha=2$ gives $z/(1+2\lambda)=0.958$; $\alpha=1$ gives $2.3-0.7=1.6$.)
+
+b) For $\beta\neq0$, $s_\alpha(\beta) = \alpha\,\text{sign}(\beta)\,|\beta|^{\alpha-1}$. As $|\beta|\to\infty$: for $\alpha=2$, $s_2(\beta) = 2\beta \to \pm\infty$; for $\alpha=1$, $|s_1(\beta)|=1$ stays constant (scaled by $\lambda$ it stays at $\lambda$ and does not vanish); for $0<\alpha<1$, $|\beta|^{\alpha-1}\to0$ since $\alpha-1<0$, so $s_\alpha(\beta)\to0$. The derivative $\frac{d\,s_\alpha}{d|\beta|} = \alpha(\alpha-1)|\beta|^{\alpha-2}$ has the sign of $\alpha(\alpha-1)$: positive at $\alpha=2$ ($\alpha(\alpha-1)=2$), zero at $\alpha=1$, and negative for $0<\alpha<1$ (since $\alpha>0$ and $\alpha-1<0$; e.g., $\alpha=0.5$ gives $\alpha(\alpha-1)=-0.25$). So the marginal penalty *grows* without bound for ridge, is *flat* for Lasso, and *redescends* toward $0$ for bridge with $\alpha<1$: past some magnitude, extra coefficient size is essentially free in the objective. That vanishing marginal cost for already-large coefficients is what "redescending" names.
+
+c) Near $\beta=z$ (large signal), the stationarity condition is $-(z-\beta) + \lambda\,s_\alpha(\beta) = 0$. For $0<\alpha<1$, as the signal grows the interior optimum sits at large $\beta$, where $s_\alpha(\beta)\to0$, so the penalty gradient term vanishes and $\hat\beta\to z$: asymptotic unbiasedness, achieved with a continuous penalty, paralleling the exact large-signal unbiasedness of the $\ell_0$ hard threshold in @exr-spike-slab-thresholding (d) rather than Lasso's constant bias $\lambda$. Near $\beta=0$, $s_\alpha(\beta)\to\infty$, so for small $|z|$ the penalty term dominates the smooth quadratic data term and pulls the optimum to (essentially) $0$: strong null shrinkage. Aggressive killing of noise plus vanishing bias on large signals is exactly the informal oracle property.
+
+d) On $(0,\infty)$ the second derivative of $|\beta|^\alpha$ is $\alpha(\alpha-1)\beta^{\alpha-2}$, negative for $\alpha<1$: the penalty is concave. The objective $\tfrac12(z-\beta)^2 + \lambda|\beta|^\alpha$ is then a convex quadratic plus a concave penalty, so it need not be convex or unimodal. This concavity is precisely what makes the marginal penalty redescend in part (b), so vanishing large-signal bias and non-convexity are two faces of the same property: one cannot have $s_\alpha(\beta)\to0$ without $|\beta|^\alpha$ being concave. Concavity permits two local minima, one near $0$ and one near $z$. (For example, with $\alpha=0.5,\lambda=0.9,z=2.0$, the objective has local minima at $\beta=0$, value $2.00$, and at $\beta\approx1.65$, value $\approx1.22$.) With correlated predictors these coordinatewise bimodalities combine into a genuinely multimodal posterior; MCMC averages over all modes, whereas a single point-estimate optimization can converge to just one, which is why the chapter favors the Bayesian/MCMC treatment in the non-convex $\alpha<1$ regime.
+:::
+:::
+
+::: {#exr-spike-slab-thresholding}
+## Spike-and-Slab, L0, and Hard vs Soft Thresholding
+
+Consider linear regression $y = X\beta + \epsilon$ with orthonormal design, $X^\top X = I_p$, and let $z \defeq X^\top y$.
+
+a) Show that $z_j \mid \beta_j \sim N(\beta_j,\sigma^2)$ independently across $j = 1, \ldots, p$, and that for any penalty of the separable form $\phi(\beta) = \sum_{j=1}^p \phi_j(\beta_j)$, the penalized least-squares problem
+$$
+\min_\beta \; \frac12\lVert y-X\beta \rVert_2^2 + \lambda\phi(\beta)
+$$
+decouples into $p$ independent univariate problems $\min_{\beta_j}\frac12(z_j-\beta_j)^2 + \lambda\phi_j(\beta_j)$.
+
+b) Solve the univariate Lasso problem $\min_{\beta_j}\frac12(z_j-\beta_j)^2+\lambda|\beta_j|$ by subdifferential calculus (consider $\beta_j>0$, $\beta_j<0$, $\beta_j=0$ separately), and show that the solution is the soft-thresholding operator
+$$
+\hat{\beta}_j^{\text{Lasso}} = \text{sign}(z_j)(|z_j|-\lambda)_+.
+$$
+
+c) Solve the univariate $\ell_0$ problem $\min_{\beta_j}\frac12(z_j-\beta_j)^2+\lambda\mathbf{1}\{\beta_j\neq0\}$ by directly comparing the objective at $\beta_j=0$ to its value at the best nonzero choice, and show that the solution is the hard-thresholding operator
+$$
+\hat{\beta}_j^{\ell_0} = z_j\,\mathbf{1}\{|z_j|>\sqrt{2\lambda}\}.
+$$
+Recall that the spike-and-slab MAP estimator [@mitchell1988bayesian; @george1993variable], under prior sparsity $\theta<1/2$ and weak shrinkage on the slab ($\sigma_\beta^2 \gg \sigma_e^2$), reduces to exactly this $\ell_0$ objective with $\lambda = \sigma_e^2\log\left(\frac{1-\theta}{\theta}\right)$. What is the corresponding hard threshold $t$?
+
+d) For $|z_j|$ much larger than $\lambda$ (respectively $\sqrt{2\lambda}$), compute the bias $\E{\hat\beta_j} - \beta_j$ of each estimator (treat $z_j = \beta_j+\epsilon_j$ with $\E{\epsilon_j}=0$, and assume $\beta_j$ is large enough that thresholding occurs with near-certainty). Which estimator's bias vanishes as $|\beta_j|\to\infty$, and which retains a constant bias no matter how large the signal? Explain informally why hard-thresholding's discrete keep/kill decision is more naturally aligned with the goal of *selection consistency* (correctly recovering which coefficients are truly nonzero) than soft-thresholding's simultaneous shrink-and-select behavior.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Since $X^\top X = I_p$,
+$$
+\lVert y-X\beta \rVert_2^2 = \lVert y \rVert^2 - 2\beta^\top X^\top y + \beta^\top X^\top X\beta = \lVert y \rVert^2 - 2\beta^\top z + \lVert \beta \rVert^2 = \lVert z-\beta \rVert^2 + \left(\lVert y \rVert^2 - \lVert z \rVert^2\right).
+$$
+The last term does not depend on $\beta$, so minimizing $\frac12\lVert y-X\beta \rVert_2^2+\lambda\phi(\beta)$ is equivalent to minimizing
+$$
+\frac12\lVert z-\beta \rVert^2+\lambda\phi(\beta) = \sum_{j=1}^p\left[\frac12(z_j-\beta_j)^2+\lambda\phi_j(\beta_j)\right],
+$$
+which separates into $p$ independent one-dimensional problems, one per coordinate. Marginally, $z = X^\top y = X^\top X\beta + X^\top\epsilon = \beta + X^\top\epsilon$, and $X^\top\epsilon \sim N(0,\sigma^2 X^\top X) = N(0,\sigma^2 I_p)$, so $z_j \mid \beta_j \sim N(\beta_j,\sigma^2)$ independently across $j$.
+
+b) Fix $j$ and write $z=z_j, \beta=\beta_j$ for brevity. The objective $g(\beta) = \frac12(z-\beta)^2+\lambda|\beta|$ is convex with subdifferential $\partial g(\beta) = -(z-\beta)+\lambda\,\text{sign}(\beta)$ for $\beta\neq0$ and $\partial g(0) = \{-z+\lambda s : s\in[-1,1]\}$. Setting $0\in\partial g(\hat\beta)$:
+
+   - If $\hat\beta>0$: $-(z-\hat\beta)+\lambda=0 \Rightarrow \hat\beta=z-\lambda$, self-consistent (i.e., $\hat\beta>0$) iff $z>\lambda$.
+   - If $\hat\beta<0$: $-(z-\hat\beta)-\lambda=0 \Rightarrow \hat\beta=z+\lambda$, self-consistent iff $z<-\lambda$.
+   - If $\hat\beta=0$: need $0\in[-z-\lambda,-z+\lambda]$, i.e., $|z|\le\lambda$.
+
+   These three cases partition the real line exactly, giving
+   $$
+   \hat{\beta}^{\text{Lasso}} = \begin{cases} z-\lambda & z>\lambda \\ 0 & |z|\le\lambda \\ z+\lambda & z<-\lambda \end{cases} = \text{sign}(z)(|z|-\lambda)_+.
+   $$
+
+c) Again fix $j$. At $\beta=0$, $h(0) = \frac12z^2$. Among nonzero $\beta$, the quadratic term $\frac12(z-\beta)^2$ is minimized (to zero) at $\beta=z$, so the best nonzero value is $h(z) = 0+\lambda = \lambda$ (any other nonzero $\beta$ only makes $h$ larger). Comparing the two candidates,
+   $$
+   \frac12 z^2 \lessgtr \lambda \quad\Longleftrightarrow\quad |z| \lessgtr \sqrt{2\lambda},
+   $$
+   so the global minimizer is $\beta=0$ when $|z|<\sqrt{2\lambda}$ and $\beta=z$ when $|z|>\sqrt{2\lambda}$:
+   $$
+   \hat{\beta}^{\ell_0} = z\,\mathbf{1}\{|z|>\sqrt{2\lambda}\}.
+   $$
+   Substituting the spike-and-slab value $\lambda=\sigma_e^2\log\left(\frac{1-\theta}{\theta}\right)$ gives the threshold
+   $$
+   t = \sqrt{2\lambda} = \sqrt{2\sigma_e^2\log\left(\frac{1-\theta}{\theta}\right)}.
+   $$
+   So the full-Bayes variable-selection prior and the combinatorial $\ell_0$ penalty are, under orthonormal design, literally the same hard-thresholding rule. (Taking $\theta=1/p$, one signal expected among $p$ coefficients, gives $t\approx\sqrt{2\sigma_e^2\log p}$, recovering the universal threshold used earlier in the chapter for sparse signal recovery.)
+
+d) For $\beta_j \gg \lambda>0$ (WLOG positive), $\prob{z_j>\lambda}\to1$ as $\beta_j\to\infty$, so $\hat\beta_j^{\text{Lasso}} \approx z_j-\lambda$ and
+   $$
+   \E{\hat\beta_j^{\text{Lasso}}} - \beta_j \approx \E{z_j}-\lambda-\beta_j = -\lambda,
+   $$
+   a constant bias that does not shrink no matter how large $\beta_j$ is. For hard-thresholding, once $\beta_j \gg \sqrt{2\lambda}$, $\prob{z_j>\sqrt{2\lambda}}\to1$, so $\hat\beta_j^{\ell_0}\approx z_j$ and
+   $$
+   \E{\hat\beta_j^{\ell_0}} - \beta_j \approx \E{z_j}-\beta_j = 0.
+   $$
+   Hard-thresholding is exactly unbiased for large signals once they clear the threshold; soft-thresholding retains a fixed bias of $\lambda$ forever, exactly analogous to Ridge's persistent proportional bias in @exr-horseshoe-shrinkage. Selection is fundamentally a discrete decision (is $\beta_j$ zero or not), and hard-thresholding makes that decision directly: once a coefficient clears the threshold it is used at its full observed value, with no further penalty, so selection and estimation are decoupled (an oracle-like property). Soft-thresholding conflates the two: the same $\lambda$ that determines which coefficients survive also permanently shrinks the ones that do, so achieving both correct support recovery and low-bias estimation with a single convex penalty is not possible; in practice this is patched with a second, unpenalized refit on the selected variables (the "relaxed Lasso"), which is exactly an $\ell_0$-style hard decision applied after the fact.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Baseball Batting Averages
+
+Efron and Morris (1975) analyzed the batting averages of 18 baseball players based on their first 45 at-bats. This exercise uses the grand-mean-centered James-Stein estimator, which shrinks individual averages toward the grand mean $\bar y$:
+$$
+\hat{\theta}_i^{JS} = \bar y + \left(1 - \frac{(p-3)\sigma^2}{\sum_j (y_j - \bar y)^2}\right)(y_i - \bar y)
+$$
+This is a different, deliberate variant from the zero-centered estimator in Pen-and-Pencil Exercise 1(b), which shrinks toward the origin using a $(p-2)$ correction instead.
+
+a) Simulate the scenario: generate true season batting averages $\theta_i \sim N(0.265, 0.02^2)$ for 18 players. For each player, generate $y_i \sim N(\theta_i, \sigma^2)$ where $\sigma^2 = 0.265 \times 0.735 / 45$ (binomial variance approximation).
+b) Compute the MLE ($\hat{\theta}_i = y_i$) and the James-Stein estimator above. Plot both estimates alongside the true $\theta_i$.
+c) Compute the total squared error $\sum_i (\hat{\theta}_i - \theta_i)^2$ for both estimators. Which is smaller?
+d) Repeat the simulation 1000 times and compute the average total squared error for MLE vs. JS. Report the risk ratio.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+set.seed(42)
+p <- 18
+n_at_bats <- 45
+grand_mean <- 0.265
+sigma2 <- grand_mean * (1 - grand_mean) / n_at_bats
+sigma <- sqrt(sigma2)
+
+# a) Generate data
+theta <- rnorm(p, grand_mean, 0.02)
+y <- rnorm(p, theta, sigma)
+
+# b) MLE and JS
+mle <- y
+ybar <- mean(y)
+shrinkage <- (p - 3) * sigma2 / sum((y - ybar)^2)
+js <- ybar + (1 - shrinkage) * (y - ybar)
+
+# Plot
+ord <- order(theta)
+plot(1:p, theta[ord], pch = 16, ylim = range(c(theta, mle, js)),
+     xlab = "Player", ylab = "Batting Average")
+points(1:p, mle[ord], pch = 1, col = "blue")
+points(1:p, js[ord], pch = 2, col = "red")
+legend("topleft", c("True", "MLE", "James-Stein"),
+       pch = c(16, 1, 2), col = c("black", "blue", "red"), cex = 0.8)
+
+# c) Squared errors
+mse_mle <- sum((mle - theta)^2)
+mse_js <- sum((js - theta)^2)
+cat("MSE (MLE):", round(mse_mle, 6), "\n")
+cat("MSE (JS):", round(mse_js, 6), "\n")
+
+# d) Repeated simulation
+n_sim <- 1000
+mse_mle_vec <- numeric(n_sim)
+mse_js_vec <- numeric(n_sim)
+
+for (s in 1:n_sim) {
+  th <- rnorm(p, grand_mean, 0.02)
+  yi <- rnorm(p, th, sigma)
+  yb <- mean(yi)
+  shr <- (p - 3) * sigma2 / sum((yi - yb)^2)
+  js_est <- yb + (1 - shr) * (yi - yb)
+
+  mse_mle_vec[s] <- sum((yi - th)^2)
+  mse_js_vec[s] <- sum((js_est - th)^2)
+}
+
+cat("Average MSE (MLE):", round(mean(mse_mle_vec), 4), "\n")
+cat("Average MSE (JS):", round(mean(mse_js_vec), 4), "\n")
+cat("Risk ratio (JS/MLE):", round(mean(mse_js_vec) / mean(mse_mle_vec), 4), "\n")
+```
+:::
+:::
+
+::: {#exr-}
+## Ridge and Lasso Comparison
+
+Use the `Boston` dataset (`MASS` package) to compare Ridge and Lasso regression.
+
+a) Standardize all predictors. Fit Ridge regression for a grid of 50 $\lambda$ values from $10^{-2}$ to $10^4$ (log-spaced). Plot the coefficient paths (all 13 coefficients vs. $\log \lambda$).
+b) Repeat for Lasso. How do the coefficient paths differ? Which coefficients are driven to exactly zero first?
+c) Use 10-fold cross-validation to select the optimal $\lambda$ for both Ridge and Lasso. Report the selected $\lambda$ and test MSE.
+d) Compare the number of nonzero coefficients at the optimal $\lambda$ for each method.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+data(Boston, package = "MASS")
+X <- scale(as.matrix(Boston[, colnames(Boston) != "medv"]))
+y <- Boston$medv
+
+lambdas <- 10^seq(-2, 4, length.out = 50)
+
+# a) Ridge paths
+ridge_coefs <- matrix(NA, length(lambdas), ncol(X))
+for (i in seq_along(lambdas)) {
+  lam <- lambdas[i]
+  beta <- solve(t(X) %*% X + lam * diag(ncol(X)), t(X) %*% y)
+  ridge_coefs[i, ] <- beta
+}
+
+matplot(log10(lambdas), ridge_coefs, type = "l", lty = 1,
+        xlab = expression(log[10](lambda)), ylab = "Coefficients",
+        main = "Ridge Paths")
+
+# b) Lasso (using coordinate descent)
+soft_threshold <- function(z, gamma) {
+  sign(z) * max(abs(z) - gamma, 0)
+}
+
+lasso_fit <- function(X, y, lambda, max_iter = 1000, tol = 1e-6) {
+  p <- ncol(X)
+  beta <- rep(0, p)
+  for (iter in 1:max_iter) {
+    beta_old <- beta
+    for (j in 1:p) {
+      r <- y - X[, -j, drop = FALSE] %*% beta[-j]
+      z <- sum(X[, j] * r) / nrow(X)
+      beta[j] <- soft_threshold(z, lambda / nrow(X))
+    }
+    if (max(abs(beta - beta_old)) < tol) break
+  }
+  return(beta)
+}
+
+lasso_coefs <- matrix(NA, length(lambdas), ncol(X))
+for (i in seq_along(lambdas)) {
+  lasso_coefs[i, ] <- lasso_fit(X, y, lambdas[i])
+}
+
+matplot(log10(lambdas), lasso_coefs, type = "l", lty = 1,
+        xlab = expression(log[10](lambda)), ylab = "Coefficients",
+        main = "Lasso Paths")
+
+# c) 10-fold CV
+set.seed(42)
+k <- 10
+folds <- sample(rep(1:k, length.out = nrow(X)))
+
+cv_ridge <- sapply(lambdas, function(lam) {
+  mse <- numeric(k)
+  for (f in 1:k) {
+    tr <- folds != f
+    ybar_tr <- mean(y[tr])
+    beta <- solve(t(X[tr,]) %*% X[tr,] + lam * diag(ncol(X)), t(X[tr,]) %*% (y[tr] - ybar_tr))
+    pred <- ybar_tr + X[!tr,] %*% beta
+    mse[f] <- mean((y[!tr] - pred)^2)
+  }
+  mean(mse)
+})
+
+cv_lasso <- sapply(lambdas, function(lam) {
+  mse <- numeric(k)
+  for (f in 1:k) {
+    tr <- folds != f
+    ybar_tr <- mean(y[tr])
+    beta <- lasso_fit(X[tr,], y[tr] - ybar_tr, lam)
+    pred <- ybar_tr + X[!tr,] %*% beta
+    mse[f] <- mean((y[!tr] - pred)^2)
+  }
+  mean(mse)
+})
+
+cat("Ridge: best lambda =", round(lambdas[which.min(cv_ridge)], 4),
+    ", CV MSE =", round(min(cv_ridge), 4), "\n")
+cat("Lasso: best lambda =", round(lambdas[which.min(cv_lasso)], 4),
+    ", CV MSE =", round(min(cv_lasso), 4), "\n")
+
+# d) Nonzero coefficients
+best_lasso <- lasso_fit(X, y - mean(y), lambdas[which.min(cv_lasso)])
+cat("Lasso nonzero coefficients:", sum(abs(best_lasso) > 1e-6), "of", ncol(X), "\n")
+cat("Ridge nonzero coefficients:", ncol(X), "(Ridge never produces exact zeros)\n")
+```
+:::
+:::
+
+::: {#exr-sbr-subset-selection}
+## Single Best Replacement for Subset Selection
+
+The Single Best Replacement (SBR) algorithm attacks the $\ell_0$ objective $f(S) = \tfrac12\lVert y - X_S\hat\beta_S\rVert_2^2 + \lambda|S|$ directly, one add-or-remove move at a time. This exercise runs it on the `Hitters` data (`data/Hitters.csv`), the classic subset-selection benchmark of major-league batters (1986-season and career statistics predicting `Salary`). Drop rows with missing `Salary`, set $y = \log(\text{Salary})$ centered to mean zero, and standardize the 16 numeric predictors `AtBat, Hits, HmRun, Runs, RBI, Walks, Years, CAtBat, CHits, CHmRun, CRuns, CRBI, CWalks, PutOuts, Assists, Errors` (so $n=263$, $p=16$; with $y$ centered and $X$ standardized, no separate intercept is needed).
+
+a) Implement SBR as described in the chapter: start from the empty active set $S_0=\emptyset$; at each iteration, for every $j=1,\ldots,p$ evaluate $f(S\cdot j)$, where $S\cdot j$ adds $j$ if $j\notin S$ and removes it if $j\in S$ and $\hat\beta_S$ is the OLS fit of $y$ on $X_S$; accept the best replacement if it lowers $f$, otherwise stop. (Direct refitting each time is fine at this scale.) Run this for $\lambda\in\{1,3,12\}$ and report, for each $\lambda$, the final active set, the number of iterations to convergence, and a plot of $f(S_k)$ against $k$.
+
+b) For each $\lambda$ in part (a), find the `glmnet` Lasso solution with the same number of nonzero coefficients as SBR's active set (search the Lasso path for a matching model size). Do SBR and Lasso agree on which predictors they select?
+
+c) Since $p=16$, exhaustive best-subset selection is feasible. Use `leaps::regsubsets` to get the best subset of each size $k=1,\ldots,6$ by residual sum of squares (RSS). For the active-set size found by SBR at $\lambda=3$, compare SBR's set and RSS to the true best subset of the same size. Does SBR find the global optimum?
+
+d) Build a warm-start active set from three steps of pure forward selection (ignore the penalty; just add whichever variable most reduces RSS, three times). Rerun SBR at $\lambda=3$ from this warm start. Does it converge to the same final active set as the empty start? In how many iterations? What does this say about SBR's guarantee, or lack of one, of global optimality?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| fig-cap: "SBR objective $f(S_k)$ versus iteration $k$ from the empty start, for three penalties $\\lambda$."
+suppressMessages({library(glmnet); library(leaps)})
+set.seed(1)
+
+h <- read.csv("data/Hitters.csv")
+h <- h[!is.na(h$Salary), ]
+preds <- c("AtBat","Hits","HmRun","Runs","RBI","Walks","Years","CAtBat",
+           "CHits","CHmRun","CRuns","CRBI","CWalks","PutOuts","Assists","Errors")
+y <- log(h$Salary); y <- y - mean(y)
+X <- scale(as.matrix(h[, preds])); colnames(X) <- preds
+p <- ncol(X)
+
+# objective f(S) = 0.5||y - X_S bhat_S||^2 + lambda|S|, bhat_S = OLS on active set S
+fobj <- function(S, lambda) {
+  if (length(S) == 0) return(0.5 * sum(y^2))
+  Xs <- X[, S, drop = FALSE]
+  b  <- solve(crossprod(Xs), crossprod(Xs, y))
+  0.5 * sum((y - Xs %*% b)^2) + lambda * length(S)
+}
+sbr <- function(lambda, S0 = integer(0)) {
+  S <- S0; path <- fobj(S, lambda); it <- 0
+  repeat {
+    cand <- sapply(1:p, function(j)
+      fobj(if (j %in% S) setdiff(S, j) else c(S, j), lambda))
+    j <- which.min(cand)
+    if (cand[j] >= fobj(S, lambda) - 1e-9) break        # no improving move: stop
+    S <- if (j %in% S) setdiff(S, j) else sort(c(S, j))  # accept add or remove
+    it <- it + 1; path <- c(path, cand[j])
+  }
+  list(S = colnames(X)[S], iters = it, f = fobj(S, lambda), path = path)
+}
+
+# (a) SBR from the empty set for three penalties
+lams <- c(1, 3, 12); fit <- lapply(lams, sbr); names(fit) <- lams
+for (l in as.character(lams))
+  cat(sprintf("lambda=%2s: {%s}  iters=%d  f=%.3f\n",
+      l, paste(fit[[l]]$S, collapse = ", "), fit[[l]]$iters, fit[[l]]$f))
+
+plot(0, type = "n", xlim = c(0, 4),
+     ylim = range(unlist(lapply(fit, `[[`, "path"))),
+     xlab = "iteration k", ylab = expression(f(S[k])))
+cols <- c("firebrick", "steelblue", "darkgreen")
+for (i in seq_along(lams))
+  lines(0:(length(fit[[i]]$path) - 1), fit[[i]]$path, type = "b", pch = 19, col = cols[i])
+legend("topright", legend = paste0("lambda=", lams), col = cols, lty = 1, pch = 19, bty = "n")
+
+# (b) matched-sparsity Lasso from the glmnet path
+gl <- glmnet(X, y, alpha = 1, standardize = FALSE, intercept = FALSE)
+for (l in as.character(lams)) {
+  k <- length(fit[[l]]$S); j <- which.min(abs(gl$df - k))
+  las <- names(which(coef(gl, s = gl$lambda[j])[-1, ] != 0))
+  cat(sprintf("size %d  SBR={%s}  Lasso={%s}  shared: %s\n", k,
+      paste(fit[[l]]$S, collapse = ", "), paste(las, collapse = ", "),
+      paste(intersect(fit[[l]]$S, las), collapse = ", ")))
+}
+
+# (c) exhaustive best subset vs SBR at lambda=3
+rs <- summary(regsubsets(y ~ . - 1, data = data.frame(y, X), nvmax = 8, intercept = FALSE))
+k  <- length(fit[["3"]]$S)
+cat(sprintf("SBR@3: {%s} RSS=%.3f | best-subset(%d): {%s} RSS=%.3f\n",
+    paste(fit[["3"]]$S, collapse = ", "), 2 * (fit[["3"]]$f - 3 * k),
+    k, paste(names(which(rs$which[k, ])), collapse = ", "), rs$rss[k]))
+
+# (d) warm start = 3 steps of pure forward selection, then SBR at lambda=3
+rss <- function(S) { Xs <- X[, S, drop = FALSE]
+  sum((y - Xs %*% solve(crossprod(Xs), crossprod(Xs, y)))^2) }
+S <- integer(0)
+for (s in 1:3) { cn <- setdiff(1:p, S)
+  S <- sort(c(S, cn[which.min(sapply(cn, function(j) rss(sort(c(S, j)))))])) }
+warm <- sbr(3, S0 = S)
+cat(sprintf("warm start {%s} -> SBR@3 {%s}  iters=%d  f=%.3f  (empty-start f=%.3f)\n",
+    paste(colnames(X)[S], collapse = ", "), paste(warm$S, collapse = ", "),
+    warm$iters, warm$f, fit[["3"]]$f))
+```
+
+**Key Finding**:
+
+a) Starting from $f(\emptyset)=103.577$, the active set grows as $\lambda$ falls: $\lambda=12$ selects $\{$CRuns$\}$ (1 iteration, $f=75.62$); $\lambda=3$ selects $\{$Hits, CRuns$\}$ (2 iterations, $f=59.66$); $\lambda=1$ selects $\{$Hits, Years, CRuns, PutOuts$\}$ (4 iterations, $f=54.95$). In this range the greedy path from the empty set never needs a removal step, so iteration count equals final active-set size, matching the chapter's claim that SBR runs in $O(|S_\text{final}|)$ iterations, and $f(S_k)$ decreases at every accepted step.
+
+b) At matched sparsity SBR and Lasso overlap but are not identical. At size 1 both pick $\{$CRuns$\}$; at size 2, SBR picks $\{$Hits, CRuns$\}$ while Lasso picks $\{$CHits, CRuns$\}$ (agree on CRuns); at size 4 they share Hits and CRuns (2 of 4), with SBR adding Years and PutOuts against Lasso's Walks and CHits. The five career-total variables (CAtBat, CHits, CRuns, CRBI, CWalks) are mutually correlated (every pairwise correlation exceeds $0.88$, and most exceed $0.90$), so the discrete $\ell_0$ search and the continuous $\ell_1$ shrinkage can settle on different but nearly interchangeable career totals, exactly where the chapter says the two approaches diverge.
+
+c) At $\lambda=3$, SBR's set $\{$Hits, CRuns$\}$ has RSS $=107.31$, while the true best subset of size 2 is $\{$Hits, CAtBat$\}$ with RSS $=107.24$. SBR lands within about $0.06\%$ of the global optimum but does not attain it: both sets contain Hits and differ only in the second career total, CRuns versus CAtBat, which are correlated $0.98$. This is a concrete instance of the chapter's stated limitation, "no guarantee of global optimality."
+
+d) Three steps of forward selection give the warm start $\{$Hits, Years, CRuns$\}$. Rerunning SBR at $\lambda=3$ from there converges in a single removal step (dropping CRuns) to $\{$Hits, Years$\}$, a *different* final set from the empty-start $\{$Hits, CRuns$\}$, and with a slightly *better* objective ($f=59.65$ versus $59.66$). So SBR is sensitive to initialization: different starting points reach different local optima of slightly different quality. It guarantees monotone improvement and finite convergence to a local optimum, but neither the global optimum nor a unique answer independent of the start, exactly as the chapter's advantages-and-limitations discussion states.
+:::
+:::
+
+::: {#exr-credit-lasso}
+## Credit Scoring with LASSO
+
+Use the German credit data (`credit.csv`) to predict loan default using regularized logistic regression.
+
+a) Fit a standard logistic regression predicting `Default` from loan characteristics (duration, amount, installment, age, history). Interpret key coefficients.
+b) Fit a LASSO logistic regression using `cv.gamlr`. Compare the selected variables to the unregularized model.
+c) Compare 10-fold CV error for both models. Which performs better out-of-sample?
+d) Discuss: When would LASSO provide significant improvement over standard logistic regression?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(gamlr)
+library(boot)
+
+credit <- read.csv("data/credit.csv", stringsAsFactors = TRUE)
+
+# Recode history variable
+credit$history <- factor(credit$history, levels = c("A30", "A31", "A32", "A33", "A34"))
+levels(credit$history) <- c("good", "good", "poor", "poor", "terrible")
+
+# a) Standard logistic regression
+log_model <- glm(Default ~ duration + amount + installment + age + history,
+                 family = binomial, data = credit)
+summary(log_model)
+
+cat("\nKey coefficient interpretations:\n")
+cat("Duration: +1 month increases log-odds of default by",
+    round(coef(log_model)["duration"], 3), "\n")
+cat("  Odds ratio:", round(exp(coef(log_model)["duration"]), 3), "per month\n")
+cat("Terrible history: log-odds increase by",
+    round(coef(log_model)["historyterrible"], 3),
+    "(OR =", round(exp(coef(log_model)["historyterrible"]), 2), ")\n")
+
+# b) LASSO logistic regression
+x <- model.matrix(Default ~ duration + amount + installment + age + history - 1, data = credit)
+y <- credit$Default
+
+set.seed(1)
+lasso_model <- cv.gamlr(x, y, family = "binomial", nfold = 10)
+plot(lasso_model)
+
+# Compare selected variables
+B_lasso <- coef(lasso_model)[-1, ]
+cat("\nLASSO non-zero coefficients:", sum(B_lasso != 0), "of", length(B_lasso), "\n")
+cat("\nTop LASSO coefficients:\n")
+print(head(sort(abs(B_lasso[B_lasso != 0]), decreasing = TRUE), 10))
+
+# c) CV comparison on a COMMON scale: mean binomial deviance per observation.
+# cv.gamlr already reports out-of-sample deviance; the default cv.glm cost is
+# squared error (Brier), so we pass a matching deviance cost to make the two
+# numbers directly comparable.
+dev_cost <- function(y, pi) -2 * mean(y * log(pi) + (1 - y) * log(1 - pi))
+set.seed(1)
+cv_glm <- cv.glm(credit, log_model, cost = dev_cost, K = 10)
+cat("\n10-fold CV mean binomial deviance (lower is better):\n")
+cat("Standard logistic:", round(cv_glm$delta[1], 4), "\n")
+cat("LASSO (regularized):", round(min(lasso_model$cvm), 4), "\n")
+
+# d) Discussion points
+cat("\nWhen LASSO helps:\n")
+cat("1. Many predictors relative to observations (high p/n ratio)\n")
+cat("2. Many irrelevant features that add noise\n")
+cat("3. Multicollinearity among predictors\n")
+cat("4. When feature selection is valuable for interpretation\n")
+```
+
+**Key Finding**: Compared on a common scale (mean binomial deviance), both models achieve essentially the same out-of-sample fit, so with these five relevant predictors LASSO's shrinkage provides only marginal improvement. LASSO shines when $p \gg n$ or when many candidate predictors are irrelevant and automatic feature selection is valuable.
+:::
+:::
+
+::: {#exr-congress-lasso}
+## Congressional Speech Analysis
+
+Use the `congress109` dataset from the `textir` package containing word counts from speeches of the 109th Congress.
+
+a) Load `congress109Counts` and `congress109Ideology`. What is the dimension of the counts matrix?
+b) Use LASSO to regress `repshare` (proportion of Republican votes) on binarized word presence (>0). Which words are most associated with each party?
+c) Perform 5-fold cross-validation. How well can we predict partisan lean from word usage?
+d) Discuss: Why might predicting partisanship from speech be easier (or harder) than predicting policy positions?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+library(textir)
+library(gamlr)
+
+data(congress109)
+
+# a) Data dimensions
+cat("Counts matrix: ", nrow(congress109Counts), "speeches ×",
+    ncol(congress109Counts), "words\n")
+
+# b) LASSO regression
+y <- congress109Ideology$repshare
+x <- congress109Counts > 0  # Binarize: word present or not
+
+lassoslant <- cv.gamlr(x, y, nfold = 5)
+B <- coef(lassoslant$gamlr)[-1, ]
+
+# Most Democratic words (negative coefficients)
+cat("\nMost Democratic words:\n")
+head(sort(B[B != 0]), 10)
+
+# Most Republican words (positive coefficients)
+cat("\nMost Republican words:\n")
+tail(sort(B[B != 0]), 10)
+
+# c) Cross-validation
+plot(lassoslant)
+cat("\nMin CV MSE:", round(min(lassoslant$cvm), 4), "\n")
+cat("OOS R²:", round(1 - min(lassoslant$cvm) / var(y), 3), "\n")
+
+# d) Partisan words visualization
+sig_words <- B[abs(B) > 0.01]
+if (length(sig_words) > 0) {
+  barplot(sort(sig_words), horiz = TRUE, las = 1,
+          col = ifelse(sort(sig_words) > 0, "red", "blue"),
+          main = "Partisan Word Associations",
+          xlab = "Coefficient (+ = Republican, - = Democrat)")
+}
+```
+
+**Discussion**: Predicting partisanship from speech is often quite accurate because:
+1. Politicians use different vocabulary and framing for partisan reasons
+2. Certain topics are "owned" by each party (e.g., "tax" vs "healthcare")
+3. Even neutral words may appear in different contexts
+
+However, this captures *rhetoric* not necessarily *policy*. A politician might use partisan language but vote moderately, or vice versa.
+:::
+:::
+
+::::

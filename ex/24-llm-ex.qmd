@@ -1,0 +1,871 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Autoregressive Generation
+
+An LLM outputs logits for the next token: $z = (z_1, z_2, z_3, z_4, z_5) = (3.2, 2.5, 2.0, 1.5, 0.5)$ corresponding to tokens (mat, floor, chair, table, dog).
+
+a) Compute the softmax probabilities at temperature $T=1$.
+b) Compute the softmax probabilities at temperature $T=0.5$ and $T=2.0$. How does the distribution change?
+c) Using greedy decoding, which token is selected? Does the choice depend on temperature?
+d) Define nucleus (top-$p$) sampling. For $p=0.8$ at $T=1$, which tokens are in the nucleus?
+e) Compute the entropy $H = -\sum_i p_i \log p_i$ at each temperature. What is the relationship between temperature and entropy?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Softmax at $T=1$: $q_i = \exp(z_i)/\sum_j \exp(z_j)$.
+
+```{r}
+z <- c(3.2, 2.5, 2.0, 1.5, 0.5)
+tokens <- c("mat", "floor", "chair", "table", "dog")
+
+softmax <- function(z, T) {
+  e <- exp(z / T)
+  e / sum(e)
+}
+
+p1 <- softmax(z, 1)
+names(p1) <- tokens
+round(p1, 4)
+```
+
+b) At different temperatures:
+```{r}
+p05 <- softmax(z, 0.5)
+p2 <- softmax(z, 2.0)
+tab <- rbind(T_0.5 = round(p05, 4), T_1 = round(p1, 4), T_2 = round(p2, 4))
+colnames(tab) <- tokens
+tab
+```
+
+Lower temperature concentrates mass on the top token; higher temperature spreads it more uniformly.
+
+c) Greedy decoding always selects the token with the highest logit (or equivalently, the highest probability). Since $\arg\max_i q_i = \arg\max_i z_i$ regardless of $T > 0$, the choice is always "mat." Temperature does not affect greedy decoding.
+
+d) Top-$p$ (nucleus) sampling: sort tokens by probability, include the smallest set whose cumulative probability $\geq p$. At $T=1$:
+```{r}
+ord <- order(p1, decreasing = TRUE)
+cumprob <- cumsum(p1[ord])
+nucleus <- tokens[ord][1:which(cumprob >= 0.8)[1]]
+cat("Nucleus (p=0.8):", paste(nucleus, collapse = ", "), "\n")
+```
+
+e) Entropy at each temperature:
+```{r}
+H <- function(p) -sum(p * log(p))
+cat("H(T=0.5):", round(H(p05), 4), "\n")
+cat("H(T=1.0):", round(H(p1), 4), "\n")
+cat("H(T=2.0):", round(H(p2), 4), "\n")
+```
+
+Higher temperature increases entropy (more uncertainty). As $T \to 0$, entropy $\to 0$ (deterministic). As $T \to \infty$, entropy $\to \log 5$ (uniform).
+:::
+:::
+
+::: {#exr-}
+## Autoregressive Probability
+
+An LLM generates text by factoring the joint probability using the chain rule:
+$$
+p(x_1, x_2, \ldots, x_n) = \prod_{t=1}^{n} p(x_t \mid x_1, \ldots, x_{t-1})
+$$
+
+a) Show that this factorization holds for any joint distribution (no independence assumptions needed).
+b) A model assigns the following conditional probabilities to generate "the cat sat":
+   $p(\text{the}) = 0.15$, $p(\text{cat} \mid \text{the}) = 0.08$, $p(\text{sat} \mid \text{the cat}) = 0.12$.
+   What is the joint probability of this sequence?
+c) Define perplexity as $\text{PPL} = \exp\left(-\frac{1}{n}\sum_{t=1}^n \log p(x_t \mid x_{<t})\right)$. Compute the perplexity of the sequence in (b).
+d) A competing model assigns probabilities 0.12, 0.10, 0.15 to the same three tokens. Which model assigns higher probability to this sequence? Which has lower perplexity?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) By the definition of conditional probability, $p(x_1, \ldots, x_n) = p(x_1) \cdot p(x_2 \mid x_1) \cdot p(x_3 \mid x_1, x_2) \cdots p(x_n \mid x_1, \ldots, x_{n-1})$. This is the chain rule of probability and holds for any joint distribution without requiring independence.
+
+b) $p(\text{the cat sat}) = 0.15 \times 0.08 \times 0.12 = 0.00144$.
+
+c)
+```{r}
+probs <- c(0.15, 0.08, 0.12)
+ppl <- exp(-mean(log(probs)))
+cat("Perplexity:", round(ppl, 2), "\n")
+```
+
+d)
+```{r}
+probs2 <- c(0.12, 0.10, 0.15)
+cat("Model 1 joint prob:", prod(probs), "\n")
+cat("Model 2 joint prob:", prod(probs2), "\n")
+cat("Model 1 PPL:", round(exp(-mean(log(probs))), 2), "\n")
+cat("Model 2 PPL:", round(exp(-mean(log(probs2))), 2), "\n")
+```
+
+Model 2 assigns higher joint probability (0.0018 vs. 0.00144) and has lower perplexity. Lower perplexity indicates the model is less "surprised" by the observed text.
+:::
+:::
+
+
+::: {#exr-}
+## LoRA: Low-Rank Adaptation
+
+In LoRA, a pretrained weight matrix $W \in \mathbb{R}^{d \times k}$ is updated as $W' = W + BA$ where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$ with rank $r \ll \min(d,k)$.
+
+a) For a transformer layer with $d = k = 4096$, compute the number of trainable parameters for LoRA ranks $r \in \{1, 4, 8, 16, 64\}$. Express each as a percentage of the full $d \times k$ parameters.
+b) If LoRA is applied to the query and value projection matrices in each of 32 transformer layers, how many total trainable parameters for $r = 8$?
+c) Why is $A$ typically initialized with a random Gaussian and $B$ initialized to zero? What would happen if both were random?
+d) Suppose a full fine-tuning achieves test accuracy 94.2% and LoRA with $r=8$ achieves 93.8%. Is the 0.4% gap worth the parameter savings? Argue both sides.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+d <- 4096; k <- 4096
+full <- d * k
+for (r in c(1, 4, 8, 16, 64)) {
+  lora <- d * r + r * k
+  cat(sprintf("r=%2d: %8d params (%.3f%% of full)\n", r, lora, 100 * lora / full))
+}
+```
+
+b) Two matrices per layer (Q and V), 32 layers, $r=8$:
+```{r}
+params_per_layer <- 2 * (d * 8 + 8 * k)
+total <- 32 * params_per_layer
+cat("Total LoRA params:", total, "\n")
+cat("Full model params (32 layers, Q+V only):", 32 * 2 * d * k, "\n")
+cat("Ratio:", round(100 * total / (32 * 2 * d * k), 2), "%\n")
+```
+
+c) $B = 0 \Rightarrow BA = 0 \Rightarrow W' = W + BA = W$ at initialization, so training starts from the pretrained weights exactly as they were after pretraining. If both $B$ and $A$ were random, the initial $W'$ would be a large random perturbation of $W$, destroying pretrained knowledge and requiring more training to recover.
+
+d) For the trade-off: LoRA with $r=8$ uses $\sim 0.4\%$ of parameters, enabling fine-tuning on a single GPU instead of requiring distributed training. The 0.4% accuracy gap may be negligible for most applications. Against: for high-stakes tasks (medical, legal), every fraction of a percent matters, and the cost of additional hardware may be justified.
+:::
+:::
+
+
+::: {#exr-}
+## Knowledge Distillation
+
+A teacher model produces soft targets $q_i = \exp(z_i/T) / \sum_j \exp(z_j/T)$ for a 4-class classification with logits $z = (5.0, 2.0, 1.0, 0.5)$.
+
+a) Compute the soft targets at $T=1$ and $T=4$. Why are higher-temperature targets more informative for the student?
+b) The distillation loss combines soft and hard targets: $L = \alpha T^2 \cdot \text{KL}(q^T \| p^T) + (1 - \alpha) \cdot \text{CE}(y, p^1)$, where $q^T$ and $p^T$ are teacher and student distributions at temperature $T$, and $y$ is the true label. Why is the $T^2$ factor needed?
+c) If the true label is class 1 (the correct answer), explain what information the soft targets provide beyond the hard label.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+z <- c(5.0, 2.0, 1.0, 0.5)
+softmax <- function(z, T) { e <- exp(z/T); e/sum(e) }
+
+q1 <- softmax(z, 1)
+q4 <- softmax(z, 4)
+cat("T=1:", round(q1, 4), "\n")
+cat("T=4:", round(q4, 4), "\n")
+```
+
+At $T=1$, the distribution is peaked (class 1 dominates). At $T=4$, the distribution is smoother, revealing the teacher's relative ranking of incorrect classes. For instance, the teacher considers class 2 more plausible than classes 3 or 4. This "dark knowledge" about inter-class similarities helps the student learn richer representations.
+
+b) When logits are divided by $T$, the gradients of the KL divergence are scaled down by $1/T^2$ (since the softmax becomes flatter). Multiplying by $T^2$ compensates, keeping the gradient magnitudes consistent with the hard-target loss regardless of the temperature choice.
+
+c) The hard label says only "class 1 is correct." The soft targets additionally convey: class 2 is the most likely mistake (perhaps visually similar), classes 3 and 4 are much less likely but class 3 is slightly more plausible than 4. This similarity structure helps the student generalize, especially on ambiguous inputs.
+:::
+:::
+
+
+::: {#exr-}
+## Quantization
+
+A neural network layer has weights
+$$
+w = (0.73, -1.24, 0.05, 2.31, -0.89).
+$$
+
+a) Apply 8-bit linear quantization: $w_q = \text{round}\left(\frac{w - w_{\min}}{w_{\max} - w_{\min}} \times 255\right)$. What are the quantized integer values?
+b) Dequantize back to floating point using $\hat{w} = w_q \times \frac{w_{\max} - w_{\min}}{255} + w_{\min}$. What is the maximum absolute quantization error?
+c) A 7B parameter model uses 16-bit floats. How much memory does it require? How much with 8-bit quantization? With 4-bit?
+d) Why might quantization degrade performance more on mathematical reasoning tasks than on text summarization?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+w <- c(0.73, -1.24, 0.05, 2.31, -0.89)
+w_min <- min(w); w_max <- max(w)
+w_q <- round((w - w_min) / (w_max - w_min) * 255)
+cat("Quantized:", w_q, "\n")
+```
+
+b)
+```{r}
+w_hat <- w_q * (w_max - w_min) / 255 + w_min
+errors <- abs(w - w_hat)
+cat("Dequantized:", round(w_hat, 4), "\n")
+cat("Errors:", round(errors, 6), "\n")
+cat("Max error:", round(max(errors), 6), "\n")
+```
+
+The maximum quantization error is bounded by $\frac{w_{\max} - w_{\min}}{2 \times 255} \approx 0.007$ (half a quantization step).
+
+c)
+```{r}
+params <- 7e9
+cat("16-bit:", round(params * 2 / 1e9, 1), "GB\n")
+cat("8-bit:", round(params * 1 / 1e9, 1), "GB\n")
+cat("4-bit:", round(params * 0.5 / 1e9, 1), "GB\n")
+```
+
+d) Mathematical reasoning requires precise numerical relationships between weights; small quantization errors accumulate through multi-step computations. Summarization is more robust because it relies on broad semantic patterns that are preserved even with small weight perturbations.
+:::
+:::
+
+
+::: {#exr-ift-loss-masking}
+## Instruction Fine-Tuning: Loss Masking and Domain Adaptation
+
+Instruction fine-tuning (IFT) runs a second pass of supervised learning on (instruction, input, answer) triples such as the "solve this math word problem step by step" example in @sec-post-training-reasoning. Under teacher forcing a causal language model computes a next-token cross-entropy loss $\ell_t$ at every position of the tokenized triple; IFT differs from ordinary continued pretraining only in *which* positions contribute to the loss.
+
+a) A tokenized example has 3 instruction tokens (per-token losses $0.2, 0.2, 0.2$), 3 input tokens (losses $0.4, 0.4, 0.4$), and 2 answer tokens (losses $3.0, 1.0$). Compute (i) the full-sequence loss $L_{\text{full}} = \frac{1}{n}\sum_{t=1}^{n} \ell_t$ used by ordinary continued pretraining, and (ii) the answer-only masked loss $L_{\text{IFT}} = \frac{1}{|A|}\sum_{t \in A} \ell_t$ used by instruction tuning, where $A$ is the set of answer-token positions. By what factor do they differ?
+
+b) Explain why IFT masks the loss on the instruction and input tokens instead of including them. What would the model be optimized to do if they were included, and why is that undesirable given that at inference time the instruction and input are supplied by the user rather than generated by the model?
+
+c) In ICD-10 medical coding, domain supervised fine-tuning raised exact-code accuracy from under 1% at the pretrained baseline (take 0.5% as a representative value) to about 97% on standard coding tasks, but only 69% on real clinical notes [@hou2025enhancing]. Compute the multiplicative improvement factor $97/0.5$ and the retention ratio $69/97$. What does the gap between these two numbers reveal about what IFT does and does not fix?
+
+d) @sec-alignment describes RLHF's first stage as supervised fine-tuning "on high-quality demonstrations of desired behavior." Is this the same computation as the masked loss in part (a)? What differs, in purpose and in training data, between generic instruction tuning (Flan-style, a broad task mixture whose 540B model showed an average gain of 8.9 points across MMLU, BBH, TyDiQA, and MGSM, @chung2022scaling) and the supervised fine-tuning stage that precedes reward-model training in RLHF?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+loss   <- c(0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 3.0, 1.0)  # 3 instr, 3 input, 2 answer
+answer <- c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)
+cat(sprintf("L_full = %.3f\n", mean(loss)))
+cat(sprintf("L_IFT  = %.3f\n", mean(loss[answer])))
+cat(sprintf("ratio  = %.2f\n", mean(loss[answer]) / mean(loss)))
+```
+
+$L_{\text{full}} = (0.6 + 1.2 + 4.0)/8 = 0.725$ and $L_{\text{IFT}} = (3.0 + 1.0)/2 = 2.0$. The masked loss is about $2.76\times$ larger because it averages over only the two hard-to-predict answer tokens instead of being diluted by six easy, low-loss instruction and input tokens the model is not being asked to learn to generate.
+
+b) Including the instruction and input tokens in the loss would push the model to become better at predicting the exact wording of the prompts it receives, that is, to imitate the prompt itself. This is wasted capacity: the user supplies the instruction and input verbatim at inference time, so the model never needs to generate them. Masking concentrates all gradient signal on the one thing the model must actually produce, the answer.
+
+c)
+```{r}
+cat(sprintf("improvement factor 97/0.5 = %.0fx\n", 97 / 0.5))
+cat(sprintf("retention 69/97 = %.3f (%.0f%% relative drop)\n", 69 / 97, 100 * (1 - 69 / 97)))
+```
+
+Domain SFT delivers a roughly $194\times$ (about 200-fold) jump on the standard coding benchmark, but only $69/97 \approx 0.71$ of that accuracy survives on real clinical notes, a relative drop of about 29%. IFT is highly effective when the test data matches the fine-tuning distribution, yet a meaningful fraction of the gain does not transfer to messier, out-of-distribution inputs (abbreviations, typos, nonstandard phrasing) absent from the curated training set. IFT teaches task format and domain vocabulary, but it does not by itself solve distribution shift.
+
+d) Mechanically it is the same objective: a teacher-forced, answer-masked cross-entropy loss over demonstration pairs. The difference is in role and data. Flan-style instruction tuning uses a large, deliberately diverse mixture of templated tasks aimed at broad instruction-following generalization (the 540B Flan model gained 8.9 points on average across the four benchmarks). RLHF's supervised fine-tuning stage instead curates a smaller set of high-quality human demonstrations whose purpose is to give the model a reasonable starting policy before reward-model-guided PPO refines it further; it is a precursor stage in a longer alignment pipeline rather than an end in itself.
+:::
+:::
+
+
+::: {#exr-}
+## Context Window Budget
+
+An LLM has a context window of 8,192 tokens. You are building a RAG-based customer support system with the following token requirements:
+
+- System prompt: 500 tokens
+- Tool descriptions (5 tools): 150 tokens each
+- Conversation history: 3 prior turns averaging 200 tokens each
+- Retrieved documents: up to $k$ chunks of 300 tokens each
+- User query: ~100 tokens
+- Reserved for model response: 1,500 tokens
+
+a) Write the budget equation and solve for the maximum number of retrievable chunks $k$.
+b) If you need $k = 20$ chunks, which components would you reduce and by how much?
+c) The "lost-in-the-middle" phenomenon suggests that LLMs attend more to the beginning and end of the context. How should you arrange the retrieved chunks to mitigate this?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+budget <- 8192
+system <- 500
+tools <- 5 * 150
+history <- 3 * 200
+query <- 100
+response <- 1500
+
+used <- system + tools + history + query + response
+available <- budget - used
+k <- floor(available / 300)
+cat("Used (without retrieval):", used, "\n")
+cat("Available for retrieval:", available, "\n")
+cat("Max chunks k =", k, "\n")
+```
+
+b) To fit $k = 20$ chunks we need $20 \times 300 = 6000$ tokens for retrieval. Currently we have `r available` available (part (a) showed this covers only $k_{\max}=15$ chunks). We need `r 6000 - available` more tokens. Options:
+
+- Reduce history to 2 turns (save 200 tokens)
+- Summarize tool descriptions to 80 tokens each (save 350 tokens)
+- Shorten system prompt to 350 tokens (save 150 tokens)
+- Reduce chunk size to 200 tokens (saves $100 \times 20 = 2000$ tokens at $k=20$, with possible relevance loss)
+
+The first three combined save only 700 tokens, still short of the gap, so closing it requires either the chunk-size reduction alone or several combined cuts.
+
+c) Place the most relevant chunks at the beginning and end of the context, with less relevant chunks in the middle. This aligns with the U-shaped attention curve, ensuring that the most important information receives the highest attention weight.
+:::
+:::
+
+
+::: {#exr-}
+## Direct Preference Optimization
+
+The DPO loss for a pair of responses (preferred $y_w$, dispreferred $y_l$) given prompt $x$ is:
+$$
+\mathcal{L}_{\text{DPO}} = -\log \sigma\left(\beta \left[\log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right]\right)
+$$
+where $\sigma$ is the sigmoid function, and $\pi_{\text{ref}}$ is the frozen reference model.
+
+a) What happens to the loss when the model strongly prefers $y_w$ over $y_l$ (relative to the reference)? When it prefers $y_l$?
+b) What role does $\beta$ play? What happens as $\beta \to 0$ and $\beta \to \infty$?
+c) DPO eliminates the need for a separate reward model used in RLHF. Explain why, by showing that DPO implicitly defines a reward $r(x,y) = \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$.
+d) Why does DPO keep a reference model $\pi_{\text{ref}}$? What would go wrong without it?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Let $\Delta = \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}$. When the model strongly prefers $y_w$ (large positive $\Delta$), $\sigma(\beta \Delta) \to 1$ and $\mathcal{L} \to -\log(1) = 0$. When the model prefers $y_l$ (negative $\Delta$), $\sigma(\beta \Delta) \to 0$ and $\mathcal{L} \to \infty$. The loss penalizes the model for preferring the dispreferred response.
+
+b) $\beta$ controls how strongly the model can deviate from the reference:
+
+- $\beta \to 0$: The loss becomes $-\log \sigma(0) = \log 2$ regardless of model behavior (no learning signal).
+- $\beta \to \infty$: Even small deviations from the reference are heavily penalized, making training unstable.
+- In practice, $\beta \in [0.1, 0.5]$ balances preference learning with staying close to the reference.
+
+c) The Bradley-Terry preference model gives $p(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$. Substituting $r(x,y) = \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$ directly yields the DPO loss. This shows that optimizing DPO is equivalent to fitting a reward model and doing RL, but in a single step.
+
+d) Without $\pi_{\text{ref}}$, the model could assign probability 1 to preferred responses and 0 to dispreferred ones, collapsing to a degenerate distribution. The reference model acts as a KL penalty, keeping $\pi_\theta$ close to a well-behaved pretrained model and preserving general capabilities.
+:::
+:::
+
+
+::: {#exr-}
+## True/False: LLMs
+
+a) GPT-style models predict the next token given all previous tokens (autoregressive generation).
+
+b) Larger models always produce better outputs than smaller models on every task.
+
+c) RLHF trains a reward model from human preference data, then optimizes the LLM to maximize the learned reward.
+
+d) A model with perplexity 15 on a dataset assigns higher average probability to each token than a model with perplexity 25.
+
+e) LoRA fine-tuning modifies every parameter in the pretrained model.
+
+f) Quantizing a model from 16-bit to 4-bit reduces memory by 75% with no change in inference speed.
+
+g) In RAG, the retriever and generator are trained jointly end-to-end.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **TRUE**. Autoregressive factorization: $p(x_1, \ldots, x_n) = \prod_t p(x_t \mid x_{<t})$.
+
+b) **FALSE**. Diminishing returns on scale; smaller fine-tuned or distilled models often outperform larger general-purpose models on specific tasks. Scaling laws show predictable improvement with size, but task-specific adaptation can be more efficient.
+
+c) **TRUE**. The RLHF pipeline has three stages: supervised fine-tuning, reward model training from pairwise preferences, and policy optimization (typically PPO) against the reward model.
+
+d) **TRUE**. Perplexity $= \exp(H)$ where $H$ is cross-entropy. Lower perplexity means lower cross-entropy, which means higher average log-probability per token.
+
+e) **FALSE**. LoRA freezes all pretrained weights and only trains low-rank update matrices $B$ and $A$, typically less than 1% of total parameters.
+
+f) **FALSE**. Memory reduction from 16-bit to 4-bit is 75%, but inference speed may actually increase (less memory bandwidth needed) or decrease (dequantization overhead). The statement's claim of "no change" is incorrect.
+
+g) **FALSE**. In most RAG systems, the retriever and generator are separate components. The retriever uses embedding similarity search, and the generator is a pretrained LLM. Some research explores joint training, but standard RAG pipelines are modular.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Token-Level Text Generation
+
+Build a simple character-level language model and use it to generate text.
+
+a) Load a text corpus (e.g., first 10,000 characters of a book). Build a bigram frequency table: for each character, count how often each next character follows it.
+b) Convert the frequency table to conditional probabilities. Generate 200 characters by sampling from the conditional distribution at each step.
+c) Extend to a trigram model (condition on the previous 2 characters). Generate 200 characters and compare the quality with the bigram model.
+d) Compute the perplexity of both models on a held-out portion of the text. Which model has lower perplexity?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| cache: true
+# Use a simple corpus
+text <- "to be or not to be that is the question whether tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles and by opposing end them to die to sleep no more and by a sleep to say we end the heartache and the thousand natural shocks that flesh is heir to"
+chars <- strsplit(text, "")[[1]]
+n <- length(chars)
+train <- chars[1:round(0.8 * n)]
+test <- chars[(round(0.8 * n) + 1):n]
+
+# a) Bigram frequency table
+uniq <- sort(unique(chars))
+bigram <- matrix(0, length(uniq), length(uniq), dimnames = list(uniq, uniq))
+for (i in 1:(length(train) - 1)) {
+  bigram[train[i], train[i + 1]] <- bigram[train[i], train[i + 1]] + 1
+}
+
+# b) Convert to probabilities (with Laplace smoothing)
+bigram_prob <- (bigram + 1) / rowSums(bigram + 1)
+
+# Generate from bigram
+generate_bigram <- function(start, n, prob) {
+  out <- start
+  for (i in 1:n) {
+    p <- prob[out[length(out)], ]
+    out <- c(out, sample(colnames(prob), 1, prob = p))
+  }
+  paste(out, collapse = "")
+}
+
+set.seed(42)
+cat("Bigram output:", generate_bigram("t", 200, bigram_prob), "\n\n")
+
+# c) Trigram frequency table: rows indexed by the previous two-character
+# context. Use every vocabulary pair (not just observed contexts) so that
+# generation and test-set evaluation never hit an unseen row.
+ctx_all <- sort(unique(as.vector(outer(uniq, uniq, paste0))))
+trigram <- matrix(0, length(ctx_all), length(uniq), dimnames = list(ctx_all, uniq))
+for (i in 1:(length(train) - 2)) {
+  ctx <- paste0(train[i], train[i + 1])
+  trigram[ctx, train[i + 2]] <- trigram[ctx, train[i + 2]] + 1
+}
+trigram_prob <- (trigram + 1) / rowSums(trigram + 1)
+
+generate_trigram <- function(start, n, prob) {
+  out <- start
+  for (i in 1:n) {
+    ctx <- paste0(out[length(out) - 1], out[length(out)])
+    p <- prob[ctx, ]
+    out <- c(out, sample(colnames(prob), 1, prob = p))
+  }
+  paste(out, collapse = "")
+}
+
+set.seed(42)
+cat("Trigram output:", generate_trigram(c("t", "h"), 200, trigram_prob), "\n\n")
+
+# d) Perplexity of both models on the held-out test set
+log_prob_bigram <- 0
+for (i in 2:length(test)) {
+  log_prob_bigram <- log_prob_bigram + log(bigram_prob[test[i-1], test[i]])
+}
+ppl_bigram <- exp(-log_prob_bigram / (length(test) - 1))
+
+log_prob_trigram <- 0
+for (i in 3:length(test)) {
+  ctx <- paste0(test[i - 2], test[i - 1])
+  log_prob_trigram <- log_prob_trigram + log(trigram_prob[ctx, test[i]])
+}
+ppl_trigram <- exp(-log_prob_trigram / (length(test) - 2))
+
+cat("Bigram perplexity: ", round(ppl_bigram, 2), "\n")
+cat("Trigram perplexity:", round(ppl_trigram, 2), "\n")
+```
+
+Here the bigram model has lower (better) perplexity than the trigram model. The corpus is small (250 training characters), so most of the 529 possible two-character contexts are seen once or not at all; Laplace smoothing then dominates the trigram's predictions and pulls them toward uniform, offsetting the benefit of the extra context. With a larger corpus, per-context counts are more reliable and the trigram typically overtakes the bigram.
+:::
+:::
+
+::: {#exr-}
+## Temperature and Sampling Strategies
+
+Using a pretrained model's output logits, explore how different sampling strategies affect text generation. Top-$k$ sampling keeps only the $k$ highest-probability tokens, renormalizes their probabilities to sum to one, and samples from that truncated distribution.
+
+Take the logits of a vocabulary of ten tokens, `token_1` to `token_10`, to be
+$$
+4.5, 3.2, 2.8, 2.1, 1.5, 0.8, 0.3, -0.5, -1.2, -2.0,
+$$
+stored in the vector `logits`.
+
+```{r}
+#| cache: true
+# Simulated logits for a vocabulary of 10 tokens
+set.seed(123)
+vocab <- paste0("token_", 1:10)
+logits <- c(4.5, 3.2, 2.8, 2.1, 1.5, 0.8, 0.3, -0.5, -1.2, -2.0)
+names(logits) <- vocab
+```
+
+a) Implement softmax with temperature. Plot the probability distribution for $T \in \{0.1, 0.5, 1.0, 2.0, 5.0\}$.
+b) Implement top-$k$ sampling. For $k=3$, what is the probability of each token being selected at $T=1$?
+c) Implement top-$p$ (nucleus) sampling. For $p=0.9$ at $T=1$, which tokens are included?
+d) Sample 1000 tokens using each strategy: greedy, top-$k$ ($k=5$), top-$p$ ($p=0.9$), and pure sampling at $T=1$. Plot histograms comparing the token frequency distributions.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| cache: true
+#| fig-height: 5
+softmax <- function(z, T = 1) { e <- exp(z / T); e / sum(e) }
+
+# a) Plot distributions at different temperatures
+temps <- c(0.1, 0.5, 1.0, 2.0, 5.0)
+cols <- rainbow(length(temps))
+
+plot(1:10, softmax(logits, temps[1]), type = "b", pch = 16, col = cols[1],
+     xlab = "Token", ylab = "Probability", ylim = c(0, 1),
+     xaxt = "n")
+axis(1, at = 1:10, labels = 1:10)
+for (i in 2:length(temps)) {
+  lines(1:10, softmax(logits, temps[i]), type = "b", pch = 16, col = cols[i])
+}
+legend("topright", paste("T =", temps), col = cols, lty = 1, pch = 16, cex = 0.7)
+
+# b) Top-k sampling
+top_k_sample <- function(logits, k, T = 1) {
+  p <- softmax(logits, T)
+  top_idx <- order(p, decreasing = TRUE)[1:k]
+  p_trunc <- p[top_idx] / sum(p[top_idx])
+  names(p_trunc) <- names(logits)[top_idx]
+  p_trunc
+}
+
+cat("Top-3 probabilities (T=1):\n")
+print(round(top_k_sample(logits, 3), 4))
+
+# c) Top-p sampling
+top_p_sample <- function(logits, p_thresh, T = 1) {
+  p <- softmax(logits, T)
+  ord <- order(p, decreasing = TRUE)
+  cumprob <- cumsum(p[ord])
+  cutoff <- which(cumprob >= p_thresh)[1]
+  included <- ord[1:cutoff]
+  p_trunc <- p[included] / sum(p[included])
+  names(p_trunc) <- names(logits)[included]
+  p_trunc
+}
+
+cat("\nTop-p (p=0.9) tokens:\n")
+print(round(top_p_sample(logits, 0.9), 4))
+
+# d) Sample 1000 tokens with each strategy
+n_samples <- 1000
+p1 <- softmax(logits, 1)
+
+greedy <- rep(which.max(p1), n_samples)
+topk <- sample(order(p1, decreasing = TRUE)[1:5], n_samples, replace = TRUE,
+               prob = p1[order(p1, decreasing = TRUE)[1:5]])
+topp_probs <- top_p_sample(logits, 0.9)
+topp <- sample(as.integer(gsub("token_", "", names(topp_probs))),
+               n_samples, replace = TRUE, prob = topp_probs)
+pure <- sample(1:10, n_samples, replace = TRUE, prob = p1)
+
+par(mfrow = c(2, 2))
+hist(greedy, breaks = 0:10 + 0.5, main = "Greedy", xlab = "Token")
+hist(topk, breaks = 0:10 + 0.5, main = "Top-k (k=5)", xlab = "Token")
+hist(topp, breaks = 0:10 + 0.5, main = "Top-p (p=0.9)", xlab = "Token")
+hist(pure, breaks = 0:10 + 0.5, main = "Pure Sampling (T=1)", xlab = "Token")
+```
+:::
+:::
+
+::: {#exr-}
+## Scaling Laws
+
+Neural scaling laws predict that test loss decreases predictably as a power law with model size, dataset size, and compute, an empirical regularity documented across many orders of magnitude by @kaplan2020scaling and refined by @hoffmann2022training, whose Chinchilla study showed that model size and training tokens should be scaled together for a fixed compute budget. A simplified form for model size is:
+$$
+L(N) = L_\infty + \left(\frac{N_0}{N}\right)^\alpha
+$$
+where $L_\infty$ is the irreducible loss, $N$ is the number of parameters, and $N_0, \alpha$ are constants.
+
+Given the following data from training runs:
+
+| Parameters (M) | Test Loss |
+|:---:|:---:|
+| 10 | 3.80 |
+| 50 | 3.15 |
+| 100 | 2.90 |
+| 500 | 2.45 |
+| 1000 | 2.28 |
+| 5000 | 2.05 |
+
+a) Plot log(parameters) vs. test loss. Does the relationship look approximately linear on a log scale (after subtracting the irreducible loss)?
+b) Assuming $L_\infty = 1.8$, fit the power law by linear regression on $\log(L - L_\infty)$ vs. $\log(N)$. Estimate $\alpha$ and $N_0$.
+c) Using your fit, predict the test loss for a 10B parameter model.
+d) What are the limitations of extrapolating scaling laws?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| cache: true
+N <- c(10, 50, 100, 500, 1000, 5000)  # millions
+L <- c(3.80, 3.15, 2.90, 2.45, 2.28, 2.05)
+L_inf <- 1.8
+
+# a) Plot
+par(mfrow = c(1, 2))
+plot(log10(N), L, pch = 16, xlab = "log10(Parameters in M)", ylab = "Test Loss",
+     main = "Scaling Law")
+grid()
+
+# b) Fit power law: log(L - L_inf) = log(N0^alpha) - alpha * log(N)
+y <- log(L - L_inf)
+x <- log(N)
+fit <- lm(y ~ x)
+cat("alpha =", round(-coef(fit)[2], 3), "\n")
+cat("log(N0^alpha) =", round(coef(fit)[1], 3), "\n")
+
+alpha <- -coef(fit)[2]
+N0_alpha <- exp(coef(fit)[1])
+N0 <- N0_alpha^(1/alpha)
+cat("N0 =", round(N0, 2), "M\n")
+
+plot(log10(N), y, pch = 16, xlab = "log10(N)", ylab = "log(L - L_inf)")
+abline(fit, col = "red")
+grid()
+
+# c) Predict for 10B = 10000M
+L_10B <- L_inf + (N0 / 10000)^alpha
+cat("Predicted loss at 10B:", round(L_10B, 3), "\n")
+
+# d) Limitations: scaling laws assume fixed architecture, training procedure,
+# and data distribution. Emergent capabilities can appear discontinuously.
+# Power laws may not hold across architecture families.
+```
+:::
+:::
+
+::: {#exr-rag-retrieval-metrics}
+## Retrieval Quality Metrics and Hybrid Search in RAG
+
+@sec-context-engineering evaluates retrieval with Precision@k (fraction of the top-$k$ retrieved chunks that are relevant), Recall@k (fraction of all relevant chunks that appear in the top $k$), and Mean Reciprocal Rank (MRR, here the reciprocal rank $1/\text{rank}$ of the first relevant chunk). It also fuses dense and lexical search through the formula $H = (1-\alpha)\cdot\text{BM25} + \alpha\cdot\text{Semantic}$, with a typical $\alpha \approx 0.5$. This exercise works through these mechanics on a small worked example, distinct from the earlier Context Window Budget exercise, which covers token budgeting rather than retrieval quality.
+
+A knowledge base has 6 chunks (A through F). For the query "What is the timeout setting for RFC 2616 keep-alive connections?" a retrieval system reports the scores below. Only chunks B and E actually answer the question: B states the number tersely using the exact RFC identifier and section number, while E restates the same fact in more natural, paraphrased language.
+
+| Chunk | Semantic (cosine) | BM25 (lexical) | Relevant? |
+|---|---|---|---|
+| A | 0.55 | 1.0 | No |
+| B | 0.42 | 9.5 | Yes |
+| C | 0.20 | 0.5 | No |
+| D | 0.62 | 1.5 | No |
+| E | 0.81 | 3.0 | Yes |
+| F | 0.15 | 2.0 | No |
+
+a) Rank the chunks by semantic score alone. Compute Precision@3, Recall@3, and MRR.
+
+b) Min-max normalize the semantic and BM25 columns separately to $[0,1]$, and explain why normalizing before fusing is necessary given the very different native scales of cosine similarity and BM25. Using the fusion formula with $\alpha = 0.5$ on the normalized scores, rank the chunks again and recompute Precision@3, Recall@3, and MRR.
+
+c) Compare (a) and (b). Which relevant chunk was rescued from outside the top 3, and why? Relate this to the chapter's point that a user searching for "RFC 2616" needs lexical matching that pure semantic similarity to "HTTP specification" would miss.
+
+d) Sweep $\alpha \in \{0, 0.3, 0.5, 0.7, 1.0\}$ and report Precision@3 and Recall@3 at each value. Is the chapter's "typical $\alpha \approx 0.5$" consistent with what you find? At what value of $\alpha$ does retrieval quality degrade, and why, given chunk B's scores?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{python}
+import numpy as np
+
+chunks   = np.array(list("ABCDEF"))
+semantic = np.array([0.55, 0.42, 0.20, 0.62, 0.81, 0.15])
+bm25     = np.array([1.0, 9.5, 0.5, 1.5, 3.0, 2.0])
+relevant = np.array([False, True, False, False, True, False])   # B and E
+n_rel    = relevant.sum()
+
+def metrics(scores, k=3):
+    order  = np.argsort(-scores)               # rank chunks by descending score
+    ranked = relevant[order]
+    p_at_k = ranked[:k].sum() / k
+    r_at_k = ranked[:k].sum() / n_rel
+    mrr    = 1.0 / (np.argmax(ranked) + 1)     # 1 / rank of first relevant chunk
+    return "".join(chunks[order]), p_at_k, r_at_k, mrr
+
+rank, p, r, mrr = metrics(semantic)
+print(f"(a) semantic ranking {rank}: P@3={p:.3f} R@3={r:.3f} MRR={mrr:.3f}")
+```
+
+a) The semantic ranking is E, D, A, B, C, F. The top 3 are {E, D, A}, of which only E is relevant, so Precision@3 $= 1/3 \approx 0.333$ and Recall@3 $= 1/2 = 0.5$ (the relevant chunk B sits at rank 4 and is missed). MRR $= 1/1 = 1.0$ because E is already at rank 1. MRR looks perfect while Recall@3 misses half the relevant material, which is exactly why the chapter reports all three metrics together.
+
+b)
+```{python}
+def minmax(x):
+    return (x - x.min()) / (x.max() - x.min())
+
+sem_n, bm_n = minmax(semantic), minmax(bm25)
+H = 0.5 * bm_n + 0.5 * sem_n
+print("normalized semantic:", np.round(sem_n, 3))
+print("normalized bm25:    ", np.round(bm_n, 3))
+rank, p, r, mrr = metrics(H)
+print(f"(b) hybrid ranking {rank}: P@3={p:.3f} R@3={r:.3f} MRR={mrr:.3f}")
+```
+
+Normalization is necessary because raw BM25 is an unbounded, term-frequency-based score (here 0.5 to 9.5) while cosine similarity is bounded (here 0.15 to 0.81). Fusing the raw columns would let whichever has the larger native magnitude dominate regardless of the intended weight $\alpha$. After min-max scaling, the fused scores at $\alpha = 0.5$ rank the chunks B, E, D, A, F, C. The top 3 are now {B, E, D}, so both relevant chunks are retrieved: Precision@3 $= 2/3 \approx 0.667$, Recall@3 $= 1.0$, and MRR $= 1.0$ (B is now rank 1).
+
+c) Chunk B is rescued: it moves from rank 4 under semantic-only retrieval to rank 1 under hybrid retrieval. Its terse, identifier-heavy phrasing scores poorly on semantic similarity (0.42, only fourth highest) but highest on BM25 (9.5) because it contains the exact tokens "RFC 2616" and "keep-alive." This is precisely the chapter's point: an exact-identifier query is underserved by semantic-only retrieval, and hybrid retrieval recovers B without dropping the paraphrased chunk E.
+
+d)
+```{python}
+for a in [0.0, 0.3, 0.5, 0.7, 1.0]:
+    rank, p, r, _ = metrics((1 - a) * bm_n + a * sem_n)
+    print(f"alpha={a:.1f}  ranking {rank}  P@3={p:.3f} R@3={r:.3f}")
+```
+
+Precision@3 and Recall@3 hold at 0.667 and 1.0 across $\alpha \in \{0, 0.3, 0.5, 0.7\}$ and drop to 0.333 and 0.5 only at $\alpha = 1.0$ (pure semantic). Chunk B's normalized BM25 score of 1.0 keeps it in the top 3 as long as BM25 receives any nonzero weight, whereas its normalized semantic score of 0.409 is too low to save it once BM25 is excluded entirely. This is consistent with the chapter's "typical $\alpha \approx 0.5$": a wide middle range of $\alpha$ works equally well here, and the real lesson is that the failure mode sits at the $\alpha = 1$ extreme, exactly the pure-semantic scenario the chapter warns about.
+:::
+:::
+
+::: {#exr-self-consistency-voting}
+## Self-Consistency: Majority Voting over Reasoning Paths
+
+@sec-post-training-reasoning reports that giving PaLM 540B eight chain-of-thought (CoT) examples raised its GSM8K accuracy from 18% to 57% [@wei2023chainofthought], a gain that came entirely from a better prompt. The chapter also stresses that reasoning need not be linear: Tree-of-Thought explores several branches instead of one, and Reflexion revises an answer after critiquing itself. *Self-consistency* is a third way to spend extra inference-time compute: draw several independent CoT samples for the same problem and return the most common (mode) final answer instead of trusting a single sample.
+
+Suppose each sampled reasoning path independently reaches the correct answer with probability $p$, and otherwise lands on one of $m$ distinct wrong answers, chosen uniformly at random among the $m$ options. Majority voting returns whichever of the $m+1$ possible answers gets the most votes among $k$ independent samples, breaking ties at random.
+
+a) Simulate this voting scheme for $p = 0.57$ (the chapter's post-CoT GSM8K accuracy) with $m=3$ wrong answers, for $k \in \{1, 3, 5, 7, 11, 21\}$ samples per problem, using at least 20,000 simulated problems per value of $k$. Report the accuracy at each $k$ and the gain of $k=11$ over the single-sample case $k=1$.
+
+b) Consider the simpler two-outcome case: ignore how the wrong answers split, and count a vote as correct whenever more than half of the $k$ samples are correct. For odd $k$ this majority-vote probability is a binomial tail,
+$$
+\prob{\text{majority correct}} = \prob{X > k/2}, \qquad X \sim \text{Binomial}(k,p), \quad \E{X} = kp.
+$$
+Compute this theoretical accuracy for $p=0.57$ at the same values of $k$ as in (a). Is it higher or lower than your simulation from (a), and why would splitting the wrong answers across $m>1$ labels make the vote easier for the correct answer to win than a strict two-outcome majority requires?
+
+c) Repeat (a) and (b) with $p = 0.18$, the chapter's pre-CoT (direct-answer) GSM8K accuracy. What happens to voting accuracy as $k$ grows? State a general rule for when self-consistency helps versus when it hurts, and explain why the accuracy gains in (a) shrink at larger $k$ even though $p > 0.5$ throughout.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{python}
+import numpy as np
+from scipy import stats
+
+np.random.seed(24)
+
+def vote_accuracy(p, k, m_wrong=3, n_trials=20000):
+    correct = np.random.rand(n_trials, k) < p
+    wrong = np.random.randint(1, m_wrong + 1, size=(n_trials, k))
+    votes = np.where(correct, 0, wrong)  # label 0 marks the correct answer
+    wins = 0
+    for row in votes:
+        vals, counts = np.unique(row, return_counts=True)
+        top = vals[counts == counts.max()]
+        winner = top[0] if len(top) == 1 else np.random.choice(top)
+        wins += (winner == 0)
+    return wins / n_trials
+
+ks = [1, 3, 5, 7, 11, 21]
+sim_57 = [vote_accuracy(0.57, k) for k in ks]
+for k, a in zip(ks, sim_57):
+    print(f"k={k:2d}  simulated accuracy={a:.3f}")
+```
+
+a) A single CoT sample is correct 57.2% of the time, matching $p=0.57$ up to simulation noise. Voting over $k=11$ samples raises accuracy to 0.923, a gain of about 0.35 (35 percentage points) over $k=1$, comparable in size to the chapter's own CoT jump from 18% to 57%. With $k=21$ samples accuracy reaches 0.986.
+
+b)
+```{python}
+theo_57 = [stats.binom.sf(k // 2, k, 0.57) for k in ks]
+for k, a, t in zip(ks, sim_57, theo_57):
+    print(f"k={k:2d}  simulated={a:.3f}  two-outcome theory={t:.3f}")
+```
+The two-outcome theoretical accuracy (0.570, 0.604, 0.630, 0.650, 0.683, 0.743 for $k=1,\ldots,21$) is below the simulation at every $k>1$. Requiring a strict majority over two outcomes is a harder bar than requiring only a plurality over $m+1=4$ outcomes: when the wrong samples split across three labels instead of pooling into one, the correct answer's vote share only has to beat each wrong label's share individually, not the combined wrong total. This is why realistic self-consistency, where the wrong answers are rarely just one alternative, tends to outperform the conservative two-outcome bound.
+
+c)
+```{python}
+sim_18 = [vote_accuracy(0.18, k) for k in ks]
+theo_18 = [stats.binom.sf(k // 2, k, 0.18) for k in ks]
+for k, a, t in zip(ks, sim_18, theo_18):
+    print(f"k={k:2d}  simulated={a:.3f}  two-outcome theory={t:.3f}")
+```
+With $p=0.18$, voting makes things worse: simulated accuracy falls from 0.183 at $k=1$ to 0.103 at $k=11$ and 0.070 at $k=21$, a drop of about 0.08, while the two-outcome theoretical accuracy collapses even faster, from 0.180 down to 0.007 at $k=11$ and essentially 0 at $k=21$. The general rule follows from the law of large numbers applied to votes. If $p>0.5$, each additional independent sample is more likely right than wrong, so the correct answer's vote share concentrates around $p$ and eventually dominates as $k \to \infty$. If $p<0.5$, the same concentration works against the correct answer, and voting amplifies the base error rate instead of correcting it. Self-consistency does not create signal; it only purifies signal that is already present on average in a single sample.
+
+The diminishing returns visible in (a) are a ceiling effect: accuracy cannot exceed 1, so as it approaches 1 the remaining error shrinks by roughly a constant factor for each added block of samples, a Chernoff-type exponential decay in $k$, and the visible gain in accuracy is bounded above by that shrinking error. This is also why published self-consistency results use modest sample counts, $k$ in the tens rather than thousands: most of the achievable gain over a single CoT sample arrives within the first ten or so votes, much as ToT's branching search bought most of its gain over a bounded number of branches (4% to 74% on Game of 24, @yao2023tree) and Reflexion's critique-and-revise loop bought most of its gain over a handful of iterations (80% to 91% on HumanEval, @shinn2023reflexion).
+:::
+:::
+
+::: {#exr-tree-of-thought-reflexion}
+## Tree-of-Thought and Reflexion: Search and Self-Critique
+
+@sec-post-training-reasoning presents two ways to spend extra inference-time compute beyond the self-consistency voting of @exr-self-consistency-voting: Tree-of-Thought (ToT) explores and prunes multiple partial solutions, while Reflexion revises a single line of attempts using its own written critique of what went wrong.
+
+a) *Tree-of-Thought as pruned beam search.* Model a $d$-step puzzle (like Game of 24's three arithmetic operations) where at each step there are $b = 4$ candidate continuations, exactly one of which lies on a correct solution path. A linear CoT strategy picks one candidate uniformly at random at each of $d = 3$ steps, succeeding only if it is correct all three times. A ToT strategy scores all $b$ candidates with a noisy evaluator that ranks the true best candidate first with probability $s = 0.6$ (otherwise it orders all $b$ candidates uniformly at random), keeps the best $k = 2$, and expands both survivors; the search succeeds if the correct candidate survives the beam at every level.
+   (i) Derive $p_{\text{CoT}} = (1/b)^d$ and, with per-level retention probability $r = s + (1-s)(k/b)$, $p_{\text{ToT}} = r^d$.
+   (ii) Compute both.
+   (iii) Compute the number of nodes each strategy evaluates: linear CoT ($d$), beam search ($b + (d-1)kb$), and exhaustive search ($b^d$). Express the beam search's savings as a multiple of the exhaustive cost.
+   (iv) Confirm (ii) with a short Monte Carlo simulation, and comment on how the pattern (large accuracy gain, modest node-count increase) compares to the chapter's Game of 24 result (4% to 74%, @yao2023tree).
+
+b) *Reflexion and the independence assumption.* The chapter reports a GPT-4 agent using Reflexion raised its HumanEval success rate from $p_1 = 0.80$ to 0.91 [@shinn2023reflexion]. Suppose, counterfactually, that repeated attempts at the same problem (no reflection, just resampling, checked against the same unit-test oracle) were independent Bernoulli trials each succeeding with probability $p_1$.
+   (i) Compute $\prob{\text{at least one success in 2 independent tries}}$ and compare it to the reported 0.91.
+   (ii) Your answer to (i) exceeds 0.91. What does this imply about whether repeated LLM samples on the same failed problem, with no new information, can be treated as independent draws at rate $p_1$?
+   (iii) Using the chapter's description of Reflexion ("the model gains short-term memory and avoids repeating past mistakes"), argue why the targeted information in a self-written critique does work that plain resampling cannot, and relate this to why the independence assumption in @exr-self-consistency-voting (independent parallel CoT samples) is more defensible than an independence assumption across un-reflected sequential retries on the same problem.
+
+c) Fill in a table contrasting self-consistency (@exr-self-consistency-voting), Tree-of-Thought, and Reflexion on: whether attempts are generated independently or sequentially/dependently; whether an external verifier or oracle is required; and what happens to a failed candidate.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)(i) A linear CoT chain is correct only if it picks the one correct continuation at every step, and the picks are independent uniform draws over $b$ options, so $p_{\text{CoT}} = (1/b)^d$. For ToT, the correct candidate survives a level either when the evaluator ranks it first (probability $s$) or when the evaluator fails but the correct candidate still lands in the top $k$ of a uniformly random order (probability $(1-s)\cdot k/b$); these give per-level retention $r = s + (1-s)(k/b)$, and survival across $d$ independent levels gives $p_{\text{ToT}} = r^d$.
+
+```{python}
+import numpy as np
+np.random.seed(24)
+
+b, d, k, s = 4, 3, 2, 0.6
+p_cot = (1 / b) ** d
+r     = s + (1 - s) * (k / b)
+p_tot = r ** d
+print(f"p_CoT = {p_cot:.4f},  r = {r},  p_ToT = {p_tot:.4f}")
+print(f"improvement factor p_ToT / p_CoT = {p_tot / p_cot:.1f}x")
+
+nodes = {"linear CoT": d, "beam": b + (d - 1) * k * b, "exhaustive": b ** d}
+print("node counts:", nodes)
+print(f"beam savings vs exhaustive = {nodes['exhaustive'] / nodes['beam']:.1f}x")
+```
+
+(ii) $p_{\text{CoT}} = (1/4)^3 = 1/64 \approx 0.016$; with $r = 0.6 + 0.4(2/4) = 0.8$ we get $p_{\text{ToT}} = 0.8^3 = 0.512$, roughly a 33-fold improvement over linear CoT.
+
+(iii) Node counts are 3 for linear CoT, $4 + 2\cdot 2\cdot 4 = 20$ for beam search, and $4^3 = 64$ for exhaustive search, so beam search uses $64/20 = 3.2\times$ fewer node evaluations than exhaustive search.
+
+(iv)
+```{python}
+n = 400_000
+cot  = (np.random.rand(n, d) < 1 / b).all(axis=1)
+good = np.random.rand(n, d) < s                     # evaluator ranks correct first
+rnk  = np.random.randint(1, b + 1, size=(n, d))     # else uniformly random rank
+tot  = (good | (~good & (rnk <= k))).all(axis=1)
+print(f"simulated p_CoT = {cot.mean():.4f}  (closed form {p_cot:.4f})")
+print(f"simulated p_ToT = {tot.mean():.4f}  (closed form {p_tot:.4f})")
+```
+
+The simulation recovers $p_{\text{CoT}} \approx 0.016$ and $p_{\text{ToT}} \approx 0.51$, matching the closed forms. Qualitatively this mirrors Game of 24: a large absolute accuracy gain (here 1.6% to 51.2%, the chapter's case 4% to 74%) bought by evaluating a few more candidates per step, far short of exhaustive search's combinatorial cost.
+
+b)(i)
+```{python}
+p1 = 0.80
+print(f"P(>=1 success in 2 independent tries) = {1 - (1 - p1) ** 2:.3f}")
+```
+$1 - (1 - 0.8)^2 = 1 - 0.04 = 0.96$, which exceeds the reported 0.91.
+
+(ii) If retries really were independent at rate $p_1$, then naive resampling with no reflection at all would already beat the reported Reflexion result using just two tries. Since Reflexion is reported as a genuine improvement over simpler baselines, the independence assumption must fail in practice: repeated samples from the same model on the same problem, with no new information, are positively correlated, because failures tend to be systematic (a specific, confidently wrong reasoning error) rather than fresh random noise a new draw would simply avoid.
+
+(iii) Reflexion's critique step supplies a diagnosis of the specific error, information absent from a plain retry, which can break a correlation that a same-conditions resample cannot. This is exactly why self-consistency's assumption of independent samples (which differ only by sampling randomness within a single well-posed reasoning task) is more defensible than assuming independence across sequential retries on a problem the model has already failed once with nothing new added.
+
+c)
+
+| Method | Attempts | Verifier or oracle | Fate of a failed candidate |
+|---|---|---|---|
+| Self-consistency | Independent, parallel i.i.d. samples | None (majority vote only) | Simply outvoted, never revisited |
+| Tree-of-Thought | Branching: dependent within a lineage, parallel across the beam | A scoring or evaluator function (heuristic or self-evaluation, not necessarily ground truth) | Pruned and not expanded further |
+| Reflexion | Strictly sequential and dependent (each attempt conditions on prior critiques) | A pass/fail oracle (e.g., unit tests) | Analyzed to produce a written critique that reshapes the next attempt |
+:::
+:::
+
+::::

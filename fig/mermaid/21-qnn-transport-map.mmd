@@ -1,0 +1,6 @@
+flowchart TB
+    Y["Data Y"] --> S["Statistics S(Y)"]
+    Z["Latent Z ~ Uniform"] --> E["Embedding ψ(Z)"]
+    S --> H(["Transport map H"])
+    E --> H
+    H --> X["Posterior sample X"]

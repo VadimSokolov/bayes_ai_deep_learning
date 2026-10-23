@@ -1,0 +1,1145 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## A/B Testing
+
+During a recent breakout of the flu, 850 out of 6,224 people diagnosed with
+the virus presented severe symptoms. During the same flu season, a
+experimental anti-virus drug was being tested. The drug was given to 238
+people with the flu, and only 6 of them developed severe symptoms. Based
+on this information, can you conclude, for sure, that the drug is a
+success?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+Null hypothesis is $H_0: p_1 - p_2 = 0$, $H_a: p_1 - p_2 \neq 0$.
+$$
+\hat{p}_1 = \frac{850}{6224} = 0.136, \quad \hat{p}_2 = \frac{6}{238} = 0.025, \quad \hat{p}_1 - \hat{p}_2 = 0.136-0.025 = 0.111
+$$
+The standard error is
+$$
+s = \sqrt{\frac{0.136 \times (1 - 0.136)}{6224} + \frac{0.025 \times ( 1- 0.025)}{238} }= 0.011
+$$
+t-stat is
+$$
+t = \frac{\hat{p}_1 - \hat{p}_2 - 0}{s} = \frac{0.136 - 0.025}{0.011} = 10.09 > 1.96
+$$
+
+Yes, given this information we can conclude that the drug is working.
+
+If you do confidence interval, the $95\%$ confidence interval of $p_1 - p_2$ is
+$$
+[0.111 - 1.96 \times 0.011, 0.111 + 1.96\times 0.011] = [0.089, 0.133]
+$$
+which doesn't contain 0. We reject the null hypothesis.
+
+
+:::
+:::
+
+::: {#exr-}
+## Red Sox
+On September 24, 2003, Pete Thamel in the New York Times reported that
+the Boston Red Sox had been accused of cheating by another American
+League Team. The claim was that the Red Sox had a much better winning
+record at home games than at games played in other cities.
+
+The following table provides the wins and losses for home and away games
+for the Red Sox in the 2003 season
+
+                     Record                              
+  ---------------- ----------- ------------- ----------- -------------
+        Team        Home Wins   Home Losses   Away Wins   Away Losses
+   Boston Red Sox      53           28           42           39
+
+Is there any evidence that the proportion of Home wins is significantly
+different from home and away games?
+
+Discuss any other issues that are relevant.
+
+Hint: a 95% confidence interval for a difference in proportions $p_1 - p_2$ is given by 
+$$
+( \hat{p}_1 - \hat{p}_2 ) \pm 1.96 
+\sqrt{ \frac{ \hat{p}_1 ( 1 - \hat{p}_1 ) }{ n_1 }  + 
+\frac{ \hat{p}_2 ( 1 - \hat{p}_2 ) }{ n_2 } }
+$$
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The home and away winning proportions are given by
+$$
+p_1 = \frac{53}{81} = 0.654  \; \; \text{ and} \; \;  \text{ Var} = \frac{ p_1 ( 1- p_1 ) }{ n_1 } = \frac{53 \times 28 }{81^3} = 0.0028
+$$
+and
+$$
+p_2 = \frac{42}{81} = 0.518 \; \; \text{ and} \; \;  \text{ Var} = \frac{ p_2 ( 1- p_2 ) }{ n_2 } = \frac{42 \times 39}{81^3} = 0.0031
+$$
+Can either do the problem as a confidence interval or a hypothesis test.
+
+For the CI, we get
+$$
+\left (  \frac{53}{81} - \frac{42}{81} \right ) \pm 1.96 \sqrt{  \frac{53 \times 28 }{81^3} + \frac{42 \times 39}{81^3} } = ( -0.014 , 0.286 )
+$$
+As the confidence interval contains zero there is no significant difference at the $5$% level.
+
+For the hypothesis test we have the null hypothesis that $H_0 : p_1 = p_2$ versus $H_1 : p_1 \neq p_2$. Then the test statistic is approximately normally distributed (large $n = n_1 + n_2$) is and given by $$Z = \frac{ 0.654 - 0.518 }{\sqrt{ 0.0059} } = 1.77$$ At the $5$% level the critical value is $1.96$ and so there's not statistical significance.
+
+The major issue here is whether you should test whether the proportions from home and away are different. There might be a significant home team bias in general and we should test to see if the Red Sox advantage is significantly different from that. All things else equal this will reduce the significance of the Red Sox home advantage bias.
+
+:::
+:::
+
+::: {#exr-}
+## Myocardial Infarction
+In a five-year study of the effects of aspirin on Myocardial Infarction (MI), or heart attack, you have the following dataset on the reduction of the probability of getting MI from taking aspirin versus a Placebo, or control.
+
+   Treatment   with MI   without MI
+  ----------- --------- ------------
+    Placebo      198       10845
+    Aspirin      104       10933
+
+a) Find a $95$% confidence interval for the difference in proportions
+    $p_1-p_2$.
+a) Perform a hypothesis test of the null $H_0 : p_1 = p_2$ at a $1$%
+    significance level.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+Converting to proportions:
+
+   Treatment   with MI   without MI     n
+  ----------- --------- ------------ -------
+    Placebo    0.01793    0.98207     11043
+    Aspirin    0.00942    0.99058     11037
+
+a) The CI for a difference in proportion is:
+    $$(\hat{p}_1-\hat{p}_2)\pm z_{\alpha/2}\sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1}+\frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}$$
+    $$=(0.01793-0.00942)\pm 1.96\sqrt{\frac{0.01793(1-0.01793)}{11043}+\frac{0.00942(1-0.00942)}{11037}}$$
+    $$=0.00851\pm 1.96\sqrt{0.0000015945+0.0000008454}=0.00851\pm 1.96\sqrt{0.0000024399}$$
+    $$=0.00851\pm 1.96*0.00156205=0.00851\pm 0.00306$$ Therefore, the CI
+    for the difference in these proportions is: $$(0.00545,0.01157)$$
+a) At the 1% level, we would have a implied CI for the difference in
+    proportions of: $$=0.00851\pm 2.58*0.00156205=0.00851\pm 0.00403$$
+    Therefore, the CI for the difference in these proportions is:
+    $$(0.00448,0.01254)$$ We can see that this CI does not contain 0, so
+    therefore we can reject the null that $p_1=p_2$ at the 1%
+    significance level.
+
+
+:::
+:::
+
+::: {#exr-}
+## San Francisco Giants
+In October 1992, the ownership of the San Francisco Giants considered a
+sale of the franchise that would have resulted in a move to Florida. A
+survey from the *San Francisco Chronicle* found that in a random sample
+of $625$ people, 50.7% would be disappointed by the move. Find a 95%
+confidence interval of the population proportion
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The 95% CI is found by
+$$
+\hat{p} \pm z_{\alpha /2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}=.507\pm 1.96\sqrt{\frac{.507\times .493}{625}}=.507\pm 2\times .020=\left(.467,.547\right)
+$$
+
+:::
+:::
+
+::: {#exr-}
+## Pfizer
+Pfizer introduced Viagra in early 1998, and during $1998$, of the $6$
+million Viagra users, $77$ died from coronary problems such as heart
+attacks. Pfizer claimed that this rate is no more than that in the
+general population.
+
+You find from a clinical study of $1{,}500{,}000$ men who were not on Viagra
+that $11$ of them died of coronary problems in the same length of time
+during the $77$ Viagra users who dies in $1998$.
+
+Do you agree with Pfizer's claim that the proportion of Viagra users
+dying from coronary problems is no more than that of other comparable
+men?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+A 95% confidence interval for a difference in proportions $p_1 - p_2$ is
+given by $$( \hat{p}_1 - \hat{p}_2 ) \pm 1.96 
+\sqrt{ \frac{ \hat{p}_1 ( 1 - \hat{p}_1 ) }{ n_1 }  + 
+ \frac{ \hat{p}_2 ( 1 - \hat{p}_2 ) }{ n_2 } }$$
+
+Can do a confidence interval or a $Z$-score test.
+
+With Viagra, $\hat{p}_1 = 77/6000000 = 0.00001283$ and without Viagra
+$\hat{p}_2 = 11/1500000 = 0.00000733$. Need to test whether these are
+equal.
+
+With a $95$% confidence interval for $( p_1 - p_2 )$, you get an
+interval $( 0.0000003 , 0.0000107 )$ which doesn't contain zero. Hence
+evidence that the proportion is higher.
+
+Measured very accurately due to the large sample sizes.
+
+With testing might use a one-sided test and an $\alpha$ of $0.01$.
+
+
+:::
+:::
+
+::: {#exr-}
+## Voter: CI
+True or False: Given a random sample of $1000$ voters, $400$ say they will vote for
+Donald Trump if the Republican nomination for the 2016 US Presidential
+Election. Given that he gets the nomination, a $95\%$ confidence
+interval for the true proportion of voters that will vote for him
+includes $45\%$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+False, $\hat p = \frac{400}{1000} = 40\%$ and
+$$
+s_{\hat p} = \sqrt{\frac{\hat p(1-\hat p)}{1000}} = 0.0155
+$$
+The $95\%$ confidence interval is $0.4 \pm 1.96 \times 0.0155 = 0.4 \pm 0.0304$, i.e., $(0.370, 0.430)$, which does not include $45\%$.
+
+
+:::
+:::
+
+::: {#exr-}
+## Survey AB Testing
+In a pre-election survey of $435$ voters, $10$ indicated that they
+planned to vote for Ralph Nader. In a separate survey of $500$ people,
+$250$ said they planned to vote for George Bush.
+
+a) Perform a hypothesis test at the 5% level for the hypothesis that
+    Nader will get 3% or less of the vote.
+a) Find a 95% confidence interval for the difference in the proportion
+    of people that will vote for George Bush versus Ralph Nader.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $H_{0}:p\leq 0.03$ $H_{1}:p>0.03$
+    $z=\frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}$ where
+    $\hat{p}=\frac{10}{435}=0.023$ and $p_{0}=0.03$. Hence,
+    $z=\frac{0.023-0.03}{\sqrt{\frac{0.03\cdot 0.97}{435}}}=-0.86$, $z_{\alpha }=1.65$ (one-sided test!) so we do not reject $H_{0}$ as
+    $z<z_{\alpha }$.
+a) We know that the confidence interval is given by
+    $(\hat{p}_{1}-\hat{p}_{2})\pm 1.96\sqrt{\frac{\hat{p}_{1}(1-\hat{p}_{1})}{n_{1}}+\frac{\hat{p}_{2}(1-\hat{p}_{2})}{n_{2}}}$ and we have
+    $\hat{p}_{1}=\frac{250}{500}=0.5$ and
+    $\hat{p}_{2}=\frac{10}{435}=0.023$. Plugging everything into the
+    formula we find: $(0.5-0.023)\pm 1.96\sqrt{\frac{0.5\cdot 0.5}{500}+\frac{0.023\cdot 0.977}{435}}=[0.431,0.523]$
+
+:::
+:::
+
+::: {#exr-}
+## Significance Tests
+
+Some defendants in southern states have challenged verdicts made during the '50s and '60s, because of possible unfair jury selections. Juries are supposed to be selected at random from the population. In one specific case, only 12 jurors in an 80 person panel were African American. In the state in question, 50% of the population was African American. Could a jury with 12 African Americans out of 80 people be the result of pure chance?
+
+Using $n = 80$, $X = 12$, find a 99% confidence interval for the proportion $p$. Is that significantly different from $p = 0.5$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The sample proportion is $\hat{p} = 12/80 = 0.15$.
+The standard error is $\sqrt{\frac{0.15(1-0.15)}{80}} = 0.040$.
+For 99% CI ($z_{0.005} = 2.576$):
+$0.15 \pm 2.576 \times 0.040 = 0.15 \pm 0.103 = [0.047, 0.253]$.
+Since 0.5 is not in this interval, the result is significantly different from random selection from a 50% population.
+:::
+:::
+
+::: {#exr-}
+## Classical vs. Pop Music Spending
+A marketing firm is studying the effects of background music on people's
+buying behavior. A random sample of $150$ people had classical music
+playing while shopping and $200$ had pop music playing. The group that
+listened to classical music spent, on average \$ $74$ with a standard
+deviation of \$ $18$ while the pop music group spent \$ $78.4$ with a
+standard deviation of \$ $12$.
+
+a) Test whether there is any significant difference between the
+    difference in purchasing habits. Describe clearly your null and
+    alternative hypotheses and any test statistics that you use.
+a) Is there a difference between using a $5$% and $1$% significance
+    level.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We are given the following:
+$\bar{x}=74,s_{x}=18,n_{x}=150,\bar{y}=78.4,s_{y}=12,n_{y}=200$
+
+$$\begin{aligned}
+H_{0}:\mu_{x}-\mu_{y} & = & 0\\
+H_{1}:\mu_{x}-\mu_{y} & \neq & 0\end{aligned}
+$$
+
+In order to test for this hypothesis, we calculate the $z$-score and
+compare it with the z score at 5% and 1% confidence
+level.$$z=\frac{\bar{x}-\bar{y}}{\sqrt{\frac{s_{x}^{2}}{n_{x}}+\frac{s_{y}^{2}}{n_{y}}}}=\frac{74-78.4}{\sqrt{\frac{324}{150}+\frac{144}{200}}}=-2.592$$
+
+Since $\left\vert z\right\vert>z_{0.025}$, we can reject the null hypothesis at 95% confidence
+level and say that there exist significant differences between
+purchasing habits.
+
+For $\alpha=0.05$, $z_{\alpha/2}=1.96$ and for $\alpha=0.01$,
+$z_{\alpha/2}=2.575$. Thus, the answer does not change when we move from
+95% to 99% confidence level.
+
+Alternately, the above question can be solved by creating a confidence interval based on the differences. Again, we will reach the same conclusion.
+
+:::
+:::
+
+::: {#exr-}
+## CI for Google
+
+Google is test marketing a new website design to see if it increases the
+number of click-through on banner ads. In a small study of a million
+page views, they find the following table of responses
+
+                Total Viewers   Click-Throughs
+  ------------ --------------- ----------------
+   new design      700,000          10,000
+   old design      300,000          2,000
+
+Find a $99$% confidence interval for the increase in the proportion of people who click-through on banner ads using the new web design.
+
+Hint: a 99% confidence interval for a difference in proportions $p_1 - p_2$ is given by $( \hat{p}_1 - \hat{p}_2 ) \pm 2.58\sqrt{ \frac{ \hat{p}_1 ( 1 - \hat{p}_1 ) }{ n_1 }  + \frac{ \hat{p}_2 ( 1 - \hat{p}_2 ) }{ n_2 } }$
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+We are interested in the distribution of $p_1-p_2$. We have that: 
+$$
+\begin{aligned}
+\hat{p}_1 = \frac{10000}{700000} = \frac{1}{70} \\
+\hat{p}_2 = \frac{2000}{300000} = \frac{1}{150}
+\end{aligned}
+$$
+
+Following the hint, we have that the $99\%$ confidence interval is:
+
+$$
+\begin{aligned}
+p_1 - p_2 &\in & \Big[\hat{p}_1- \hat{p}_2 - 2.58\sqrt{\frac{\hat{p}_1(1-\hat{p}_1 )}{n_1}+\frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}, \hat{p}_1- \hat{p}_2 + 2.58\sqrt{\frac{\hat{p}_1(1-\hat{p}_1 )}{n_1}+\frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}\Big] \\
+&=& [0.00762-0.00053,0.00762+0.00053]  \\
+&=& [0.00709,0.00815]
+\end{aligned}
+$$
+
+:::
+:::
+
+::: {#exr-}
+## Amazon
+Amazon is test marketing a new package delivery system. It wants to see
+if same-day service is feasible for packages bought with Amazon prime.
+In a small study of a hundred thousand delivers they find the following
+times for delivery
+
+                Deliveries   Mean-Time (Hours)   Standard Deviation-Time
+  ------------ ------------ ------------------- -------------------------
+   new system     80,000            4.5                    2.1
+   old system     20,000            5.6                    2.5
+
+a) Find a $95$% confidence interval for the decrease in delivery time.
+a) If they switch to the new system, what proportion of deliveries will
+    be under $5$ hours which is required to guarantee same-day service.
+
+Hint: a 95% confidence interval for a difference in means
+$\mu_1 - \mu_2$ is given by $( \bar{x}_1 - \bar{x}_2 ) \pm 1.96 
+\sqrt{ \frac{s_1^2 }{ n_1 }  + \frac{ s_2^2 }{ n_2 } }$
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Follow the hint, the answer is (-1.14, -1.06).
+```{r}
+(4.5-5.6)-1.96*sqrt(2.1^2/80000+2.5^2/20000) #-1.14
+(4.5-5.6)+1.96*sqrt(2.1^2/80000+2.5^2/20000) #-1.06
+```
+Hence, the 95% confidence interval is (-1.14, -1.06).
+a)  As we have a large sample size, we can assume a normal distribution with given sample mean and standard deviation,
+    $P(T \leq 5) = 0.594$
+```{r}
+pnorm(5,mean=4.5,sd=2.1) #0.594
+```
+Hence, 59.4% of deliveries will be under 5 hours.
+
+:::
+:::
+
+::: {#exr-}
+## Vitamin C
+In the very famous study of the benefits of Vitamin C, $279$ people were randomly assigned to a dose of vitamin C or a placebo (control of nothing). The objective was to study where vitamin C reduces the incidence of a common cold. The following table provides the responses from the experiment
+
+     Group     Colds   Total
+  ----------- ------- -------
+   Vitamin C    17      139
+    Placebo     31      140
+
+a) Is there a significant difference in the proportion of colds between the vitamin C and placebo groups?
+a) Find a $99$% confidence interval for the difference. Would you recommend the use of vitamin C to prevent a cold?
+
+Hint: a 95% confidence interval for a difference in proportions $p_1 - p_2$ is given by 
+$$
+( \hat{p}_1 - \hat{p}_2 ) \pm 1.96  \sqrt{ \frac{ \hat{p}_1 (1- \hat{p}_1) }{ n_1 }  + \frac{ \hat{p}_2 (1- \hat{p}_2)   }{ n_2 } }
+$$
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+To test $$H_0: p_1 - p_2 = 0,$$ we could perform a two-sample $z$-test.
+$$
+\hat{p}_1 = \frac{17}{139} = 12.23\% \mbox{ and } \hat{p}_2 = \frac{31}{140} = 22.14\%
+$$
+$$
+\hat{\sigma} = \sqrt{ \frac{ \hat{p}_1 (1- \hat{p}_1) }{ n_1 }  + \frac{ \hat{p}_2 (1- \hat{p}_2)   }{ n_2 } }  = 4.48\%
+$$
+$$
+t-stat = \frac{\hat{p}_1 - \hat{p}_2}{\hat{\sigma} } = -2.21 < -1.96 = qnorm(0.025)
+$$
+Yes, we can reject the null hypothesis and there is a significant difference at 5% level.
+
+To form the 99% confidence interval of the difference, we use
+```{r}
+qnorm(0.995) #2.58.
+```
+$$
+0 \in [-9.91\% - 2.58*4.48\%, -9.91\% + 2.58*4.48\%]
+$$ 
+We cannot recommend the use of vitamin to prevent a cold at the 1% significance level.
+
+:::
+:::
+
+::: {#exr-}
+## Facebook vs Reading
+In a recent article, it was claimed that "$96$% of Americans under the age of $50$" spent more than three hours a day on Facebook.
+
+To test this hypothesis, a survey of $418$ people under the age of $50$ were taken, and it was found that $401$ used Facebook for more than three
+hours a day.
+
+Test the hypothesis at the $5$% level that the claim of $96$% is correct.
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We want to test the proportion of people under the age of 50 on
+Facebook. $$H_0: p = 96\%$$
+
+The estimated proportion from the survey is
+$$\hat{p} = 401/418 = 0.959$$
+
+The standard deviation of the sample proportion is
+$$\hat{\sigma} = \sqrt{\frac{\hat{p}*(1-\hat{p})}{n}} = 0.0096$$
+
+To perform a $t$-test, the corresponding statistic is
+$$\mbox{t-stat} = \frac{0.959 - 0.96}{0.0096} = -0.1$$
+
+It seems that we cannot reject the null hypothesis at the 5% level.
+
+:::
+:::
+
+::: {#exr-}
+## Paired T-Test
+
+The following table shows the outcome of eight years of a ten-year bet that Warren Buffett placed with Protege Partners, a New York hedge fund. Buffett claimed that a simple index fund would beat a portfolio strategy (fund-of-funds) picked by Protege over a ten-year time frame. At Buffett's shareholder meeting, he provided an update of the current state of the bet. The bundle of hedge funds picked by Protege had returned $21.9$% in the eight years through $2015$, and the S&P500 index fund had soared $65.7$%.
+
+                SP Index   Hedge Funds
+  ------------ ---------- -------------
+      2008       -37.0%      -23.9%
+      2009       26.6%        15.9%
+      2010       15.1%        8.5%
+      2011        2.1%        -1.9%
+      2012       16.0%        6.5%
+      2013       32.3%        11.8%
+      2014       13.6%        5.6%
+      2015        1.4%        1.7%
+   cumulative    65.7%        21.9%
+
+a) Use a paired $t$-test to assess the statistical significance between
+    the two return strategies
+a) How likely is Buffett to win his bet in two years?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+To conduct a paired $t$-test, we need define a new variable
+$$
+D = SP.Index - Hedge.Funds.
+$$ 
+Assume that
+$D_i \overset{i.i.d.}{\sim} N(\mu, \sigma^2)$. the null hypothesis we want to test is 
+$$
+H_0: \mu=0
+$$ 
+The mean and standard deviation of the difference $\{D_i\}_{i=1}^n$ are 
+$$
+\bar{D} = 0.0574,\quad s_D = 0.0969
+$$
+```{r}
+SP.Index = c(-37,26.6,15.1,2.1,16,32.3,13.6,1.4)
+Hedge.Funds = c(-23.9,15.9,8.5,-1.9,6.5,11.8,5.6,1.7)
+SP.Index = SP.Index/100
+Hedge.Funds = Hedge.Funds/100
+mean(SP.Index-Hedge.Funds)
+sd(SP.Index-Hedge.Funds)
+```
+
+Therefore the $t$-statistic is
+$$t=\frac{\bar{D}}{s_D\sqrt{1/n}} = \frac{0.0574}{0.0969\times\sqrt{1/8}}=1.6755.$$
+Notice that the degree of freedom is $8 - 1 = 7$. The corresponding
+$p$-value is $$P(|t_7|>1.6755) = 0.1378$$
+```{r}
+2*pt(1.6755,df=7,lower.tail = FALSE) #0.1377437
+```
+
+In `R`, you can easily perform $t$-test using the following command, which gives the same test result as above.
+```{r}
+t.test(SP.Index,Hedge.Funds,paired = TRUE)
+```
+The $p$-value is larger than 0.05. Thus we don't reject the null hypothesis at 5% significance level. In other words, these two return strategies are not significantly different.
+
+For the second question, the exact probability of Buffett winning his bet is calculated by
+$$P\left(\frac{(1+S_9)(1+S_{10})(1+65.7\%)}{(1+H_9)(1+H_{10})(1+21.9\%)}>1\right)$$
+where $S_9, S_{10}, H_9, H_{10}$ are returns of two strategies in 9th and 10th year. To derive the distribution of the left-hand side expression is difficult. Here we instead give a simulation solution, where the returns are assumed to be i.i.d. Normal variables.
+```{r}
+m1 = mean(SP.Index)
+s1 = sd(SP.Index)
+m2 = mean(Hedge.Funds)
+s2 = sd(Hedge.Funds)
+N = 1000 
+cum1 = NULL # cumulative return of SP.Index
+cum2 = NULL # cumulative return of Hedge.Funds
+set.seed(410)
+for (i in 1:N)
+{ 
+  # simulate returns in 2016 and 2017
+  return1 = c(0.657, rnorm(n=2, mean = m1, sd = s1)) 
+  # compute the cumulative return
+  cum1 = c(cum1, cumprod(1+return1)) 
+  
+  return2 = c(0.219, rnorm(n=2, mean = m2, sd = s2))
+  cum2 = c(cum2, cumprod(1+return2))
+}
+
+# compute the prob. of Buffett winning
+mean(cum1>cum2) #0.9296667
+```
+
+The estimated probability is 92.97%, indicating that Buffett is very likely to win his bet. Since the paired t - test suggests no significant difference in average returns, you can also estimate the mean by pooling the data and redo the simulation, which gives a smaller estimate (89.27%).
+
+:::
+:::
+
+::: {#exr-}
+## Shaquille O'Neal
+Shaquille O'Neal (nicknamed Shaq) is an ex-American Professional
+basketball player. He was notoriously bad at free throws (an uncontested
+shot given to a player when they are fouled). The following table
+compares the first three years of Shaq's career to his last three years.
+
+      Group      Free Throws Made   Free Throws Attempted
+  ------------- ------------------ -----------------------
+   Early Years         1352                 2425
+   Later Years         1121                 2132
+
+Did Shaq get worse at free throws over his career?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+$$
+\hat{p}_1 = \frac{1352}{2425} = 0.5575, \quad \hat{p}_2 = \frac{1121}{2132} = 0.5258, 
+\quad se( \hat{p_1} - \hat{p_2} ) = \sqrt{ \frac{ \hat{p}_1 (1- \hat{p}_1) }{ n_1 }  + \frac{ \hat{p}_2 (1- \hat{p}_2)   }{ n_2 } } = 0.0148
+$$
+The $Z$-score is
+$$
+Z = \frac{ \hat{p}_1 - \hat{p}_2 }{ se( \hat{p_1} - \hat{p_2} ) } = 2.14 \; .
+$$
+The $p$-value of Z-test is $$P(|N(0,1)|>2.14) = 0.0324$$ Thus we conclude that Shaq got worse at free throws.
+
+:::
+:::
+
+::: {#exr-}
+## Furniture Website
+Furniture.com wishes to estimate the average annual expenditure on
+furniture among its subscribers. A sample of 1000 subscribers is taken.
+The sample standard deviation is found to be \$670, and the sample mean
+is \$3790.
+
+a) Give a 90% confidence interval for the average expenditure.
+a) Test the hypothesis that the average expenditure is \$2,500 or less
+    at the 1% level.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) 90% Confidence Interval:
+$\bar{x} \pm t_{n-1, 0.05} \frac{s}{\sqrt{n}}$. With $n=1000$, we can use $z=1.645$.
+$3790 \pm 1.645 \times \frac{670}{\sqrt{1000}} = 3790 \pm 1.645 \times 21.19 = 3790 \pm 34.85 = (3755.15, 3824.85)$.
+
+a) Test $H_0: \mu \le 2500$ vs $H_a: \mu > 2500$.
+$t = \frac{3790 - 2500}{21.19} = 60.8$.
+This far exceeds any conventional critical value, so the $p$-value is essentially 0.
+We reject the null hypothesis and conclude the average expenditure is greater than \$2500.
+:::
+:::
+
+::: {#exr-}
+## Grocery AB Testing
+A grocery delivery service is studying the impact of weather on customer ordering behavior. To do so, they identified households which made orders both in October and in February on the same day of the week and approximately the same time of day. They found 112 such matched orders. The mean purchase amount in October was \$121.45, with a standard deviation of \$32.78, while the mean purchase amount in February was \$135.99 with a standard deviation of \$24.81. The standard deviation of the difference between the two orders was \$38.28. To quantify the evidence in the data regarding a difference in the average purchase amount between the two months, compute the $p$-value of the data.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+This is a paired comparison (same households, same day/time).
+We are given the standard deviation of the *difference* $s_d = 38.28$.
+$n = 112$.
+Mean difference $\bar{d} = 135.99 - 121.45 = 14.54$.
+The $t$-statistic is $t = \frac{\bar{d}}{s_d / \sqrt{n}} = \frac{14.54}{38.28 / \sqrt{112}} = \frac{14.54}{3.617} \approx 4.02$.
+Degrees of freedom = 111.
+P-value (two-sided) is very small. In R: `2*(1-pt(4.02, 111))`.
+Using normal approximation ($z=4.02$), $p$-value $\approx 0.00006$.
+So there is strong evidence of a difference.
+:::
+:::
+
+::: {#exr-}
+## SimCity AB Testing
+SimCity 5 is one of Electronic Arts (EA's) most popular video games. As EA prepared to release the new version, they released a promotional offer to drive more pre-orders. The offer was displayed on their webpage as a banner across the top of the pre-order page. They decided to test some other options to see what design or layout would drive more revenue.
+
+The control removed the promotional offer from the page altogether. The test led to some very surprising results. With a sample size of $1000$ visitors, of the $500$ which got the promotional offer they found $143$ people wanted to purchase the games and of the half that got the control, they found that $199$ wanted to buy the new version of SimCity.
+
+Test at the $1$% level whether EA should provide a promotional offer or not.
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+To see whether the promotion program works, we need to find out whether
+the proportion of people who want to buy the game is larger. Denote
+$p_1$ is the proportion from the experimental group with promotion and
+$p_2$ from the control group without promotion. Therefore, the null
+hypothesis we are testing is $$H_0: p_1 - p_2 = 0, \quad H_a: p_1 - p_2 \neq 0$$
+
+In the sample, we observe $$n_1 = n_2 = 500$$
+$$\hat{p_1} = 143/500 \mbox{ and } \hat{p_2} = 199/500$$
+
+To perform the two-sample $t$-test, we need to calculate the pooled sample
+standard deviation first.
+$$\bar{p} = \hat{p_1}*\frac{n_1}{n_1+n_2} + \hat{p_2}*\frac{n_2}{n_1+n_2} = 171/500$$
+$$\bar{\sigma} = \sqrt{\bar{p}*(1-\bar{p})*(\frac{1}{n_1} + \frac{1}{n_2})} = 0.03$$
+
+Then,
+$$\mbox{t-stat} = \frac{\hat{p_1} - \hat{p_2}}{\bar{\sigma}} = \frac{143/500 - 199/500}{0.03} = -3.73$$
+
+Since $\lvert\mbox{t-stat}\rvert = 3.73 > \mbox{qnorm(0.995)} = 2.58$, we reject $H_0$ at
+the 1% level. Because $\hat{p}_1 < \hat{p}_2$, the promotional offer actually
+*reduced* the proportion of visitors who wanted to buy the game, so EA
+should not display the promotion, consistent with the chapter's SimCity
+example (@exm-simcity).
+
+:::
+:::
+
+::: {#exr-}
+## True/False
+
+a) At the Apple conference, it was claimed that "$97$% of people love the iWatch." From a market survey, you found empirically that $1175$ out of a sample of $1400$ people love the new iWatch. Statistically speaking, you can reject Apple's claim at the $1$% significance level. Hint: You may use $pnorm(2.58) = 0.995$
+a) Given a random sample of $2000$ voters, $800$ say they will vote for Hillary Clinton in the 2016 US Presidential Election. At the $95$%level, I can reject the null hypothesis that Hillary has an evens chance of winning the election.
+a) The average movie is Netflix's database has an average customer rating of $3.1$ with a standard deviation of $1$. The last episode of Breaking Bad had a rating of $4.7$ with a standard deviation of $0.5$. The $p$-value for testing whether Breaking Bad's rating is statistical different from the average is a lot less than $1$%.
+a) A chip manufacturer needs to add the right amount of chemicals to make the chips resistant to heat. On average, the population of chips needs to be able to withstand heat of 300 degrees. Suppose you have a random sample of $30$ chips with a mean of $305$ and a standard deviation of $8$. Then you can reject the null hypothesis $H_0: \mu= 300$ versus $H_a: \mu> 300$ at the $5$% level.
+a) Zagats rates restaurants on food quality. In a random sample of $100$ restaurants you observe a mean of $20$ with a standard deviation of $2.5$. Your favorite restaurant has a score of $25$. This is statistically different from the population mean at the $5$% level.
+a) The $t$-score is used to test whether a null hypothesis can be rejected.
+a) An oil company introduces a new fuel that they claim has, on average no more than $100$ milligrams of toxic matter per liter. They take a sample of $100$ liters and find that $\bar{X} = 105$ with a given $\sigma_X = 20$. Then there is evidence at the $5$% level that their claim is wrong.
+a) A wine producer claims that the proportion of customers who cannot distinguish his product from grape juice is at most 5%. For a sample of $100$ people, he finds that $10$ fail the taste test. He should reject his null hypothesis $H_{0}:p=0.05$ at the $5$% level.
+a) As the absolute value of the $t$-ratio increases, the $p$-value of a hypothesis test decreases.
+
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) True. $$\hat{p} = \frac{1175}{1400} = 83.9\%$$$$\hat{\sigma} = \sqrt{\frac{\hat{p}(1-\hat{p})}{1400}} = 0.98\%$$ For $H_0: p = 97\%$,
+$$t\text{-stat} = \frac{\hat{p} - 97\%}{0.98\%} = -13.37 < -2.58 = \texttt{qnorm}(0.005)$$
+Yes, we can reject the null hypothesis at 1% significance level.
+a) True. The $t$-statistic is $T = (\hat{p}-0.5)/\sqrt{\frac{\hat{p} \times (1-\hat{p})}{n}} = -9.13$, which is below the critical value $\texttt{qnorm}(0.025) = -1.96$.
+a) False. The formula for a T-ratio is $$\begin{aligned}T = \frac{\bar{x}_1-\bar{x}_2 - (\mu_1 -\mu_2)}{\sqrt{\frac{s_{x_1}^2}{n_1}+\frac{s_{x_2}^2}{n_2}}}\end{aligned}$$ However, since we do not know $n_1$ and $n_2$ we cannot get the T-ratio and thus $p$-value.
+a) True. Since the sample size is $n\ge30$ the t test is effectively the same as the z test. Therefore, we find the following z value:$$z=\frac{\bar{x}-\mu}{s/\sqrt{n}}=\frac{305-300}{8/\sqrt{30}}=3.4233$$Here we use a one-sided test: $$z_\alpha=1.65$$ Since $z>z_\alpha$, we can reject $H_0$ in favor of $H_a$ at the 5% level
+a) True. We can calculate the t statistic as $(25-20)/(2.5/10)>1.96$. Hence we reject the null.
+a) True. The $t$ score can be used to test whether a null hypothesis can be rejected or not. Alternately, a z score can be used
+a) True. This is a one-side test $H_0 : \mu_x \leq 100$ versus $H_1 : \mu_X > 100$. The $Z$-score is $Z = \frac{105 -100}{ 20 / \sqrt{100} } = 2.5$. The critical value for a 1-sided test at the $5$% level is $1.64$. Therefore you can reject $H_0$ at the $5$% level.
+a) True. $z=\frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}=\frac{0.1-0.05}{\sqrt{\frac{0.05\cdot 0.95}{100}}}=2.29$ and $z_{\alpha /2}=1.96$. Reject the null hypothesis since $\left\vert z\right\vert >z_{\alpha/2}$
+a) True. As $\lvert t\rvert$ increases, the $p$-value decreases: if $t>0$, moving further into the right tail decreases the $p$-value, and if $t<0$, moving further into the left tail (more negative) also decreases the $p$-value.
+
+:::
+:::
+
+::: {#exr-}
+## True/False: CI
+
+a) There is much discussion of the effects of second-hand smoke. In a survey of $500$ children who live in families where someone smokes, it was found that $10$ children were in poor health. A $95$% confidence interval for the probability of a child living in a smoking family being in poor health is then $2$% to $4$%. 
+a) You are finding a confidence interval for a population mean. Holding everything else constant, an interval based on an unknown standard deviation will be wider than one based on a known standard deviation no matter what the sample size is. 
+a) There is a $95$% probability that a normal random variable lies between $\mu \pm \sigma$. 
+a) A recent CNN poll found that $49$% of $10000$ voters said they would vote for Obama versus Romney if that was the election in November 2012. A $95$% confidence interval for the true proportion of voters that would vote for Obama is then $0.49 \pm 0.03$. 
+a) A mileage test for a new electric car model called the "Pizzazz" is conducted. With a sample size of $n=30$, the mean mileage for the sample is $36.8$ miles with a sample standard deviation of $4.5$. A $95$% confidence interval for the population mean is $(32.3,41.3)$ miles. 
+a) In a random sample of $100$ NCAA basketball games, the team leading after one quarter won the game $72$ times. Then a 95% confidence interval for the proportion of teams leading after the first quarter that go on to win is approximately $(0.6,0.84)$. 
+a) For the same sample, a 95% prediction interval for a particular team winning is also $(0.6,0.84)$. 
+a) In playing poker in Vegas, from $100$ hours of play, you make an average of \$50 per hour with a standard deviation of \$10. A 95\% confidence interval for your mean gain per hour is approximately \$ $( 48 , 52 )$
+a) If 27 out of 100 respondents to a survey state that they drink Pepsi then a 95% confidence interval for the proportion $p$ of the population that drinks Pepsi is $( 0.26 , 0.28 )$. 
+a) The $p$-value is the probability that the Null hypothesis is true. 
+
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+a) False The $95\%$ confidence interval should be: $$\begin{aligned} \Bigg[.02 - 1.96\sqrt{\frac{.02(1-.02)}{500}},.02 + 1.96\sqrt{\frac{.02(1-.02)}{500}}\Bigg]\end{aligned}$$ So, the lower bound on this interval will definitely be less than 2 percent. 
+a) True Because you need to use the same data to estimate the standard deviation, and thus contains more noise or error. In other words, we are comparing between $z$ distribution and $t$ distribution 
+a) False. There is a 95% probability that it lies between $\mu\pm1.96\sigma$ 
+a) False. The confidence interval for the proportion is given by: $$\hat{p}\pm1.96\sqrt{\hat{p}(1-\hat{p})/n}$$ *This gives:* $$0.49\pm1.96\sqrt{(0.49)(0.51)/10000}=0.49\pm0.009798$$ 
+a) False. $CI=36.8\pm1.96\frac{4.5}{\sqrt{30}}=(35.19,38.41)$ 
+a) False. The 95% CI is approximately equal to $$.72 \pm  1.96 \sqrt{ \frac{ \hat{p} (1- \hat{p})}{n} } = 0.72 \pm 1.96 \times 0.045=(.63,.81)$$ 
+a) False. The prediction interval is equal to $$0.72 \pm 2 \sqrt{ \hat{p} (1- \hat{p} ) } \sqrt{1+1/n}$$ In this case, that contains the entire interval (0,1) 
+a) True. The CI is given by $50 \pm 2 \times \frac{10}{\sqrt{100} } =(48,52)$ 
+a) False. The 95% confidence interval for the proportion is given by $\hat{p} \pm 1.96 \sqrt{ \hat{p} ( 1 - \hat{p} ) / n }$. Which here gives $0.27 \pm 1.96 \sqrt{ 0.27 \times 0.73 / 100 }$ or the interval $( 0.18 , 0.36 )$ 
+a) False. The $p$-value is the probability of the observing something more extreme than the observed sample assuming the null hypothesis is true 
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Sampling Distribution
+
+a) The Central Limit Theorem states that the distribution of a sample mean is approximately Normal. 
+a) The Central Limit Theorem states that the distribution of the sample mean $\bar{X}$ is Normally distributed for large samples. 
+a) The Central Limit Theorem guarantees that the distribution of $\bar{X}$ is constant. 
+a) The sample mean, $\bar{x}$, approximates the population mean for large random samples. 
+a) The trimmed mean of a dataset is more sensitive to outliers than the mean. 
+a) The sample mean of a dataset must be larger than its standard deviation 
+a) Selection bias is not a problem when you are estimating a population mean. 
+a) The kurtosis of a distribution is not sensitive to outliers. 
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**: 
+
+a) True. The standard deviation of the sample mean is $\frac{\sigma}{\sqrt{n}}$. The CLT has (approximately) $\bar{X} \sim N(\mu, \frac{\sigma^2}{n})$, where $\mu$ and $\sigma^2$ are the population true value 
+a) True. If $X_i$ is a random sample (or $iid$) with mean $\mu$, then $\sqrt{n}\big(\bar{X} - \mu \big) \longrightarrow^d N(0,\sigma^2)$ 
+a) False. For some set of independent random variables, the mean of a sufficiently large number of them (each with finite mean and variance) will have a distribution with variance depending on the number of samples. 
+a) True. The CLT states that the $\bar{X} \sim N \left ( \mu, \frac{\sigma^2}{n} \right )$, or the best guess for the population mean is $\bar{x}$ 
+a) False. The trimmed mean is the average of the observations deleting the outer 5% in the tails. Hence, it is less sensitive to outliers than the sample mean.
+a) False. Many datasets have a negative mean and the standard deviation must be positive. 
+a) False. When sampling to estimate a population mean, you need to be certain to select a random sample, or selection bias may affect your results.
+a) False. Kurtosis depends on each observation in the distribution and is extremely sensitive to the outliers 
+
+:::
+:::
+
+
+## Field vs Observational
+
+::: {#exr-split-plot-cdn}
+## Split-Plot Design: CDN and Recommendation Algorithm
+
+A streaming company wants to compare two content-delivery-network (CDN) configurations, Factor A (standard vs. enhanced), against two recommendation algorithms, Factor B (Algorithm 1 vs. Algorithm 2). Reconfiguring a CDN setup requires re-provisioning an entire regional server cluster, so it cannot be changed session by session; switching which recommendation algorithm a session uses is just a server-side flag that can be toggled instantly. The company assigns a CDN configuration to each of 8 regional server clusters (4 standard, 4 enhanced) and, within each cluster, randomly assigns individual user sessions 50/50 to Algorithm 1 or Algorithm 2.
+
+a) Identify the whole plots and the subplots in this design, and say which factor is applied at which level.
+a) Explain the practical reason cluster-level randomization is used for the CDN factor, and why randomizing the CDN configuration session by session is infeasible.
+a) Which effect, the CDN configuration (A) or the recommendation algorithm (B), is estimated with lower precision? Explain in terms of the number of independent randomizations available for each factor.
+a) Sessions within the same cluster share an intraclass correlation of $\rho = 0.15$ (common network conditions), and each cluster contributes $m = 200$ sessions. A naive standard error for the CDN effect that ignores clustering treats all $8 \times 200 = 1600$ sessions as independent draws. The correctly adjusted variance inflates the naive variance by the design effect $\mathrm{DEFF} = 1 + (m-1)\rho$. Compute the DEFF and the factor by which the naive analysis underestimates the standard error of the CDN effect.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The whole plots are the 8 regional server clusters, the unit to which a CDN configuration is applied. The subplots are the individual user sessions within each cluster, the unit to which a recommendation algorithm is applied. Factor A (CDN) is the whole-plot factor, held constant across every session in a cluster; Factor B (algorithm) is the subplot factor, varying session by session within each cluster.
+
+a) A CDN reconfiguration re-provisions shared regional infrastructure that every session routed through that cluster uses, so it is a hard-to-change factor that can realistically only be randomized at the cluster level. Toggling the recommendation algorithm is a lightweight per-session flag, an easy-to-change factor, so it can be freely randomized within each cluster. Randomizing the CDN session by session would require tearing down and rebuilding a regional cluster for every user, which is operationally impossible.
+
+a) The CDN configuration (the whole-plot factor A) is estimated with lower precision. Only 8 independent randomization units (the clusters) inform the CDN comparison, whereas 1600 independent per-session randomizations inform the algorithm comparison. Precision scales with the number of independent replicates at the level a factor was actually randomized, not with the raw session count, so the whole-plot factor's effective sample size is $n = 8$, not $n = 1600$. This is the split-plot tradeoff: constraining randomization of the hard-to-change factor buys feasibility at the cost of precision on that factor's main effect, while the subplot factor and the interaction, compared within clusters, are estimated more precisely.
+
+a) The design effect is
+$$
+\mathrm{DEFF} = 1 + (m-1)\rho = 1 + (200-1)(0.15) = 1 + 29.85 = 30.85 .
+$$
+The correctly adjusted variance is 30.85 times the naive variance, so the correct standard error is $\sqrt{30.85} \approx 5.55$ times larger than the naive one that treats all 1600 sessions as independent.
+```{r}
+sqrt(1 + (200 - 1) * 0.15)
+```
+Ignoring the whole-plot and subplot clustering understates the CDN effect's standard error by roughly a factor of 5.5, which would make an unremarkable CDN difference look spuriously significant.
+:::
+:::
+
+::: {#exr-}
+## Randomized Trials vs. Observational Studies
+What is the difference between a randomized trial and an observational study?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+In a **randomized trial** (or experiment), the researcher randomly assigns units (e.g., people) to different treatment groups (e.g., drug vs. placebo). This randomization helps ensure that the groups are comparable at the start, balancing both observed and unobserved confounders. As a result, differences in outcomes can be attributed to the treatment itself (causality).
+
+In an **observational study**, the researcher observes units and measures variables of interest without assigning treatments. The subjects "select" their own treatments (or are selected by nature/circumstance). Because of this, the groups may differ systematically in other ways (confounding variables), making it difficult to establish causality. One can only observe associations.
+:::
+:::
+
+::: {#exr-ci-troutfish}
+## Confidence Intervals: Rainbow Trout
+A sample of weights of 40 rainbow trout revealed that the sample mean is
+402.7 grams and the sample standard deviation is 8.8 grams.
+
+a) What is the estimated mean weight of the population?
+a) What is the 99% confidence interval for the mean?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The estimated mean weight is $\bar{X} = 402.7$ grams.
+
+b) With $n = 40$, $\bar{X} = 402.7$, $s = 8.8$, the 99% CI uses $z_{0.005} = 2.576$:
+$$
+\bar{X} \pm z_{0.005} \frac{s}{\sqrt{n}} = 402.7 \pm 2.576 \times \frac{8.8}{\sqrt{40}} = 402.7 \pm 3.58 = [399.12, 406.28]
+$$
+:::
+:::
+
+::: {#exr-ci-smokers}
+## Confidence Intervals: Smokers
+A research firm conducted a survey to determine the mean amount steady
+smokers spend on cigarettes during a week.
+
+A sample of 49 steady smokers revealed that $\bar{X} = 20$ and $s = 5$
+dollars.
+
+a) What is the point estimate? Explain what it indicates.
+a) Using a 95% confidence interval, determine the confidence interval for $\mu$. Explain what it indicates.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The point estimate is $\bar{X} = \$20$. It is the sample mean, our best single estimate of the population mean weekly spending on cigarettes.
+
+b) With $n = 49$, $\bar{X} = 20$, $s = 5$, the 95% CI uses $z_{0.025} = 1.96$:
+$$
+\bar{X} \pm z_{0.025} \frac{s}{\sqrt{n}} = 20 \pm 1.96 \times \frac{5}{\sqrt{49}} = 20 \pm 1.40 = [18.60, 21.40]
+$$
+We are 95% confident that the true mean weekly spending on cigarettes is between \$18.60 and \$21.40.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-ab-banner}
+## A/B Testing: Banner Ad Click-Through
+
+Use dataset from `ab_browser_test.csv`. Here is the definition of the columns:
+
+-   `userID`: unique user ID
+-   `browser`: browser which was used by userID
+-   `slot`: status of the user (exp = saw modified page, control = saw
+    unmodified page)
+-   `n_clicks`: number of total clicks user did during as a result of
+    `n_queries`
+-   `n_queries`: number of queries made by `userID`, who used browser
+    `browser`
+-   `n_nonclk_queries`: number of queries that did not result in any
+    clicks
+
+Note, that not everyone uses a single browser, so there might be
+multiple rows with the same `userID`. In this data set combination of
+`userID` and `browser` is the unique row identifier.
+
+a) Count how many users in each group. How much larger (in percent) exp
+    group when compared to control group
+a) Using bootstrap, construct 95% confidence interval for mean and
+    median of number of clicks in group exp and group control. Are the
+    mean and median significantly different?
+a) Using bootstrap, check if mean of each group has a normal
+    distribution. Generate $B = 1000$ bootstrap samples, calculate mean
+    of each and plot `qqplot`.
+a) Use z-ratio for the means, to perform sis testing, with $H_0$: there
+    is no difference in average number of clicks between 2 groups
+a) Mann-Whitney (<http://www.statmethods.net/stats/nonparametric.html>)
+    is another test for comparing means, that does not require normality
+    assumption. Use this test to check hypothesis that means are equal.
+a) For each browser type and each of the 2 groups (control and exp)
+    count the percent of queries that did not result in any clicks. You
+    can do it be dividing sum of `n_nonclk_queries` by sum of
+    `n_queries`. Comment your on your results.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+d <- read.csv("data/ab_browser_test.csv")
+
+# a) Count users per group
+group_counts <- table(d$slot)
+cat("Users per group:\n")
+print(group_counts)
+pct_larger <- (group_counts["exp"] - group_counts["control"]) / group_counts["control"] * 100
+cat("Exp group is", round(pct_larger, 1), "% larger than control\n")
+
+# b) Bootstrap CI for mean and median clicks
+B <- 1000
+boot_stat <- function(x, stat_fn) {
+  replicate(B, stat_fn(sample(x, replace = TRUE)))
+}
+
+for (grp in c("control", "exp")) {
+  clicks <- d$n_clicks[d$slot == grp]
+  boot_means <- boot_stat(clicks, mean)
+  boot_medians <- boot_stat(clicks, median)
+  cat("\n", grp, "- Mean 95% CI:", round(quantile(boot_means, c(0.025, 0.975)), 3), "\n")
+  cat(grp, "- Median 95% CI:", round(quantile(boot_medians, c(0.025, 0.975)), 3), "\n")
+}
+
+# c) QQ plot of bootstrap means
+for (grp in c("control", "exp")) {
+  clicks <- d$n_clicks[d$slot == grp]
+  boot_means <- boot_stat(clicks, mean)
+  qqnorm(boot_means, main = paste("QQ Plot -", grp))
+  qqline(boot_means)
+}
+
+# d) z-test for difference in means
+x1 <- d$n_clicks[d$slot == "exp"]
+x2 <- d$n_clicks[d$slot == "control"]
+z <- (mean(x1) - mean(x2)) / sqrt(var(x1)/length(x1) + var(x2)/length(x2))
+p_val <- 2 * (1 - pnorm(abs(z)))
+cat("\nz-statistic:", round(z, 3), ", p-value:", round(p_val, 4), "\n")
+
+# e) Mann-Whitney test
+wilcox.test(x1, x2)
+
+# f) Non-click rate by browser and group
+rates <- aggregate(cbind(n_nonclk_queries, n_queries) ~ browser + slot, data = d, sum)
+rates$pct_nonclick <- rates$n_nonclk_queries / rates$n_queries * 100
+print(rates[, c("browser", "slot", "pct_nonclick")])
+```
+:::
+:::
+
+::: {#exr-ab-power-curve}
+## Statistical Power for a Two-Proportion A/B Test
+
+A website is running an A/B test on its checkout page. The baseline (control) conversion rate is $p_1 = 0.10$, and the design team hopes the new version lifts it to $p_2 = 0.12$. Before running the experiment, they want to know how many visitors per group are needed to reliably detect a difference of this size.
+
+a) For per-group sample size $n$ ranging from 200 to 6000, compute the power of a two-sided, two-proportion test at significance level $\alpha = 0.05$ to detect the difference between $p_1$ and $p_2$. Use the `power.prop.test` function from the `stats` package. Plot the power curve (power vs $n$).
+a) Using `power.prop.test`, find the per-group sample size $n$ needed for 80% power, and separately for 90% power.
+a) Set a seed and cross-check the $n$ found for 80% power with a short Monte Carlo simulation: simulate many two-proportion tests with true rates $p_1$ and $p_2$ at that $n$, and estimate the empirical power as the fraction of simulated tests that reject $H_0$ at the 5% level. Does the simulation agree with the analytical answer from `power.prop.test`?
+a) Comment on how power depends on effect size and $n$: holding $n$ fixed, what happens to power as the effect size $p_2-p_1$ shrinks? Holding the effect size fixed, how much more data are needed to reach 80% power if $\alpha$ is tightened from 0.05 to 0.01?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+The power of a test is $P(\text{reject } H_0 \mid H_1 \text{ true})$, the complement of a Type II error. For the two-proportion $Z$-test used throughout this chapter, `power.prop.test` computes this power directly, or, given a target power, the required $n$.
+
+a) Power curve over $n$:
+```{r}
+p1 <- 0.10; p2 <- 0.12
+n_seq <- seq(200, 6000, by = 200)
+power_seq <- sapply(n_seq, function(n) power.prop.test(n, p1, p2)$power)
+plot(n_seq, power_seq, type = "l", lwd = 2, col = "blue",
+     xlab = "Per-group sample size n", ylab = "Power",
+     main = "Power curve: p1 = 0.10 vs p2 = 0.12")
+abline(h = c(0.8, 0.9), lty = 2, col = "gray50")
+```
+Power rises from near 0 and flattens out near 1, an S-shaped curve in $n$.
+
+a) Sample size for 80% and 90% power:
+```{r}
+n80 <- power.prop.test(p1 = p1, p2 = p2, power = 0.80)$n
+n90 <- power.prop.test(p1 = p1, p2 = p2, power = 0.90)$n
+ceiling(c(n80 = n80, n90 = n90))
+```
+About 3841 visitors per group are needed for 80% power, and 5142 per group for 90% power: raising power by 10 points costs roughly 1300 more visitors per group.
+
+a) Monte Carlo cross-check at $n = 3841$:
+```{r}
+set.seed(42)
+n_mc <- ceiling(n80)
+reject <- replicate(5000, {
+  x1 <- rbinom(1, n_mc, p1); x2 <- rbinom(1, n_mc, p2)
+  prop.test(c(x1, x2), c(n_mc, n_mc))$p.value < 0.05
+})
+mean(reject)
+```
+With this seed, the simulated rejection rate is 0.797, close to the target 0.80 from `power.prop.test`, so the analytical and simulation-based answers agree.
+
+a) Effect size, sample size, and $\alpha$ all trade off against each other:
+```{r}
+n_half <- power.prop.test(p1 = p1, p2 = 0.11, power = 0.80)$n
+n_alpha01 <- power.prop.test(p1 = p1, p2 = p2, power = 0.80, sig.level = 0.01)$n
+ceiling(c(n_full_effect = n80, n_half_effect = n_half, n_alpha_0.01 = n_alpha01))
+```
+Halving the effect size, from $p_2-p_1=0.02$ to $p_2-p_1=0.01$, nearly quadruples the required $n$ (3841 versus 14751), since for fixed $p_1$, $\alpha$, and power, $n$ scales roughly with $1/(p_2-p_1)^2$. Tightening $\alpha$ from 0.05 to 0.01, holding power at 80%, raises the required $n$ from 3841 to 5716, a 49% increase, because a smaller $\alpha$ raises the critical value the test statistic must clear. Small effects and stringent significance levels are both expensive in sample size: real A/B tests on mature products, where lifts are often a percentage point or less, need very large traffic to reach adequate power.
+
+:::
+:::
+
+::: {#exr-multiple-testing-fdr}
+## Multiple Testing: Family-Wise Error and False Discovery Rate
+
+This chapter's discussion of multiple testing showed that testing $m=1000$ hypotheses one at a time at $\alpha = 0.05$ makes at least one false positive almost certain. This exercise quantifies that inflation by simulation and compares two standard remedies: the Bonferroni correction and the Benjamini-Hochberg (BH) procedure.
+
+a) Simulate $m$ independent tests, all true nulls, each tested at level $\alpha = 0.05$ with no adjustment for multiplicity. For $m \in \{1, 5, 10, 20, 50, 100\}$, use simulation to estimate the family-wise error rate $\text{FWER} = \prob{\text{at least one rejection} \mid \text{all } m \text{ nulls true}}$, and compare it to the closed form $1-(1-\alpha)^m$.
+a) Now let $m = 50$, with $T_0 = 40$ true nulls and $T_1 = 10$ true alternatives (real effects of size $\mu = 1.5$ on a $z$-scale). Over many replications, apply three procedures at nominal level $\alpha = 0.05$: (i) no correction, (ii) Bonferroni ($p < \alpha/m$), and (iii) Benjamini-Hochberg targeting FDR $\le \alpha$. For each procedure, report the realized FWER, the realized FDR $= \E{\frac{FD}{D}}$, and the power (fraction of the $T_1$ true effects detected).
+a) Compare the three procedures. Which controls FWER? Which controls FDR while retaining more power? What does this imply about when to prefer Bonferroni versus Benjamini-Hochberg in practice?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Under the null, a $p$-value is distributed $\text{Unif}(0,1)$, so $m$ independent $\text{Unif}(0,1)$ draws simulate $m$ independent true-null tests at level $\alpha$.
+
+```{r}
+set.seed(2024)
+alpha <- 0.05
+
+m_seq <- c(1, 5, 10, 20, 50, 100)
+fwer_uncorrected <- sapply(m_seq, function(m)
+  mean(replicate(2000, any(runif(m) < alpha))))
+names(fwer_uncorrected) <- m_seq
+
+fwer_theory <- 1 - (1 - alpha)^m_seq
+names(fwer_theory) <- m_seq
+
+rbind(simulated = round(fwer_uncorrected, 3),
+      theoretical = round(fwer_theory, 3))
+```
+```
+                1     5    10    20    50   100
+simulated   0.054 0.217 0.412 0.618 0.920 0.994
+theoretical 0.050 0.226 0.401 0.642 0.923 0.994
+```
+The simulation tracks the closed form up to Monte Carlo noise from the 2000 replications. Testing just 20 true nulls already gives roughly a 62% chance of at least one false "discovery," and by $m=100$ a false rejection is nearly certain, even though each individual test is correct 95% of the time on its own.
+
+a) With $m=50$ ($T_0=40$, $T_1=10$), the three procedures are compared over 5000 replications.
+
+```{r}
+m <- 50; n_null <- 40; n_alt <- 10; mu_alt <- 1.5; n_rep <- 5000
+is_null <- c(rep(TRUE, n_null), rep(FALSE, n_alt))
+
+evaluate <- function(reject) c(
+  fwer  = any(reject & is_null),
+  fdp   = ifelse(sum(reject) == 0, 0, sum(reject & is_null) / sum(reject)),
+  power = sum(reject & !is_null) / n_alt)
+
+out <- replicate(n_rep, {
+  z <- c(rnorm(n_null), rnorm(n_alt, mean = mu_alt))
+  p <- 2 * pnorm(-abs(z))
+  rbind(naive = evaluate(p < alpha),
+        bonferroni = evaluate(p < alpha / m),
+        bh = evaluate(p.adjust(p, method = "BH") < alpha))
+})
+
+round(apply(out, c(1, 2), mean), 3)
+round(n_null / m * alpha, 3)  # BH's theoretical FDR bound, T0/m * alpha
+```
+```
+            fwer   fdp power
+naive      0.875 0.369 0.326
+bonferroni 0.042 0.034 0.036
+bh         0.067 0.041 0.049
+[1] 0.04
+```
+Averaged over replications, `fdp` is the realized FDR and `fwer` the realized family-wise error rate.
+
+a) With no correction, the FWER is 0.875 (a false discovery is nearly certain) and the FDR is 0.369 (more than a third of "discoveries" are wrong). Bonferroni pushes the FWER down to 0.042, at or below the nominal $\alpha=0.05$ as guaranteed, but power collapses from 0.326 to 0.036 because the per-test threshold shrinks to $\alpha/m = 0.001$. Benjamini-Hochberg does not control FWER (0.067, above Bonferroni's), but it controls FDR at 0.041, essentially matching its theoretical bound $\E{\frac{FD}{D}} \le \frac{T_0}{m}\alpha = 0.04$, while recovering some power (0.049 versus Bonferroni's 0.036). Bonferroni is the right choice when a single false discovery is costly (approving a drug, shipping a costly production change); Benjamini-Hochberg is preferable when a controlled fraction of false leads among many flagged candidates is tolerable (screening genes, metrics, or A/B test variants for follow-up), since it buys back power for the same nominal error budget.
+
+:::
+:::
+
+::: {#exr-split-plot-anova}
+## Split-Plot ANOVA: Whole-Plot and Subplot Error Strata
+
+This exercise makes the split-plot precision tradeoff concrete and shows why the analysis must respect the nesting. A streaming company assigns a CDN configuration (standard vs. enhanced) to each of 8 regional server clusters, 4 clusters per configuration, and within every cluster randomly splits sessions 50/50 between two recommendation algorithms. The response is a per-session engagement score. This is a split-plot layout: CDN is the hard-to-change whole-plot factor (constant within a cluster) and the algorithm is the easy-to-change subplot factor (varying within a cluster). Because sessions in the same cluster share network conditions, they are positively correlated (here an intraclass correlation near $0.15$, induced by a cluster-level random effect).
+
+a) Simulate the design below. It has a true algorithm lift of $0.5$ engagement points and no true CDN effect; the only between-cluster signal is the random cluster effect. Fit the correct split-plot ANOVA with `aov(y ~ CDN * algo + Error(cluster))`, which separates a whole-plot (`cluster`) error stratum from a within-cluster (subplot) stratum. Report the $F$-test for CDN, for the algorithm, and for their interaction, and state which error stratum each is tested in.
+a) Fit the naive model `aov(y ~ CDN * algo)` that ignores the cluster nesting and pools everything into a single residual. Compare the CDN $F$-statistic and $p$-value against the correct split-plot analysis.
+a) The CDN sum of squares is identical in both analyses. Explain, in terms of the error mean square each analysis divides by, why the naive CDN $F$-statistic is inflated, and relate the inflation factor to the design-effect logic.
+a) State the practical lesson for A/B tests in which a factor is randomized at a coarse level (region, store, server cluster) rather than per user.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) In the split-plot ANOVA, the whole-plot factor CDN is tested in the `cluster` stratum against between-cluster variation (6 residual degrees of freedom); the subplot factor and the interaction are tested in the within-cluster stratum.
+```{r}
+set.seed(20)
+n_clusters <- 8; m <- 40                          # 8 clusters, 40 sessions each
+CDN <- rep(c("standard", "enhanced"), each = 4)    # whole-plot factor (cluster level)
+sigma_c <- sqrt(0.15); sigma_e <- sqrt(0.85)       # ICC = 0.15
+cluster_re <- rnorm(n_clusters, 0, sigma_c)        # whole-plot random effect
+
+d <- do.call(rbind, lapply(1:n_clusters, function(j) {
+  algo <- rep(c("algo1", "algo2"), each = m / 2)   # subplot factor (session level)
+  y <- 30 + 0.5 * (algo == "algo2") +              # true algorithm lift, no CDN effect
+       cluster_re[j] + rnorm(m, 0, sigma_e)
+  data.frame(cluster = factor(j), CDN = CDN[j], algo = algo, y = y)
+}))
+d$CDN  <- factor(d$CDN,  levels = c("standard", "enhanced"))
+d$algo <- factor(d$algo, levels = c("algo1", "algo2"))
+
+summary(aov(y ~ CDN * algo + Error(cluster), data = d))
+```
+```
+Error: cluster
+          Df Sum Sq Mean Sq F value Pr(>F)
+CDN        1  19.32   19.32   1.586  0.255
+Residuals  6  73.08   12.18
+
+Error: Within
+           Df Sum Sq Mean Sq F value   Pr(>F)
+algo        1  10.88  10.877  12.983 0.000366 ***
+CDN:algo    1   0.80   0.798   0.953 0.329800
+Residuals 310 259.71   0.838
+```
+CDN gives $F = 1.586$ on 1 and 6 degrees of freedom ($p = 0.255$): correctly not significant, since there is no true CDN effect and only 8 clusters inform the comparison. The algorithm gives $F = 12.98$ ($p = 0.00037$) in the within-cluster stratum, easily detected because it is compared session by session within each cluster; the interaction is not significant ($F = 0.95$, $p = 0.33$).
+
+a) The naive analysis pools the cluster-level variability into a single residual:
+```{r}
+summary(aov(y ~ CDN * algo, data = d))
+```
+```
+             Df Sum Sq Mean Sq F value   Pr(>F)
+CDN           1   19.3  19.322  18.347 2.45e-05 ***
+algo          1   10.9  10.877  10.328  0.00145 **
+CDN:algo      1    0.8   0.798   0.758  0.38466
+Residuals   316  332.8   1.053
+```
+Now CDN shows $F = 18.35$ ($p = 2.4 \times 10^{-5}$), a strong but entirely spurious effect, produced only by treating correlated sessions as independent.
+
+a) Both analyses assign CDN the same sum of squares (19.32). The split-plot tests it against the whole-plot residual mean square, $12.18$ on 6 degrees of freedom, which measures genuine cluster-to-cluster variability. The naive model folds that cluster variability (whole-plot residual sum of squares $73.08$) into the session-level residual, giving a residual mean square of only $1.053$ on 316 degrees of freedom. The CDN $F$-statistic is therefore inflated by the ratio of the two error mean squares,
+$$
+\frac{12.18}{1.053} \approx 11.6 \approx \frac{18.35}{1.586} ,
+$$
+which is the ANOVA face of the design effect: dividing by an error term that ignores the intraclass correlation understates the whole-plot factor's variance and manufactures significance. In expectation the inflation tracks the design effect $\mathrm{DEFF} = 1 + (m-1)\rho = 1 + 39(0.15) \approx 6.85$; the larger ratio realized on this single seed ($\approx 11.6$) is a noisy draw, since the whole-plot residual mean square rests on only 6 degrees of freedom and swings substantially from seed to seed.
+
+a) When a factor is applied at a coarse unit (a region, store, or server cluster), the effective sample size for that factor is the number of such units, not the number of users. Analyzing it as if every user were an independent replicate collapses its standard error and yields overconfident, often false, conclusions. Respect the randomization level: use a whole-plot and subplot analysis (split-plot ANOVA or a mixed model with a cluster random effect), or cluster-robust standard errors.
+:::
+:::
+
+::::

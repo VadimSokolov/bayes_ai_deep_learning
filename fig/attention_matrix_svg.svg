@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="612" viewBox="0 0 600 612" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            .matrix-text { font-family: Arial, sans-serif; font-size: 16px; text-anchor: middle; dominant-baseline: central; }
+            .label-text { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #333; }
+            .title-text { font-family: Arial, sans-serif; font-size: 22px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #333; }
+        </style>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="600" height="612" fill="white" stroke="#ddd" stroke-width="2"/>
+       
+    <!-- Column labels (Keys - What we attend TO) -->
+    <text x="150" y="90" class="label-text">The</text>
+    <text x="250" y="90" class="label-text">cat</text>
+    <text x="350" y="90" class="label-text">sat</text>
+    <text x="450" y="90" class="label-text">on</text>
+    <text x="550" y="90" class="label-text">mat</text>
+    
+    <!-- Row labels (Queries - What attends FROM) -->
+    <text x="50" y="150" class="label-text">The</text>
+    <text x="50" y="250" class="label-text">cat</text>
+    <text x="50" y="350" class="label-text">sat</text>
+    <text x="50" y="450" class="label-text">on</text>
+    <text x="50" y="550" class="label-text">mat</text>
+    
+    <!-- Matrix cells with attention weights -->
+    
+    <!-- Row 1: "The" attending to each word -->
+    <rect x="100" y="110" width="100" height="100" fill="rgba(25, 10, 5, 0.4)" stroke="#ddd" stroke-width="1"/>
+    <text x="150" y="160" class="matrix-text" fill="black">0.10</text>
+    
+    <rect x="200" y="110" width="100" height="100" fill="rgba(178, 71, 35, 1.0)" stroke="#ddd" stroke-width="1"/>
+    <text x="250" y="160" class="matrix-text" fill="white">0.70</text>
+    
+    <rect x="300" y="110" width="100" height="100" fill="rgba(25, 10, 5, 0.4)" stroke="#ddd" stroke-width="1"/>
+    <text x="350" y="160" class="matrix-text" fill="black">0.10</text>
+    
+    <rect x="400" y="110" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="450" y="160" class="matrix-text" fill="black">0.05</text>
+    
+    <rect x="500" y="110" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="550" y="160" class="matrix-text" fill="black">0.05</text>
+    
+    <!-- Row 2: "cat" attending to each word -->
+    <rect x="100" y="210" width="100" height="100" fill="rgba(76, 30, 15, 0.6)" stroke="#ddd" stroke-width="1"/>
+    <text x="150" y="260" class="matrix-text" fill="white">0.30</text>
+    
+    <rect x="200" y="210" width="100" height="100" fill="rgba(102, 40, 20, 0.7)" stroke="#ddd" stroke-width="1"/>
+    <text x="250" y="260" class="matrix-text" fill="white">0.40</text>
+    
+    <rect x="300" y="210" width="100" height="100" fill="rgba(51, 20, 10, 0.5)" stroke="#ddd" stroke-width="1"/>
+    <text x="350" y="260" class="matrix-text" fill="black">0.20</text>
+    
+    <rect x="400" y="210" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="450" y="260" class="matrix-text" fill="black">0.05</text>
+    
+    <rect x="500" y="210" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="550" y="260" class="matrix-text" fill="black">0.05</text>
+    
+    <!-- Row 3: "sat" attending to each word -->
+    <rect x="100" y="310" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="150" y="360" class="matrix-text" fill="black">0.05</text>
+    
+    <rect x="200" y="310" width="100" height="100" fill="rgba(153, 61, 30, 0.9)" stroke="#ddd" stroke-width="1"/>
+    <text x="250" y="360" class="matrix-text" fill="white">0.60</text>
+    
+    <rect x="300" y="310" width="100" height="100" fill="rgba(51, 20, 10, 0.5)" stroke="#ddd" stroke-width="1"/>
+    <text x="350" y="360" class="matrix-text" fill="black">0.20</text>
+    
+    <rect x="400" y="310" width="100" height="100" fill="rgba(25, 10, 5, 0.4)" stroke="#ddd" stroke-width="1"/>
+    <text x="450" y="360" class="matrix-text" fill="black">0.10</text>
+    
+    <rect x="500" y="310" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="550" y="360" class="matrix-text" fill="black">0.05</text>
+    
+    <!-- Row 4: "on" attending to each word -->
+    <rect x="100" y="410" width="100" height="100" fill="rgba(5, 2, 1, 0.32)" stroke="#ddd" stroke-width="1"/>
+    <text x="150" y="460" class="matrix-text" fill="black">0.02</text>
+    
+    <rect x="200" y="410" width="100" height="100" fill="rgba(7, 3, 1, 0.33)" stroke="#ddd" stroke-width="1"/>
+    <text x="250" y="460" class="matrix-text" fill="black">0.03</text>
+    
+    <rect x="300" y="410" width="100" height="100" fill="rgba(76, 30, 15, 0.6)" stroke="#ddd" stroke-width="1"/>
+    <text x="350" y="460" class="matrix-text" fill="white">0.30</text>
+    
+    <rect x="400" y="410" width="100" height="100" fill="rgba(38, 15, 7, 0.45)" stroke="#ddd" stroke-width="1"/>
+    <text x="450" y="460" class="matrix-text" fill="black">0.15</text>
+    
+    <rect x="500" y="410" width="100" height="100" fill="rgba(127, 51, 25, 0.8)" stroke="#ddd" stroke-width="1"/>
+    <text x="550" y="460" class="matrix-text" fill="white">0.50</text>
+    
+    <!-- Row 5: "mat" attending to each word -->
+    <rect x="100" y="510" width="100" height="100" fill="rgba(25, 10, 5, 0.4)" stroke="#ddd" stroke-width="1"/>
+    <text x="150" y="560" class="matrix-text" fill="black">0.10</text>
+    
+    <rect x="200" y="510" width="100" height="100" fill="rgba(25, 10, 5, 0.4)" stroke="#ddd" stroke-width="1"/>
+    <text x="250" y="560" class="matrix-text" fill="black">0.10</text>
+    
+    <rect x="300" y="510" width="100" height="100" fill="rgba(12, 5, 2, 0.35)" stroke="#ddd" stroke-width="1"/>
+    <text x="350" y="560" class="matrix-text" fill="black">0.05</text>
+    
+    <rect x="400" y="510" width="100" height="100" fill="rgba(63, 25, 12, 0.55)" stroke="#ddd" stroke-width="1"/>
+    <text x="450" y="560" class="matrix-text" fill="white">0.25</text>
+    
+    <rect x="500" y="510" width="100" height="100" fill="rgba(127, 51, 25, 0.8)" stroke="#ddd" stroke-width="1"/>
+    <text x="550" y="560" class="matrix-text" fill="white">0.50</text>
+    
+    <!-- Axis labels -->
+    <text x="350" y="25" class="label-text" fill="#666">Keys (Attending TO) →</text>
+    <text x="25" y="350" class="label-text" fill="#666" transform="rotate(-90, 25, 350)">← Queries (Attending FROM)</text>
+    
+</svg>

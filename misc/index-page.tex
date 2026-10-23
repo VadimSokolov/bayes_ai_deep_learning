@@ -1,0 +1,8 @@
+% Typeset the back-of-book index at the very end of the document.
+% Injected before \end{document} via `include-after-body` in _quarto.yml (PDF only).
+% makeindex builds the .ind from the \index{} tags that misc/index-terms.lua emits.
+% The standard theindex environment writes no contents line, so it is added here.
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Index}
+\printindex

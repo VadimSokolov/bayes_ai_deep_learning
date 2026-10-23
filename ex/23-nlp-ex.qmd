@@ -1,0 +1,777 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Tokenization
+
+For the sentence: "The quick brown fox jumps over the lazy dog."
+
+a) Tokenize using whitespace splitting. How many tokens?
+b) What are the limitations of whitespace tokenization?
+c) Using BPE-style subword tokenization, how might "jumping" be tokenized if "jump" and "ing" are in the vocabulary?
+d) Why do GPT models use byte-pair encoding rather than word-level tokenization?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Whitespace tokenization:
+```{r}
+sentence <- "The quick brown fox jumps over the lazy dog."
+tokens <- strsplit(sentence, " ")[[1]]
+cat("Tokens:", tokens, "\n")
+cat("Number of tokens:", length(tokens), "\n")
+```
+
+b) Limitations of whitespace tokenization:
+- Punctuation attached to words: "dog." treated as different from "dog"
+- Can't handle languages without spaces (Chinese, Japanese)
+- Vocabulary explodes with morphological variations: "jump", "jumps", "jumped", "jumping" all different
+- Out-of-vocabulary (OOV) words are completely unknown
+- Compound words and contractions handled poorly
+
+c) BPE-style subword tokenization:
+- "jumping" → ["jump", "ing"] or ["jump", "##ing"]
+- If "jump" is frequent and "ing" is a common suffix
+- Allows sharing parameters between "jumping", "running", "walking"
+- The model can understand new words by combining known subwords
+
+d) Why GPT uses BPE:
+- **Open vocabulary**: Can represent any text (even new words, misspellings)
+- **Efficient**: Common words = 1 token; rare words = multiple subword tokens
+- **Smaller vocabulary**: ~50K tokens covers most text vs millions of words
+- **Cross-lingual sharing**: Subwords can be shared across languages
+- **Morphological awareness**: Learns meaningful units like "un-", "-ing", "-tion"
+
+:::
+:::
+
+::: {#exr-}
+## Word Embeddings
+
+Given pre-trained word vectors:
+
+- king = [0.5, 0.8, 0.3, 0.2]
+- queen = [0.5, 0.7, 0.35, 0.9]
+- man = [0.4, 0.9, 0.2, 0.1]
+- woman = [0.4, 0.8, 0.25, 0.8]
+
+a) Calculate the cosine similarity between "king" and "queen".
+b) Verify the famous analogy: king - man + woman $\approx$ queen
+c) What does this suggest about the embedding space?
+d) What are limitations of static word embeddings like Word2Vec?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+king <- c(0.5, 0.8, 0.3, 0.2)
+queen <- c(0.5, 0.7, 0.35, 0.9)
+man <- c(0.4, 0.9, 0.2, 0.1)
+woman <- c(0.4, 0.8, 0.25, 0.8)
+```
+
+a) Cosine similarity:
+```{r}
+cosine_sim <- function(a, b) {
+  sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
+}
+
+sim_king_queen <- cosine_sim(king, queen)
+cat("Cosine similarity(king, queen):", round(sim_king_queen, 4), "\n")
+```
+
+b) Analogy verification:
+```{r}
+# king - man + woman should be close to queen
+analogy_result <- king - man + woman
+cat("king - man + woman =", round(analogy_result, 2), "\n")
+cat("queen =", queen, "\n")
+
+# Check similarity
+sim_to_queen <- cosine_sim(analogy_result, queen)
+cat("Similarity to queen:", round(sim_to_queen, 4), "\n")
+
+# Distance
+dist_to_queen <- sqrt(sum((analogy_result - queen)^2))
+cat("Euclidean distance to queen:", round(dist_to_queen, 4), "\n")
+```
+
+c) What this suggests:
+- The embedding space captures semantic relationships as vector directions
+- "Gender" is encoded as a consistent direction: queen - king ≈ woman - man
+- Semantic analogies become vector arithmetic
+- The space has interpretable structure despite being learned automatically
+
+d) Limitations of static embeddings:
+- **One representation per word**: "bank" (river) = "bank" (financial) 
+- **Context-independent**: Can't handle polysemy/homonymy
+- **No sentence understanding**: Just bag of vectors
+- **Training data bias**: Captures stereotypes from training text
+- **Solutions**: Contextual embeddings (BERT, GPT) give different representations based on context
+
+:::
+:::
+
+::: {#exr-}
+## Attention Mechanism
+
+Consider a simple attention mechanism with:
+
+- Query: q = [1, 0]
+- Keys: K = [[1, 0], [0, 1], [1, 1]]
+- Values: V = [[10], [20], [30]]
+
+Using scaled dot-product attention (without the scaling factor for simplicity):
+
+a) Calculate the attention scores (K q).
+b) Apply softmax to get attention weights.
+c) Compute the weighted sum of values.
+d) What does this attention mechanism "attend to"?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+q <- c(1, 0)
+K <- matrix(c(1, 0, 0, 1, 1, 1), nrow = 3, byrow = TRUE)
+V <- matrix(c(10, 20, 30), nrow = 3)
+
+cat("Query q:\n"); print(q)
+cat("\nKeys K:\n"); print(K)
+cat("\nValues V:\n"); print(V)
+```
+
+a) Attention scores:
+```{r}
+scores <- K %*% q
+cat("Attention scores (K q):\n")
+print(as.vector(scores))
+```
+
+b) Softmax to get weights:
+```{r}
+softmax <- function(x) exp(x) / sum(exp(x))
+weights <- softmax(scores)
+cat("Attention weights (softmax):\n")
+print(round(as.vector(weights), 4))
+```
+
+c) Weighted sum of values:
+```{r}
+output <- sum(weights * V)
+cat("Output (weighted sum):", round(output, 2), "\n")
+```
+
+d) Interpretation:
+- Query q = [1, 0] is looking for keys that match the first dimension
+- Key 1 [1, 0] matches perfectly (score = 1)
+- Key 2 [0, 1] doesn't match at all (score = 0)
+- Key 3 [1, 1] partially matches (score = 1)
+- After softmax, attention focuses mostly on Key 1 and Key 3
+- The output is weighted toward Value 1 (10) and Value 3 (30)
+- This mechanism lets the model dynamically focus on relevant parts of input
+
+:::
+:::
+
+::: {#exr-}
+## Transformer Architecture
+
+In a Transformer encoder:
+
+a) What are the three components of the (self-)attention mechanism? (Hint: Q, K, V)
+b) If we have 8 attention heads with d_model = 512, what is the dimension of each head?
+c) What is the purpose of positional encoding?
+d) Why is layer normalization used after each sub-layer?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Three components of the (self-)attention mechanism:
+- **Query (Q)**: What we're looking for (linear projection of input)
+- **Key (K)**: What we're matching against (linear projection)
+- **Value (V)**: What we retrieve if there's a match (linear projection)
+- All three are computed from the same input in self-attention:
+  $Q = XW_Q$, $K = XW_K$, $V = XW_V$
+
+b) Dimension per head:
+```{r}
+d_model <- 512
+n_heads <- 8
+d_head <- d_model / n_heads
+cat("Dimension per head:", d_head, "\n")
+```
+Each head works with 64-dimensional queries, keys, and values.
+Total outputs are concatenated: 8 × 64 = 512.
+
+c) Purpose of positional encoding:
+- Transformers process all positions in parallel (unlike RNNs)
+- Without positional info, "The cat sat on mat" = "mat on sat cat The"
+- Positional encodings add position information to embeddings
+- Original paper: sinusoidal functions of position
+- Learned positional embeddings also work
+
+d) Layer normalization purpose:
+- **Stabilizes training**: Keeps activations in reasonable range
+- **Speeds up convergence**: Each layer sees normalized inputs
+- **Enables residual connections**: Helps gradient flow
+- Applied after attention and after feed-forward:
+  $\text{output} = \text{LayerNorm}(x + \text{SubLayer}(x))$
+
+:::
+:::
+
+::: {#exr-}
+## True/False: NLP
+
+a) In self-attention, each position can attend to all other positions simultaneously.
+
+b) RNNs process sequences faster than Transformers because they don't compute attention.
+
+c) BERT uses both left and right context when encoding each token.
+
+d) The softmax in attention ensures attention weights sum to 1.
+
+e) Transformers can handle variable-length sequences without modification.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **TRUE**. Self-attention allows each position to directly attend to every other position in a single operation. This is how Transformers capture long-range dependencies efficiently.
+
+b) **FALSE**. RNNs are actually slower for long sequences because:
+- They must process tokens sequentially (can't parallelize)
+- Transformers compute all positions in parallel
+- Training RNNs takes O(n) sequential steps; Transformers take O(1)
+- This is a key advantage of the Transformer architecture
+
+c) **TRUE**. BERT (Bidirectional Encoder Representations from Transformers) is bidirectional:
+- It can look at both left and right context simultaneously
+- This is different from GPT, which only sees left context (autoregressive)
+- BERT is trained with masked language modeling, not next-token prediction
+
+d) **TRUE**. Softmax outputs sum to 1:
+$$\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$
+This creates a probability distribution over positions, ensuring valid attention weights.
+
+e) **TRUE** (mostly). Transformers handle variable length via:
+- Padding shorter sequences (with attention masks)
+- The architecture itself has no fixed sequence length
+- But: context window is limited (e.g., 2K, 8K, 128K tokens)
+- Very long sequences require special handling (sliding windows, sparse attention)
+
+:::
+:::
+
+::: {#exr-bio-qa-heads}
+## Downstream Heads: BIO Tagging and Answer Spans
+
+@sec-nlp describes token-level downstream tasks built on pretrained representations. Two of them turn per-token outputs into structured predictions: named entity recognition via BIO tags, and extractive question answering, which predicts a start and an end position and returns the span maximizing the product of start and end probabilities subject to a length limit.
+
+a) For the sentence "Steve Jobs founded Apple Inc in California" (7 tokens), with entities PER = "Steve Jobs", ORG = "Apple Inc", LOC = "California", write the BIO tag of each token, following @sec-nlp (B- begins an entity, I- continues it, O is outside any entity).
+
+b) For the question "Who founded Apple?" over the passage "Apple was founded by Steve Jobs in 1976" (8 tokens), a QA head outputs the unnormalized start scores $(1, 1, 1, 1, 5, 3, 1, 1)$ and end scores $(1, 1, 1, 1, 3, 4, 1, 5)$ over the tokens. Normalize each with a softmax to get $P_{\text{start}}$ and $P_{\text{end}}$. Report $\arg\max P_{\text{start}}$ and $\arg\max P_{\text{end}}$ separately, and the span obtained by naively combining the two independent argmaxes. Then, per @sec-nlp, select the span $(i, j)$ with $i \le j$ maximizing $P_{\text{start}}(i)\,P_{\text{end}}(j)$ subject to a maximum length of 3 tokens ($j - i + 1 \le 3$), searching all valid pairs.
+
+c) Compare the naive combination with the length-constrained joint search. Which one recovers "Steve Jobs", the answer that @sec-nlp's own example names? Why did the constraint matter?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Tagging each token:
+
+| token | Steve | Jobs | founded | Apple | Inc | in | California |
+|-------|-------|------|---------|-------|-----|-----|-----------|
+| tag | B-PER | I-PER | O | B-ORG | I-ORG | O | B-LOC |
+
+"Steve" begins the person entity and "Jobs" continues it; "founded" and "in" lie outside any entity; "Apple" begins the organization and "Inc" continues it; "California" is a single-token location, so it is just B-LOC with no following I- tag. This matches the scheme @sec-nlp illustrates on "Apple Inc. ... Steve Jobs."
+
+b)
+```{python}
+import numpy as np
+
+tokens = ["Apple", "was", "founded", "by", "Steve", "Jobs", "in", "1976"]
+raw_start = [1, 1, 1, 1, 5, 3, 1, 1]
+raw_end   = [1, 1, 1, 1, 3, 4, 1, 5]
+
+def softmax(x):
+    x = np.array(x, float)
+    e = np.exp(x - x.max())
+    return e / e.sum()
+
+Ps, Pe = softmax(raw_start), softmax(raw_end)
+print("P_start:", np.round(Ps, 3))
+print("P_end:  ", np.round(Pe, 3))
+i_s, i_e = int(np.argmax(Ps)), int(np.argmax(Pe))
+print(f"argmax start = {tokens[i_s]} ({Ps[i_s]:.3f}); "
+      f"argmax end = {tokens[i_e]} ({Pe[i_e]:.3f})")
+print("naive span:", tokens[i_s:i_e + 1], "length", i_e - i_s + 1)
+
+best, span = -1.0, None
+for i in range(len(tokens)):
+    for j in range(i, len(tokens)):
+        if j - i + 1 <= 3 and Ps[i] * Pe[j] > best:
+            best, span = Ps[i] * Pe[j], (i, j)
+print("constrained span:", tokens[span[0]:span[1] + 1], f"(product {best:.4f})")
+```
+The softmax puts 0.803 of the start mass on "Steve" and 0.627 of the end mass on "1976", so the independent argmaxes are "Steve" (start) and "1976" (end). Combining them naively spans "Steve Jobs in 1976", four tokens long. The length-constrained joint search instead returns "Steve Jobs" with product $0.803 \times 0.231 \approx 0.185$.
+
+c) Only the constrained joint search recovers "Steve Jobs", the answer @sec-nlp's example names. The naive combination fails because it maximizes the two distributions independently: the single best end position, "1976", is a plausible end for a longer factual clause but not for the entity itself, so pairing it with the best start "Steve" yields a span that runs four tokens long. Capping the answer at 3 tokens and scoring start and end jointly forces the search to trade a lower end probability ("Jobs" at 0.231 rather than "1976" at 0.627) for a valid, coherent span, which is exactly why @sec-nlp specifies a length-constrained joint search rather than two independent argmaxes.
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-skipgram-negsampling}
+## Skip-Gram with Negative Sampling
+
+Consider a toy corpus of sixteen three-word "sentences" drawn from two unrelated themes, royalty and pets:
+
+```{python}
+#| echo: true
+corpus = [
+    "king queen throne", "queen king throne", "king queen palace", "queen king crown",
+    "king throne crown", "queen throne palace", "king palace crown", "queen palace crown",
+    "dog cat pet", "cat dog pet", "dog cat animal", "cat dog leash",
+    "dog animal leash", "cat animal pet", "dog leash pet", "cat leash animal",
+]
+sentences = [s.split() for s in corpus]
+```
+
+a) Build the vocabulary and, treating each three-word sentence as its own context window (every word is a context word for every other word in the same sentence), construct the list of (center, context) index pairs used for training. Report the vocabulary size and the number of training pairs.
+
+b) Implement skip-gram with negative sampling (@sec-nlp) from scratch: a center-word embedding matrix and a context-word embedding matrix, each with one $d=8$ dimensional row per vocabulary word, a sigmoid function, and the noise distribution $P_n(w) \propto f(w)^{3/4}$ built from the unigram counts $f(w)$. Run manual stochastic gradient descent for 400 epochs with $K=8$ negative samples per positive pair and a learning rate that decays linearly over training, printing the average per-pair loss every 100 epochs. Confirm the loss decreases.
+
+c) Using the trained center embeddings, compute the cosine similarity for the two within-theme pairs (king, queen) and (dog, cat), and for the four cross-theme pairs (king, dog), (king, cat), (queen, dog), (queen, cat). Does the model separate the two themes, even though it was never told they exist?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{python}
+import numpy as np
+np.random.seed(26)
+
+vocab = sorted(set(w for s in sentences for w in s))
+word2idx = {w: i for i, w in enumerate(vocab)}
+V = len(vocab)
+
+pairs = []
+for s in sentences:
+    for c in s:
+        for o in s:
+            if c != o:
+                pairs.append((word2idx[c], word2idx[o]))
+
+print(f"vocabulary ({V} words):", vocab)
+print("training pairs:", len(pairs))
+```
+There are 10 distinct words and 96 ordered pairs: each sentence has 3 distinct words, contributing $3 \times 2 = 6$ ordered (center, context) pairs, and $16 \times 6 = 96$.
+
+b)
+```{python}
+counts = np.array([sum(w == word for s in sentences for w in s) for word in vocab])
+noise_dist = counts ** 0.75
+noise_dist /= noise_dist.sum()
+
+d, K, n_epochs = 8, 8, 400
+v_center = (np.random.rand(V, d) - 0.5) / d   # center-word embeddings
+u_context = (np.random.rand(V, d) - 0.5) / d  # context-word embeddings
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+losses = []
+for epoch in range(n_epochs):
+    lr = 0.08 * (1 - epoch / n_epochs) + 0.005
+    np.random.shuffle(pairs)
+    total_loss = 0.0
+    for c, o in pairs:
+        vc, uo = v_center[c], u_context[o]
+        neg = np.random.choice(V, size=K, p=noise_dist)
+        pos = sigmoid(uo @ vc)
+        grad_vc = (pos - 1) * uo
+        loss = -np.log(pos + 1e-10)
+        for w_k in neg:
+            uk = u_context[w_k]
+            neg_score = sigmoid(uk @ vc)
+            grad_vc = grad_vc + neg_score * uk
+            u_context[w_k] -= lr * neg_score * vc
+            loss += -np.log(1 - neg_score + 1e-10)
+        u_context[o] -= lr * (pos - 1) * vc
+        v_center[c] -= lr * grad_vc
+        total_loss += loss
+    losses.append(total_loss / len(pairs))
+    if epoch % 100 == 0 or epoch == n_epochs - 1:
+        print(f"epoch {epoch:3d}  loss {losses[-1]:.3f}")
+```
+The average per-pair loss falls from 6.159 at initialization to 2.503 after 100 epochs and 2.345 after 400, most of the improvement happening early as the random initial embeddings quickly start separating real pairs from sampled noise. Each update pulls $\mathbf{u}_o$ and $\mathbf{v}_c$ together for an observed pair (`pos` toward 1) and pushes $\mathbf{v}_c$ away from the $K$ sampled negatives (`neg_score` toward 0), which is exactly the contrastive objective $\mathcal{L}_{\text{NS}} = \log \sigma(\mathbf{u}_o^\top \mathbf{v}_c) + \sum_{k=1}^K \E[w_k \sim P_n]{\log \sigma(-\mathbf{u}_{w_k}^\top \mathbf{v}_c)}$ from @sec-nlp.
+
+c)
+```{python}
+def cos(a, b):
+    return a @ b / (np.linalg.norm(a) * np.linalg.norm(b))
+
+related = [("king", "queen"), ("dog", "cat")]
+unrelated = [("king", "dog"), ("king", "cat"), ("queen", "dog"), ("queen", "cat")]
+for a, b in related:
+    print(f"related   sim({a},{b}) = {cos(v_center[word2idx[a]], v_center[word2idx[b]]):.3f}")
+for a, b in unrelated:
+    print(f"unrelated sim({a},{b}) = {cos(v_center[word2idx[a]], v_center[word2idx[b]]):.3f}")
+```
+The two within-theme pairs land at 0.415 (king, queen) and 0.401 (dog, cat), while all four cross-theme pairs stay between 0.072 and 0.110. The algorithm was never given labels for "royalty" or "pet": the co-occurrence counts alone, filtered through the negative sampling objective, are enough to pull semantically related words into nearby regions of the embedding space and keep unrelated words apart. This is the distributional hypothesis made quantitative: words end up close together because they keep the same company, not because the model was told they are similar.
+
+:::
+:::
+
+::: {#exr-glove-cooccurrence}
+## GloVe from Global Co-occurrence Counts
+
+While skip-gram slides a window over sentences, GloVe (@sec-nlp) fits word vectors directly to global co-occurrence counts. Its motivating observation is that *ratios* of co-occurrence probabilities carry meaning: $\prob{\text{solid} \mid \text{ice}}/\prob{\text{solid} \mid \text{steam}}$ is large, $\prob{\text{gas} \mid \text{ice}}/\prob{\text{gas} \mid \text{steam}}$ is small, and $\prob{\text{water} \mid \text{ice}}/\prob{\text{water} \mid \text{steam}}$ is near 1.
+
+Work over the five-word vocabulary `["gas", "ice", "solid", "steam", "water"]` with symmetric co-occurrence counts ice-steam 3, ice-solid 9, ice-gas 1, ice-water 5, steam-solid 1, steam-gas 9, steam-water 5, solid-gas 1, solid-water 3, and gas-water 3 (all unlisted pairs 0).
+
+```{python}
+vocab = ["gas", "ice", "solid", "steam", "water"]
+idx = {w: i for i, w in enumerate(vocab)}
+counts = {
+    ("ice", "steam"): 3, ("ice", "solid"): 9, ("ice", "gas"): 1, ("ice", "water"): 5,
+    ("steam", "solid"): 1, ("steam", "gas"): 9, ("steam", "water"): 5,
+    ("solid", "gas"): 1, ("solid", "water"): 3, ("gas", "water"): 3,
+}
+```
+
+a) Build the symmetric co-occurrence matrix $X$ from these counts. Using $\prob{w_t \mid w_g} = X_{g,t}/\sum_k X_{g,k}$, compute the three ratios above. Do they reproduce the large / small / near-one pattern @sec-nlp describes?
+
+b) Implement the GloVe loss from @sec-nlp,
+$$\mathcal{L}_{\text{GloVe}} = \sum_{i,j} h(X_{ij})\left(\mathbf{v}_i^\top \mathbf{u}_j + b_i + c_j - \log X_{ij}\right)^2,$$
+with weighting $h(x) = (x/x_{\max})^{\alpha}$ for $x < x_{\max}$ and $1$ otherwise. Because these toy counts are small, use $x_{\max} = 5$ and $\alpha = 0.75$ (the chapter's $x_{\max} = 100$ is tuned for a billion-word corpus). Initialize $\mathbf{v}_i, \mathbf{u}_j \in \mathbb{R}^3$ with `np.random.seed(26)` and $b_i = c_j = 0$, then run gradient descent over the pairs with $X_{ij} > 0$ for 800 epochs, printing the average weighted squared error periodically. Confirm it decreases.
+
+c) Using $\mathbf{v}_i + \mathbf{u}_i$ as word $i$'s embedding, compute the cosine similarities between (ice, solid), (steam, solid), (ice, gas), and (steam, gas). Does the trained geometry recover the ratio asymmetry: ice aligned with solid, steam aligned with gas?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{python}
+import numpy as np
+
+V = len(vocab)
+X = np.zeros((V, V))
+for (w1, w2), n in counts.items():
+    X[idx[w1], idx[w2]] = n
+    X[idx[w2], idx[w1]] = n
+print("X (rows/cols =", vocab, "):")
+print(X.astype(int))
+
+def cond(t, g):
+    return X[idx[g], idx[t]] / X[idx[g]].sum()
+
+for t in ["solid", "gas", "water"]:
+    print(f"P({t}|ice)/P({t}|steam) = {cond(t, 'ice') / cond(t, 'steam'):.3f}")
+```
+Both ice and steam have row sum 18, so the ratios are $9/1 = 9$ for solid (large), $1/9 = 0.111$ for gas (small), and $5/5 = 1$ for water (near one), reproducing the qualitative pattern from @sec-nlp: ice keeps company with solid, steam with gas, and both share water. The exact magnitudes differ from the chapter's 8.9 / 0.085 / 1.36 because those come from a billion-word corpus, but the ordering is what GloVe learns from.
+
+b)
+```{python}
+np.random.seed(26)
+d = 3
+Wv = np.random.rand(V, d) - 0.5
+Wu = np.random.rand(V, d) - 0.5
+b = np.zeros(V)
+c = np.zeros(V)
+x_max, alpha, lr = 5.0, 0.75, 0.05
+
+def h(x):
+    return (x / x_max) ** alpha if x < x_max else 1.0
+
+pairs = [(i, j) for i in range(V) for j in range(V) if X[i, j] > 0]
+for epoch in range(800):
+    total = 0.0
+    for i, j in pairs:
+        w = h(X[i, j])
+        diff = Wv[i] @ Wu[j] + b[i] + c[j] - np.log(X[i, j])
+        total += w * diff ** 2
+        gv, gu = w * diff * Wu[j], w * diff * Wv[i]
+        Wv[i] -= lr * gv
+        Wu[j] -= lr * gu
+        b[i] -= lr * w * diff
+        c[j] -= lr * w * diff
+    if epoch % 200 == 0 or epoch == 799:
+        print(f"epoch {epoch:3d}  weighted MSE {total / len(pairs):.4f}")
+```
+The weighted error falls from 1.4852 to essentially 0 by epoch 200: with five words and a rank-3 factorization there is more than enough capacity to fit $\log X$ on the observed pairs. Each update is a least-squares step nudging $\mathbf{v}_i^\top \mathbf{u}_j + b_i + c_j$ toward $\log X_{ij}$, weighted by $h(X_{ij})$ so the rarest pairs (count 1) count for less than the frequent ones.
+
+c)
+```{python}
+emb = Wv + Wu
+
+def cos(p, q):
+    return p @ q / (np.linalg.norm(p) * np.linalg.norm(q))
+
+for w1, w2 in [("ice", "solid"), ("steam", "solid"), ("ice", "gas"), ("steam", "gas")]:
+    print(f"cos({w1},{w2}) = {cos(emb[idx[w1]], emb[idx[w2]]):+.3f}")
+```
+The geometry recovers the asymmetry: cos(ice, solid) $= +0.997$ while cos(steam, solid) $= -0.870$, and cos(steam, gas) $= +0.999$ while cos(ice, gas) $= -0.819$. Ice ends up aligned with solid and opposed to gas; steam does the reverse. GloVe reaches the same qualitative separation as the skip-gram exercise but by a completely different route: a single global regression against log co-occurrence counts, with no sliding window over sentences and no sampled negatives.
+:::
+:::
+
+::: {#exr-self-attention-numpy}
+## Self-Attention from Scratch
+
+Four tokens, "dog", "puppy", "car", "vehicle", are embedded by hand (not learned) in $\mathbb{R}^3$ using three features: how strongly the word denotes an animal, a filler feature that carries no information about that distinction, and how strongly the word denotes a vehicle.
+
+```{python}
+#| echo: true
+import numpy as np
+
+tokens = ["dog", "puppy", "car", "vehicle"]
+X = np.array([
+    [1.0, 0.5, 0.0],
+    [0.9, 0.3, 0.0],
+    [0.0, 0.4, 1.0],
+    [0.0, 0.6, 0.9],
+])
+```
+
+The projection matrices are fixed (not learned), so the whole computation can be checked by hand:
+$$
+W_Q = W_K = \begin{bmatrix} 1 & 0 \\ 0 & 0 \\ 0 & 1 \end{bmatrix}, \qquad
+W_V = \begin{bmatrix} 0 & 1 \\ 1 & 1 \\ 1 & 0 \end{bmatrix}.
+$$
+
+a) Form $Q = XW_Q$, $K = XW_K$, $V = XW_V$ in numpy. What do $W_Q$ and $W_K$ do to the middle (filler) feature of $X$?
+
+b) Compute the scaled scores $QK^\top/\sqrt{d_k}$ and the attention weight matrix $\alpha = \text{softmax}(QK^\top/\sqrt{d_k})$, with the softmax taken row-wise as in @sec-nlp. Verify numerically that every row of $\alpha$ sums to 1.
+
+c) For each token, report which other token it attends to most strongly. Does the attention pattern recover the fact that "dog" and "puppy" are related, and separately that "car" and "vehicle" are related, given that this was only implicit in $X$?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{python}
+W_Q = np.array([[1, 0], [0, 0], [0, 1]], dtype=float)
+W_K = np.array([[1, 0], [0, 0], [0, 1]], dtype=float)
+W_V = np.array([[0, 1], [1, 1], [1, 0]], dtype=float)
+
+Q, K, V = X @ W_Q, X @ W_K, X @ W_V
+print("Q =\n", Q)
+print("K =\n", K)
+```
+The second row of $W_Q$ and $W_K$ is $[0, 0]$, so the middle column of $X$ is dropped entirely: $Q$ and $K$ retain only the animal and vehicle features, and the filler feature is projected away before any dot product is computed. $V$ keeps a mix of all three features instead, since $W_V$ has no zero row.
+
+b)
+```{python}
+d_k = Q.shape[1]
+scores = Q @ K.T / np.sqrt(d_k)
+scores_shift = scores - scores.max(axis=1, keepdims=True)
+weights = np.exp(scores_shift)
+weights /= weights.sum(axis=1, keepdims=True)
+print("attention weights =\n", np.round(weights, 3))
+print("row sums =", weights.sum(axis=1))
+```
+Every row sums to 1.0 (`row sums = [1. 1. 1. 1.]`), as it must: softmax guarantees $\alpha_{ij} \geq 0$ and $\sum_j \alpha_{ij} = 1$ for each query $i$, so each output row is a genuine weighted average of the value vectors, not an arbitrary rescaling.
+
+c)
+```{python}
+for i, t in enumerate(tokens):
+    order = np.argsort(-weights[i])
+    print(t, "->", [(tokens[j], round(weights[i, j], 3)) for j in order])
+```
+"dog" puts 0.343 of its attention on itself and 0.319 on "puppy" (a combined 0.662), leaving only $0.169 + 0.169 = 0.338$ for "car" and "vehicle" together, and "puppy" attends the same way (0.334 on "dog", 0.313 on itself). "car" and "vehicle" show the identical pair of numbers in mirrored positions (0.343 and 0.319 on each other, 0.169 and 0.169 on "dog" and "puppy"), a direct consequence of how $X$ was built: swapping the animal and vehicle feature values between the two pairs produces swapped rows of $Q$ and $K$. No token attends more to a token from the other group than to one from its own, and this happens purely from geometry: the dot product between two animal-heavy rows (or two vehicle-heavy rows) is large, while the dot product between one of each is close to zero, exactly the mechanism scaled dot-product attention exploits.
+
+:::
+:::
+
+::: {#exr-bpe-from-scratch}
+## Byte Pair Encoding from Scratch
+
+@sec-nlp introduces BPE on the word frequencies {"fast": 4, "faster": 3, "tall": 5, "taller": 4} and predicts that the first merges will be "t" + "a" $\rightarrow$ "ta", then "ta" + "l" $\rightarrow$ "tal". This exercise implements BPE and checks that prediction against real merge counts.
+
+```{python}
+from collections import defaultdict
+
+corpus = {"fast": 4, "faster": 3, "tall": 5, "taller": 4}
+vocab = {tuple(word) + ("</w>",): freq for word, freq in corpus.items()}
+```
+Each word starts out as a tuple of single-character symbols followed by an end-of-word marker `</w>`, tagged with its corpus frequency.
+
+a) Write `get_pair_counts(vocab)`, returning for every adjacent symbol pair the total frequency (summed over words) with which it occurs, and `merge_pair(pair, vocab)`, which replaces every adjacent occurrence of `pair` with the merged symbol throughout `vocab`. Using these two functions, run 8 rounds of "find the most frequent pair, merge it," printing the merge and its count at each step. Do the first three merges match the chapter's prediction?
+
+b) Print `vocab` after the 8 merges. How many merges does it take before "fast" and "tall" each become a single symbol (plus `</w>`)?
+
+c) Write `bpe_tokenize(word, merges)`, which applies the learned merges, in order, to a new word, and use it to tokenize the unseen words "fastest" and "tallest". Why does the stem survive as one token while the superlative suffix does not, and what does this predict for a word like "smartest" if training data only ever showed the comparative "smarter"?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{python}
+def get_pair_counts(vocab):
+    pairs = defaultdict(int)
+    for symbols, freq in vocab.items():
+        for i in range(len(symbols) - 1):
+            pairs[(symbols[i], symbols[i + 1])] += freq
+    return pairs
+
+def merge_pair(pair, vocab):
+    new_vocab = {}
+    for symbols, freq in vocab.items():
+        symbols, merged, i = list(symbols), [], 0
+        while i < len(symbols):
+            if i < len(symbols) - 1 and (symbols[i], symbols[i + 1]) == pair:
+                merged.append(symbols[i] + symbols[i + 1])
+                i += 2
+            else:
+                merged.append(symbols[i])
+                i += 1
+        new_vocab[tuple(merged)] = freq
+    return new_vocab
+
+merges = []
+for step in range(8):
+    pair_counts = get_pair_counts(vocab)
+    best_pair = max(pair_counts, key=pair_counts.get)
+    print(f"step {step}: merge {best_pair}, count {pair_counts[best_pair]}")
+    merges.append(best_pair)
+    vocab = merge_pair(best_pair, vocab)
+```
+The first three merges are exactly `('t', 'a')`, `('ta', 'l')`, `('tal', 'l')`, each with count 9 (the combined frequency of "tall" and "taller," $5 + 4 = 9$), confirming the chapter's prediction: "tall" is the most frequent character sequence in the corpus, so BPE merges it first, one pair at a time.
+
+b)
+```{python}
+print("vocab after 8 merges:", vocab)
+```
+The result is `{('fast', '</w>'): 4, ('fast', 'er</w>'): 3, ('tall', '</w>'): 5, ('tall', 'er</w>'): 4}`. "tall" becomes a single symbol after 3 merges (steps 0 to 2); "fast" needs 3 more (steps 3 to 5, merging `('f','a')`, `('fa','s')`, `('fas','t')`, each with count 7, the combined frequency of "fast" and "faster"). The last two merges, `('e','r')` and `('er','</w>')`, both count 7, fold the shared comparative suffix into a single `er</w>` symbol used by both "faster" and "taller."
+
+c)
+```{python}
+def bpe_tokenize(word, merges):
+    symbols = list(word) + ["</w>"]
+    for pair in merges:
+        merged, i = [], 0
+        while i < len(symbols):
+            if i < len(symbols) - 1 and (symbols[i], symbols[i + 1]) == pair:
+                merged.append(symbols[i] + symbols[i + 1])
+                i += 2
+            else:
+                merged.append(symbols[i])
+                i += 1
+        symbols = merged
+    return symbols
+
+print("fastest ->", bpe_tokenize("fastest", merges))
+print("tallest ->", bpe_tokenize("tallest", merges))
+```
+"fastest" becomes `['fast', 'e', 's', 't', '</w>']` and "tallest" becomes `['tall', 'e', 's', 't', '</w>']`: the stem is recovered as a single learned token, but the superlative suffix "est" falls back to individual characters, because the training corpus only ever taught the merges for the comparative suffix "er," never for "est." A word like "smartest" would suffer the same fate if its training data contained "smarter" but not "smartest": the tokenizer would recognize "smart" as one clean unit and then split "est" into three separate, semantically empty characters, exactly the fragmentation of rare and unseen forms that @sec-nlp warns about.
+
+:::
+:::
+
+::: {#exr-mlm-from-scratch}
+## Masked Language Modeling from Scratch
+
+@sec-nlp introduces BERT's masked language modeling (MLM): 15% of token positions are selected for prediction, and each selected position is corrupted by the 80/10/10 recipe (80% replaced with `[MASK]`, 10% replaced with a random word, 10% left unchanged). The loss
+$$\mathcal{L}_{\text{MLM}} = -\sum_{m \in \mathcal{M}} \log P(x_m \mid \mathbf{x}_{\backslash \mathcal{M}})$$
+is evaluated only at the selected positions $\mathcal{M}$. This exercise implements the masking and a simplified MLM objective on a toy corpus of twelve five-word sentences over a 16-word vocabulary.
+
+```{python}
+#| echo: true
+corpus = [
+    "the king rules the kingdom", "the queen rules the kingdom",
+    "the king loves the queen",   "the queen loves the king",
+    "the king guards the castle",  "the queen guards the castle",
+    "the dog chases the ball",     "the cat chases the ball",
+    "the dog sleeps on mat",       "the cat sleeps on mat",
+    "the king sleeps on throne",   "the dog guards the castle",
+]
+sentences = [s.split() for s in corpus]
+vocab = sorted(set(w for s in sentences for w in s))
+word2id = {w: i for i, w in enumerate(vocab)}
+Vsz = len(vocab)
+MASK = Vsz  # id reserved for the [MASK] token
+```
+
+a) Implement BERT's masking from @sec-nlp: visit every token position, select it with probability 0.15, and for each selected position draw a corruption type with probabilities 0.8 (replace with `[MASK]`), 0.1 (replace with a random vocabulary word), 0.1 (leave unchanged). With `np.random.seed(26)`, report how many of the 60 positions are selected and the count of each corruption type, recording for every selected position the true word (needed for the loss).
+
+b) Implement a simplified MLM loss. Give each vocabulary word and `[MASK]` a trainable $d = 8$ embedding. For a selected position $m$, form the context vector as the average of the (corrupted) embeddings at the other positions of the same sentence, project it to logits over the vocabulary with a trainable linear layer, and compute cross-entropy $-\log P(x_m \mid \mathbf{x}_{\backslash \mathcal{M}})$ only at the selected positions. Run gradient descent for 400 epochs, printing the average loss periodically. Confirm it decreases.
+
+c) One selected position falls in the 10% "leave unchanged" branch: its input token is not altered, yet the loss is still computed there. Explain why BERT keeps these positions in the loss instead of scoring only positions where the input was actually replaced.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{python}
+import numpy as np
+
+np.random.seed(26)
+corrupted, selected = [], []
+n_mask = n_rand = n_unch = 0
+for si, s in enumerate(sentences):
+    row = [word2id[w] for w in s]
+    for pi, w in enumerate(s):
+        if np.random.rand() < 0.15:
+            r = np.random.rand()
+            if r < 0.8:
+                row[pi] = MASK; n_mask += 1
+            elif r < 0.9:
+                row[pi] = np.random.randint(Vsz); n_rand += 1
+            else:
+                n_unch += 1
+            selected.append((si, pi, word2id[w]))
+    corrupted.append(row)
+print(f"positions {sum(len(s) for s in sentences)}  selected {len(selected)}  "
+      f"mask {n_mask}  random {n_rand}  unchanged {n_unch}")
+```
+Six of the 60 positions are selected (close to the 15% target at this small scale), split into 4 replaced with `[MASK]`, 1 replaced with a random word, and 1 left unchanged. The true word is stored before corruption so the loss can score the position even when its input has been overwritten by `[MASK]` or a wrong word.
+
+b)
+```{python}
+d = 8
+E = 0.1 * np.random.randn(Vsz + 1, d)
+Wc = 0.1 * np.random.randn(Vsz, d)
+bc = np.zeros(Vsz)
+
+def softmax(z):
+    z = z - z.max()
+    e = np.exp(z)
+    return e / e.sum()
+
+lr = 0.5
+for epoch in range(400):
+    total = 0.0
+    for si, pi, y in selected:
+        row = corrupted[si]
+        L = len(row)
+        ctx = np.zeros(d)
+        for k in range(L):
+            if k != pi:
+                ctx += E[row[k]]
+        ctx /= (L - 1)
+        p = softmax(Wc @ ctx + bc)
+        total += -np.log(p[y] + 1e-12)
+        dlog = p.copy()
+        dlog[y] -= 1.0
+        dctx = Wc.T @ dlog
+        Wc -= lr * np.outer(dlog, ctx)
+        bc -= lr * dlog
+        gE = lr * dctx / (L - 1)
+        for k in range(L):
+            if k != pi:
+                E[row[k]] -= gE
+    if epoch % 100 == 0 or epoch == 399:
+        print(f"epoch {epoch:3d}  MLM loss {total / len(selected):.4f}")
+```
+The average loss falls from 2.4202 at initialization to 0.0006 after 400 epochs: averaging the surrounding embeddings gives the linear head enough signal to recover each masked identity from its context. With so few selected positions the model effectively memorizes the six (context, target) mappings, which is what MLM does at scale, only there the context is read by a deep Transformer rather than a plain average.
+
+c) If the loss were computed only where the input was actually replaced (the `[MASK]` and random-word cases), the model would only ever be asked about tokens it cannot read directly, and it could settle for the shortcut "predict whatever token sits in this slot." Keeping the 10% unchanged positions in the loss forces a genuinely contextual prediction even when the true token is visible, so the representations cannot collapse to a copy operation. It also matches fine-tuning and inference, when no `[MASK]` tokens exist at all: every position then looks like the unchanged case, and the model must already predict from context rather than from the presence of a `[MASK]` marker. This is why @sec-nlp notes the 80/10/10 split "prevents the model from simply learning to copy tokens when they're not masked."
+:::
+:::
+
+::::

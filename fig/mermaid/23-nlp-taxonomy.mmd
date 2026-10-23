@@ -1,0 +1,59 @@
+%%{init: {'themeCSS': '.mermaid svg { background-color: #f8f9fa; }', 'flowchart': {'nodeSpacing': 10, 'rankSpacing': 20}}}%%
+graph LR
+    subgraph P [Pretrained Representations]
+        P1[Word2Vec/GloVe]
+        P2[BERT/RoBERTa]
+        P3[GPT/T5]
+    end
+
+    subgraph A [Architectures]
+        A1[MLPs]
+        A2[CNNs]
+        A3[RNNs]
+        A4[Transformers]
+        A5[Attention]
+    end
+
+    subgraph S [Sequence-Level Tasks]
+        S1[Sentiment Analysis]
+        S2[Text Classification]
+        S3[Natural Language Inference]
+        S4[Semantic Similarity]
+    end
+
+    subgraph T [Token-Level Tasks]
+        T1[Named Entity Recognition]
+        T2[Part-of-Speech Tagging]
+        T3[Question Answering]
+    end
+
+    subgraph G [Sequence-to-Sequence Tasks]
+        G1[Machine Translation]
+        G2[Text Summarization]
+    end
+
+    P1 --> A1
+    P1 --> A2
+    P1 --> A3
+    P2 --> A4
+    P2 --> A5
+    P3 --> A4
+
+    A1 --> S1
+    A1 --> S3
+    A2 --> S1
+    A2 --> S2
+    A3 --> S1
+    A3 --> S3
+    A3 --> T2
+    A4 --> S2
+    A4 --> S3
+    A4 --> S4
+    A4 --> T1
+    A4 --> T2
+    A4 --> T3
+    A4 --> G1
+    A4 --> G2
+    A5 --> S3
+    A5 --> S4
+    A5 --> T3

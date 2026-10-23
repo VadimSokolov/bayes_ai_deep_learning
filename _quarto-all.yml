@@ -1,0 +1,35 @@
+book:
+  chapters:
+    - 00-intro.qmd
+    - part: "Bayes"
+      chapters:
+        - 01-prob.qmd
+        - 02-bayes.qmd
+        - 03-bl.qmd
+        - 04-dec.qmd
+        - 05-ab.qmd
+        - 06-hyp.qmd
+        - 07-sp.qmd
+        - 08-gp.qmd
+        - 09-rl.qmd
+    - part: "AI"
+      chapters:
+        - 10-data.qmd 
+        - 11-pattern.qmd
+        - 12-regression.qmd
+        - 13-logistic.qmd
+        - 14-tree.qmd
+        - 15-forecasting.qmd        
+        - 16-select.qmd
+        - 17-theoryai.qmd 
+    - part: "Deep Learning"
+      chapters:
+        - 18-nn.qmd
+        - 19-theorydl.qmd
+        - 20-sgd.qmd
+        - 21-qnn.qmd
+        - 22-cnn.qmd
+        - 23-nlp.qmd
+        - 24-llm.qmd
+        - 25-robots.qmd
+    - references.qmd

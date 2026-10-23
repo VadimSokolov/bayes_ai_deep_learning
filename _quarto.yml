@@ -1,0 +1,112 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Bayes, Artificial Intelligence, and Deep Learning"
+  subtitle: "Foundations of Data Science"
+  author: "Nick Polson and Vadim Sokolov"
+  date: today
+  cover-image: "fig/cover_gpt4o_mucha.png"
+  # Adds a Download menu to the HTML sidebar linking the rendered PDF/EPUB.
+  # The files must exist in _book/, so build all three formats before publishing.
+  downloads: [pdf, epub]
+  open-graph: true
+  twitter-card: true
+  sidebar:
+    style: docked
+    background: light
+    collapse-level: 2
+  chapters:
+    - index.qmd
+bibliography: 
+  - BayesBook.bib 
+
+metadata-files:
+  - bookmeta.yml
+
+profile:
+  default: all
+
+showsln: false
+
+execute:
+  cache: true
+  freeze: auto
+  echo: false
+
+filters:
+  - misc/index-terms.lua
+  - misc/epub-math.lua
+  - misc/epub-fixups.lua
+
+fig-align: "center"
+  
+format:
+  html:
+    fig-height: 2
+    fig-width: 5
+    default: true
+    theme: cosmo
+    df-print: kable
+    mainfont: 'Palatino, Palatino Linotype, Palatino LT STD, Book Antiqua, Georgia, serif'
+    embed-resources: false
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    number-sections: true
+    number-depth: 2
+    fig-align: "center"
+    code-fold: false
+    code-overflow: wrap
+    callout-icon: false
+    include-in-header: 
+      - file: misc/preamble.html
+  epub:
+    fig-height: 2
+    fig-width: 5
+    df-print: kable
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    number-depth: 2
+    code-overflow: wrap
+    callout-icon: false
+    fig-align: "center"
+    css: misc/epub.css
+  pdf: &latex-shared
+    fig-height: 2
+    fig-width: 5.5
+    echo: false
+    code-overflow: wrap
+    df-print: kable
+    toc: true
+    number-sections: true
+    number-depth: 2
+    fig-pos: "H"
+    callout-icon: false
+    include-in-header: 
+      - file: misc/preamble.tex
+    include-after-body:
+      - file: misc/index-page.tex
+    # PDF-specific options below:
+    documentclass: book
+    classoption: [10pt, twoside, openright]
+    pdf-engine: xelatex
+    latex-clean: false
+    keep-tex: true
+  # latex:
+  #   <<: *latex-shared
+
+knitr:
+    opts_knit:
+      global.par: true
+    opts_chunk: 
+      comment: "##"
+      warning: false
+      message: false
+      opts.label: "kill_prefix"
+      fig.align: "center"
+      collapse: true
+      R.options:
+        digits: 2

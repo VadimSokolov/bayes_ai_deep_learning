@@ -1,0 +1,452 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-bias-variance-decomposition}
+## Bias-Variance Decomposition
+
+For a regression problem with true function $f(x)$ and noisy observations $y = f(x) + \epsilon$ where $\epsilon \sim N(0, \sigma^2)$ (as derived in Chapter 17, @sec-theoryai):
+
+a) Write the expected test MSE as the sum of bias squared, variance, and irreducible error.
+b) A linear model has bias = 2.0, variance = 0.5, and $\sigma^2 = 1$. What is the expected MSE?
+c) A neural network has bias = 0.3, variance = 3.0 (using the same $\sigma^2 = 1$ as in part (b)). Is it better than the linear model?
+d) How does increasing model complexity typically affect bias and variance?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The bias-variance decomposition:
+$$
+\E{(y - \hat{f}(x))^2} = \text{Bias}[\hat{f}(x)]^2 + \Var{\hat{f}(x)} + \sigma^2
+$$
+
+where:
+
+- $\text{Bias}[\hat{f}(x)] = \E{\hat{f}(x)} - f(x)$
+- $\Var{\hat{f}(x)} = \E{(\hat{f}(x) - \E{\hat{f}(x)})^2}$
+- $\sigma^2$ is irreducible error (noise in data)
+
+b) Linear model MSE:
+```{r}
+bias_linear <- 2.0
+var_linear <- 0.5
+sigma2 <- 1
+
+mse_linear <- bias_linear^2 + var_linear + sigma2
+cat("Linear model MSE =", mse_linear, "\n")
+```
+
+c) Neural network comparison:
+```{r}
+bias_nn <- 0.3
+var_nn <- 3.0
+
+mse_nn <- bias_nn^2 + var_nn + sigma2
+cat("Neural network MSE =", mse_nn, "\n")
+cat("Linear model MSE =", mse_linear, "\n")
+cat("Better model:", ifelse(mse_nn < mse_linear, "Neural Network", "Linear Model"), "\n")
+```
+
+d) Effect of complexity on bias and variance:
+- **Increasing complexity** (more parameters, more flexible models):
+  - Bias typically decreases (can fit the true function more closely)
+  - Variance typically increases (more sensitive to training data)
+- **The bias-variance trade-off**: Find the sweet spot that minimizes total error
+- Example:
+  - Underfitting (too simple): high bias, low variance
+  - Overfitting (too complex): low bias, high variance
+
+:::
+:::
+
+::: {#exr-double-descent-concept}
+## Double Descent
+
+The double descent phenomenon shows that test error can decrease again after the interpolation threshold.
+
+a) Sketch a typical double descent curve with test error on y-axis and model complexity on x-axis.
+b) What is the "interpolation threshold" and why does classical theory predict error should increase there?
+c) Why might overparameterized models generalize well despite having more parameters than data points?
+d) How does this relate to neural networks with millions of parameters?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Double descent curve:
+```{r}
+# Illustrative curve
+complexity <- seq(0.1, 3, by = 0.05)
+
+# Classical U-shaped + second descent
+test_error <- ifelse(complexity < 1,
+                     2/complexity + 0.5*complexity,  # Classical regime
+                     ifelse(complexity < 1.2,
+                            5 * exp(-(complexity-1.2)^2 / 0.02) + 1.5,  # Spike at threshold
+                            1.5 - 0.3*(complexity - 1.2)))  # Overparameterized
+
+plot(complexity, test_error, type = "l", lwd = 2,
+     xlab = "Model Complexity / (# parameters / # samples)",
+     ylab = "Test Error",
+     main = "Double Descent Phenomenon")
+abline(v = 1, lty = 2, col = "red")
+text(1, 4, "Interpolation\nThreshold", pos = 4, col = "red")
+text(0.5, 3, "Classical\nRegime")
+text(2, 1, "Overparameterized\nRegime")
+```
+
+b) Interpolation threshold:
+- Occurs when # parameters ≈ # training samples
+- At this point, model can exactly fit (interpolate) all training data
+- Classical theory (bias-variance) predicts: fitting noise = high variance = poor generalization
+- The spike in error at this threshold is called "peak error"
+
+c) Why overparameterized models can generalize well:
+- **Implicit regularization**: SGD finds "simpler" solutions among many that interpolate
+- **Minimum norm solutions**: Among all interpolating solutions, gradient descent tends to find those with smaller parameter norms
+- **Flat minima**: Overparameterized models tend to find flatter loss landscapes, which generalize better
+- **Multiple solutions**: With more parameters, there are many ways to interpolate: some generalize well
+
+d) Relation to neural networks:
+- Modern neural networks are heavily overparameterized (e.g., GPT-3 has 175B parameters, trained on ~300B tokens)
+- They operate firmly in the "overparameterized regime"
+- Despite classical theory predictions, they generalize extremely well
+- This explains why "bigger is better" often works in deep learning
+
+:::
+:::
+
+::: {#exr-ridge-functions}
+## Ridge Functions and Projection Pursuit
+
+Recall from the chapter that a ridge function $f: \mathbb{R}^n \to \mathbb{R}$ has the form $f(x) = g(w^\top x)$ for a fixed direction $w \neq 0$ and a univariate function $g$.
+
+a) State the property that makes $f$ constant along any direction orthogonal to $w$, and prove it.
+b) Let $w = (1,1)^\top$ and $g(t) = t^2$, so $f(x_1,x_2) = (x_1+x_2)^2$. Evaluate $f$ at $(0,1)$, $(0.5,0.5)$, and $(-1,2)$. What do you notice, and how does it relate to the level set $\{x : f(x) = 1\}$?
+c) Projection pursuit regression represents a multivariate relationship as $\phi(x) = \sum_{i=1}^p g_i(w_i^\top x)$, a sum of $p$ ridge functions. Explain how increasing $p$ lets $\phi$ approximate a general continuous $f$, and state whether this approximation is ever exact for a fixed, finite $p$.
+d) A single unit in a one-hidden-layer network computes $h(x) = \sigma(w^\top x + b)$ for activation $\sigma$ and bias $b$. Show that $h$ is a ridge function, identify its direction and its univariate function, and relate the network output $\sum_{i=1}^K \beta_i h_i(x)$ to the projection pursuit form in (c).
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) For any $u$ with $w^\top u = 0$,
+$$
+f(x+u) = g(w^\top(x+u)) = g(w^\top x + w^\top u) = g(w^\top x) = f(x).
+$$
+So $f$ is unchanged when $x$ moves in any direction orthogonal to $w$: all of its variation happens along the single direction $w$, which is why the graph of $f$ looks like a corrugated "ridge" in $\mathbb{R}^n$ for $n>1$.
+
+b) With $w=(1,1)^\top$, $g(t)=t^2$:
+```{r}
+w <- c(1, 1)
+g <- function(t) t^2
+f <- function(x) g(sum(w * x))
+cat("f(0,1)     =", f(c(0, 1)), "\n")
+cat("f(0.5,0.5) =", f(c(0.5, 0.5)), "\n")
+cat("f(-1,2)    =", f(c(-1, 2)), "\n")
+```
+All three points give $f(x)=1$, because each satisfies $x_1+x_2=1=w^\top x$. The level set $\{x : f(x)=1\}$ is the pair of lines $x_1+x_2=\pm1$, which are orthogonal to $w=(1,1)^\top$ (direction $(1,-1)^\top$, since $w^\top(1,-1)^\top=0$). In general, the level sets of a ridge function are hyperplanes orthogonal to $w$, exactly the geometric content of part (a).
+
+c) Each term $g_i(w_i^\top x)$ is a ridge function along its own direction $w_i$. Summing $p$ of them combines $p$ different one-dimensional "views" of $x$, each reshaped by a learned univariate $g_i$. As $p$ grows and the $w_i, g_i$ are chosen well, $\phi(x)=\sum_{i=1}^p g_i(w_i^\top x)$ can approximate an arbitrary continuous multivariate $f$ arbitrarily closely [@friedman1981projection; @huber1985projection]. For a fixed, finite $p$, however, this is generally only an approximation, not an exact representation: nothing guarantees that any particular finite $p$ reproduces $f$ exactly. Contrast this with the Kolmogorov Superposition Theorem (next exercise), which gives an exact representation using a fixed number of terms, $2n+1$, regardless of how complicated $f$ is.
+
+d) Since $h(x) = \sigma(w^\top x+b) = g(w^\top x)$ with $g(t) := \sigma(t+b)$, part (a)'s argument applies directly: $h(x+u)=h(x)$ whenever $w^\top u=0$, so $h$ is a ridge function with direction $w$ and univariate function $g(t)=\sigma(t+b)$. A one-hidden-layer network with output $\hat y(x) = \sum_{i=1}^K \beta_i \sigma(w_i^\top x + b_i)$ therefore has exactly the projection pursuit form $\sum_i \beta_i g_i(w_i^\top x)$ from (c), with two differences: the $\beta_i$ multiply each ridge function from outside, and every hidden unit reuses the same activation shape $\sigma$ (only its direction $w_i$ and bias $b_i$ vary), whereas projection pursuit allows each $g_i$ to be a separately estimated, arbitrarily shaped univariate function. This is the sense in which projection pursuit regression anticipates how a single hidden layer decomposes a high-dimensional problem into a sum of ridge functions.
+
+:::
+:::
+
+::: {#exr-kst-kgam}
+## Kolmogorov Superposition Theorem and K-GAM
+
+a) State the Kolmogorov Superposition Theorem (KST): for continuous $f:[0,1]^n \to \mathbb{R}$, there exist continuous outer functions $g_q$ and inner functions $\psi_{q,i}$ such that
+$$
+f(x_1,\ldots,x_n) = \sum_{q=1}^{2n+1} g_q\left(\sum_{i=1}^n \psi_{q,i}(x_i)\right).
+$$
+Is this an exact identity for every continuous $f$, or an approximation that only improves as more terms are added? Contrast your answer with projection pursuit regression from the previous exercise.
+b) For general input dimension $n$, how many outer functions $g_q$ and how many inner functions $\psi_{q,i}$ appear in the representation above? Evaluate both counts for $n=2, 5, 10$, and check the $n=5$ case against the "11 features ($2d+1$)" used in the chapter's simulated K-GAM example.
+c) K-GAM [@polson2017deep] replaces the inner functions with a single fixed Köppen function $\psi$, giving hidden-layer features
+$$
+z_q = \sum_{p=1}^d \lambda_p\,\psi(x_p + qa), \qquad q = 0,\ldots,2d,
+$$
+that do not depend on the target function $f$ at all; only the outer functions $g_q$ are fit to data. Contrast this with a spline basis or a PCA projection (whose basis functions or directions are chosen using the data, and in PLS, using $Y$ too). What does the chapter mean by describing the K-GAM features as "universal topological information" that implements a $k$-nearest-neighbor structure?
+d) KST gives an exact representation of any continuous $f$ with a fixed number of terms, while projection pursuit only approximates $f$, in general needing more ridge terms as the desired accuracy increases. Given this, why does the chapter still discuss ridge functions and projection pursuit at all, rather than treating KST as the final answer?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) KST is an exact identity: for every continuous $f$ on $[0,1]^n$, there exist $g_q$ and $\psi_{q,i}$ making the two sides equal everywhere, with no error term and no dependence of the number of terms ($2n+1$ outer, one inner sum per outer term) on how complicated $f$ is. This is fundamentally different from projection pursuit, where a fixed number of ridge terms $p$ generally only approximates $f$, and achieving higher accuracy requires letting $p$ grow.
+
+b) There are $2n+1$ outer functions $g_q$ (one for each $q=1,\ldots,2n+1$) and $n(2n+1)$ inner functions $\psi_{q,i}$ (one for each pair $(q,i)$, $i=1,\ldots,n$):
+```{r}
+n <- c(2, 5, 10)
+for (i in seq_along(n)) {
+  cat("n =", n[i], ": outer functions g_q =", 2*n[i] + 1,
+      ", inner functions psi_(q,i) =", n[i] * (2*n[i] + 1), "\n")
+}
+```
+For $n=5$ this gives $11$ outer functions, matching the "11 features ($2d+1$)" used to transform the five-dimensional input in the chapter's simulated-data example, and $55$ inner functions (which K-GAM collapses to copies of one shared Köppen function, see (c)).
+
+c) A spline basis or a PCA projection is built from the observed inputs $X$ (and PLS additionally uses $Y$): the basis adapts to the specific dataset and, for PLS, to the specific target being predicted. The K-GAM features $z_q$ use the same Köppen function $\psi$ and the same shifts $qa$ regardless of what $f$ or $Y$ happens to be; they only encode where $x$ sits in $[0,1]^d$. That is what the chapter means by "universal topological information": the inner layer is a fixed embedding of the input space, and because $\psi$ is built from a digit-by-digit (base-$\gamma$) expansion of each coordinate, nearby points in $[0,1]^d$ map to nearby feature vectors, giving the fixed inner layer an implicit $k$-nearest-neighbors structure. Only the outer functions $g_q$, which play the role of a generalized additive model fit on top of these fixed features, are learned from $(x_i,y_i)$.
+
+d) The price of KST's exact, fixed-size representation is that its inner functions are pathological: the Köppen function $\psi$ is defined only as the limit of a recursive construction, is non-smooth, and is expensive to construct and evaluate, particularly as $n$ grows (the chapter notes a direct trade-off: $C^1$ inner functions are easier to work with but limit representable dimension, while the rougher, only Hölder-continuous inner functions needed in higher dimensions enable better approximation at the cost of smoothness). Ridge functions and projection pursuit sacrifice the fixed-size, exact representation for univariate functions $g_i$ that can be smooth and directly estimated from data, for instance by scatterplot smoothing along each projection, in a way the Köppen function cannot be. KST wins on representation; projection pursuit wins on computation, which is exactly the "Representation vs. Computation" tension the chapter returns to in its conclusion.
+
+:::
+:::
+
+::: {#exr-kernel-smoothing-attention}
+## Kernel Smoothing and Attention
+
+a) Write the Nadaraya-Watson estimator $\hat f(x)$ of a regression function from data $(x_i,y_i)_{i=1}^n$, using a Gaussian kernel $K(x,x') = \exp\left(-\|x-x'\|_2^2/(2\sigma^2)\right)$.
+b) Toy dataset: $(x_i,y_i) \in \{(0,1),(1,3),(2,2)\}$. Using bandwidth $\sigma=1$, compute $\hat f(1.5)$ by hand. Show the unnormalized kernel weights and the normalized weights before giving the final number.
+c) Bahdanau-style attention [@bahdanau2014neural] forms a context vector $c_i = \sum_j \alpha_{ij}h_j$ with $\alpha_{ij} = \exp(e_{ij})/\sum_k\exp(e_{ik})$, and the transformer's scaled dot-product attention [@vaswani2017attention] is $\text{Attention}(Q,K,V)=\text{softmax}(QK^\top/\sqrt{d_k})V$. Show that a single row of $\text{Attention}(Q,K,V)$ has exactly the Nadaraya-Watson form $\sum_j w_j V_j$, and identify the "kernel" $K(q_i,k_j)$ and the role played by the value vectors $V_j$.
+d) In Nadaraya-Watson, the bandwidth $\sigma$ controls how localized the weights are: small $\sigma$ behaves like a nearest-neighbor rule, large $\sigma$ approaches a uniform average. Argue that dividing the attention scores by a temperature $T$ (of which the transformer's $\sqrt{d_k}$ is a fixed special case) plays an analogous role, and illustrate numerically with a small example.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+$$
+\hat f(x) = \frac{\sum_{i=1}^n y_i K(x,x_i)}{\sum_{i=1}^n K(x,x_i)}, \qquad K(x,x') = \exp\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right).
+$$
+
+b) With $x_i \in \{0,1,2\}$, $y_i \in \{1,3,2\}$, $x=1.5$, $\sigma=1$:
+```{r}
+xi <- c(0, 1, 2); yi <- c(1, 3, 2); x0 <- 1.5; sigma <- 1
+Kw <- exp(-(x0 - xi)^2 / (2*sigma^2))
+w_nw <- Kw / sum(Kw)
+cat("unnormalized kernel weights:", round(Kw, 4), "\n")
+cat("normalized weights:        ", round(w_nw, 4), "\n")
+cat("fhat(1.5) =", round(sum(w_nw * yi), 4), "\n")
+```
+The point $x=1.5$ is equidistant from $x_2=1$ and $x_3=2$ (distance $0.5$) and farther from $x_1=0$ (distance $1.5$), so $x_2$ and $x_3$ receive equal, larger weight and $x_1$ is downweighted; the estimate $\hat f(1.5) \approx 2.27$ sits closer to $y_2=3$ and $y_3=2$ than to $y_1=1$.
+
+c) Writing row $i$ of the attention output as $\text{Attention}(Q,K,V)_i = \sum_j \alpha_{ij}V_j$ with
+$$
+\alpha_{ij} = \frac{\exp\left(q_i^\top k_j/\sqrt{d_k}\right)}{\sum_l \exp\left(q_i^\top k_l/\sqrt{d_k}\right)}
+$$
+is exactly the Nadaraya-Watson form $\sum_j w_j y_j$ with $x$ replaced by the query $q_i$, the data points $x_j$ replaced by the keys $k_j$, the responses $y_j$ replaced by the value vectors $V_j$, and the kernel $K(q_i,k_j) = \exp(q_i^\top k_j/\sqrt{d_k})$ in place of the Gaussian kernel. The softmax is nothing but the kernel-weight normalization $K(q_i,k_j)/\sum_l K(q_i,k_l)$ applied to this exponential-inner-product kernel. We can check this numerically:
+```{r}
+set.seed(1)
+dk <- 4
+Q <- matrix(rnorm(3*dk), 3, dk)
+Kmat <- matrix(rnorm(3*dk), 3, dk)
+V <- matrix(rnorm(3*2), 3, 2)
+softmax <- function(v) exp(v - max(v)) / sum(exp(v - max(v)))
+
+scores <- (Q %*% t(Kmat))[1, ] / sqrt(dk)      # query 1 against all keys
+alpha <- softmax(scores)                        # attention weights
+kern <- exp(scores); w_kernel <- kern / sum(kern)  # Nadaraya-Watson-style weights
+
+cat("attention weights:       ", round(alpha, 4), "\n")
+cat("kernel-smoother weights: ", round(w_kernel, 4), "\n")
+cat("max abs diff in outputs:", max(abs(alpha %*% V - w_kernel %*% V)), "\n")
+```
+The two weight vectors agree to numerical precision, confirming that scaled dot-product attention over query 1 is a Nadaraya-Watson kernel smoother over the value vectors.
+
+d) Dividing the raw scores $q_i^\top k_j$ by a larger temperature $T$ shrinks their spread before the softmax, making the resulting weights more uniform (like a large bandwidth); dividing by a smaller $T$ stretches their spread, concentrating weight on the single largest score (like a small bandwidth, approaching a nearest-neighbor rule). The fixed choice $T=\sqrt{d_k}$ is simply a variance-stabilizing default, not a qualitatively different mechanism.
+```{r}
+raw_scores <- (Q %*% t(Kmat))[1, ]
+for (temp in c(0.5, 2, 8, 32)) {
+  cat("T =", sprintf("%4.1f", temp), "-> weights:", round(softmax(raw_scores/temp), 3), "\n")
+}
+```
+As $T$ increases from $0.5$ to $32$, the largest weight drops from about $0.59$ to about $0.34$ (close to the uniform $1/3$), exactly the bandwidth-widening pattern of Nadaraya-Watson as $\sigma \to \infty$; a small $T$ instead pushes the weights toward a one-hot vector, mirroring $\sigma \to 0$.
+
+:::
+:::
+
+::: {#exr-tf-deep-learning-theory}
+## True/False: Deep Learning Theory
+
+a) The Kolmogorov Superposition Theorem guarantees that an exact representation of any continuous function exists, and that its inner and outer functions are always easy to compute in practice.
+
+b) Projection pursuit regression represents a multivariate function as a sum of ridge functions, each depending on $x$ only through a single one-dimensional projection $w_i^\top x$.
+
+c) Overparameterized neural networks always overfit.
+
+d) The Nadaraya-Watson estimator predicts the response at a new point as a weighted average of the observed $y_i$, with weights given by a normalized kernel.
+
+e) Self-attention in the transformer can be viewed as a form of kernel smoothing, with the softmax-normalized dot products acting as kernel weights over the value vectors.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. KST guarantees that an exact representation exists using a fixed number of terms, but it says nothing about how easy that representation is to compute. The inner functions (such as the Köppen function used to build K-GAM features) are typically non-smooth, defined only as the limit of a recursive construction, and computationally demanding. Existence of a representation is not the same as being able to compute it efficiently.
+
+b) **TRUE**. Projection pursuit regression is $\phi(x) = \sum_{i=1}^p g_i(w_i^\top x)$: each term $g_i(w_i^\top x)$ is a ridge function, constant along any direction orthogonal to its own $w_i$, and depends on $x$ only through the scalar projection $w_i^\top x$.
+
+c) **FALSE**. Classical bias-variance theory predicts that once the number of parameters exceeds the number of training points, an interpolating model should fit noise and generalize poorly. The chapter's double descent analysis shows test error can instead re-descend past this interpolation threshold: among all solutions that fit the training data exactly, the minimum-norm (pseudoinverse) solution has an implicit bias toward simpler functions, and a Bayesian treatment shows this re-descent is not in conflict with Occam's razor, since highly parameterized Bayesian models can still have good risk properties through the conditional prior of parameters given the model.
+
+d) **TRUE**. The Nadaraya-Watson estimator is $\hat f(x) = \sum_i y_i K(x,x_i) / \sum_i K(x,x_i)$, a weighted average of the observed responses $y_i$ with nonnegative weights $w_i = K(x,x_i)/\sum_j K(x,x_j)$ that sum to one.
+
+e) **TRUE**. Writing the self-attention output for query $i$ as $\sum_j \alpha_{ij}V_j$ with $\alpha_{ij} = \exp(q_i^\top k_j/\sqrt{d_k})/\sum_l\exp(q_i^\top k_l/\sqrt{d_k})$ is exactly the Nadaraya-Watson form, with $K(q_i,k_j) = \exp(q_i^\top k_j/\sqrt{d_k})$ playing the role of the kernel and the value vectors $V_j$ playing the role of the responses.
+
+:::
+:::
+
+::: {#exr-relu-linear-regions}
+## Linear Regions of ReLU Networks versus CART
+
+Recall from the chapter's *Space Partitioning* section that each ReLU neuron corresponds to a hyperplane in input space, and that three ReLU neurons acting on a two-dimensional input divide the plane into seven regions.
+
+a) Consider a single-hidden-layer ReLU network with $m$ hidden units and scalar input $x \in \mathbb{R}$:
+$$
+f(x) = c + \sum_{j=1}^m \beta_j\,\text{ReLU}(w_j x + b_j), \qquad \text{ReLU}(t) = \max(0,t),
+$$
+with all $w_j \neq 0$. Show that $f$ is a continuous, piecewise-linear function of $x$ with at most $m+1$ linear pieces, and identify the location of the $j$-th unit's kink.
+
+b) In two dimensions, $n$ hyperplanes (lines) in *general position* (no two parallel, no three meeting at a single point) partition the plane into at most $1+n+\binom{n}{2}$ regions. Derive this formula from the recursion $R(n)=R(n-1)+n$ with $R(0)=1$, and check it against the chapter's claim that three ReLU neurons in 2D produce seven regions. How does $n$ relate to the number of hidden units of a single ReLU hidden layer acting on a two-dimensional input?
+
+c) The chapter observes that tree-based models such as CART also partition the input space, but that "trees are more local in the regions that they use to construct their estimators." Contrast the ReLU partition with a CART partition along two dimensions: (i) the orientation of the region boundaries, and (ii) whether neighboring pieces are fit jointly, sharing parameters, or independently. For a target whose decision boundary is the diagonal line $x_1=x_2$, which representation is more parameter-efficient, and why?
+
+d) The region counts in (a)-(b) grow only polynomially in the number of units of a single hidden layer. Without giving a full proof, briefly explain why stacking $L$ ReLU hidden layers, instead of widening a single layer to the same total number of units, can make the number of linear regions grow multiplicatively in $L$ (exponentially in depth) rather than merely polynomially in the total unit count.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Write $w_jx+b_j = w_j(x-x_j^*)$ where $x_j^* = -b_j/w_j$ is the point at which the $j$-th unit's input crosses zero. Since $w_j \neq 0$, this is the only point where $w_jx+b_j$ changes sign, so $\text{ReLU}(w_jx+b_j)$ equals $0$ on one side of $x_j^*$ and equals the affine function $w_j(x-x_j^*)$ on the other side, a single "hinge" with one kink, located at $x_j^*=-b_j/w_j$, and value $0$ at the kink itself.
+
+Collect the (at most $m$) distinct kink locations and sort the distinct values as $t_1 < t_2 < \cdots < t_k$, $k \le m$. These points partition $\mathbb{R}$ into $k+1 \le m+1$ open intervals $(-\infty,t_1), (t_1,t_2), \ldots, (t_k,\infty)$. On any one such interval, no $w_jx+b_j$ changes sign, since its only zero is one of the $t_i$, which lies outside the open interval, so each $\text{ReLU}(w_jx+b_j)$ coincides with a single affine function of $x$ throughout that interval: either the zero function, or $w_jx+b_j$ itself. Since $f$ is a finite linear combination $c+\sum_j\beta_j\,\text{ReLU}(w_jx+b_j)$ of such pieces, $f$ is affine on each interval, giving at most $m+1$ linear pieces in total.
+
+Continuity follows because each hinge $\text{ReLU}(w_jx+b_j)$ is continuous on all of $\mathbb{R}$ (it is the composition of the continuous affine map $x\mapsto w_jx+b_j$ with the continuous function $\max(0,\cdot)$), and a finite linear combination of continuous functions is continuous. So $f$ is continuous everywhere, including at the breakpoints $t_i$, and is a continuous, piecewise-linear function with at most $m+1$ pieces. The bound is attained when the $m$ kinks $x_j^*$ are all distinct and no slope cancellation occurs across any of them.
+
+b) With $0$ lines, the plane is a single region, so $R(0)=1$. Suppose $n-1$ lines in general position partition the plane into $R(n-1)$ regions, and consider adding an $n$-th line $\ell_n$ that is also in general position relative to the others. Since $\ell_n$ is parallel to none of the other $n-1$ lines, it crosses each of them exactly once, at $n-1$ points, and general position also rules out three lines meeting at a point, so these $n-1$ crossing points on $\ell_n$ are distinct. They divide $\ell_n$ into $n$ pieces, and each such piece runs through the interior of exactly one existing region without leaving it, splitting that region into two. So adding $\ell_n$ increases the number of regions by exactly $n$:
+$$
+R(n) = R(n-1)+n, \qquad R(0)=1.
+$$
+Unrolling the recursion, $R(n) = 1+\sum_{i=1}^n i = 1+\dfrac{n(n+1)}{2}$. Since $\binom{n}{2}=\dfrac{n(n-1)}{2}$, we have $n+\binom{n}{2} = \dfrac{2n+n(n-1)}{2} = \dfrac{n(n+1)}{2}$, so
+$$
+R(n) = 1+n+\binom{n}{2}.
+$$
+For $n=3$, $R(3) = 1+3+\binom{3}{2} = 1+3+3 = 7$, exactly the seven regions the chapter reports for three ReLU neurons in 2D. Each hidden unit $j$ contributes one boundary hyperplane $\{x : w_j^\top x+b_j=0\}$, so a single ReLU hidden layer with $n$ units acting on a two-dimensional input plays the same role as the $n$ lines above: $n$ hidden units generate at most $1+n+\binom{n}{2}$ regions, within each of which the hidden layer's activation pattern, and hence the network output under an affine readout, is affine in $x$. This is the two-dimensional analogue of part (a), where $m$ kink points on the line produced $m+1$ intervals; in the plane, the same $n$ boundaries interact pairwise, producing a term quadratic in $n$ rather than merely linear in $n$.
+
+c) A CART split always tests a single coordinate against a threshold, $x_i \le c$, so every boundary between two CART regions is a segment of a hyperplane orthogonal to one coordinate axis, and the leaves are axis-aligned rectangles. A ReLU unit's boundary $\{x : w^\top x+b=0\}$ can point in any direction set by the learned weight vector $w$, so the resulting linear regions are generally oblique polygonal cells rather than axis-aligned rectangles.
+
+The two partitions also differ in how neighboring pieces relate to one another. In CART, each split is chosen, and each leaf's fitted value estimated, using only the data that reaches that node, so the leaves are effectively fit independently, with no requirement that the fitted surface agree across a leaf boundary. In the ReLU network, by contrast, the same $m$ hyperplanes and the same coefficients $\beta_j$ enter the formula for $f$ in every region; crossing one boundary only flips the sign of the single term $\beta_j(w_j^\top x+b_j)$ associated with that hyperplane, so the local affine pieces on either side of a boundary are tied together by shared, globally-fit parameters and, by the continuity argument of part (a) extended coordinatewise, agree exactly along the boundary. This is the content behind the chapter's remark that "trees are more local in the regions that they use to construct their estimators": a CART split only ever refines one local, axis-aligned rectangle, while one ReLU hyperplane organizes the entire input space at once.
+
+For a target whose decision boundary is the diagonal $x_1=x_2$, a single ReLU unit with $w=(1,-1)^\top$, $b=0$ gives $\text{ReLU}(x_1-x_2)$, whose zero level set is exactly that diagonal: one hyperplane, one hidden unit, and a handful of parameters. CART, restricted to axis-aligned cuts, cannot represent a diagonal boundary exactly with any finite tree; it can only approximate it with a staircase of axis-aligned rectangles, and pulling the staircase closer to the diagonal requires adding more splits and more leaves without ever removing the staircase error entirely. The ReLU network is therefore far more parameter-efficient for an oblique boundary: it aligns one hyperplane directly along the boundary's own direction, while CART must keep spending splits to chase that same direction using only right-angle cuts.
+
+d) A single hidden layer's linear regions are cut out by hyperplanes that all live directly in the input space, so, as in (a)-(b), adding one more unit adds at most one more hyperplane, and the region count grows only polynomially in the number of units (linearly in 1D, quadratically in 2D, and more generally like $n^d$ for input dimension $d$). Stacking layers changes this: the second hidden layer is not applied to the raw input but to the output of the first layer, so the partition that the second layer's hyperplanes induce in the first layer's output space is pulled back, through the first layer's own many-to-one, piecewise-linear map, into every one of the first layer's linear regions separately. Each additional layer thus multiplies, rather than adds to, the number of regions contributed by the previous layers, much as repeatedly folding a sheet of paper multiplies the number of layers of paper at each fold. A network with $L$ hidden layers of $m$ units each can therefore realize a number of linear regions that grows exponentially in the depth $L$, whereas a single layer with the same total number of units can only grow polynomially in that count, which is the precise sense of the chapter's remark that the number of hyperplanes "grows exponentially with the number of layers."
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-double-descent-repro}
+## Reproducing Double Descent with Polynomial Regression
+
+The chapter's own double descent demonstration uses Python; here we reproduce the same phenomenon in R. Simulate $n=20$ noisy observations $y_i = f(x_i) + \varepsilon_i$ of $f(x)=\sin(5x)$ at equally spaced points $x_i \in [-1,1]$, with $\varepsilon_i \sim N(0, 0.3^2)$, and fit polynomial regressions of degree $d=1,\ldots,45$ using the standard Legendre polynomials $P_0,\ldots,P_d$ (with $P_k(1)=1$) as the basis. Measure the test error as the RMSE between the fitted polynomial and $f$ on a grid of 200 equally spaced points in $[-1,1]$. Because $d$ ranges well past $n$, use the Moore-Penrose pseudoinverse (`MASS::ginv`) rather than ordinary least squares, so that the overparameterized regime returns the minimum-norm interpolating solution instead of an error. This is exactly the classical-U-then-re-descent pattern documented for over-parameterized models [@belkin2019reconciling; @hastie2022surprises].
+
+a) Carry out the simulation with `set.seed(42)`. Report the degree with the smallest test RMSE in the classical (underparameterized) regime, the degree at which test RMSE peaks, and the test RMSE at degree 45.
+b) Explain why the training RMSE becomes (numerically) zero once $d$ reaches a certain value, while the test RMSE does not.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(42)
+n <- 20; sigma <- 0.3
+x <- seq(-1, 1, length.out = n)
+ftrue <- function(x) sin(5 * x)
+y <- ftrue(x) + rnorm(n, sd = sigma)
+xdense <- seq(-1, 1, length.out = 200)
+
+legvander <- function(x, d) {
+  # columns are Legendre polynomials P_0(x), ..., P_d(x), via the standard recurrence
+  X <- matrix(0, length(x), d + 1); X[, 1] <- 1
+  if (d >= 1) X[, 2] <- x
+  if (d >= 2) for (k in 2:d) X[, k+1] <- ((2*k-1)*x*X[, k] - (k-1)*X[, k-1]) / k
+  X
+}
+rmse <- function(a, b) sqrt(mean((a - b)^2))
+
+degrees <- 1:45
+train_err <- test_err <- numeric(length(degrees))
+for (i in seq_along(degrees)) {
+  Xd <- legvander(x, degrees[i])
+  beta <- MASS::ginv(Xd) %*% y            # minimum-norm solution, valid for d+1 > n too
+  train_err[i] <- rmse(Xd %*% beta, y)
+  test_err[i]  <- rmse(legvander(xdense, degrees[i]) %*% beta, ftrue(xdense))
+}
+
+plot(degrees, log10(test_err), type = "l", col = "blue", lwd = 2,
+     xlab = "polynomial degree (model complexity)", ylab = "log10(RMSE)",
+     ylim = range(log10(c(test_err, train_err))))
+lines(degrees, log10(train_err), col = "red", lwd = 2)
+abline(v = n, lty = 2)
+legend("topright", legend = c("test", "train"), col = c("blue", "red"), lwd = 2, bty = "n")
+```
+
+a)
+```{r}
+cat("classical-regime minimum test RMSE: degree", degrees[which.min(test_err[degrees < n])],
+    ", value", round(min(test_err[degrees < n]), 3), "\n")
+cat("peak test RMSE: degree", degrees[which.max(test_err)], ", value", round(max(test_err), 2), "\n")
+cat("test RMSE at degree 45:", round(test_err[degrees == 45], 3), "\n")
+```
+The classical U-shape bottoms out at degree 5 (RMSE about $0.26$), test error then spikes sharply to about $82$ right at the interpolation threshold $d \approx n = 20$, and it re-descends to about $0.31$ by degree 45, far below the spike and back in the range of the classical optimum, even though the model at degree 45 has more than twice as many coefficients as training points.
+
+b)
+```{r}
+cat("train RMSE at degree 18:", round(train_err[degrees == 18], 4),
+    ", degree 19:", round(train_err[degrees == 19], 4),
+    ", degree 20:", round(train_err[degrees == 20], 4), "\n")
+```
+A degree-$d$ Legendre fit has $d+1$ basis columns evaluated at the $n=20$ training points. Once $d+1 \geq n$ (i.e., $d \geq 19$ here), the design matrix has at least as many columns as rows, and the pseudoinverse returns a solution that fits all $n$ training points exactly, driving training RMSE to zero by construction (as the output above confirms: it is still positive at degree 18, but zero from degree 19 onward). Nothing forces the fitted polynomial to behave well between the training points, however, so the test RMSE, evaluated on a dense grid the model never saw, is free to be very large right at this threshold before improving again as $d$ grows further.
+
+:::
+:::
+
+::: {#exr-nw-implementation}
+## Nadaraya-Watson Kernel Smoothing on Toy Data
+
+Implement the Nadaraya-Watson estimator from @exr-kernel-smoothing-attention on a 1-D toy dataset with $n=15$ points from $y_i = \sin(2\pi x_i) + \epsilon_i$, and compare the fit for a narrow and a wide bandwidth.
+
+a) Write a function `nw_fit(x0, x, y, h)` implementing
+$$
+\hat f(x_0) = \sum_i y_i K(x_0,x_i) / \sum_i K(x_0,x_i)
+$$
+with Gaussian kernel bandwidth $h$, and plot the resulting curve on a dense grid for $h=0.03$ and $h=0.3$ together with the data and the true function.
+b) Report the RMSE of each fit against the true $\sin(2\pi x)$ on the grid, and say which bandwidth is oversmoothed and which is undersmoothed.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+set.seed(1)
+n <- 15
+x <- seq(0, 1, length.out = n)
+y <- sin(2*pi*x) + rnorm(n, sd = 0.2)
+
+nw_fit <- function(x0, x, y, h) {
+  wts <- exp(-(x0 - x)^2 / (2*h^2))
+  sum(wts * y) / sum(wts)
+}
+
+xg <- seq(0, 1, length.out = 200)
+fit_narrow <- sapply(xg, nw_fit, x = x, y = y, h = 0.03)
+fit_wide   <- sapply(xg, nw_fit, x = x, y = y, h = 0.3)
+
+plot(x, y, pch = 19, ylim = c(-1.5, 1.5), xlab = "x", ylab = "y")
+lines(xg, sin(2*pi*xg), col = "gray50")
+lines(xg, fit_narrow, col = "red", lwd = 2)
+lines(xg, fit_wide, col = "blue", lwd = 2)
+legend("topright", legend = c("truth", "h = 0.03", "h = 0.3"),
+       col = c("gray50", "red", "blue"), lwd = 2, bty = "n", cex = 0.8)
+```
+
+b)
+```{r}
+rmse <- function(a, b) sqrt(mean((a - b)^2))
+cat("RMSE vs truth, h=0.03:", round(rmse(fit_narrow, sin(2*pi*xg)), 3), "\n")
+cat("RMSE vs truth, h=0.3 :", round(rmse(fit_wide, sin(2*pi*xg)), 3), "\n")
+```
+With $h=0.03$, smaller than the spacing between points (about $0.07$), the estimator behaves close to a nearest-neighbor rule and tracks the single oscillation of $\sin(2\pi x)$ well (RMSE about $0.16$). With $h=0.3$, the estimator averages over roughly a third of the domain at every point, oversmoothing away the oscillation almost entirely (RMSE about $0.46$, undershooting the peak and trough). This mirrors the bandwidth-temperature trade-off from @exr-kernel-smoothing-attention: too small a bandwidth (or too low a temperature) risks following noise, too large a bandwidth (or too high a temperature) washes out real structure.
+
+:::
+:::
+
+::::

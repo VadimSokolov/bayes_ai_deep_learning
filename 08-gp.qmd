@@ -1,0 +1,388 @@
+{{< include ./misc/common.qmd >}}
+# Gaussian Processes {#sec-gp}
+
+> "*Uncertainty is the only certainty there is, and knowing how to live with insecurity is the only security.*"---John Allen Paulos
+
+A *Gaussian Process (GP)* defines a probability distribution over functions rather than estimating parameters for a single function. Given data, a GP returns not just a predicted curve but a full posterior distribution over curves, quantifying uncertainty at every point. GPs are used extensively in machine learning for tasks ranging from robotic control to geospatial analysis and Bayesian optimization.
+
+Formally, a GP is a collection of random variables, any finite number of which have a joint Gaussian distribution. A finite collection of $n$ points drawn from a GP is completely specified by its $n$-dimensional mean vector $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$. We assume the process is indexed by a real variable $x\in\mathbb{R}$ (e.g., time or space) and has real-valued outputs. The GP is defined by:
+1.  *Mean function* $m(x) = \E{f(x)}$: The expected value of the function at point $x$.
+2.  *Covariance (Kernel) function* $k(x, x') = \E{(f(x) - m(x))(f(x') - m(x'))}$: A measure of similarity between values at $x$ and $x'$.
+
+We denote this as:
+$$
+f(x) \sim \mathcal{GP}(m(x), k(x, x')).
+$$
+
+Intuitively, the kernel function determines the "shape" and "smoothness" of the functions we expect to see. If $x$ and $x'$ are close, $k(x, x')$ should be high, implying $f(x)$ and $f(x')$ are likely similar.
+
+In practice, we often assume a zero mean, $m(x)=0$, and focus on the covariance kernel. The choice of kernel encodes our prior beliefs about the data. The most common choice is the *Squared Exponential (SE)* kernel (also known as the Radial Basis Function or RBF):
+
+$$
+k(x, x') = \sigma^2 \exp\left(-\frac{(x - x')^2}{2l^2}\right)
+$$
+
+Here, we have two *hyperparameters*:
+
+-   $\sigma^2$ (Signal Variance): Controls the vertical amplitude of the function.
+-   $l$ (Length Scale): Controls the horizontal "wiggliness." A large $l$ implies the function changes slowly (smooth), while a small $l$ allows for rapid variations.
+
+Observe that $k(x,x) = \sigma^2$ and $k(x,x') \rightarrow 0$ as the distance $|x-x'| \rightarrow \infty$.
+
+We can illustrate a GP with a simulated example. First generate a sequence of 100 input points (indices)
+```{r}
+#| echo: true
+x = seq(0,10, length.out = 100)
+```
+and then define the zero mean vector and the covariance function
+```{r}
+#| echo: true
+mean = rep(0, length(x))
+sqexpcov = function(x, x1, l=1, sigma=1) {
+  exp(-0.5 * (x - x1)^2 / l^2) * sigma^2
+}
+```
+The covariance function depends only on the distance between two points, not on their absolute values. The squared exponential kernel is infinitely differentiable, which means that the GP is a very smooth function. The covariance matrix is then defined as
+```{r}
+#| echo: true
+cov_mat = outer(x, x, sqexpcov)
+```
+and we can generate a sample from the GP using the `mvrnorm` function from the `MASS` package and plot a sample.
+```{r}
+#| fig-cap: Sample from a Gaussian Process.
+#| label: fig-gp-sample
+#| fig-height: 2
+#| echo: true
+library(MASS)
+set.seed(17)
+Y = mvrnorm(1, mean, cov_mat)
+plot(x, Y, type="l", xlab="x", ylab="y", ylim=c(-1.5,2), lwd=2, col="blue")
+```
+
+@fig-gp-sample displays 100 values of a function $f(x)$ drawn from a GP with zero mean and a squared-exponential kernel at equally spaced inputs from $x=0$ to $x=10$. The realisation is smooth, with most values lying between -2 and 2. Because each diagonal element of the covariance matrix equals $\sigma^2=1$, the marginal variance is one. By properties of the normal distribution, approximately 95 percent of the points of $Y$ should therefore fall within 1.96 standard deviations of the mean. The mild oscillations arise because values with neighbouring indices are highly correlated.
+
+We can generate a few more samples from the same GP and plot them together
+```{r}
+#| fig-cap: Samples from a Gaussian Process.
+#| label: fig-gp-samples
+set.seed(68) # Jagr
+Ys = mvrnorm(3, mean, cov_mat)
+matplot(x, t(Ys), type="l", ylab="Y", lwd=5)
+```
+Each finite sample path differs from the next, yet all share a similar range, a comparable number of bumps, and overall smoothness. That's what it means to have function realizations under a GP prior: $Y = f(x) \sim \mathcal{GP}(0, k(x, x'))$.
+
+
+Simulating from the prior shows us the richness of possible functions we can model. However, our goal is not just to generate random curves, but to learn. We want to constrain these possibilities using actual observations.
+
+## Making Predictions with Gaussian Processes
+Suppose our observed data consist of $n$ inputs $\mathbf{X}=(x_1,\ldots,x_n)^\top$ and outputs $\mathbf{y}=(y_1,\ldots,y_n)^\top$. We assume these are a realization of a GP. Our goal is to predict the outputs $\mathbf{y}_*$ at new inputs $\mathbf{X}_*$.
+
+By definition of a GP, the joint distribution of the observed data $\mathbf{y}$ and the predictions $\mathbf{y}_*$ is a multivariate Gaussian:
+
+$$
+\begin{bmatrix} \mathbf{y} \\ \mathbf{y}_* \end{bmatrix} \sim \mathcal{N} \left ( \begin{bmatrix} \boldsymbol{\mu} \\ \boldsymbol{\mu}_* \end{bmatrix}, \begin{bmatrix} \mathbf{K} & \mathbf{K}_* \\ \mathbf{K}_*^\top & \mathbf{K}_{**} \end{bmatrix} \right )
+$$
+
+where:
+
+*   $\mathbf{K} = k(\mathbf{X}, \mathbf{X})\in \mathbb{R}^{n\times n}$ is the covariance of the training data.
+*   $\mathbf{K}_* = k(\mathbf{X}, \mathbf{X}_*)\in \mathbb{R}^{n\times q}$ is the covariance between training and test data.
+*   $\mathbf{K}_{**} = k(\mathbf{X}_*, \mathbf{X}_*) \in \mathbb{R}^{q\times q}$ is the covariance of the test data.
+*   $\boldsymbol{\mu} = \E{\mathbf{y}}$ and $\boldsymbol{\mu}_* = \E{\mathbf{y}_*}$.
+
+The beauty of Gaussians is that conditioning on observed data is closed-form. Assuming noiseless observations (that is, $\mathbf{y} = f(\mathbf{X})$ exactly, with no measurement error), the conditional distribution of $\mathbf{y}_*$ given $\mathbf{y}$ is:
+
+$$
+\mathbf{y}_* \mid \mathbf{y}, \mathbf{X}, \mathbf{X}_* \sim \mathcal{N}(\boldsymbol{\mu}_{\mathrm{post}}, \boldsymbol{\Sigma}_{\mathrm{post}})
+$$
+
+The posterior mean $\boldsymbol{\mu}_{\mathrm{post}}$ serves as our prediction, and the posterior covariance $\boldsymbol{\Sigma}_{\mathrm{post}}$ quantifies our uncertainty:
+
+$$
+\boldsymbol{\mu}_{\mathrm{post}} = \boldsymbol{\mu}_* + \mathbf{K}_*^\top\mathbf{K}^{-1} (\mathbf{y} - \boldsymbol{\mu})
+$$ {#eq-mupost}
+
+$$
+\boldsymbol{\Sigma}_{\mathrm{post}} = \mathbf{K}_{**} - \mathbf{K}_*^\top \mathbf{K}^{-1} \mathbf{K}_*
+$$ {#eq-Spost}
+
+@eq-mupost and @eq-Spost are standard properties of the multivariate normal distribution (see @sec-bl for its definition and @eq-mvn-conditional for the conditioning identities, which are also in Appendix A.2 of @rasmussen2006gaussian). Intuitively, the posterior variance $\boldsymbol{\Sigma}_{\mathrm{post}}$ is equal to the prior variance $\mathbf{K}_{**}$ minus a term representing the information gained from the observed data. This structure reflects a fundamental Bayesian principle: data acts to reduce our prior uncertainty (represented by the second term in @eq-Spost).
+
+
+::: {#exm-gpsin}
+## Gaussian Process for $\sin$ Function
+We can use the GP to make predictions about the output values at new inputs $x_*$. We use $x$ in the [0,$2\pi$] range and $y$ to be the $y = \sin(x)$. We start by simulating the observed $x$-$y$ pairs.
+```{r}
+#| echo: true
+n = 8; eps=1e-6
+X = matrix(seq(0, 2*pi, length=n), ncol=1)
+Y = sin(X)
+K = outer(X[,1], X[,1], sqexpcov) + diag(eps, n)
+```
+The additive term `diag(eps, n)` corresponds to adding $\epsilon \mathbf{I}$, which stabilizes the matrix inversion by ensuring strict positive definiteness; in machine learning practice, this is known as 'jitter'.
+
+Now we generate a new set of inputs $x_*$ and calculate the covariance matrices $K_*$ and $K_{**}$.
+```{r}
+#| echo: true
+q = 100
+XX = matrix(seq(-0.5, 2*pi + 0.5, length=q), ncol=1)
+KX = outer(X[,1], XX[,1],sqexpcov)
+KXX = outer(XX[,1],XX[,1], sqexpcov) + diag(eps, q)
+```
+
+Notice that we did not add $\epsilon I$ to $K_*$ = `KX` matrix, but we add it to $K_{**}$ = `KXX` to ensure the posterior covariance is invertible. We do not add it to $K_*$ (`KX`) as it represents cross-covariance, which does not need to be positive definite. Now we can calculate the mean and covariance of the posterior distribution of $y_*$ given $Y$.
+```{r}
+#| echo: true
+Si = solve(K)
+mup = t(KX) %*% Si %*% Y # we assume mu is 0
+Sigmap = KXX - t(KX) %*% Si %*% KX
+```
+
+Now, we can generate a sample from the posterior distribution over $y_*$, given $Y$
+```{r}
+#| fig-align: center
+#| echo: true
+set.seed(9) # Gordie Howe
+YY = mvrnorm(100, mup, Sigmap)
+```
+Using our convenience function `plot_gp` we can plot the posterior distribution over $y_*$, given $Y$.
+```{r}
+plot_gp = function(mup, Sigmap, X, Y, XX, YY, ...){
+  q1 = mup + qnorm(0.05, 0, sqrt(diag(Sigmap)))
+  q2 = mup + qnorm(0.95, 0, sqrt(diag(Sigmap)))
+  matplot(XX, t(YY), type="l", col="gray", lty=1, xlab="x", ylab="y", ...)
+  points(X, Y, pch=20, cex=if (par("din")[1] < 4) 1 else 2)
+  lines(XX, sin(XX), col="blue")
+  lines(XX, mup, lwd=2)
+  lines(XX, q1, lwd=2, lty=2, col=2)
+  lines(XX, q2, lwd=2, lty=2, col=2)
+}
+```
+
+```{r}
+#| fig-cap: 'Posterior distribution over $y_*$, given $Y$. Light gray lines: 100 draws from the posterior; thick solid line: posterior mean; thin solid line: $\sin(x)$; dashed lines: 90% band; dots: observations.'
+#| label: fig-gp-sin
+plot_gp(mup, Sigmap, X, Y, XX, YY)
+```
+:::
+
+::: {#exm-gp-sim}
+## Gaussian Process for Simulated Data Using MLE
+In the previous example, we assumed fixed values for the hyperparameters: $\sigma^2 = 1$ and $l^2 = 1$ (i.e., $2l^2 = 2$). In real applications, we don't know these values; we must estimate them from the data.
+
+We use Maximum Likelihood Estimation (MLE) to find the parameters that maximize the probability of observing our data. This parallels the likelihood-to-loss framing in @sec-pattern: we write down a (marginal) likelihood for the data and then optimize it, often via its log-likelihood. This section relies on basic matrix operations (inverse, determinant); a short refresher is on the book's website, <https://vsokolov.org/books/bayes_ai_deep_learning/>. If you have not seen gradient-based optimization, the core intuition appears in @sec-sgd; here we use it only as a practical tool to fit GP hyperparameters.
+
+The marginal likelihood of the data $\mathbf{y}$ (integrating out the function values $f$) is:
+
+$$
+p(\mathbf{y} \mid \mathbf{X}, \sigma, l) = \frac{1}{(2\pi)^{n/2} |\mathbf{K}|^{1/2}} \exp \left ( -\frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y} \right )
+$$
+
+where $\mathbf{K}$ is the covariance matrix computed with hyperparameters $\sigma$ and $l$. For numerical stability, we typically maximize the *log*-likelihood:
+
+$$
+\log p(\mathbf{y} \mid \mathbf{X}, \sigma, l) = -\frac{1}{2} \log |\mathbf{K}| - \frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y} - \frac{n}{2} \log 2\pi.
+$$
+
+This equation encapsulates *Occam's Razor*. The term $-\frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y}$ rewards the model for fitting the data well. The term $-\frac{1}{2} \log |\mathbf{K}|$ penalizes model complexity; a more flexible kernel (e.g., smaller length scale) has a larger determinant $|\mathbf{K}|$, which exacts a larger cost. MLE automatically balances these two competing objectives to prevent overfitting.
+
+
+We can implement a function that calculates the log-likelihood of the data given the hyperparameters $\sigma$ and $l$ and use the `optim` function to find the maximum of the log-likelihood function. Our function `loglik` returns the negative log-likelihood, since `optim` minimizes by default.
+```{r gpmle, }
+#| echo: true
+loglik = function(par, X, Y) {
+  sigma = par[1]
+  l = par[2]
+  K = outer(X[,1],X[,1], sqexpcov,l,sigma) + diag(eps, n)
+  Si = solve(K)
+  return(-(-0.5 * log(det(K)) - 0.5 * t(Y) %*% Si %*% Y - (n/2)* log(2*pi)))
+}
+par = optim(c(1,1), loglik, X=X, Y=Y)$par
+print(par)
+```
+
+
+The `optim` function returns the hyperparameters that maximize the log-likelihood function. We can now use those hyperparameters to make predictions about the output values at new inputs $x_*$.
+```{r}
+#| fig-cap: 'Posterior distribution over $y_*$ with the hyperparameters estimated by maximum likelihood. Lines as in @fig-gp-sin.'
+set.seed(4) # Bobby Orr
+l = par[2]; sigma = par[1]
+predplot = function(X, Y, XX, YY, l, sigma, ...) {
+  K = outer(X[,1],X[,1], sqexpcov,l,sigma) + diag(eps, n)
+  KX = outer(X[,1], XX[,1],sqexpcov,l,sigma)
+  KXX = outer(XX[,1],XX[,1], sqexpcov,l,sigma) + diag(eps, q)
+  Si = solve(K)
+  mup = t(KX) %*% Si %*% Y # we assume mu is 0
+  Sigmap = KXX - t(KX) %*% Si %*% KX
+  YY = mvrnorm(100, mup, Sigmap)
+  plot_gp(mup, Sigmap, X, Y, XX, YY, ...)
+}
+predplot(X, Y, XX, YY, l, sigma)
+``` 
+
+We can see that the posterior distribution is considerably tighter. This is because we used the observed data to estimate the hyperparameters. We can also see that the posterior mean is closer to the true function $y = \sin(x)$. Although our initial guess of $\sigma^2 = 1$ and $2l^2 = 2$ was not too far off, the model fits the data much better when we use the estimated hyperparameters.
+
+The default method of `optim`, Nelder-Mead, uses no derivatives, and the gradient-based methods such as BFGS approximate them numerically unless a gradient function is supplied. While convenient, this can be slow and less precise. For GPs, we can calculate the analytical gradients of the log-likelihood with respect to the hyperparameters, significantly speeding up optimization.
+
+::: {.callout-note collapse="true"}
+## Mathematical Details: Gradient Derivation
+
+To optimize efficiently, we rely on two matrix calculus identities:
+$$
+\frac{\partial \mathbf{K}^{-1}}{\partial \theta} = -\mathbf{K}^{-1} \frac{\partial \mathbf{K}}{\partial \theta} \mathbf{K}^{-1} \quad \text{and} \quad \frac{\partial \log |\mathbf{K}|}{\partial \theta} = \mathrm{tr} \left ( \mathbf{K}^{-1} \frac{\partial \mathbf{K}}{\partial \theta} \right )
+$$
+Using these, the gradient of the log-likelihood is:
+$$
+\frac{\partial \log p(\mathbf{y} \mid \mathbf{X},\theta)}{\partial \theta} = -\frac{1}{2} \mathrm{tr} \left ( \mathbf{K}^{-1} \frac{\partial \mathbf{K}}{\partial \theta} \right ) + \frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \frac{\partial \mathbf{K}}{\partial \theta} \mathbf{K}^{-1} \mathbf{y}
+$$
+In the case of squared exponential kernel, the elements of the covariance matrix  $K$ are given by
+$$
+K_{ij} = k(x_i, x_j) = \sigma^2 \exp \left ( -\frac{1}{2} \frac{(x_i - x_j)^2}{l^2} \right ).
+$$
+The derivative of the covariance matrix with respect to $\sigma$ is given by
+$$
+\frac{\partial K_{ij}}{\partial \sigma} = 2\sigma \exp \left ( -\frac{1}{2} \frac{(x_i - x_j)^2}{l^2} \right );~\frac{\partial K}{\partial \sigma} = \dfrac{2}{\sigma}K.
+$$
+The derivative of the covariance matrix with respect to $l$ is given by
+$$
+\frac{\partial K_{ij}}{\partial l} = \sigma^2 \exp \left ( -\frac{1}{2} \frac{(x_i - x_j)^2}{l^2} \right ) \frac{(x_i - x_j)^2}{l^3};~ \frac{\partial K}{\partial l}  = \frac{(x_i - x_j)^2}{l^3} K.
+$$
+:::
+Now we can implement a function that calculates the derivative of the negative log-likelihood function with respect to $\sigma$ and $l$.
+```{r}
+#| label: code-gp-deriv
+#| echo: true
+# Derivative of the negative log-likelihood function with respect to sigma
+dloglik_sigma = function(par, X, Y) {
+  sigma = par[1]; l = par[2]
+  K = outer(X[,1],X[,1], sqexpcov,l,sigma) + diag(eps, n)
+  Si = solve(K)
+  dK = 2*K/sigma
+  tr = sum(diag(Si %*% dK))
+  return(-(-0.5 * tr + 0.5 * t(Y) %*% Si %*% dK %*% Si %*% Y))
+}
+# Derivative of the negative log-likelihood function with respect to l
+dloglik_l = function(par, X, Y) {
+  sigma = par[1]; l = par[2]
+  K = outer(X[,1],X[,1], sqexpcov ,l,sigma) + diag(eps, n)
+  Si = solve(K)
+  dK =   outer(X[,1],X[,1], function(x, x1) (x - x1)^2)/l^3 * K
+  tr = sum(diag(Si %*% dK))
+  return(-(-0.5 * tr + 0.5 * t(Y) %*% Si %*% dK %*% Si %*% Y))
+}
+# Gradient function that returns a vector of derivatives
+gnlg = function(par,X,Y) {
+  return(c(dloglik_sigma(par, X, Y), dloglik_l(par, X, Y)))
+}
+```
+
+Now we can use the `optim` function to find the maximum of the log-likelihood function and provide the derivative function we just implemented.
+```{r}
+#| echo: true
+par1 = optim(c(1,1), fn=loglik, gr=gnlg ,X=X, Y=Y,method="BFGS")$par
+l = par1[2]; sigma = par1[1]
+print(par1)
+``` 
+The result is the same compared to when we called `optim` without the derivative function. Even execution time is the same for our small problem. However, at larger scale, the derivative-based optimization algorithm will be much faster. 
+
+Furthermore, instead of coding our own derivative functions, we can use an existing package, such as the [`laGP`](https://cran.r-project.org/web/packages/laGP/index.html) package, developed by Bobby Gramacy to estimate the hyperparameters. The `laGP` package uses the same optimization algorithm we used above, but it also provides better selection of the covariance functions and implements approximate GP inference algorithms for large scale problems, when $n$ becomes large, and inversion of the covariance matrix $K$ is prohibitively expensive. 
+
+```{r laGP, }
+#| echo: true
+#| cache: false
+library(laGP)
+gp = newGP(X, Y, 1, 0, dK = TRUE)
+res = mleGP(gp, tmax=20)
+l.laGP = sqrt(res$d/2)
+print(l.laGP)
+```
+In the `newGP` function defines a Gaussian process with square exponential covariance function and assumes $\sigma^2 = 1$, then `mleGP` function uses optimization algorithm to maximize the log-likelihood and returns the estimated hyperparameters `d` = $2l^2$, we can see that the length scale is close to the one we estimated above. We will use the `predplot` convenience function to calculate the predictions and plot the data vs fit.
+
+```{r}
+#| fig-cap: 'Posterior distribution over $y_*$, given $Y$. Lines as in @fig-gp-sin.'
+#| fig-subcap: 
+#|   - MLE Fit
+#|   - laGP Fit
+#| label: fig-gp-sin-mle
+#| layout-ncol: 2
+#| fig-width: 2.6
+#| fig-height: 1.8
+predplot(X, Y, XX, YY, l, sigma)
+predplot(X, Y, XX, YY, l.laGP, 1)
+```
+We can see that there is visually no difference between the two fits. Thus, it seems irrelevant whether we keep sigma fixed $\sigma=1$ or estimate it using MLE. However, in other applications when uncertainty is larger, the choice of $\sigma$ is important when we use GP for regression and classification tasks. Even for our example, if we ask our model to extrapolate
+```{r}
+#| fig-cap: 'Extrapolation: Posterior distribution over $y_*$, given $Y$. Lines as in @fig-gp-sin.'
+#| fig-subcap: 
+#|   - MLE Fit
+#|   - laGP Fit
+#| layout-ncol: 2
+#| fig-width: 2.6
+#| fig-height: 1.8
+XX1 = matrix(seq(-4*pi, 6*pi + 0.5, length=q), ncol=1)
+predplot(X, Y, XX1, YY, l, sigma, ylim = c(-6, 6))
+predplot(X, Y, XX1, YY, l.laGP, 1, ylim = c(-6, 6))
+```
+We can see that outside of the range of the observed data, the model with $\sigma=1$ is more confident in its predictions.
+:::
+
+
+Now, instead of using GP to fit a known function ($\sin$), we will apply it to a real-world dataset. We will use the motorcycle accident dataset from the `MASS` package. The dataset contains accelerator readings taken through time in a simulated experiment on the efficacy of crash helmets. These data are non-linear and exhibit varying curvature, making them an excellent candidate for GP regression where linear models would fail.
+
+::: {#exm-gp}
+## Gaussian Process for Motorcycle Accident Data
+
+We first estimate the length scale parameter $l$ using the `laGP` package.
+```{r}
+#| output: false
+#| cache: false
+#| echo: true
+library(MASS)
+X = mcycle$times
+Y = mcycle$accel
+gp = newGP(matrix(X), Y, 2, 1e-6, dK = TRUE)
+mleGP(gp, tmax=10)
+```
+
+Now we predict on a grid of times with `predGP` and plot the data and the fit using the estimated length scale parameter $l$.
+```{r}
+#| cache: false
+#| echo: true
+XX = matrix(seq(2.4, 55, length = 499), ncol=1)
+p = predGP(gp, XX)
+```
+
+```{r}
+#| fig-height: 2
+#| fig-cap: Motorcycle Accident Data. Black line is the mean of the posterior distribution over $y_*$, given $Y$. The shaded band is the 90% credible interval.
+#| cache: false
+N = 499
+q1 = qnorm(0.05, mean = p$mean, sd = sqrt(diag(p$Sigma)))
+q2 = qnorm(0.95, mean = p$mean, sd = sqrt(diag(p$Sigma)))
+q3 = qnorm(0.5, mean = p$mean, sd = sqrt(diag(p$Sigma)))
+ggplot() + 
+  geom_point(aes(x=X,y=Y)) + 
+  geom_line(aes(x=XX,y=q3)) + 
+  geom_ribbon(aes(x=XX,ymin=q1, ymax=q2), alpha=0.2) +
+  labs(x = "Time (ms)", y = "Acceleration (g)")
+```   
+
+We can see that our model is more confident for time values between 10 and 30. The credible interval is wider for time values between 0 and 10 and between 30 and 55. For some reason, the acceleration values were not measured evenly. If we look at the histogram of time values, we can see that there are more data points in the middle of the time range.
+```{r}
+#| fig-cap: Histogram of time values.
+hist(X, main = "", xlab = "Time (ms)")
+```
+
+The widening of the credible intervals in regions with fewer data points (e.g., between 30 and 40) is a natural property of the GP; where data are sparse, the model reverts to the prior covariance, resulting in higher uncertainty.
+:::
+
+
+By defining a prior over functions and updating it with data, we obtain a posterior distribution that captures both predictions and the confidence in those predictions. The key features of GPs are:
+
+-   *Non-parametric*: GPs can model functions of arbitrary complexity without a fixed number of parameters.
+-   *Data-efficient*: They work well with small datasets and provide uncertainty estimates that are valuable for decision-making.
+-   *Versatile*: Through the choice of the kernel function, GPs can capture various structures (smoothness, periodicity, etc.) and are used in fields ranging from environmental modeling to hyperparameter optimization in deep learning ("Bayesian Optimization").
+
+## Exercises {.unnumbered}
+
+{{< include ./ex/08-gp-ex.qmd >}}

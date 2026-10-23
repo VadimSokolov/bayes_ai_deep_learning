@@ -1,0 +1,11 @@
+%%{init: {"flowchart": {"padding": 6, "nodeSpacing": 30, "rankSpacing": 18}}}%%
+graph LR
+    subgraph FWD["Forward mode"]
+        direction TB
+        F1["x, dx = 1"] --> F2["v1 = w x<br/>dv1 = w"] --> F3["v2 = v1 + b<br/>dv2 = dv1"] --> F4["v3 = σ(v2)<br/>dv3 = σ′(v2) dv2"]
+    end
+    subgraph REV["Reverse mode"]
+        direction BT
+        R4["f = v3<br/>∂f/∂v3 = 1"] --> R3["∂f/∂v2 = σ′(v2)"] --> R2["∂f/∂v1 = σ′(v2)<br/>∂f/∂b = σ′(v2)"] --> R1["∂f/∂w = x σ′(v2)<br/>∂f/∂x = w σ′(v2)"]
+    end
+    FWD ~~~ REV

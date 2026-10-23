@@ -1,0 +1,372 @@
+
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Bias-Variance Decomposition
+
+Show that for a prediction $\hat{y}$ of a random variable $Y = f(X) + \varepsilon$, where $\varepsilon$ has mean zero and variance $\sigma^2$ and $\hat{y}$ is computed independently of the test outcome $Y$ (e.g., fit on separate training data), the expected squared prediction error decomposes as:
+$$
+\E{(Y - \hat{y})^2} = \sigma^2 + \Var{\hat{y}} + (\E{\hat{y}} - f(X))^2
+$$
+Identify which term represents irreducible noise, which represents variance, and which represents bias.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+We expand the squared error:
+$$
+\E{(Y - \hat{y})^2} = \E{(Y - f(X) + f(X) - \hat{y})^2}
+$$
+$$
+= \E{(Y - f(X))^2} + \E{(\hat{y} - f(X))^2} - 2\E{(Y - f(X))(\hat{y} - f(X))}
+$$
+The cross-term vanishes because $Y - f(X) = \varepsilon$ is independent of $\hat{y}$ and has mean zero.
+
+The first term is $\E{\varepsilon^2} = \sigma^2$ (irreducible noise).
+
+For the second term, add and subtract $\E{\hat{y}}$:
+$$
+\E{(\hat{y} - f(X))^2} = \E{(\hat{y} - \E{\hat{y}} + \E{\hat{y}} - f(X))^2}
+$$
+$$
+= \E{(\hat{y} - \E{\hat{y}})^2} + (\E{\hat{y}} - f(X))^2
+$$
+$$
+= \Var{\hat{y}} + \text{Bias}^2(\hat{y})
+$$
+
+Therefore: $\E{(Y - \hat{y})^2} = \sigma^2 + \Var{\hat{y}} + \text{Bias}^2(\hat{y})$.
+
+- $\sigma^2$: irreducible noise (cannot be reduced by any model)
+- $\Var{\hat{y}}$: variance (sensitivity to training data)
+- $\text{Bias}^2$: squared bias (systematic error from model assumptions)
+:::
+:::
+
+::: {#exr-}
+## Conditions for Crowd Wisdom
+
+Galton's ox experiment succeeded because several conditions were met. For each scenario below, identify which condition(s) for crowd wisdom are violated and predict whether the aggregate will be accurate.
+
+a) A company runs an internal survey asking employees to estimate next quarter's revenue. The CEO shares their estimate first, and all responses are visible to other employees.
+b) A group of 500 meteorologists independently forecast tomorrow's high temperature using different models and data sources. Their estimates are averaged.
+c) A stock price is determined by traders who all use the same momentum-based algorithm.
+d) A prediction market asks participants to bet on an election outcome. Participants pay real money for their bets and results are anonymous.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Violates *independence* (CEO anchors responses) and *diversity* (employees may defer to CEO). The aggregate will likely be biased toward the CEO's estimate, not the true value.
+
+b) All conditions met: *independence* (separate forecasts), *diversity* (different models), *incentive alignment* (professional reputation). The average should be highly accurate, likely better than any individual forecast.
+
+c) Violates *diversity* (all use the same algorithm) and *independence* (correlated errors). The aggregate amplifies the systematic bias of the algorithm rather than canceling errors.
+
+d) All conditions met: *independence* (anonymous), *diversity* (different information sources), *incentive alignment* (real money at stake), *appropriate aggregation* (market price). This is a well-designed prediction market.
+:::
+:::
+
+::: {#exr-}
+## Boscovich's Slope Averaging
+
+Boscovich estimated the slope $\beta_1$ in the model $\text{Arc Length} = \beta_0 + \beta_1 \sin^2\theta$ by computing all $\binom{5}{2} = 10$ pairwise slopes from 5 data points and averaging them.
+
+a) For two points $(x_1, y_1)$ and $(x_2, y_2)$, the pairwise slope is $s_{12} = (y_2 - y_1)/(x_2 - x_1)$. Show that the average of all pairwise slopes is *not* the same as the ordinary least squares (OLS) slope in general.
+b) Under what conditions would the two estimates coincide?
+c) Boscovich removed one outlying slope (the Cape-Rome pair, which was negative) before averaging. Explain why this makes his estimator more robust than OLS.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The OLS slope is $\hat{\beta}_1 = \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sum_i (x_i - \bar{x})^2}$. Each pairwise slope $s_{ij} = (y_j - y_i)/(x_j - x_i)$ contributes equally to the average of pairwise slopes, whereas OLS weights each pairwise slope by the squared $x$-separation $(x_i - x_j)^2$ (see part (b) for exactly when the two coincide). The two estimators generally produce different results.
+
+b) The two coincide only for $n \le 3$: trivially for $n = 2$ (a single pair), and for $n = 3$ with equally-spaced $x$-values, which can be verified directly from the OLS formula. For $n \ge 4$, including Boscovich's actual $n = 5$ case, equal spacing is *not* sufficient: OLS weights each pairwise slope by $(x_i - x_j)^2$, and equally-spaced points still have unequal pairwise distances (adjacent pairs are closer than non-adjacent ones), so the simple average of pairwise slopes generally differs from the OLS slope. For example, with $x = (1,2,3,4,5)$ and $y = (0,0,0,0,10)$, the mean pairwise slope is $2.083$ but the OLS slope is $2.0$.
+
+c) By removing the negative slope (an outlier), Boscovich effectively performed a trimmed estimate. OLS has no mechanism to downweight outliers, as the squared loss amplifies their influence. Boscovich's approach anticipates modern robust regression (e.g., least trimmed squares, median regression).
+:::
+:::
+
+::: {#exr-}
+## True/False: Data and Aggregation
+
+a) In the bias-variance tradeoff, a model with zero bias necessarily has zero prediction error.
+
+b) Ensemble methods (e.g., random forests) work by reducing bias rather than variance.
+
+c) In Heaton and Polson's dumb money model, a trader can determine whether they are "smart money" or "dumb money" by observing the market price.
+
+d) Galton's ox experiment showed that the *mean* of the crowd's guesses was within 1% of the true weight.
+
+e) Adding more data always improves prediction accuracy.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) False. Even with zero bias, prediction error includes irreducible noise $\sigma^2$ and variance.
+
+b) False. Bagging and random forests primarily reduce *variance* while preserving the low bias of individual trees. (Boosting, covered in Chapter 14, instead targets bias.)
+
+c) False. This is the identification problem: the market price is consistent with both scenarios (being smart or dumb money). The likelihood ratio equals 1 when the two groups are balanced.
+
+d) False. Galton used the *median*, not the mean. The median was 1,207 lbs vs. the true 1,198 lbs. The median is more robust to outliers than the mean.
+
+e) False. More data help reduce variance, but if the model is misspecified (high bias), adding data won't fix the systematic error. Also, if the additional data are biased or of low quality, they can worsen predictions.
+:::
+:::
+
+::: {#exr-dumb-money-identification}
+## Learning Whether You Are Dumb Money
+
+Return to the Heaton and Polson default market from the chapter. In the chapter's example, smart money knows the true default probability $\theta_S = 0.70$; dumb money instead believes $\theta_D = 0.10$. Dumb money holds a fraction $\lambda$ of total market capital, smart money holds $1 - \lambda$, and, following the chapter's worked example, take $\lambda = 0.45$: the market splits 45-55, and the equilibrium price of the "default" contract is $p = 1 - \lambda = 0.55$.
+
+Take the point of view of a trader on the default side, who believes, like the smart money of the chapter's example, that the default probability is $\theta_S = 0.70$, and whose side holds the capital share $1-\lambda$. The trader knows that the other side believes $\theta_D = 0.10$, but not which of the two sides is the smart one, and so weighs two possible worlds: in the world *Smart* the trader's belief is right and the default probability is $\theta_S$, and in the world *Dumb* the other side is right and the default probability is $\theta_D$. A trader on the other side faces the mirror image of this problem, which part (b) asks about.
+
+The chapter argues that the price of 0.55 cannot by itself tell a trader which side of the split is smart and which is dumb: a price of 0.55 is equally consistent with "my side is smart and the other side is dumb" and "my side is dumb and the other side is smart." But once the contract settles, that is, once it becomes known whether the asset actually defaults, that resolution *is* informative about a trader's own type. This exercise works out that update using the chapter's Bayes' rule for self-identification,
+$$
+\frac{\prob{\text{Dumb} \mid \text{Outcome}}}{\prob{\text{Smart} \mid \text{Outcome}}} = \underbrace{\frac{\prob{\text{Outcome} \mid \text{Dumb}}}{\prob{\text{Outcome} \mid \text{Smart}}}}_{\text{Likelihood Ratio}} \times \underbrace{\frac{\prob{\text{Dumb}}}{\prob{\text{Smart}}}}_{\text{Prior Odds}}
+$$
+where $\text{Outcome} \in \{\text{Default}, \text{No Default}\}$ is the eventual settlement, $\prob{\text{Default} \mid \text{Smart}} = \theta_S$, and $\prob{\text{Default} \mid \text{Dumb}} = \theta_D$ (in the world Dumb, the default probability is the one that the other side believes).
+
+a) Derive the likelihood ratio $\prob{\text{Outcome} \mid \text{Dumb}}/\prob{\text{Outcome} \mid \text{Smart}}$ for each of the two possible settlements, $\text{Outcome} = \text{Default}$ and $\text{Outcome} = \text{No Default}$, in terms of $\theta_S$ and $\theta_D$.
+
+b) Absent further information, the trader trusts the capital: the trader gives their own side, which holds the share $1-\lambda$, the probability $1-\lambda$ of being right, so the prior odds of being dumb money are $\prob{\text{Dumb}}/\prob{\text{Smart}} = \lambda / (1-\lambda)$. Using $\theta_S = 0.70$, $\theta_D = 0.10$, and $\lambda = 0.45$, compute the posterior probability that the trader is dumb money (i) if the asset defaults and (ii) if it does not. Then do the same for a trader on the other side, who also trusts the capital, holds $\theta_D$, has a side that holds the share $\lambda$, and is dumb money if the default side is right. Which resolution is more diagnostic of a trader's type, and why?
+
+c) Show that if $\theta_S = \theta_D$, no observed settlement can ever change a trader's beliefs about their own type, regardless of the prior. Relate this to the chapter's claim that no learning occurs when the likelihood ratio is 1.
+
+d) Now fix $\theta_S = 0.70$, $\theta_D = 0.10$ and let $\lambda$ vary freely. Show that as $\lambda \to 1$ (or $\lambda \to 0$), the posterior probability that the default-side trader is dumb money converges to 1 (or 0) *regardless* of whether the asset defaults; that is, the gap between the two possible posteriors from part (b) shrinks to zero. Explain, in words, why a fixed and bounded piece of evidence (the likelihood ratio) cannot overcome an arbitrarily lopsided prior. Which trader does the limit $\lambda \to 1$ leave convinced of being smart, whatever happens, and how does this connect to the chapter's remark that "the essence of being the dumb money is thinking too strongly that one is the smart money"?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Conditioning the chapter's identity on each possible settlement,
+$$
+\frac{\prob{\text{Dumb} \mid \text{Default}}}{\prob{\text{Smart} \mid \text{Default}}} = \frac{\theta_D}{\theta_S} \times \frac{\prob{\text{Dumb}}}{\prob{\text{Smart}}}, \qquad
+\frac{\prob{\text{Dumb} \mid \text{No Default}}}{\prob{\text{Smart} \mid \text{No Default}}} = \frac{1-\theta_D}{1-\theta_S} \times \frac{\prob{\text{Dumb}}}{\prob{\text{Smart}}},
+$$
+so the two likelihood ratios are $\theta_D/\theta_S$ if default occurs and $(1-\theta_D)/(1-\theta_S)$ if it does not.
+
+b) With $\theta_S = 0.70$ and $\theta_D = 0.10$: $LR_{\text{Default}} = 0.10/0.70 = 1/7 \approx 0.143$ and $LR_{\text{No Default}} = 0.90/0.30 = 3$. The prior odds are $\lambda/(1-\lambda) = 0.45/0.55 = 9/11$.
+
+If default occurs, posterior odds are $\frac{1}{7} \times \frac{9}{11} = \frac{9}{77}$, so $\prob{\text{Dumb} \mid \text{Default}} = \frac{9/77}{1 + 9/77} = \frac{9}{86} \approx 0.105$.
+
+If no default occurs, posterior odds are $3 \times \frac{9}{11} = \frac{27}{11}$, so $\prob{\text{Dumb} \mid \text{No Default}} = \frac{27/11}{1 + 27/11} = \frac{27}{38} \approx 0.711$.
+
+Starting from a 45% prior probability of being dumb money, an actual default lowers this to 10.5% (strong evidence of being smart), while surviving without default raises it to 71.1%. Default is the more diagnostic outcome because its likelihood ratio is further from 1 on the log scale: the two worlds assign it probabilities 0.70 and 0.10, a ratio of 7-to-1, while for no default (0.30 and 0.90) the ratio is 3-to-1.
+
+A trader on the no-default side, who holds $\theta_D$, faces the same two states of the market (the default side is right, with probability $1-\lambda$, or the no-default side is right), but the names are swapped: for this trader the world Dumb is the one in which the default side is right, so the prior probability of being dumb money is $1-\lambda = 0.55$. The posterior probability is the complement of the one above: $1 - 9/86 = 77/86 \approx 0.895$ after a default and $1 - 27/38 = 11/38 \approx 0.289$ after no default. For this trader a default raises the probability of being dumb money from 0.55 to 0.895, which matches the chapter's discussion of the 2008 crisis: it was a realized default that forced dumb money to diagnose itself.
+
+c) If $\theta_S = \theta_D = \theta$ for some common $\theta$, then $LR_{\text{Default}} = \theta/\theta = 1$ and $LR_{\text{No Default}} = (1-\theta)/(1-\theta) = 1$, for *any* $\theta$. Posterior odds then equal prior odds under either settlement, so the posterior equals the prior no matter what happens: observing the outcome updates nothing. This is the degenerate case in which smart and dumb money hold observationally identical beliefs, leaving nothing to learn from the resolution beyond what the market composition $\lambda$ already implied, exactly the chapter's point that a likelihood ratio of 1 shuts down learning entirely.
+
+d) Prior odds are $\lambda/(1-\lambda)$, which $\to \infty$ as $\lambda \to 1$ and $\to 0$ as $\lambda \to 0$. The likelihood ratios, in contrast, are fixed finite numbers bounded away from $0$ and $\infty$ once $\theta_S, \theta_D \in (0,1)$ are fixed ($1/7$ and $3$ here). Since posterior odds are the product of the two,
+$$
+\lim_{\lambda \to 1} \; LR \times \frac{\lambda}{1-\lambda} = \infty \quad \text{for either value of } LR,
+$$
+so $\prob{\text{Dumb} \mid \text{Outcome}} \to 1$ for both $\text{Outcome} = \text{Default}$ and $\text{Outcome} = \text{No Default}$: the two posteriors converge to the *same* limit, and their gap, which is exactly what a trader could learn from, vanishes. Symmetrically, $\prob{\text{Dumb} \mid \text{Outcome}} \to 0$ for both settlements as $\lambda \to 0$. Numerically, at $\lambda = 0.99$ the two posteriors are $0.934$ (Default) and $0.997$ (No Default), a gap of only $0.063$, versus a gap of $0.606$ at $\lambda = 0.45$; the gap is not monotonic, in fact it peaks near $\lambda \approx 0.6$ (about $0.642$) and falls off toward zero on both sides.
+
+The mechanism is that Bayesian updating multiplies a bounded likelihood ratio by prior odds, and once prior odds are extreme, no bounded multiplicative correction can pull the posterior away from the certainty already implied by the prior. The limit anchors the two traders in opposite ways. The default-side trader has prior probability $\lambda$ of being dumb money, so as $\lambda \to 1$ the trader becomes nearly sure of being dumb even though they hold the true probability, and as $\lambda \to 0$ nearly sure of being smart. The trader on the other side is the trader of the chapter's remark. Their prior probability of being dumb money is $1-\lambda$ and their posteriors are the complements of the ones above: as $\lambda \to 1$ their side holds nearly all the capital, they are nearly sure of being smart, and at $\lambda = 0.99$ a default moves their probability of being dumb money only from $0.01$ to $0.066$, and no default to $0.003$. This is the paradox the chapter identifies: dumb money's overconfidence is not a separate flaw layered on top of the identification problem, it *is* the identification problem. A trader who gives almost all the prior weight to being smart, because almost the whole market bets the same way, cannot learn from the settlement that they are dumb.
+
+```{r}
+#| eval: false
+theta_S <- 0.70
+theta_D <- 0.10
+lr_default <- theta_D / theta_S
+lr_nodefault <- (1 - theta_D) / (1 - theta_S)
+
+post_prob <- function(lambda, lr) {
+  prior_odds <- lambda / (1 - lambda)
+  post_odds <- lr * prior_odds
+  post_odds / (1 + post_odds)
+}
+
+lambda_grid <- c(0.01, 0.45, 0.99)
+data.frame(
+  lambda = lambda_grid,
+  p_dumb_given_default = post_prob(lambda_grid, lr_default),
+  p_dumb_given_nodefault = post_prob(lambda_grid, lr_nodefault),
+  # the trader on the other side: the complements
+  other_side_given_default = 1 - post_prob(lambda_grid, lr_default),
+  other_side_given_nodefault = 1 - post_prob(lambda_grid, lr_nodefault)
+)
+```
+:::
+:::
+
+::: {#exr-correlated-errors-aggregation}
+## Correlated Errors and the Limits of Crowd Wisdom
+
+Galton's ox demonstrated *variance reduction through aggregation*: averaging many independent estimates yields an aggregate far more accurate than any individual. The chapter's Bias-Variance Tradeoff subsection warns that this fails "when errors are correlated and biased in the same direction." This exercise makes that warning precise.
+
+Model a crowd of $n$ estimators $X_1, \dots, X_n$ of a true value $\mu$. Suppose they are *exchangeable*: each has mean $\E{X_i} = \mu + b$ (a common bias $b$, identical for every member, as when one shared narrative anchors everyone), common variance $\Var{X_i} = \sigma^2$, and common pairwise correlation $\Cor{X_i, X_j} = \rho$ for $i \ne j$. The aggregate is the average $\bar X = \frac1n \sum_{i=1}^n X_i$. (We analyze the mean, the aggregation rule of bagging and model ensembles; Galton's median behaves similarly but is less tractable analytically.)
+
+a) Show that
+$$
+\Var{\bar X} = \frac{\sigma^2}{n} + \frac{n-1}{n}\,\rho\,\sigma^2 .
+$$
+Which term is the familiar $1/n$ "wisdom of crowds" reduction, and which term does *not* vanish as the crowd grows?
+
+b) Take $n \to \infty$ and show that $\Var{\bar X} \to \rho\sigma^2$. Interpret both regimes: what becomes of the aggregate's variance when errors are independent ($\rho = 0$), and what irreducible *variance floor* remains when $\rho > 0$? Explain why this floor is the quantitative content of the chapter's slogan that the "unreasonable effectiveness of data" presumes independence.
+
+c) Define the *effective number of independent estimators* $n_{\text{eff}}$ as the count of independent members that would achieve the same aggregate variance, i.e., $\sigma^2/n_{\text{eff}} = \Var{\bar X}$. Show that
+$$
+n_{\text{eff}} = \frac{n}{1 + (n-1)\rho}, \qquad n_{\text{eff}} \xrightarrow{n\to\infty} \frac{1}{\rho}.
+$$
+For a crowd of Galton's size, $n = 800$, evaluate $n_{\text{eff}}$ at $\rho = 0.1$ and at $\rho = 0.5$. Interpret the result for a market under social contagion, where each new participant's belief is partly copied from those who came before.
+
+d) Now restore the common bias $b$ (social contagion and "new-era thinking" push every participant's estimate the same direction). Show that the mean-squared error of the aggregate is
+$$
+\E{(\bar X - \mu)^2} = \Var{\bar X} + b^2 \xrightarrow{n\to\infty} \rho\sigma^2 + b^2 .
+$$
+Using $\sigma = 40$, $\rho = 0.3$, $b = 20$, compare the large-$n$ root-mean-squared error of this correlated, biased crowd with that of an independent, unbiased crowd of $n = 800$ ($\rho = 0$, $b = 0$). Explain why adding participants cannot rescue the first crowd, and connect this to the chapter's claim that in the "dumb money" market, aggregation "entrenches rather than eliminates" the bias.
+
+e) The equicorrelation structure is not valid for every $\rho$: the covariance matrix is positive semidefinite only if $\rho \ge -1/(n-1)$. What does this bound become as $n \to \infty$, and why does it imply that a large crowd cannot have all pairs *negatively* correlated? Contrast this with $\rho > 0$, which faces no such obstruction.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Write $\Var{\bar X} = \frac{1}{n^2}\sum_{i}\sum_{j}\Cov{X_i,X_j}$. There are $n$ diagonal terms with $\Cov{X_i,X_i} = \sigma^2$ and $n(n-1)$ off-diagonal terms with $\Cov{X_i,X_j} = \rho\sigma^2$ (from $\Cor{X_i,X_j} = \rho$ and equal variances $\sigma^2$). Hence
+$$
+\Var{\bar X} = \frac{1}{n^2}\left[ n\sigma^2 + n(n-1)\rho\sigma^2 \right] = \frac{\sigma^2}{n} + \frac{n-1}{n}\rho\sigma^2 .
+$$
+The first term $\sigma^2/n$ is the classical variance reduction behind Galton's wisdom of crowds; it vanishes as $n \to \infty$. The second term $\frac{n-1}{n}\rho\sigma^2$ arises entirely from the *covariances between members* and does not vanish. It is the price of correlation.
+
+b) As $n \to \infty$, $\sigma^2/n \to 0$ and $\frac{n-1}{n} \to 1$, so $\Var{\bar X} \to \rho\sigma^2$. If $\rho = 0$ the limit is $0$: with genuinely independent members a large enough crowd drives the aggregate variance to zero, exactly Galton's result. If $\rho > 0$ the aggregate variance can never fall below the floor $\rho\sigma^2$, no matter how many members are recruited, so "more data" buys nothing beyond this floor. This is the quantitative statement behind the chapter's slogan: aggregation is effective because of independence, and it degrades continuously as $\rho$ moves away from zero. (At $\sigma = 40$ and $n = 800$ the closed form gives $\Var{\bar X} = 481.4$ for $\rho = 0.3$, already essentially at the floor $\rho\sigma^2 = 480$; the residual $1.4$ is the last trace of the $1/n$ term.)
+
+c) Setting $\sigma^2/n_{\text{eff}} = \Var{\bar X} = \sigma^2 \dfrac{1 + (n-1)\rho}{n}$ and cancelling $\sigma^2$,
+$$
+\frac{1}{n_{\text{eff}}} = \frac{1 + (n-1)\rho}{n} \quad\Longrightarrow\quad n_{\text{eff}} = \frac{n}{1 + (n-1)\rho},
+$$
+which tends to $1/\rho$ as $n \to \infty$. For $n = 800$: at $\rho = 0.1$, $n_{\text{eff}} = 800/(1 + 799\cdot 0.1) = 9.9$; at $\rho = 0.5$, $n_{\text{eff}} = 800/(1 + 799\cdot 0.5) = 2.0$. A crowd of 800 whose members' errors correlate at $\rho = 0.5$ carries the statistical weight of just *two* independent estimates. Under social contagion, where each new participant partly copies those who came before, the effective sample size collapses toward $1/\rho$ and stops growing with head count: the market gathers people without gathering independent information.
+
+d) Every member shares the same mean $\mu + b$, so the average does too: $\E{\bar X} = \mu + b$, giving $\E{\bar X} - \mu = b$. The MSE decomposes as variance plus squared bias,
+$$
+\E{(\bar X - \mu)^2} = \Var{\bar X} + (\E{\bar X}-\mu)^2 = \Var{\bar X} + b^2 \longrightarrow \rho\sigma^2 + b^2 .
+$$
+With $\sigma = 40$, $\rho = 0.3$, $b = 20$: the large-$n$ floor is $\rho\sigma^2 + b^2 = 480 + 400 = 880$, an RMSE of $29.7$ (at $n = 800$ exactly, $881.4$, RMSE $29.7$). The independent, unbiased crowd ($\rho = 0$, $b = 0$) at $n = 800$ has MSE $\sigma^2/n = 2.0$, an RMSE of $1.4$, roughly $21$ times smaller. Crucially, the biased correlated crowd's error does not shrink as $n$ grows: its variance is pinned at the floor $\rho\sigma^2$ and the squared bias $b^2$ is untouched by averaging, since averaging many copies of the same directional error just reproduces that error. This is exactly the mechanism the chapter describes for the "dumb money" market. When members are correlated and biased in a common direction, aggregation converges to the wrong answer $\mu + b$ with residual spread $\sqrt{\rho}\,\sigma$, entrenching the bias rather than cancelling it.
+
+e) The equicorrelation matrix is $R = (1-\rho)I + \rho\,\mathbf{1}\mathbf{1}^\top$, with eigenvalues $1 - \rho$ (multiplicity $n-1$) and $1 + (n-1)\rho$ (multiplicity 1). Positive semidefiniteness requires both to be nonnegative, i.e., $-\frac{1}{n-1} \le \rho \le 1$. As $n \to \infty$ the lower bound $-1/(n-1) \to 0$, so in a large crowd $\rho$ cannot be meaningfully negative: one cannot have every pair among many estimators disagree with every other. Perfectly anti-correlated errors that always cancel are a two-body luxury (at $\rho = -1/(n-1)$ the boundary case, $\Var{\bar X} = 0$), unavailable among many members, where the best achievable is $\rho = 0$, that is, independence. Positive correlation, by contrast, is unconstrained up to $\rho = 1$, so the failure mode (a variance floor) is always on offer while the idealized better-than-independent case is not. Independence is the *ceiling* on crowd wisdom, not a midpoint.
+
+```{r}
+#| eval: false
+sigma <- 40
+var_mean <- function(n, rho, s = sigma) s^2 / n + ((n - 1) / n) * rho * s^2
+n_eff    <- function(n, rho) n / (1 + (n - 1) * rho)
+
+var_mean(800, 0.3)          # 481.4  ~ floor rho*sigma^2 = 480
+n_eff(800, 0.1)             # 9.9
+n_eff(800, 0.5)             # 2.0
+b <- 20
+var_mean(800, 0.3) + b^2    # 881.4 -> RMSE 29.7  (floor 880)
+var_mean(800, 0)            # 2.0   -> RMSE 1.4  (independent, unbiased)
+```
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Simulating Galton's Ox
+
+Galton's crowd of 800 people estimated an ox weighing 1,198 lbs with a median guess of 1,207 lbs.
+
+a) Simulate 800 guesses from a $N(1200, 100^2)$ distribution (slight bias, moderate noise). Compute the mean, median, and trimmed mean (10% trimmed). Which is closest to 1,198?
+b) Now add 20 outliers (replace 20 guesses with values drawn from $N(2000, 200^2)$). Recompute mean, median, and trimmed mean. Which aggregation method is most robust?
+c) Repeat the experiment (without outliers) 1000 times. Plot the distribution of medians. What is its standard deviation compared to the standard deviation of a single guess?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+set.seed(42)
+n <- 800
+true_weight <- 1198
+
+# a) Simulate guesses
+guesses <- rnorm(n, mean = 1200, sd = 100)
+cat("Mean:", round(mean(guesses), 1), "\n")
+cat("Median:", round(median(guesses), 1), "\n")
+cat("Trimmed mean (10%):", round(mean(guesses, trim = 0.1), 1), "\n")
+
+# b) Add outliers
+guesses_outlier <- guesses
+guesses_outlier[1:20] <- rnorm(20, mean = 2000, sd = 200)
+cat("\nWith outliers:\n")
+cat("Mean:", round(mean(guesses_outlier), 1), "\n")
+cat("Median:", round(median(guesses_outlier), 1), "\n")
+cat("Trimmed mean (10%):", round(mean(guesses_outlier, trim = 0.1), 1), "\n")
+
+# c) Repeated experiment
+medians <- replicate(1000, median(rnorm(n, 1200, 100)))
+cat("\nSD of single guess:", 100, "\n")
+cat("SD of median:", round(sd(medians), 2), "\n")
+cat("Ratio:", round(100 / sd(medians), 1), "\n")
+
+hist(medians, breaks = 30, main = "Distribution of Medians (1000 experiments)",
+     xlab = "Median estimate")
+abline(v = true_weight, col = "red", lwd = 2)
+```
+
+The median is far more robust to outliers than the mean. The trimmed mean offers a middle ground. The standard deviation of the median is roughly $\sqrt{\pi/2} \cdot \sigma/\sqrt{n} \approx 4.4$, about 23 times smaller than a single guess.
+:::
+:::
+
+::: {#exr-}
+## Boscovich Data Analysis
+
+The Boscovich meridian arc data relates arc length (toises) to $\sin^2(\theta)$ where $\theta$ is latitude.
+
+a) Load the Boscovich data and compute all 10 pairwise slopes. Reproduce the average slope of approximately 0.067 (the chapter reports 0.0667).
+b) Remove the negative slope (Cape-Rome pair) and recompute the average. Compare with Boscovich's reported value of 0.078.
+c) Fit OLS regression and compare the slope to Boscovich's estimates. Plot all three fitted lines on the same graph.
+d) Compute the median of the 10 pairwise slopes. How does it compare to the mean and OLS?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+#| eval: false
+d <- read.csv("data/boscovich.csv")
+
+# a) Compute all pairwise slopes
+slopes <- c()
+labels <- c()
+for (i in 2:5) {
+  for (j in 1:(i-1)) {
+    s <- (d$ArcLength[i] - d$ArcLength[j]) / (d$sin2Latitude[i] - d$sin2Latitude[j])
+    slopes <- c(slopes, s)
+    labels <- c(labels, paste(d$Location[j], "-", d$Location[i]))
+  }
+}
+cat("All 10 slopes:\n")
+for (k in seq_along(slopes)) cat(labels[k], ":", round(slopes[k], 4), "\n")
+cat("\nMean of all 10:", round(mean(slopes), 4), "\n")
+
+# b) Remove negative slope
+positive_slopes <- slopes[slopes > 0]
+cat("Mean without negative:", round(mean(positive_slopes), 4), "\n")
+
+# c) OLS
+fit <- lm(ArcLength ~ sin2Latitude, data = d)
+cat("OLS slope:", round(coef(fit)[2], 4), "\n")
+
+plot(d$sin2Latitude, d$ArcLength, pch = 16, xlab = expression(10^4 ~ sin^2 ~ (theta)),
+     ylab = "Arc Length", ylim = c(56700, 57450))
+abline(d$ArcLength[1], mean(slopes), col = "blue", lwd = 2)
+abline(d$ArcLength[1], mean(positive_slopes), col = "green", lwd = 2)
+abline(fit, col = "red", lwd = 2)
+legend("topleft", c("All slopes avg", "Trimmed avg", "OLS"),
+       col = c("blue", "green", "red"), lwd = 2, cex = 0.8)
+
+# d) Median of slopes
+cat("Median slope:", round(median(slopes), 4), "\n")
+```
+:::
+:::
+
+::::

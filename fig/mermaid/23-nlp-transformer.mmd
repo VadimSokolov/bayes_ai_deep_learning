@@ -1,0 +1,18 @@
+%%{init: {'flowchart': {'wrappingWidth': 130, 'rankSpacing': 25, 'nodeSpacing': 30}}}%%
+flowchart TB
+    I[Input tokens] --> IE[Embedding +<br/>Positional Encoding]
+    IE --> ENC
+    subgraph ENC [Encoder block, x N]
+        direction TB
+        E1[Multi-Head<br/>Self-Attention] --> E2[Feed-Forward<br/>Network]
+    end
+    O[Output tokens<br/>shifted right] --> OE[Embedding +<br/>Positional Encoding]
+    OE --> DEC
+    subgraph DEC [Decoder block, x N]
+        direction TB
+        D1[Masked Multi-Head<br/>Self-Attention] --> D2[Encoder-Decoder<br/>Cross-Attention]
+        D2 --> D3[Feed-Forward<br/>Network]
+    end
+    ENC -- keys, values --> D2
+    DEC --> L[Linear + Softmax]
+    L --> P[Output<br/>probabilities]

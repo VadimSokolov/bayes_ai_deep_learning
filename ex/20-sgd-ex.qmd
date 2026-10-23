@@ -1,0 +1,911 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Gradient Descent
+
+Consider minimizing $f(x) = x^2 + 4x + 5$.
+
+a) Find the derivative $f'(x)$.
+b) Starting from $x_0 = 5$, perform 3 iterations of gradient descent with learning rate $\eta = 0.3$.
+c) What is the optimal $x^*$? Compare with your result after 3 iterations.
+d) Plot the convergence of $x$ and $f(x)$ over 20 iterations.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $f'(x) = 2x + 4$
+
+b) Gradient descent: $x_{t+1} = x_t - \eta f'(x_t)$
+
+```{r}
+f <- function(x) x^2 + 4*x + 5
+grad_f <- function(x) 2*x + 4
+
+x <- 5
+eta <- 0.3
+cat("x_0 =", x, ", f(x_0) =", f(x), "\n")
+
+for (t in 1:3) {
+  x <- x - eta * grad_f(x)
+  cat("x_", t, " = ", round(x, 4), ", f(x) = ", round(f(x), 4), "\n", sep = "")
+}
+```
+
+c) Optimal: Set $f'(x) = 0$: $2x + 4 = 0 \Rightarrow x^* = -2$
+
+$f(x^*) = (-2)^2 + 4(-2) + 5 = 4 - 8 + 5 = 1$
+
+```{r}
+cat("\nOptimal x* = -2, f(x*) = 1\n")
+cat("After 3 iterations: x =", round(x, 4), ", gap = ", round(x - (-2), 4), "\n")
+```
+
+d) Convergence plot:
+```{r}
+x_vals <- numeric(21)
+f_vals <- numeric(21)
+x <- 5
+
+for (t in 0:20) {
+  x_vals[t+1] <- x
+  f_vals[t+1] <- f(x)
+  x <- x - eta * grad_f(x)
+}
+
+par(mfrow = c(1, 2))
+plot(0:20, x_vals, type = "b", xlab = "Iteration", ylab = "x",
+     main = "Convergence of x")
+abline(h = -2, lty = 2, col = "red")
+
+plot(0:20, f_vals, type = "b", xlab = "Iteration", ylab = "f(x)",
+     main = "Convergence of f(x)")
+abline(h = 1, lty = 2, col = "red")
+par(mfrow = c(1, 1))
+```
+
+:::
+:::
+
+::: {#exr-}
+## Backpropagation
+
+For the 2-2-1 network from the Neural Network Forward Pass exercise (Ch18), compute the gradients:
+
+Given: $x = (1, 2)^T$, true label $y = 1$, learning rate $\eta = 0.1$
+
+Recall the forward-pass results:
+
+- $z^{(1)} = (0, 0.9)^T$, $a^{(1)} = (0, 0.9)^T$
+- $z^{(2)} = 1.22$, $\hat{y} = 0.772$
+
+a) Calculate $\frac{\partial L}{\partial z^{(2)}}$ where $L$ is binary cross-entropy.
+b) Calculate $\frac{\partial L}{\partial W_2}$ and $\frac{\partial L}{\partial b_2}$.
+c) Calculate $\frac{\partial L}{\partial a^{(1)}}$ (backpropagate through $W_2$).
+d) Update $W_2$ using gradient descent with learning rate 0.1.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+# From the forward-pass exercise
+a1 <- c(0, 0.9)
+z2 <- 1.22
+y_hat <- 0.772
+y <- 1
+W2 <- c(0.6, 0.8)
+b2 <- 0.5
+eta <- 0.1
+
+# a) dL/dz2 for BCE with sigmoid output
+# L = -y*log(y_hat) - (1-y)*log(1-y_hat)
+# dL/dy_hat = -y/y_hat + (1-y)/(1-y_hat)
+# dy_hat/dz2 = y_hat*(1-y_hat)
+# Chain rule: dL/dz2 = y_hat - y
+
+dL_dz2 <- y_hat - y
+cat("dL/dz2 =", round(dL_dz2, 4), "\n")
+
+# b) dL/dW2 = dL/dz2 * dz2/dW2 = dL/dz2 * a1
+dL_dW2 <- dL_dz2 * a1
+cat("dL/dW2 =", round(dL_dW2, 4), "\n")
+
+dL_db2 <- dL_dz2
+cat("dL/db2 =", round(dL_db2, 4), "\n")
+
+# c) dL/da1 = dL/dz2 * dz2/da1 = dL/dz2 * W2
+dL_da1 <- dL_dz2 * W2
+cat("dL/da1 =", round(dL_da1, 4), "\n")
+
+# d) Gradient descent update
+W2_new <- W2 - eta * dL_dW2
+cat("\nW2 before:", W2, "\n")
+cat("W2 after:", round(W2_new, 4), "\n")
+
+b2_new <- b2 - eta * dL_db2
+cat("b2 before:", b2, "\n")
+cat("b2 after:", round(b2_new, 4), "\n")
+```
+
+The weights are updated to reduce the loss. Since $\hat{y} = 0.772 < 1 = y$, we need to increase the output, which is achieved by the gradient updates.
+
+:::
+:::
+
+::: {#exr-newton-vs-gd}
+## Newton's Method versus Gradient Descent
+
+Consider the quadratic objective
+$$
+f(x) = \frac{1}{2} x^\top A x - b^\top x, \qquad x \in \mathbb{R}^d,
+$$
+where $A$ is a symmetric positive definite $d \times d$ matrix and $b \in \mathbb{R}^d$. This chapter's Second-Order Methods section poses the motivating question directly: Newton's method uses curvature information to take more efficient steps than gradient descent, so why does deep learning rely on first-order methods instead?
+
+a) Derive the gradient $\nabla f(x)$ and the Hessian $\nabla^2 f(x)$.
+b) Write the gradient descent update with fixed step size $\alpha$, and the Newton update $x^{t+1} = x^t - \{\nabla^2 f(x^t)\}^{-1} \nabla f(x^t)$, both specialized to this $f$.
+c) Show algebraically that, starting from *any* $x^0$, Newton's method reaches the minimizer $x^* = A^{-1}b$ in exactly one step. Explain why this does not happen for gradient descent, and why the one-step argument does not carry over to a non-quadratic objective.
+d) For gradient descent with fixed step size $\alpha$, state a condition on $\alpha$ relative to the eigenvalues of $A$ that guarantees convergence.
+e) Newton's method looks strictly better after part (c). Explain why it is nonetheless impractical for deep learning models with $d$ in the millions or billions: compare the storage cost of the Hessian ($O(d^2)$ entries) to that of the gradient ($O(d)$ entries), and the cost of solving the Newton system (equivalently, factoring the Hessian, $O(d^3)$ by standard methods such as Cholesky or LU decomposition) to the cost of one gradient step ($O(d)$ via a single backpropagation pass, as in the Automatic Differentiation section of this chapter).
+f) Illustrate parts (c)-(e) numerically in R for a small example.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) $\nabla f(x) = Ax - b$ and $\nabla^2 f(x) = A$. Both hold exactly at every $x$, because $f$ is quadratic and $A$ does not depend on $x$.
+
+b)
+$$
+\text{Gradient descent:} \quad x^{t+1} = x^t - \alpha (Ax^t - b),
+$$
+$$
+\text{Newton:} \quad x^{t+1} = x^t - A^{-1}(Ax^t - b).
+$$
+
+c) Substituting into the Newton update from any starting point $x^0$:
+$$
+x^{1} = x^0 - A^{-1}(Ax^0 - b) = x^0 - A^{-1}Ax^0 + A^{-1}b = x^0 - x^0 + A^{-1}b = A^{-1}b = x^*.
+$$
+The starting point $x^0$ cancels exactly, so the result holds for *any* $x^0$ and requires no learning rate at all. This happens because Newton's method minimizes the second-order Taylor expansion of $f$ around the current iterate, and for a quadratic $f$ that expansion equals $f$ itself everywhere, not just locally. Gradient descent uses no curvature information: each step moves along the negative gradient with a fixed scalar step size, so when $A$ is ill-conditioned (eigenvalues on very different scales), progress along the flat directions is slow regardless of how many steps are taken. For a non-quadratic $f$, the Hessian $\nabla^2 f(x^t)$ changes with $x^t$, so the cancellation in the display above no longer occurs; Newton's method still converges quickly, but only locally (once $x^t$ is close enough that the quadratic approximation is accurate) and it must recompute and refactor the Hessian at every iterate.
+
+d) Writing the gradient descent update in terms of the error $e^t = x^t - x^*$ and using $Ax^* = b$,
+$$
+e^{t+1} = x^{t+1} - x^* = e^t - \alpha A e^t = (I - \alpha A)e^t,
+$$
+so $e^t \to 0$ as $t \to \infty$ if and only if every eigenvalue $\lambda_i$ of $A$ satisfies $|1 - \alpha \lambda_i| < 1$. This holds for all eigenvalues simultaneously exactly when
+$$
+0 < \alpha < \frac{2}{\lambda_{\max}(A)}.
+$$
+
+e) For a model with $d$ parameters, the Hessian has $d^2$ entries, so storing it in double precision costs $8d^2$ bytes, while the gradient has only $d$ entries and costs $8d$ bytes. At $d = 10^5$ parameters (a small network by modern standards), the Hessian alone needs 80 GB, more memory than a typical workstation has, while the gradient needs under 1 MB; at $d=10^7$ the gap widens to 800,000 GB versus 80 MB. Solving the Newton system $A \Delta = \nabla f(x^t)$ by a direct method (Cholesky or LU factorization) costs $O(d^3)$ floating-point operations, whereas backpropagation computes $\nabla f(x^t)$ in $O(d)$ time, proportional to a single forward pass, regardless of how many outputs the model has. Since the Hessian changes at every iterate for a non-quadratic objective, this $O(d^3)$ cost recurs at *every* step (it cannot be paid once and reused, the way it can for our quadratic toy example where $A$ is constant), which is exactly why second-order methods do not scale to deep learning.
+
+f) Numeric illustration. First, confirm the one-step Newton convergence:
+
+```{r}
+A <- matrix(c(4, 1, 1, 3), nrow = 2, byrow = TRUE)
+b <- c(1, 2)
+x_star <- solve(A, b)
+x0 <- c(5, -5)
+
+grad0 <- A %*% x0 - b
+x1_newton <- as.numeric(x0 - solve(A, grad0))
+cat("x* =", round(x_star, 6), "\n")
+cat("Newton x1 =", round(x1_newton, 6), "\n")
+cat("max|x1 - x*| =", max(abs(x1_newton - x_star)), "\n")
+```
+
+Now compare to gradient descent from the same starting point, using a step size inside the stability region from part (d):
+
+```{r}
+eig <- eigen(A, only.values = TRUE)$values
+cat("Eigenvalues of A:", round(eig, 4), " stability bound 2/lambda_max =", round(2/max(eig), 4), "\n")
+
+alpha <- 0.2
+n_iter <- 60
+x <- x0
+dist_hist <- numeric(n_iter)
+for (t in 1:n_iter) {
+  x <- x - alpha * (A %*% x - b)
+  dist_hist[t] <- sqrt(sum((x - x_star)^2))
+}
+cat("GD distance to x* at iterations 1, 5, 10, 20, 60:\n")
+print(round(dist_hist[c(1, 5, 10, 20, 60)], 6))
+```
+
+Newton's method lands on $x^*$ up to floating-point rounding (about $10^{-16}$) after a single step, from a starting point that is far away. Gradient descent, using the same starting point and a step size comfortably inside the stability region ($\alpha = 0.2 < 2/\lambda_{\max} \approx 0.433$), is still off by about $0.01$ after 10 iterations and needs on the order of 50 iterations to reach the same floating-point precision that Newton reaches in one step.
+
+Finally, the storage argument from part (e) in concrete numbers:
+
+```{r}
+for (d in c(1e3, 1e5, 1e7)) {
+  cat("d =", format(d, scientific = FALSE),
+      ": Hessian", round(8*d^2/1e9, 3), "GB, gradient", round(8*d/1e6, 3), "MB\n")
+}
+```
+
+:::
+:::
+
+::: {#exr-robbins-monro-stepsize}
+## Robbins-Monro Step-Size Conditions
+
+The *Why Robbins-Monro?* section states that the recursion $\theta_{n+1} = \theta_n - a_n\,(y(\theta_n) - \alpha)$ converges almost surely to the root $\theta^*$ provided the positive step sizes satisfy the two summability conditions
+$$
+\sum_{n=1}^{\infty} a_n = \infty
+\qquad\text{and}\qquad
+\sum_{n=1}^{\infty} a_n^2 < \infty .
+$$
+The first condition guarantees the iterates can travel far enough to reach $\theta^*$ from any starting point; the second forces the steps to shrink fast enough that the observation noise averages out. This exercise pins down which schedules satisfy them and shows what breaks when they do not.
+
+a) For the power-law family $a_n = c/n^p$ with $c > 0$ and $p > 0$, use the $p$-series test to find the exact range of $p$ for which *both* conditions hold. Does the constant $c$ affect the answer?
+
+b) Classify the schedules $a_n = c$ (constant, $p = 0$), $a_n = c/\sqrt{n}$ ($p = 1/2$), $a_n = c/n^{0.9}$ ($p = 0.9$), $a_n = c/n$ ($p = 1$), and $a_n = c/n^2$ ($p = 2$) against your answer to (a). For each schedule that fails a condition, state which one fails and give a one-sentence description of what goes wrong in the algorithm.
+
+c) In Python, verify the classification numerically by computing the partial sums $\sum_{n=1}^{N} a_n$ and $\sum_{n=1}^{N} a_n^2$ (with $c = 1$) up to $N = 10^6$ for the five schedules. Confirm that the divergent sums keep growing with $N$ while the convergent ones have essentially reached their limits.
+
+d) Simulate the scalar recursion with $M(\theta) = \theta$, target $\alpha = 5$, i.i.d. noise $\epsilon_n \sim N(0, \sigma^2 = 4)$, and $\theta_0 = 0$, that is $\theta_{n+1} = \theta_n - a_n(\theta_n + \epsilon_n - \alpha)$, over $5000$ replications and $500$ steps. For $a_n = 1/n$ (both conditions hold) plot $n\cdot\widehat{\E{(\theta_n - \alpha)^2}}$ against $n$ and confirm it is flat near $\sigma^2$, the $O(1/n)$ rate quoted in the chapter. For the constant step $a_n = 0.1$ plot $\widehat{\E{(\theta_n - \alpha)^2}}$ (without the factor $n$) and show it plateaus at a strictly positive value. Connect each behaviour to the condition it satisfies or fails.
+
+e) The stall predicted for a too-fast schedule ($p > 1$) needs a problem whose gradient stays bounded. On $f(\theta) = |\theta - 5|$, whose subgradient $\operatorname{sign}(\theta - 5)$ has magnitude $1$, the total distance travelled from $\theta_0$ is at most $\sum_n a_n$. Run subgradient descent from $\theta_0 = 0$ with the summable schedule $a_n = 1/n^2$ and with the divergent schedule $a_n = 1/n$, and show numerically that the first stalls short of the target while the second reaches it. Relate this to the first Robbins-Monro condition.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) By the $p$-series test, $\sum_n n^{-p} = \infty$ if and only if $p \le 1$, so the first condition ($\sum a_n = \infty$) requires $p \le 1$. The squared series is $\sum_n n^{-2p}$, which is finite if and only if $2p > 1$, so the second condition ($\sum a_n^2 < \infty$) requires $p > 1/2$. Both hold simultaneously exactly when
+$$
+\tfrac{1}{2} < p \le 1 .
+$$
+The constant $c$ only rescales each series by $c$ or $c^2$, so it changes neither convergence nor divergence: the admissible range of $p$ is the same for every $c > 0$.
+
+b) Classification:
+
+- $p = 0$ (constant): $\sum a_n = \infty$ holds but $\sum a_n^2 = \infty$ fails. The steps never shrink, so the observation noise is never damped and the iterate keeps fluctuating around $\theta^*$ with a residual variance that does not decay.
+- $p = 1/2$ ($1/\sqrt{n}$): $\sum a_n = \infty$ holds, but $\sum a_n^2 = \sum 1/n = \infty$ fails (the harmonic series, the boundary case). The steps shrink too slowly to average out the noise, so almost-sure convergence is not guaranteed, the same failure mode as the constant step but milder.
+- $p = 0.9$: both conditions hold, since $0.9 \le 1$ and $2(0.9) = 1.8 > 1$; a valid schedule.
+- $p = 1$ ($1/n$): both conditions hold, since $\sum 1/n = \infty$ and $\sum 1/n^2 < \infty$; the classical Robbins-Monro schedule with the $O(1/n)$ rate.
+- $p = 2$ ($1/n^2$): $\sum a_n = \pi^2/6 < \infty$ fails the first condition (the second holds trivially). The steps shrink so fast that the total displacement from $\theta_0$ is bounded, so the iterate can stall before reaching $\theta^*$ when started far away.
+
+c) Partial sums up to $N = 10^6$:
+
+```{python}
+import numpy as np
+N = 10**6
+n = np.arange(1, N + 1)
+schedules = {"constant (p=0)": 0.0, "1/sqrt(n) (p=0.5)": 0.5,
+             "1/n^0.9 (p=0.9)": 0.9, "1/n (p=1)": 1.0, "1/n^2 (p=2)": 2.0}
+print(f"{'schedule':18s} {'sum a_n':>10s} {'sum a_n^2':>10s}")
+for name, p in schedules.items():
+    a = np.ones(N) if p == 0 else 1.0 / n**p
+    print(f"{name:18s} {a.sum():10.4g} {(a * a).sum():10.4g}")
+print(f"pi^2/6 = {np.pi**2 / 6:.4f}")
+```
+
+The two divergent schedules ($p = 0$ and $p = 1/2$) have partial sums that keep climbing with $N$; for $p = 1/2$ the sum of squares grows like $\log N$, reaching only about $14.4$ by $N = 10^6$ and still increasing. The convergent sums, by contrast, have essentially settled: $\sum a_n$ for $p = 2$ and $\sum a_n^2$ for $p = 1$ have both reached $\pi^2/6 \approx 1.645$. Only $p = 0.9$ and $p = 1$ have $\sum a_n$ diverging *and* $\sum a_n^2$ converging, matching the classification in (b).
+
+d) With $a_n = 1/n$ and $M(\theta) = \theta$ the recursion telescopes (an easy induction) to the running sample mean $\theta_n = \frac{1}{n}\sum_{k=1}^n(\alpha - \epsilon_k)$, so $\Var{\theta_n} = \sigma^2/n$ exactly and $n\,\Var{\theta_n} = \sigma^2$. For the constant step $a$ the error $\delta_n = \theta_n - \alpha$ follows the stable AR(1) recursion $\delta_n = (1 - a)\delta_{n-1} - a\epsilon_n$, whose stationary variance is $a\sigma^2/(2 - a)$.
+
+```{python}
+#| fig-cap: "Robbins-Monro on the linear problem M(theta) = theta with target 5 and noise variance 4, averaged over 5000 replications. Left: with the schedule a_n = 1/n, for which both conditions hold, n times the mean squared error stays flat near sigma-squared = 4 (dashed), the O(1/n) rate quoted in the chapter. Right: with the constant step a_n = 0.1, for which the sum of squared steps diverges, the mean squared error plateaus at the residual variance a sigma-squared / (2 - a) approx 0.21 (dashed) instead of decaying to zero."
+import numpy as np
+import matplotlib.pyplot as plt
+
+alpha, sigma, theta0 = 5.0, 2.0, 0.0     # target, noise sd (variance 4), start
+R, Nsteps = 5000, 500                     # replications, steps
+
+def run_linear(step, seed):
+    rng = np.random.default_rng(seed)
+    theta = np.full(R, theta0)
+    mse = np.empty(Nsteps)
+    for i in range(1, Nsteps + 1):
+        eps = rng.normal(0.0, sigma, size=R)
+        theta = theta - step(i) * (theta + eps - alpha)
+        mse[i - 1] = np.mean((theta - alpha) ** 2)
+    return mse
+
+mse_inv   = run_linear(lambda i: 1.0 / i, seed=20)   # a_n = 1/n : both conditions hold
+mse_const = run_linear(lambda i: 0.1,     seed=20)   # a_n = 0.1 : sum of squares diverges
+
+s = np.arange(1, Nsteps + 1)
+fig, ax = plt.subplots(1, 2, figsize=(7, 2.6))
+ax[0].plot(s, s * mse_inv, color="black")
+ax[0].axhline(sigma**2, ls="--", color="red")
+ax[0].set_xlabel("step n"); ax[0].set_ylabel("n * MSE"); ax[0].set_title("a_n = 1/n")
+ax[1].plot(s, mse_const, color="black")
+ax[1].axhline(0.1 * sigma**2 / 1.9, ls="--", color="red")
+ax[1].set_xlabel("step n"); ax[1].set_ylabel("MSE"); ax[1].set_title("a_n = 0.1")
+plt.tight_layout(); plt.show()
+```
+
+```{python}
+idx = np.array([50, 100, 200, 300, 500])
+print("a_n = 1/n :  n * MSE at n =", idx, "->", np.round(idx * mse_inv[idx - 1], 3))
+print("a_n = 0.1 :  MSE   at n =", idx, "->", np.round(mse_const[idx - 1], 4))
+print("stationary variance a*sigma^2/(2-a) =", round(0.1 * 4 / 1.9, 4))
+```
+
+For $a_n = 1/n$ the quantity $n\cdot\text{MSE}$ stays between $3.87$ and $4.08$ across the sampled steps, fluctuating around $\sigma^2 = 4$ with no downward or upward trend: the mean squared error decays at exactly the $O(1/n)$ rate. For the constant step the MSE instead settles between $0.204$ and $0.219$, right at the predicted stationary variance $0.1 \times 4 / 1.9 = 0.2105$, and does not approach zero. This is precisely the $\sum a_n^2 = \infty$ failure from (b): the noise never averages out, leaving permanent residual jitter.
+
+e) On the linear problem in (d) the signal $M(\theta) - \alpha = \theta - \alpha$ grows with distance, so even a summable schedule self-corrects; the stall appears only when the gradient stays bounded. On $f(\theta) = |\theta - 5|$ the subgradient has magnitude $1$, so $|\theta_N - \theta_0| \le \sum_{n=1}^N a_n$.
+
+```{python}
+#| fig-cap: "Subgradient descent on the absolute-value objective f(theta) = abs(theta - 5) from theta_0 = 0, with the step axis on a log scale. Because the subgradient has magnitude 1, the total distance travelled cannot exceed the sum of the step sizes. With the summable schedule a_n = 1/n-squared, whose steps sum to pi-squared/6 approx 1.645, the iterate stalls well short of the target 5 (dashed); with a_n = 1/n the sum diverges, so the iterate travels the full distance and settles at 5."
+import numpy as np
+import matplotlib.pyplot as plt
+
+def run_abs(step, Nsteps=2000):           # subgradient descent on |theta - 5|, start theta_0 = 0
+    theta, hist = 0.0, np.empty(Nsteps)
+    for i in range(1, Nsteps + 1):
+        theta = theta - step(i) * np.sign(theta - 5.0)
+        hist[i - 1] = theta
+    return hist
+
+hist_sq   = run_abs(lambda i: 1.0 / i**2)   # sum a_n = pi^2/6 < inf : total travel bounded
+hist_harm = run_abs(lambda i: 1.0 / i)      # sum a_n = inf         : unbounded travel
+
+t = np.arange(1, 2001)
+plt.figure(figsize=(5, 2.6))
+plt.plot(t, hist_sq,   color="red",   label="a_n = 1/n^2  (sum a_n < inf)")
+plt.plot(t, hist_harm, color="black", label="a_n = 1/n  (sum a_n = inf)")
+plt.axhline(5.0, ls="--", color="gray")
+plt.xscale("log"); plt.xlabel("step n"); plt.ylabel("theta_n"); plt.legend()
+plt.tight_layout(); plt.show()
+```
+
+```{python}
+print("1/n^2 final theta:", round(hist_sq[-1], 4), " (ceiling pi^2/6 =", round(np.pi**2 / 6, 4), ")")
+print("1/n   final theta:", round(hist_harm[-1], 4))
+```
+
+The summable schedule $a_n = 1/n^2$ drives $\theta_n$ only to $1.6444$, essentially the ceiling $\sum_n a_n = \pi^2/6 \approx 1.6449$, and never approaches the target $5$: it stalls. The harmonic schedule $a_n = 1/n$ has $\sum_n a_n = \infty$, so it travels the full distance (its partial sums cross $5$ near step $83$) and settles at $5.0$. This is exactly what the first Robbins-Monro condition buys: $\sum_n a_n = \infty$ is what lets the iterate reach any target no matter how far away, and a schedule violating it can freeze short of the optimum.
+:::
+:::
+
+::: {#exr-}
+## True/False: Optimization
+
+a) A learning rate that's too small always leads to slower convergence but never affects the final solution quality.
+
+b) Mini-batch SGD with batch size $n$ (full dataset) is equivalent to gradient descent.
+
+c) The Adam optimizer adapts the learning rate differently for each parameter.
+
+d) Momentum always helps optimization and never hurts.
+
+e) Neural network loss functions are typically convex.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. While too-small learning rates do slow convergence, they can also affect solution quality:
+- May get stuck in suboptimal local minima
+- Numerical precision issues with very small updates
+- May not explore the loss surface enough before training stops
+
+b) **TRUE**. With batch size = full dataset, the mini-batch gradient equals the full gradient: $\nabla L = \frac{1}{n}\sum_{i=1}^n \nabla L_i$. This is exactly gradient descent.
+
+c) **TRUE**. Adam maintains per-parameter estimates of first moment ($m$) and second moment ($v$). The effective learning rate for parameter $j$ is $\eta / (\sqrt{v_j} + \epsilon)$, which differs across parameters.
+
+d) **FALSE**. Momentum can hurt when:
+- The optimum is reached and momentum causes overshooting
+- In highly stochastic settings, accumulated momentum may point in wrong direction
+- With very high momentum ($\beta \approx 1$), it can cause oscillation
+- Near the optimum, momentum can prevent settling
+
+e) **FALSE**. Neural network loss functions are highly non-convex:
+- Many local minima and saddle points
+- The loss surface is complex, especially in high dimensions
+- This is why optimization for NNs is challenging and requires careful hyperparameter tuning
+- However, empirically, many local minima seem to have similar loss values (especially for overparameterized networks)
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Learning Rate Selection
+
+For the function $f(x) = x^4 - 3x^2 + 2$:
+
+a) Plot the function for $x \in [-2, 2]$.
+b) Starting from $x_0 = 1.5$, compare convergence with learning rates $\eta = 0.01, 0.1, 0.5$.
+c) What happens with $\eta = 1$? Explain.
+d) Implement a simple line search to adaptively choose the learning rate.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+```{r}
+f <- function(x) x^4 - 3*x^2 + 2
+grad_f <- function(x) 4*x^3 - 6*x
+
+# a) Plot function
+x_grid <- seq(-2, 2, by = 0.01)
+plot(x_grid, f(x_grid), type = "l", lwd = 2,
+     xlab = "x", ylab = "f(x)", main = "f(x) = x^4 - 3x^2 + 2")
+abline(h = 0, lty = 2)
+
+# b) Compare learning rates
+run_gd <- function(x0, eta, n_iter = 50) {
+  x_hist <- numeric(n_iter + 1)
+  x <- x0
+  for (t in 0:n_iter) {
+    x_hist[t + 1] <- x
+    x <- x - eta * grad_f(x)
+    # Clip for stability
+    x <- max(min(x, 10), -10)
+  }
+  return(x_hist)
+}
+
+x0 <- 1.5
+etas <- c(0.01, 0.1, 0.5)
+colors <- c("blue", "green", "red")
+
+plot(0:50, run_gd(x0, 0.01), type = "l", col = "blue", lwd = 2,
+     xlab = "Iteration", ylab = "x", main = "Effect of Learning Rate",
+     ylim = c(-2, 2))
+lines(0:50, run_gd(x0, 0.1), col = "green", lwd = 2)
+lines(0:50, run_gd(x0, 0.5), col = "red", lwd = 2)
+legend("topright", paste("eta =", etas), col = colors, lwd = 2)
+
+# c) eta = 1 (divergence)
+cat("\nWith eta = 1:\n")
+x <- 1.5
+for (t in 1:5) {
+  x <- x - 1 * grad_f(x)
+  cat("x_", t, " = ", round(x, 2), "\n", sep = "")
+}
+```
+
+With $\eta = 1$: The algorithm diverges. The learning rate is too large, causing oscillations that grow exponentially.
+
+d) Simple line search (backtracking):
+```{r}
+gd_with_linesearch <- function(x0, n_iter = 50, alpha = 0.5, beta = 0.8) {
+  x <- x0
+  x_hist <- numeric(n_iter + 1)
+  eta_hist <- numeric(n_iter)
+
+  for (t in 0:n_iter) {
+    x_hist[t + 1] <- x
+    if (t < n_iter) {
+      g <- grad_f(x)
+      eta <- 1  # Start with large step
+
+      # Backtracking line search
+      while (f(x - eta * g) > f(x) - alpha * eta * g^2 && eta > 1e-10) {
+        eta <- beta * eta
+      }
+      eta_hist[t + 1] <- eta
+      x <- x - eta * g
+    }
+  }
+  return(list(x = x_hist, eta = eta_hist))
+}
+
+result <- gd_with_linesearch(1.5)
+cat("Final x with line search:", round(tail(result$x, 1), 4), "\n")
+cat("Average learning rate:", round(mean(result$eta), 4), "\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Stochastic Gradient Descent
+
+You have data $(x_i, y_i)$ for $i = 1, ..., 1000$ and want to minimize:
+$$
+L(\theta) = \frac{1}{n}\sum_{i=1}^n (y_i - \theta x_i)^2
+$$
+
+a) Write the full gradient $\nabla L(\theta)$ and the stochastic gradient for a single sample.
+b) Compare 1 epoch of full GD vs SGD with batch size 1 in terms of gradient computations.
+c) Implement mini-batch SGD with batch size 32 and compare to full-batch GD.
+d) Why might SGD converge to a better solution than full-batch GD in neural networks?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Gradients:
+- Full gradient: $\nabla L(\theta) = -\frac{2}{n}\sum_{i=1}^n (y_i - \theta x_i) x_i$
+- Stochastic gradient (sample $i$): $g_i(\theta) = -2(y_i - \theta x_i) x_i$
+
+b) Computational comparison:
+- Full GD (1 epoch): 1 gradient computation using all 1000 samples
+- SGD (1 epoch): 1000 gradient computations using 1 sample each
+
+Same total work per epoch, but SGD makes 1000 parameter updates.
+
+c) Implementation:
+```{r}
+set.seed(42)
+n <- 1000
+x <- rnorm(n)
+theta_true <- 3
+y <- theta_true * x + rnorm(n, 0, 0.5)
+
+# Full batch GD
+full_gd <- function(x, y, theta0 = 0, n_epochs = 50, eta = 0.01) {
+  theta <- theta0
+  theta_hist <- numeric(n_epochs + 1)
+  theta_hist[1] <- theta
+
+  for (epoch in 1:n_epochs) {
+    grad <- -2 * mean((y - theta * x) * x)
+    theta <- theta - eta * grad
+    theta_hist[epoch + 1] <- theta
+  }
+  return(theta_hist)
+}
+
+# Mini-batch SGD
+minibatch_sgd <- function(x, y, theta0 = 0, n_epochs = 50, eta = 0.01, batch_size = 32) {
+  theta <- theta0
+  n <- length(y)
+  n_batches <- ceiling(n / batch_size)
+  theta_hist <- numeric(n_epochs * n_batches + 1)
+  theta_hist[1] <- theta
+  idx <- 1
+
+  for (epoch in 1:n_epochs) {
+    # Shuffle data
+    perm <- sample(n)
+    x_shuffled <- x[perm]
+    y_shuffled <- y[perm]
+
+    for (b in 1:n_batches) {
+      start <- (b - 1) * batch_size + 1
+      end <- min(b * batch_size, n)
+      x_batch <- x_shuffled[start:end]
+      y_batch <- y_shuffled[start:end]
+
+      grad <- -2 * mean((y_batch - theta * x_batch) * x_batch)
+      theta <- theta - eta * grad
+      idx <- idx + 1
+      theta_hist[idx] <- theta
+    }
+  }
+  return(theta_hist[1:idx])
+}
+
+# Run both
+theta_full <- full_gd(x, y, n_epochs = 50)
+theta_sgd <- minibatch_sgd(x, y, n_epochs = 2, batch_size = 32)  # ~64 updates = 2 epochs
+
+plot(0:50, theta_full, type = "l", col = "blue", lwd = 2,
+     xlab = "Epoch / Updates", ylab = "theta",
+     main = "Full GD vs Mini-batch SGD", ylim = c(0, 4))
+lines(seq(0, 2, length.out = length(theta_sgd)), theta_sgd, col = "red", lwd = 1)
+abline(h = theta_true, lty = 2, col = "gray")
+legend("bottomright", c("Full GD", "Mini-batch SGD", "True theta"),
+       col = c("blue", "red", "gray"), lty = c(1, 1, 2), lwd = c(2, 1, 1))
+```
+
+d) Why SGD can find better solutions:
+- **Noise as regularization**: The stochastic noise helps escape sharp local minima
+- **Implicit bias**: SGD tends to find flatter minima which generalize better
+- **Escaping saddle points**: Noise helps break symmetry and escape saddle points faster
+- **Better generalization**: Empirically, SGD solutions often have lower test error than full-batch GD
+
+:::
+:::
+
+::: {#exr-}
+## Momentum
+
+Compare vanilla SGD with momentum-based SGD.
+
+The momentum update is:
+$$
+v_t = \beta v_{t-1} + \nabla L(\theta_t)
+$$
+$$
+\theta_{t+1} = \theta_t - \eta v_t
+$$
+
+a) Explain intuitively why momentum helps optimization.
+b) For $f(x, y) = x^2 + 100y^2$, an ill-conditioned quadratic (condition number 100), starting at $(5, 5)$, compare 100 iterations of SGD vs momentum ($\beta = 0.9$).
+c) What happens if $\beta$ is too large (e.g., 0.99)?
+d) Describe Nesterov momentum and its advantage.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Intuition for momentum:
+- **Acceleration in consistent directions**: If gradients point the same way repeatedly, velocity builds up, allowing faster progress
+- **Damping in oscillating directions**: If gradients alternate signs, momentum averages them out, reducing oscillations
+- **Like a ball rolling downhill**: Gains speed on slopes, smooths out bumps
+- **Helps with ill-conditioned problems**: Where gradients vary widely across dimensions
+
+b) Comparison:
+```{r}
+f <- function(x, y) x^2 + 100*y^2
+grad_f <- function(x, y) c(2*x, 200*y)
+
+# Vanilla SGD
+sgd <- function(x0, y0, eta = 0.001, n_iter = 100) {
+  xy <- matrix(NA, n_iter + 1, 2)
+  xy[1,] <- c(x0, y0)
+
+  for (t in 1:n_iter) {
+    g <- grad_f(xy[t, 1], xy[t, 2])
+    xy[t+1,] <- xy[t,] - eta * g
+  }
+  return(xy)
+}
+
+# Momentum SGD
+momentum_sgd <- function(x0, y0, eta = 0.001, beta = 0.9, n_iter = 100) {
+  xy <- matrix(NA, n_iter + 1, 2)
+  xy[1,] <- c(x0, y0)
+  v <- c(0, 0)
+
+  for (t in 1:n_iter) {
+    g <- grad_f(xy[t, 1], xy[t, 2])
+    v <- beta * v + g
+    xy[t+1,] <- xy[t,] - eta * v
+  }
+  return(xy)
+}
+
+# Run both
+path_sgd <- sgd(5, 5)
+path_momentum <- momentum_sgd(5, 5)
+
+# Plot convergence
+par(mfrow = c(1, 2))
+plot(1:101, sqrt(rowSums(path_sgd^2)), type = "l", col = "blue", lwd = 2,
+     xlab = "Iteration", ylab = "Distance from optimum", main = "Convergence")
+lines(1:101, sqrt(rowSums(path_momentum^2)), col = "red", lwd = 2)
+legend("topright", c("Vanilla SGD", "Momentum"), col = c("blue", "red"), lwd = 2)
+
+# Plot paths
+contour(seq(-6, 6, 0.1), seq(-6, 6, 0.1),
+        outer(seq(-6, 6, 0.1), seq(-6, 6, 0.1), function(x, y) x^2 + 100*y^2),
+        main = "Optimization Path", xlab = "x", ylab = "y")
+lines(path_sgd[, 1], path_sgd[, 2], col = "blue", lwd = 2)
+lines(path_momentum[, 1], path_momentum[, 2], col = "red", lwd = 2)
+points(0, 0, pch = 4, cex = 2, col = "green", lwd = 2)
+par(mfrow = c(1, 1))
+```
+
+c) $\beta = 0.99$ (too large):
+```{r}
+path_high_beta <- momentum_sgd(5, 5, beta = 0.99)
+cat("Final position with beta=0.99:", round(path_high_beta[101,], 4), "\n")
+cat("Final position with beta=0.9:", round(path_momentum[101,], 4), "\n")
+```
+
+With very high $\beta$, momentum accumulates too much, causing overshooting and oscillation. The "ball" gains too much velocity and can't slow down near the minimum.
+
+d) Nesterov momentum:
+- Instead of: $v_t = \beta v_{t-1} + \nabla L(\theta_t)$
+- Uses: $v_t = \beta v_{t-1} + \nabla L(\theta_t - \eta \beta v_{t-1})$
+
+This "looks ahead" by computing the gradient at the position we're about to move to, not the current position. This gives a more accurate gradient estimate and typically converges faster.
+
+:::
+:::
+
+::: {#exr-}
+## Adam Optimizer
+
+The Adam optimizer combines momentum with adaptive learning rates.
+
+Given: $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\epsilon = 10^{-8}$, $\eta = 0.001$
+
+Updates:
+$$
+m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t
+$$
+$$
+c_t = \beta_2 c_{t-1} + (1 - \beta_2) g_t^2
+$$
+$$
+\hat{m}_t = m_t / (1 - \beta_1^t), \quad \hat{c}_t = c_t / (1 - \beta_2^t)
+$$
+$$
+\theta_{t+1} = \theta_t - \eta \hat{m}_t / (\sqrt{\hat{c}_t} + \epsilon)
+$$
+
+a) Explain what $m_t$ and $c_t$ track.
+b) Why is bias correction ($\hat{m}_t$, $\hat{c}_t$) necessary?
+c) Implement Adam for $f(x) = x^4 - 3x^2 + 2$ and compare to vanilla SGD.
+d) When might you prefer SGD with momentum over Adam?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) What $m_t$ and $c_t$ track:
+- **$m_t$**: Exponential moving average of gradients (first moment). This is like momentum, tracks the direction of recent gradients.
+- **$c_t$**: Exponential moving average of squared gradients (second moment). Estimates the variance/scale of gradients. Used to normalize the learning rate per parameter.
+
+b) Bias correction:
+- At initialization, $m_0 = 0$ and $c_0 = 0$
+- Early estimates are biased toward 0 (especially for slow-moving $c_t$ with $\beta_2 = 0.999$)
+- The correction $1 - \beta^t$ compensates: at $t=1$, divides by $(1 - 0.9) = 0.1$, scaling up the estimate
+- As $t \to \infty$, correction approaches 1 (no adjustment needed)
+
+c) Implementation:
+```{r}
+f <- function(x) x^4 - 3*x^2 + 2
+grad_f <- function(x) 4*x^3 - 6*x
+
+adam <- function(x0, n_iter = 100, eta = 0.1, beta1 = 0.9, beta2 = 0.999, eps = 1e-8) {
+  x <- x0
+  m <- 0
+  c <- 0
+  x_hist <- numeric(n_iter + 1)
+  x_hist[1] <- x
+
+  for (t in 1:n_iter) {
+    g <- grad_f(x)
+    m <- beta1 * m + (1 - beta1) * g
+    c <- beta2 * c + (1 - beta2) * g^2
+    m_hat <- m / (1 - beta1^t)
+    c_hat <- c / (1 - beta2^t)
+    x <- x - eta * m_hat / (sqrt(c_hat) + eps)
+    x_hist[t + 1] <- x
+  }
+  return(x_hist)
+}
+
+vanilla_sgd <- function(x0, n_iter = 100, eta = 0.1) {
+  x <- x0
+  x_hist <- numeric(n_iter + 1)
+  x_hist[1] <- x
+
+  for (t in 1:n_iter) {
+    x <- x - eta * grad_f(x)
+    x_hist[t + 1] <- x
+  }
+  return(x_hist)
+}
+
+x0 <- 1.5
+path_adam <- adam(x0)
+path_sgd <- vanilla_sgd(x0, eta = 0.05)
+
+plot(0:100, path_adam, type = "l", col = "red", lwd = 2,
+     xlab = "Iteration", ylab = "x", main = "Adam vs Vanilla SGD")
+lines(0:100, path_sgd, col = "blue", lwd = 2)
+legend("topright", c("Adam", "Vanilla SGD"), col = c("red", "blue"), lwd = 2)
+```
+
+d) When to prefer SGD with momentum over Adam:
+- **Better generalization**: SGD often finds solutions that generalize better to test data
+- **Large-scale supervised learning**: For image classification, SGD + momentum is often preferred
+- **Computational efficiency**: SGD is simpler and faster per iteration
+- **Final fine-tuning**: Start with Adam (fast initial progress), switch to SGD (better final solution)
+- **When overfitting is a concern**: Adam can overfit faster due to adaptive per-parameter learning rates
+
+:::
+:::
+
+::: {#exr-em-gaussian-mixture}
+## EM Algorithm for a Two-Component Gaussian Mixture
+
+Consider data with a latent component indicator $z_i \in \{1,2\}$ and
+$$
+P(z_i = 1) = \pi, \qquad y_i \mid z_i = k \overset{\text{i.i.d.}}{\sim} N(\mu_k, \sigma_k^2), \quad k = 1,2.
+$$
+The marginal density of $y_i$ is $\pi N(y_i;\mu_1,\sigma_1^2) + (1-\pi) N(y_i;\mu_2,\sigma_2^2)$, so the observed-data log-likelihood is
+$$
+\ell(\theta) = \sum_{i=1}^n \log\Big[\pi N(y_i;\mu_1,\sigma_1^2) + (1-\pi) N(y_i;\mu_2,\sigma_2^2)\Big], \qquad \theta = (\pi,\mu_1,\mu_2,\sigma_1^2,\sigma_2^2).
+$$
+The log of a sum makes $\ell(\theta)$ awkward to maximize directly. The EM algorithm from this chapter avoids this by working with the complete-data likelihood and the $Q$-function instead.
+
+a) Simulate $n=500$ observations in R with true parameters $\pi = 0.4$, $\mu_1 = -2$, $\mu_2 = 3$, $\sigma_1 = 1$, $\sigma_2 = 1.5$. Set a seed. Plot a histogram of the simulated data.
+b) Using the $Q$-function from this chapter, $Q(\theta,\theta^{(g)}) = \E[z\mid\theta^{(g)},y]{\log p(y,z\mid\theta)}$, show that the E-step reduces to computing the responsibility
+$$
+\gamma_i^{(g)} = P(z_i = 1 \mid y_i,\theta^{(g)}) = \frac{\pi^{(g)} N(y_i;\mu_1^{(g)},\sigma_1^{2(g)})}{\pi^{(g)} N(y_i;\mu_1^{(g)},\sigma_1^{2(g)}) + (1-\pi^{(g)}) N(y_i;\mu_2^{(g)},\sigma_2^{2(g)})}.
+$$
+c) Show that maximizing $Q(\theta,\theta^{(g)}) = \sum_{i=1}^n \big[\gamma_i^{(g)}(\log\pi + \log N(y_i;\mu_1,\sigma_1^2)) + (1-\gamma_i^{(g)})(\log(1-\pi) + \log N(y_i;\mu_2,\sigma_2^2))\big]$ over $\theta$ gives the M-step as responsibility-weighted means, variances, and mixing proportion.
+d) Implement the E-step and M-step in R, iterate until convergence, and track the observed-data log-likelihood $\ell(\theta^{(g)})$ at every iteration.
+e) Plot $\ell(\theta^{(g)})$ against iteration $g$ and confirm it increases monotonically, as guaranteed by the majorization argument in this chapter.
+f) Compare the recovered $(\hat\pi,\hat\mu_1,\hat\mu_2,\hat\sigma_1,\hat\sigma_2)$ to the true values.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Simulate the mixture and plot its histogram:
+```{r}
+set.seed(20)
+n <- 500
+pi_true <- 0.4
+mu_true <- c(-2, 3)
+sd_true <- c(1, 1.5)
+
+z <- rbinom(n, 1, pi_true)
+y <- ifelse(z == 1, rnorm(n, mu_true[1], sd_true[1]),
+                     rnorm(n, mu_true[2], sd_true[2]))
+```
+```{r}
+#| label: fig-em-hist
+#| fig-cap: Histogram of the simulated two-component mixture data.
+hist(y, breaks = 30, col = "gray85", border = "white", xlab = "y", main = "")
+```
+
+b) Writing the complete-data log-likelihood as
+$$
+\log p(y,z\mid\theta) = \sum_{i=1}^n \Big[\mathbb{1}\{z_i=1\}\big(\log\pi + \log N(y_i;\mu_1,\sigma_1^2)\big) + \mathbb{1}\{z_i=2\}\big(\log(1-\pi) + \log N(y_i;\mu_2,\sigma_2^2)\big)\Big],
+$$
+the E-step takes its conditional expectation given $y$ and $\theta^{(g)}$. Since $\mathbb{1}\{z_i=1\}$ is Bernoulli, its conditional expectation is exactly the posterior probability $\gamma_i^{(g)} = P(z_i=1\mid y_i,\theta^{(g)})$, which by Bayes' rule is the ratio displayed in the problem: the component-1 density (weighted by $\pi^{(g)}$) divided by the total mixture density, both evaluated at the current parameter guess $\theta^{(g)}$.
+
+c) Taking derivatives of $Q(\theta,\theta^{(g)})$ and setting them to zero:
+$$
+\frac{\partial Q}{\partial \pi} = \sum_{i=1}^n \left[\frac{\gamma_i^{(g)}}{\pi} - \frac{1-\gamma_i^{(g)}}{1-\pi}\right] = 0 \quad \Longrightarrow \quad \pi^{(g+1)} = \frac{1}{n}\sum_{i=1}^n \gamma_i^{(g)},
+$$
+$$
+\frac{\partial Q}{\partial \mu_1} = \sum_{i=1}^n \gamma_i^{(g)} \frac{y_i - \mu_1}{\sigma_1^2} = 0 \quad \Longrightarrow \quad \mu_1^{(g+1)} = \frac{\sum_i \gamma_i^{(g)} y_i}{\sum_i \gamma_i^{(g)}},
+$$
+with the symmetric expression for $\mu_2^{(g+1)}$ using weights $1-\gamma_i^{(g)}$, and
+$$
+\sigma_1^{2(g+1)} = \frac{\sum_i \gamma_i^{(g)} (y_i - \mu_1^{(g+1)})^2}{\sum_i \gamma_i^{(g)}},
+$$
+with the symmetric expression for $\sigma_2^{2(g+1)}$. Each update is a responsibility-weighted mean, variance, or proportion, exactly as in the problem statement.
+
+d) Implementing the E- and M-steps:
+```{r}
+loglik <- function(y, pi, mu, sd) {
+  sum(log(pi * dnorm(y, mu[1], sd[1]) + (1 - pi) * dnorm(y, mu[2], sd[2])))
+}
+
+# initialize away from the truth using empirical quartiles
+pi_hat <- 0.5
+mu_hat <- as.numeric(quantile(y, c(0.25, 0.75)))
+sd_hat <- c(sd(y), sd(y))
+
+n_iter <- 50
+ll <- numeric(n_iter)
+for (g in 1:n_iter) {
+  # E-step: responsibilities
+  d1 <- pi_hat * dnorm(y, mu_hat[1], sd_hat[1])
+  d2 <- (1 - pi_hat) * dnorm(y, mu_hat[2], sd_hat[2])
+  gamma <- d1 / (d1 + d2)
+
+  # M-step: weighted updates
+  n1 <- sum(gamma); n2 <- n - n1
+  pi_hat <- n1 / n
+  mu_hat[1] <- sum(gamma * y) / n1
+  mu_hat[2] <- sum((1 - gamma) * y) / n2
+  sd_hat[1] <- sqrt(sum(gamma * (y - mu_hat[1])^2) / n1)
+  sd_hat[2] <- sqrt(sum((1 - gamma) * (y - mu_hat[2])^2) / n2)
+
+  ll[g] <- loglik(y, pi_hat, mu_hat, sd_hat)
+}
+```
+
+e) The log-likelihood trace:
+```{r}
+#| label: fig-em-loglik
+#| fig-cap: Observed-data log-likelihood across EM iterations, increasing monotonically.
+plot(ll, type = "b", pch = 16, col = "blue", xlab = "Iteration", ylab = "Log-likelihood")
+```
+```{r}
+cat("Log-likelihood is non-decreasing at every iteration:", all(diff(ll) >= -1e-8), "\n")
+cat("Log-likelihood at iterations 1, 2, 5, 10, 50:", round(ll[c(1,2,5,10,50)], 2), "\n")
+```
+
+The log-likelihood rises from about $-1213$ at the first iteration to about $-1134$ and then stays flat, exactly the monotone, converging behavior guaranteed by the majorization argument in this chapter (each M-step increases $Q$, and $Q$ majorizes $\ell$, so $\ell$ can never decrease).
+
+f) Recovered parameters versus truth:
+```{r}
+knitr::kable(
+  data.frame(Parameter = c("pi", "mu1", "mu2", "sigma1", "sigma2"),
+             True = c(pi_true, mu_true, sd_true),
+             Recovered = round(c(pi_hat, mu_hat, sd_hat), 3))
+)
+```
+
+With $n=500$, EM recovers $\hat\pi \approx 0.41$, $(\hat\mu_1,\hat\mu_2) \approx (-2.15, 3.05)$, and $(\hat\sigma_1,\hat\sigma_2) \approx (1.03, 1.43)$, all close to the true $(\pi,\mu_1,\mu_2,\sigma_1,\sigma_2) = (0.4,-2,3,1,1.5)$; the remaining gap is ordinary Monte Carlo sampling error at this sample size, not a failure of the algorithm. Note that mixture parameters are identifiable only up to a permutation of the component labels ("label switching"); initializing $\mu_1^{(0)}$ below $\mu_2^{(0)}$ using the empirical quartiles keeps the recovered components aligned with the labeling used to simulate the data.
+
+:::
+:::
+
+::::

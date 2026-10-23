@@ -1,0 +1,133 @@
+# Results by chapter <small>Bayes, Artificial Intelligence, and Deep Learning</small>
+
+The results of [Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science](https://vsokolov.org/books/bayes_ai_deep_learning/) that are new in the book, that come from the authors' own papers, or that correct one of those papers, as the book states them: 9 entries (9 conditional). Results of other authors that the book presents are credited in the [chapter summaries](https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/main/summaries).
+
+Status: proved; conditional (proved assuming the named statements, which the book does not prove); open (stated as an open question); counterexample (a proved counterexample); withdrawn (found wrong after release; the entry says what was wrong and which version corrects it).
+
+## Chapter 2. Bayes' Rule
+
+<a id="nakamura_streak_posterior_innocence"></a>
+
+### Posterior probability that Nakamura did not cheat given a 45 win streak
+
+Example 2.10, page 82 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Maharaj, Polson and Sokolov (2023), Kramnik vs Nakamura or Bayes vs P Value, SSRN 4648621.
+
+Status: conditional on prior odds of innocence N = 10000, the assessment attributed to Viswanathan Anand (N = 500 in the sensitivity analysis), a streak of 45 wins in 46 games with a draw counted as not a win, independent games with one common win probability q = 0.8916 (Nakamura's own estimate), and probability 1 of the evidence under guilt.
+
+Statement. Let $I$ be innocence (no cheating), $G$ guilt, and $E$ the evidence, a streak of 45 wins in 46 games. Suppose the prior odds of innocence are $O(I) = P(I)/P(G) = N$, that $P(E\mid G) = 1$, and that $P(E\mid I) = p = \binom{46}{45} q^{45}(1-q)$ with per game win probability $q = 0.8916$ (the chapter reports $p = 0.029$, rounded). Then the Bayes factor in favor of innocence is $P(E\mid I)/P(E\mid G) = p$, the posterior odds of innocence are $O(I\mid E) = Np$, and $P(I\mid E) = Np/(Np+1)$. For $N = 10000$ the posterior odds of innocence are $285$, $P(G\mid E) = 0.003492$ and $P(I\mid E) = 0.9965$. For $N = 500$, $P(I\mid E) = 0.9345$.
+
+Source: [`02-bayes.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/02-bayes.qmd), label `exm-nakamura`.
+
+## Chapter 4. Utility, Risk and Decisions
+
+<a id="bernoulli_beta_option_value_of_learning"></a>
+
+### Option value of learning in Bernoulli Beta asset allocation
+
+Section 4.2.3, page 162 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Jacquier and Polson (2013), Asset Allocation in Finance: A Bayesian Perspective, in Bayesian Theory and Applications, Oxford University Press, pages 501 to 515.
+
+Status: conditional on the dynamic Bellman solution of Jacquier and Polson (2013), which the chapter quotes and does not derive; the utility function, the payoff structure and the recursion behind the 11.7 percent allocation are not specified.
+
+Statement. Consider a sequence of bets with unknown success probability $p$ and prior $p \sim \mathrm{Beta}(\alpha,\beta)$. If $\alpha < \beta$ (unfavorable prior odds), the myopic Kelly rule invests nothing, whereas the dynamic Bellman solution invests a small positive amount even for a risk averse investor, because investing yields information that may reveal that the true environment is favorable (the option value of learning). For example, with the uniform prior $\mathrm{Beta}(1,1)$, 10 remaining periods and one observed failure (posterior $\mathrm{Beta}(1,2)$, expected odds 1:2 against), an investor might optimally allocate 11.7 percent.
+
+Source: [`04-dec.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/04-dec.qmd), label `res-option-value-of-learning`.
+
+<a id="livermore_maxims_bellman_view"></a>
+
+### Livermore's trading maxims as Bellman value comparisons
+
+Section 4.2.4, page 163 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson and Witte (2014), A Bellman View of Jesse Livermore, arXiv:1407.2642.
+
+Status: conditional on the claim, which the chapter asserts by an appeal to Bayes' theorem and does not derive (it cites Polson and Witte 2014), that observing a loss lowers the value of the long action below the value of the neutral action, and, for never average down, that no outside information beyond what the market revealed has arrived.
+
+Statement. In a Bellman (dynamic programming) formulation of a trading problem, let $Q_t(s,a)$ be the value of taking action $a$ in state $s$ at time $t$, with $a_L$ the long action and $a_N$ the neutral action. Suppose an investor holds a long position because $Q_t(s,a_L) > Q_t(s,a_N)$. If the position subsequently loses money, the price movement $x_t$ itself carries information, and by Bayes' theorem observing the loss should update beliefs to $q \cup \{x_t\}$ such that $Q_{t+1}^{q \cup \{x_t\}}(s',a_L) < Q_{t+1}^{q \cup \{x_t\}}(s',a_N)$, so that the optimal action is to exit; this is the chapter's reading of Livermore's maxim that profits always take care of themselves but losses never do. Averaging down would require $Q_t(s',a_L) > Q_t(s',a_N)$ after a loss, which, once beliefs are updated on the adverse price movement, typically cannot hold unless external information beyond what the market revealed has been received; this is the chapter's reading of Livermore's maxim never to average down.
+
+Source: [`04-dec.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/04-dec.qmd), label `res-livermore-maxims`.
+
+## Chapter 13. Logistic Regression and Generalized Linear Models
+
+<a id="polya_gamma_integral_identity"></a>
+
+### Polya Gamma integral identity for binomial likelihoods
+
+Section 13.7.1, page 445 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson, Scott and Windle (2013), Bayesian Inference for Logistic Models Using Pólya Gamma Latent Variables, Journal of the American Statistical Association 108(504), 1339 to 1349.
+
+Status: conditional on the identity and the conditional Polya Gamma law, which the chapter cites from Polson, Scott and Windle (2013) and does not prove.
+
+Statement. Let $\mathrm{PG}(b,c)$, for $b>0$ and $c\in\mathbb{R}$, be the Polya Gamma distribution, the law of $X \stackrel{d}{=} \frac{1}{2\pi^2}\sum_{k=1}^{\infty} \frac{g_k}{(k-1/2)^2 + c^2/(4\pi^2)}$, where the $g_k$ are independent $\mathrm{Ga}(b,1)$ gamma random variables. For $b>0$ and $a\in\mathbb{R}$, and for real $\psi$, the identity $\frac{(e^{\psi})^{a}}{(1+e^{\psi})^{b}} = 2^{-b} e^{\kappa\psi} \int_0^{\infty} e^{-\omega\psi^2/2}\, p(\omega)\, d\omega$ holds, where $\kappa = a - b/2$ and $p(\omega)$ is the density of $\omega \sim \mathrm{PG}(b,0)$. Moreover, the conditional distribution $p(\omega\mid\psi)$, with density proportional to $e^{-\omega\psi^2/2}p(\omega)$, is also in the Polya Gamma class: $(\omega\mid\psi) \sim \mathrm{PG}(b,\psi)$.
+
+Source: [`13-logistic.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/13-logistic.qmd), label `res-polya-gamma-identity`.
+
+<a id="polya_gamma_gibbs_sampler_logistic"></a>
+
+### Polya Gamma Gibbs sampler for Bayesian logistic regression
+
+Section 13.7.1, page 445 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson, Scott and Windle (2013), Bayesian Inference for Logistic Models Using Pólya Gamma Latent Variables, Journal of the American Statistical Association 108(504), 1339 to 1349.
+
+Status: conditional on the two conditional distributions, which the chapter quotes from Polson, Scott and Windle (2013) and does not derive from the integral identity, itself stated without proof.
+
+Statement. Let $\mathrm{PG}(h,c)$ denote the Polya Gamma distribution with parameters $h>0$ and $c\in\mathbb{R}$, the law of $\frac{1}{2\pi^2}\sum_{k=1}^{\infty} g_k/((k-1/2)^2 + c^2/(4\pi^2))$ with the $g_k$ independent $\mathrm{Ga}(h,1)$. Suppose $y_i\mid\psi_i \sim \mathrm{Binom}(n_i, 1/(1+e^{-\psi_i}))$ for $i=1,\ldots,n$, where $\psi_i = x_i^\top\beta$, let $X$ be the design matrix with rows $x_i^\top$, let $y=(y_1,\ldots,y_n)$, and let the prior be $\beta \sim N(b,B)$ with mean vector $b$ and covariance matrix $B$. The Gibbs sampler iterates two steps. First, sample $(\omega_i\mid\beta) \sim \mathrm{PG}(n_i, x_i^\top\beta)$ for each observation. Second, sample $(\beta\mid y,\omega) \sim N(m_\omega, V_\omega)$, where $V_\omega = (X^\top\Omega X + B^{-1})^{-1}$, $m_\omega = V_\omega(X^\top\kappa + B^{-1}b)$, $\kappa = (y_1 - n_1/2, \ldots, y_n - n_n/2)$ and $\Omega = \mathrm{diag}(\omega_1,\ldots,\omega_n)$.
+
+Source: [`13-logistic.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/13-logistic.qmd), label `res-polya-gamma-gibbs`.
+
+## Chapter 17. Statistical Learning Theory and Regularization
+
+<a id="bayesian_bridge_bartlett_fejer_mixture"></a>
+
+### Bartlett Fejer scale mixture representation of the exponential power prior
+
+Section 17.11.1, page 602 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson, Scott and Windle (2014), The Bayesian Bridge, Journal of the Royal Statistical Society Series B 76(4), 713 to 733.
+
+Status: conditional on the representation, which the chapter states without proof and cites to Polson, Scott and Windle (2014), and an exponent in (0,1], so that the mixing weights are nonnegative.
+
+Statement. Let $\alpha \in (0,1]$ and $\tau > 0$, and let $p(\beta_j \mid \alpha, \tau) = \frac{1}{2\tau\Gamma(1+1/\alpha)} \exp\{-|\beta_j/\tau|^{\alpha}\}$ be the exponential power prior on a coefficient $\beta_j$. This prior is a scale mixture of triangular (Bartlett Fejer) kernels: given a mixing variable $\omega_j$, $p(\beta_j \mid \tau, \omega_j, \alpha) = \frac{1}{\tau \omega_j^{1/\alpha}} \left\{ 1 - \left| \frac{\beta_j}{\tau \omega_j^{1/\alpha}} \right| \right\}_+$, where $\{a\}_+ = \max(a,0)$, and $\omega_j \mid \alpha$ has the two component gamma mixture distribution $\frac{1+\alpha}{2} \,\mathrm{Gamma}(2+1/\alpha, 1) + \frac{1-\alpha}{2} \,\mathrm{Gamma}(1+1/\alpha, 1)$, where $\mathrm{Gamma}(a,1)$ is the gamma distribution with shape $a$ and unit scale. The restriction $\alpha \in (0,1]$ is what makes the mixture weights $(1 \pm \alpha)/2$ nonnegative.
+
+Source: [`17-theoryai.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/17-theoryai.qmd), label `res-bartlett-fejer-mixture`.
+
+## Chapter 19. Theory of Deep Learning
+
+<a id="posterior_concentration_sparse_deep_learning"></a>
+
+### Posterior concentration at the minimax rate for sparse deep learning
+
+Section 19.9.2, page 657 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson and Ročková (2018), Posterior Concentration for Sparse Deep Learning, Advances in Neural Information Processing Systems 31, arXiv:1803.09138.
+
+Status: conditional on the smoothness and prior mass conditions of Polson and Ročková (2018), which the chapter does not state, and the result itself, which it cites without proof; the minimax rate is for Hölder smooth regression functions on the unit cube.
+
+Statement. Consider nonparametric regression $y_i = f(x_i) + \epsilon_i$ with $x_i = (x_{1i},\ldots,x_{di}) \in [0,1]^d$ and $N$ observations, and let $\hat f_N$ be the regularized MAP (maximum a posteriori) estimator $\hat f_N = \arg\min_{\hat f} \frac{1}{N}\sum_{i=1}^N (y_i - \hat f(x_i))^2 + \phi(\hat f)$, where $\phi$ is a regularization term. Under smoothness and prior mass conditions, the posterior distribution $\Pi(f \mid x, y)$ concentrates around the true function at the minimax rate, up to a factor of $\log N$. Here, under standard assumptions, the minimax rate over $\beta$-Hölder smooth functions $f$ is of order $N^{-2\beta/(2\beta+d)}$ for the risk $R(f,\hat f_N) = \mathbb{E}_{X,Y}\|f-\hat f_N\|^2$, where $\|\cdot\|$ is the $L^2(P_X)$ norm.
+
+Source: [`19-theorydl.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/19-theorydl.qmd), label `res-posterior-concentration`.
+
+## Chapter 21. Quantile Neural Networks
+
+<a id="meu_quantile_network_method"></a>
+
+### Maximum expected utility by a quantile neural network
+
+Section 21.6.1, page 700 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson, Ruggeri and Sokolov (2024), Generative Bayesian Computation for Maximum Expected Utility, Entropy 26(12), 1076.
+
+Status: conditional on a known utility function, the ability to simulate parameters from the prior and data from the likelihood or a forward simulator, and a network that represents the quantile function of the utility; the chapter proves no approximation error, convergence rate or consistency result for the network.
+
+Statement. Let $U(d,\theta)$ be a known utility of a decision $d$ and a parameter vector $\theta$, and let $S(y)$ be a statistic of the data $y$. Simulate prior and data pairs $(\theta^{(i)},y^{(i)})$, choose decisions $d_i$ independently of those pairs over the range of interest, draw independent levels $\tau_i\sim\mathrm{Uniform}(0,1)$, and train a network $q_\varphi$ by minimizing $L(\varphi)=\frac1M\sum_{i=1}^M\rho_{\tau_i}\big(U(d_i,\theta^{(i)})-q_\varphi(S(y^{(i)}),d_i,\tau_i)\big)$, where $\rho_\tau$ is the check loss and $M$ counts training tuples. Given sufficient summaries and a successful fit, $q_\varphi(S(y),d,\tau)$ approximates the quantile function $F^{-1}_{U\mid d,y}(\tau)$, so the expected utility is approximately $\int_0^1 q_\varphi(S(y),d,\tau)\,d\tau$ and $d^\star(y)\approx\arg\max_d\int_0^1 q_\varphi(S(y),d,\tau)\,d\tau$. Because $d$ is an input, one network serves all decisions.
+
+Source: [`21-qnn.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/21-qnn.qmd), label `res-meu-quantile-network`.
+
+<a id="quantile_trend_filtering_hierarchical_model"></a>
+
+### Hierarchical model for second order trend filtering with quantile loss
+
+Section 21.8, page 702 of Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. First stated in Polson and Scott (2016), Mixtures, Envelopes and Hierarchical Duality, Journal of the Royal Statistical Society Series B 78(4), 701 to 727.
+
+Status: conditional on the hierarchical representation, which the chapter attributes to Polson and Scott (2016) through envelope duality and does not derive, with unit likelihood scale and unpenalized level and slope, the conditions the chapter states for the posterior mode to give the penalized objective.
+
+Statement. Let $x_1<\dots<x_n$ be ordered inputs with responses $y_i$, let $\rho_\tau$ be the check loss at level $\tau$ and $\Delta^k$ the $k$th finite difference operator. Quantile trend filtering estimates $f$ by solving $\min_f\sum_{i=1}^n\rho_\tau(y_i-f(x_i))+\lambda\sum_{i=1}^{n-k}|\Delta^k f_i|$. For $k=2$, an asymmetric Laplace working likelihood $y_i\sim\mathrm{AsymmetricLaplace}(f_i,\tau,1)$ and Laplace priors $\Delta^2 f_i\sim\mathrm{Laplace}(0,1/\lambda)$, $i=2,\dots,n-1$, connect the penalized objective with a posterior mode: the asymmetric Laplace negative log likelihood is the check loss up to scale and constants, so with unpenalized level and slope the posterior mode gives the penalized estimate. This is a computational representation, not a claim that the errors follow that distribution.
+
+Source: [`21-qnn.qmd`](https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/21-qnn.qmd), label `res-quantile-trend-filtering`.
+
+***
+
+<small>License: Text, figures and PDF: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Code: [MIT](https://opensource.org/license/mit).</small>
+
+<small>This page is generated from the book's repository ([main](https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/main)). The numbers and pages are those of the PDF, [version 1.0.0](https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/tag/v1.0.0).</small>
+
+<!-- Generated by bookrepo.py from book.yaml and results.yaml. Edit those files, not this one. -->

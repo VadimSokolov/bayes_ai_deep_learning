@@ -1,0 +1,616 @@
+# Index vocabulary for "Bayes, Artificial Intelligence, and Deep Learning"
+# Line grammar:
+#   term                 -> match "term", index under "term"
+#   synonym => Canonical -> match "synonym", index under "Canonical"
+#   X => head!sub        -> makeindex subentry (renders "head, sub")
+# Lines beginning with # are comments. Canonical labels carry "(ACRONYM)"
+# where standard; the bare acronym is listed in the Acronyms section and
+# maps to the same canonical so both surface forms share one index entry.
+
+# ---- Probability & Bayesian inference ----
+probability
+Bayes' theorem
+Bayes rule => Bayes' theorem
+Bayes' rule => Bayes' theorem
+Bayes theorem => Bayes' theorem
+Bayesian inference
+Bayesian learning
+prior distribution
+Prior => prior distribution
+prior probability => prior distribution
+posterior distribution
+posterior probability => posterior distribution
+posterior predictive distribution
+posterior predictive => posterior predictive distribution
+likelihood
+likelihood function => likelihood
+marginal likelihood
+credible interval
+credible intervals => credible interval
+conjugate prior
+conjugacy
+Gaussian prior
+Laplace prior
+horseshoe prior
+Jeffreys prior
+empirical Bayes
+Bayes factor
+Dickey-Savage density ratio
+Beta-binomial model
+Beta-Binomial Bayesian model => Beta-binomial model
+exchangeability
+de Finetti's theorem
+coherence
+Dutch book
+Cromwell's rule
+principle of insufficient reason
+prosecutor's fallacy
+Prosecutor's Fallacy => prosecutor's fallacy
+explaining away
+marginal probability
+conditional probability
+joint distribution
+law of total probability
+complement rule
+inclusion-exclusion principle
+Inclusion–exclusion principle => inclusion-exclusion principle
+law of large numbers => law of large numbers (LLN)
+Kolmogorov's strong law => law of large numbers (LLN)
+central limit theorem => central limit theorem (CLT)
+Chebyshev's inequality
+convergence in probability
+almost surely
+ergodic theorem
+ergodicity
+ergodic => ergodicity
+uniformly ergodic => ergodicity
+stationarity
+stationary process => stationarity
+stationary processes => stationarity
+independence
+independent => independence
+statistical independence => independence
+correlation
+correlated => correlation
+covariance
+variance
+expected value
+probability density function
+density function => probability density function
+probability mass function
+continuous random variable
+discrete random variable
+additivity
+subadditivity
+monotonicity
+heavy tails
+fat tails => heavy tails
+confounding
+sensitivity
+specificity
+Bertrand's box paradox
+Simpson's paradox
+Stein's paradox
+Markov chain
+Markov chain Monte Carlo => MCMC
+Gibbs sampling
+Gibbs sampler => Gibbs sampling
+Metropolis-Hastings
+Monte Carlo method
+Monte Carlo simulation => Monte Carlo method
+Monte Carlo simulations => Monte Carlo method
+importance sampling
+variational inference
+maximum a posteriori => maximum a posteriori (MAP)
+maximum likelihood estimation => maximum likelihood estimation (MLE)
+maximum likelihood estimate => maximum likelihood estimation (MLE)
+sufficient statistic
+sufficient => sufficient statistic
+posterior consistency
+identifiability
+odds
+
+# ---- Decision theory & utility ----
+decision theory
+decision making => decision theory
+utility function
+Utility => utility function
+expected utility
+power utility
+risk aversion
+Risk Averse => risk aversion
+risk neutrality
+Risk Neutral => risk neutrality
+risk seeking
+Risk Seeking => risk seeking
+risk premium
+Allais paradox
+Allais => Allais paradox
+Ellsberg paradox
+Ellsberg => Ellsberg paradox
+ambiguity aversion
+ambiguity => ambiguity aversion
+certainty effect
+value of information
+option value of learning => value of information
+admissibility
+admissible => admissibility
+inadmissibility => admissibility
+Bayes estimator
+Bayes risk
+complete class
+minimal complete class => complete class
+essentially complete => complete class
+completeness axiom
+transitivity axiom
+independence axiom
+randomized strategy
+Nash equilibrium
+strategic dominance
+tit-for-tat
+asymmetric information
+proper scoring rule
+Proper scoring rules => proper scoring rule
+
+# ---- Stochastic processes & finance ----
+stochastic process
+Brownian motion
+Brownian component => Brownian motion
+Wiener process => Brownian motion
+geometric Brownian motion
+Markov property
+Poisson process
+Poisson processes => Poisson process
+Skellam process
+Lévy process
+jump process
+jump component => jump process
+drift
+stochastic volatility
+SV model => stochastic volatility
+stochastic volatility with jumps => stochastic volatility
+volatility clustering
+volatility smile
+implied volatility
+leverage effect
+option pricing
+Merton rule
+portfolio optimization
+portfolio allocation => portfolio optimization
+Laplace transform
+exponential tilting
+implied probability
+implied probabilities => implied probability
+favorite-longshot bias
+peso problem
+Peso problems => peso problem
+Harville formula
+Wang distortion
+Wang distortions => Wang distortion
+
+# ---- Statistical & machine learning ----
+statistical learning
+supervised learning
+data science
+pattern matching
+pattern-matching => pattern matching
+regression
+linear regression
+logistic regression
+Poisson regression
+gamma regression
+ridge regression
+Ridge => ridge regression
+lasso
+Lasso Regression => lasso
+quantile regression
+least squares
+least squares estimator => least squares
+least absolute deviations
+regression coefficient
+regression coefficients => regression coefficient
+fitted values
+residual
+influential point
+influential points => influential point
+dummy variable
+dummy variables => dummy variable
+coefficient of determination => coefficient of determination (R-squared)
+Huber loss
+regression to the mean
+regression-back-to-the-mean => regression to the mean
+overfitting
+underfitting
+generalization
+bias-variance tradeoff
+cross-validation
+regularization
+regularization term => regularization
+shrinkage
+global shrinkage => shrinkage!global
+local shrinkage => shrinkage!local
+adaptive shrinkage => shrinkage!adaptive
+adaptive shrinkage methods => shrinkage!adaptive
+global-local => shrinkage!global-local
+hard thresholding
+trend filtering
+variable selection
+Variable selection methods => variable selection
+model selection
+Akaike information criterion => Akaike information criterion (AIC)
+Bayesian information criterion => Bayesian information criterion (BIC)
+Occam's razor
+curse of dimensionality
+nonparametric
+Non-parametric => nonparametric
+density estimation
+dimensionality reduction
+kernel
+kernel regression
+partial least squares => partial least squares (PLS)
+nonlinear PLS => partial least squares (PLS)
+projection pursuit regression
+ridge function
+ridge functions => ridge function
+spline
+Splines => spline
+decision tree
+tree-based method => decision tree
+random forest
+Random Forests => random forest
+bagging
+boosting
+pruning
+model pruning => pruning
+unit pruning => pruning
+ensemble method
+ensemble methods => ensemble method
+ensembling => ensemble method
+nearest neighbor rule
+support vector machine => support vector machine (SVM)
+support vector machines => support vector machine (SVM)
+sparse coding
+Gaussian process => Gaussian process (GP)
+hyperparameter
+hyperparameters => hyperparameter
+accuracy
+precision
+confusion matrix
+ROC curve
+area under the curve => area under the curve (AUC)
+cross-entropy
+deviance
+saturated model
+logit
+logits => logit
+probit model
+probit => probit model
+probit link => probit model
+expectation-maximization => expectation-maximization (EM) algorithm
+EM Algorithms => expectation-maximization (EM) algorithm
+latent variable
+latent variables => latent variable
+missing data
+interpretability
+counterfactual explanation
+algorithmic bias
+differential privacy
+feature engineering
+bootstrap
+Wasserstein distance
+earth mover's distance => Wasserstein distance
+Lorenz curve
+noise outsourcing theorem
+confidence interval
+confidence intervals => confidence interval
+standard error
+significance level
+p-value
+hypothesis testing
+false discovery rate => false discovery rate (FDR)
+A/B testing
+A/B test => A/B testing
+random assignment
+sequential analysis
+optional stopping
+group sequential design
+group sequential designs => group sequential design
+uncertainty quantification
+Uncertainty Quantification => uncertainty quantification
+forecasting
+time series
+structural time series
+state-space model
+State-space structure => state-space model
+Kalman filter
+filtering distribution
+observation matrix
+transition matrix
+Transition Matrix => transition matrix
+nowcasting
+autocorrelation
+smoothing
+backward sampling
+Backwards Sampling => backward sampling
+Temporal Fusion Transformer
+gating mechanism
+Gating mechanisms => gating mechanism
+
+# ---- Reinforcement learning ----
+reinforcement learning => reinforcement learning (RL)
+Markov decision process => Markov decision process (MDP)
+Markov reward process
+Bellman equation
+value function
+Q-learning
+policy optimization
+exploration-exploitation tradeoff
+exploration => exploration-exploitation tradeoff
+exploitation => exploration-exploitation tradeoff
+multi-armed bandit
+regret
+Gittins index
+distributional reinforcement learning
+
+# ---- Deep learning & neural nets ----
+deep learning
+neural network
+convolutional neural network => neural network!convolutional
+recurrent neural network => neural network!recurrent
+feedforward neural network => neural network!feedforward
+feedforward architecture => neural network!feedforward
+quantile neural network => neural network!quantile
+monotonic neural network => neural network!monotonic
+Monotonic networks => neural network!monotonic
+perceptron
+transformer
+transformers => transformer
+autoencoder
+Auto-encoders => autoencoder
+mixture of experts => mixture of experts (MoE)
+activation function
+Activation functions => activation function
+rectified linear unit => rectified linear unit (ReLU)
+softmax
+hidden layer
+hidden layers => hidden layer
+convolutional layer
+Convolutional layers => convolutional layer
+pooling layer
+Pooling layers => pooling layer
+convolution
+receptive field
+stride
+padding
+local connectivity
+translation invariance
+Translation Invariance => translation invariance
+dropout
+dropout as ensemble => dropout
+batch normalization
+layer normalization
+embedding
+embeddings => embedding
+embedding layer => embedding
+word embedding
+word embeddings => word embedding
+latent representation
+latent representations => latent representation
+transfer learning
+universal approximation theorem
+Universal approximation => universal approximation theorem
+Kolmogorov superposition theorem
+double descent
+overparameterization
+Over-parameterized Regime => overparameterization
+knowledge distillation
+model distillation => knowledge distillation
+Teacher-Student => knowledge distillation
+distilling step-by-step => knowledge distillation
+Self-distillation => knowledge distillation
+dark knowledge
+soft targets
+quantization
+post-training quantization
+quantization-aware training
+mixed-precision training
+gradient accumulation
+gradient checkpointing
+computer vision
+Vision => computer vision
+long short-term memory => long short-term memory (LSTM)
+generative adversarial network => generative adversarial network (GAN)
+masking
+positional encoding
+positional encodings => positional encoding
+attention mechanism
+attention => attention mechanism
+Attention Mechanisms => attention mechanism
+self-attention
+self-attention mechanism => self-attention
+cross-attention
+multi-head attention
+Multi-Head Attention => multi-head attention
+scaled dot-product attention
+sparse attention
+linear attention
+attention pooling
+FlashAttention
+adversarial training
+catastrophic forgetting
+multi-task learning
+quantum supremacy
+
+# ---- Optimization ----
+gradient descent
+stochastic gradient descent => SGD
+mini-batch
+mini-batch gradients => mini-batch
+batch size
+learning rate
+backpropagation
+automatic differentiation
+momentum
+momentum-based => momentum
+Adam
+AdaGrad
+RMSprop
+BFGS
+stochastic approximation
+delta rule
+subgradient
+subdifferential => subgradient
+objective function
+loss function
+pinball loss
+check loss => pinball loss
+quantile loss => pinball loss
+epoch
+
+# ---- NLP, LLMs & agents ----
+natural language processing => natural language processing (NLP)
+large language model => large language model (LLM)
+large language models => large language model (LLM)
+GPT
+BERT
+tokenization
+token => tokenization
+tokens => tokenization
+next-token prediction
+next-word prediction => next-token prediction
+predict the next token => next-token prediction
+autoregressive model
+Autoregressive Generation => autoregressive model
+autoregressive modeling => autoregressive model
+context window
+prompt
+prompts => prompt
+prompt injection
+External prompt injections => prompt injection
+in-context learning
+pretraining
+Pre-Training => pretraining
+fine-tuning
+Full fine-tuning => fine-tuning
+instruction tuning
+Instruction fine-tuning => instruction tuning
+supervised fine-tuning => supervised fine-tuning (SFT)
+parameter-efficient fine-tuning => parameter-efficient fine-tuning (PEFT)
+direct preference optimization => direct preference optimization (DPO)
+reinforcement learning from human feedback => reinforcement learning from human feedback (RLHF)
+reward model
+reward model training => reward model
+reward hacking
+Constitutional AI
+constitutional classifier
+Constitutional Classifiers => constitutional classifier
+alignment
+safety alignment => alignment
+alignment tax
+The alignment tax => alignment tax
+AI safety
+red teaming
+automated red teaming => red teaming
+guardrails
+Guardrails and filters => guardrails
+sycophancy
+specification gaming
+format gaming => specification gaming
+hallucination
+code hallucinations => hallucination
+verbosity bias
+LLM-as-a-judge
+LLM-as-a-judge evaluation => LLM-as-a-judge
+perplexity
+temperature
+speculative decoding
+KV caching
+retrieval-augmented generation => retrieval-augmented generation (RAG)
+GraphRAG
+reranking
+Reranking => reranking
+small language model => small language model (SLM)
+sentiment analysis
+named entity recognition
+question answering
+function calling
+tool use
+tool call => tool use
+AI agent
+AI agents => AI agent
+Agent => AI agent
+embodied agent
+Embodied agents => embodied agent
+sensor fusion
+sim-to-real transfer
+sim-to-real gap => sim-to-real transfer
+corrigibility
+capability control
+
+# ---- Distributions ----
+Beta distribution => distribution!Beta
+Poisson distribution => distribution!Poisson
+normal distribution => distribution!normal (Gaussian)
+Gaussian distribution => distribution!normal (Gaussian)
+Bernoulli distribution => distribution!Bernoulli
+binomial distribution => distribution!binomial
+Dirichlet distribution => distribution!Dirichlet
+gamma distribution => distribution!gamma
+exponential distribution => distribution!exponential
+uniform distribution => distribution!uniform
+multinomial distribution => distribution!multinomial
+Cauchy distribution => distribution!Cauchy
+Student's t distribution => distribution!Student's t
+geometric distribution => distribution!geometric
+negative binomial distribution => distribution!negative binomial
+Laplace distribution => distribution!Laplace
+
+# ---- People & named methods ----
+Savage, Leonard J.
+L.J. Savage => Savage, Leonard J.
+Wiener, Norbert
+Norbert Wiener => Wiener, Norbert
+AlphaGo
+AlphaZero
+AlphaFold
+AlphaProof
+ELIZA
+ELIZA effect
+Jevons paradox
+
+# ---- Acronyms ----
+MCMC
+SGD
+MLE => maximum likelihood estimation (MLE)
+MAP => maximum a posteriori (MAP)
+CLT => central limit theorem (CLT)
+LLN => law of large numbers (LLN)
+GP => Gaussian process (GP)
+SVM => support vector machine (SVM)
+PLS => partial least squares (PLS)
+FDR => false discovery rate (FDR)
+AIC => Akaike information criterion (AIC)
+BIC => Bayesian information criterion (BIC)
+R-squared => coefficient of determination (R-squared)
+EM => expectation-maximization (EM) algorithm
+KL divergence => Kullback-Leibler divergence (KL divergence)
+Kullback-Leibler divergence => Kullback-Leibler divergence (KL divergence)
+AUC => area under the curve (AUC)
+LLM => large language model (LLM)
+NLP => natural language processing (NLP)
+CNN => neural network!convolutional
+RNN => neural network!recurrent
+LSTM => long short-term memory (LSTM)
+ReLU => rectified linear unit (ReLU)
+GAN => generative adversarial network (GAN)
+MoE => mixture of experts (MoE)
+RL => reinforcement learning (RL)
+MDP => Markov decision process (MDP)
+RLHF => reinforcement learning from human feedback (RLHF)
+DPO => direct preference optimization (DPO)
+SFT => supervised fine-tuning (SFT)
+PEFT => parameter-efficient fine-tuning (PEFT)
+RAG => retrieval-augmented generation (RAG)
+SLM => small language model (SLM)
+AGI => artificial general intelligence (AGI)
+ASI => artificial superintelligence (ASI)

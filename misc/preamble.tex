@@ -1,0 +1,37 @@
+% Paperback trim 7 x 10 in, black and white. The class is the standard book class at 10 pt; the page is cut to the trim and a
+% text block of 33pc x 51pc (5.5 x 8.5 in, the width the figures are made for) is centred on it.
+\makeatletter
+\@ifpackageloaded{geometry}%
+  {\geometry{paperwidth=7in,paperheight=10in,total={33pc,51pc},centering}}%
+  {\usepackage[paperwidth=7in,paperheight=10in,total={33pc,51pc},centering]{geometry}}
+\makeatother
+\usepackage{amsmath}
+\usepackage{cancel}
+\usepackage{fvextra}
+\fvset{breaklines=true}
+% pandoc sets 3em; exercise statements with a long inline formula or file name need more
+\setlength{\emergencystretch}{6em}
+% Back-of-book index. Standard makeidx: \index{} tags are injected
+% by misc/index-terms.lua, makeindex builds the .ind, and \printindex (added via
+% include-after-body: misc/index-page.tex) typesets it.
+\usepackage{makeidx}
+\makeindex
+% Ensure amsmath package is loaded before using these commands
+\newcommand{\Cov}[1]{\mathrm{Cov}\left(#1\right)}
+\newcommand{\Cor}[1]{\mathrm{Cor}\left(#1\right)}
+\newcommand{\Var}[1]{\mathrm{Var}\left(#1\right)}
+\newcommand{\sd}[1]{\mathrm{sd}\left(#1\right)}
+\newcommand{\E}[2][]{\mathrm{E}_{#1}\left(#2\right)}
+\newcommand{\prob}[1]{\mathrm{P}\left(#1\right)}
+\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
+\DeclareMathOperator*{\mini}{minimize}
+% A long section or chapter title in the running head is scaled down to the text width instead of running into the margin.
+\usepackage{adjustbox}
+\makeatletter
+\let\book@psheadings\ps@headings
+\renewcommand{\ps@headings}{%
+  \book@psheadings
+  \def\@evenhead{\thepage\hfil\adjustbox{max width=\dimexpr\textwidth-3em\relax}{\slshape\leftmark}}%
+  \def\@oddhead{\adjustbox{max width=\dimexpr\textwidth-3em\relax}{\slshape\rightmark}\hfil\thepage}}
+\makeatother
+\pagestyle{headings}

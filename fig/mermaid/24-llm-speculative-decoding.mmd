@@ -1,0 +1,15 @@
+%%{init: {'themeVariables': {'noteBkgColor': '#eeeeee', 'noteTextColor': '#000000', 'noteBorderColor': '#999999'}, 'sequence': {'actorFontFamily': 'Helvetica, Arial, sans-serif', 'noteFontFamily': 'Helvetica, Arial, sans-serif', 'messageFontFamily': 'Helvetica, Arial, sans-serif', 'messageFontSize': 14, 'width': 120, 'actorMargin': 60, 'noteMargin': 20, 'diagramMarginX': 10, 'diagramMarginY': 10}}}%%
+sequenceDiagram
+    participant D as Draft Model (Small)
+    participant T as Target Model (Large)
+    participant O as Output
+
+    Note over D, T: Step 1: Draft model generates $$\:K\:$$ tokens
+    D->>D: Predict $$\:x_1, x_2, \ldots, x_K$$
+    D->>T: Send draft tokens
+
+    Note over T: Step 2: Target model verifies in parallel
+    T->>T: Compute probabilities for $$\:x_1, \ldots, x_K$$
+
+    Note over T, O: Step 3: Accept/Reject
+    T-->>O: Output accepted tokens<br/>+ 1 new token

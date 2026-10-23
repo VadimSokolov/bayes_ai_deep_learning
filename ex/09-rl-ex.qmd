@@ -1,0 +1,912 @@
+### Pen-and-Pencil {.unnumbered}
+
+::: {#exr-}
+## Bellman Equation
+
+Consider a simple grid world where a robot can move in 4 directions. The state is the robot's position, and the reward is $-1$ for each step (to encourage efficiency) except reaching the goal (reward = 0, terminal).
+
+In a 3×3 grid:
+```
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+| 4 | 5 | 6 |
++---+---+---+
+| 7 | 8 | G |
+```
+State 9 is the goal (G). Discount factor $\gamma = 0.9$.
+
+a) Write the Bellman optimality equation for this problem.
+b) What is $V^*(G) = V^*(9)$?
+c) Assuming deterministic transitions, calculate $V^*(8)$ and $V^*(6)$.
+d) Calculate $V^*(5)$.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Bellman optimality equation:
+$$
+V^*(s) = \max_a \left[ R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) V^*(s') \right]
+$$
+
+For our deterministic grid:
+$$
+V^*(s) = \max_a \left[ -1 + \gamma V^*(s') \right]
+$$
+where $s'$ is the next state after taking action $a$ in state $s$.
+
+b) Goal state: $V^*(9) = 0$ (terminal state, no future rewards)
+
+c) State 8 (one step from goal):
+$$
+V^*(8) = \max\{-1 + 0.9 \cdot V^*(9), -1 + 0.9 \cdot V^*(5), -1 + 0.9 \cdot V^*(7)\}
+$$
+Best action is moving right to goal:
+$$
+V^*(8) = -1 + 0.9 \cdot 0 = -1
+$$
+
+State 6 (one step from goal):
+$$
+V^*(6) = -1 + 0.9 \cdot 0 = -1
+$$
+
+d) State 5 (two steps from goal):
+The optimal path is either right→down or down→right.
+$$
+V^*(5) = -1 + 0.9 \cdot V^*(6) = -1 + 0.9 \cdot (-1) = -1.9
+$$
+
+```{r}
+# Verify with value iteration
+gamma <- 0.9
+
+# Neighbor table: valid moves (up/down/left/right) for each non-terminal state
+neighbors <- list(
+  `1` = c(2, 4),       `2` = c(1, 3, 5),    `3` = c(2, 6),
+  `4` = c(1, 5, 7),    `5` = c(2, 4, 6, 8), `6` = c(3, 5, 9),
+  `7` = c(4, 8),       `8` = c(5, 7, 9)
+)
+
+V <- rep(0, 9)  # Initialize; V[9] = 0 stays fixed (terminal/goal)
+
+for (iter in 1:10) {
+  V_new <- V
+  for (s in 1:8) {
+    V_new[s] <- max(sapply(neighbors[[as.character(s)]],
+                           function(sp) -1 + gamma * V[sp]))
+  }
+  V <- V_new
+}
+cat("V*(8) =", round(V[8], 2), "\n")
+cat("V*(6) =", round(V[6], 2), "\n")
+cat("V*(5) =", round(V[5], 2), "\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Secretary Problem
+
+You are hiring for a position and will interview exactly 10 candidates. After each interview, you must immediately decide to hire or reject (no callbacks). Candidates can be ranked relatively but not absolutely. You want to maximize the probability of hiring the best candidate.
+
+a) What is the optimal strategy? (Hint: reject the first $r$ candidates, then hire the first one better than all previous)
+b) For $n = 10$ candidates, what is the optimal $r$?
+c) What is the probability of success with the optimal strategy?
+d) Simulate this problem 10,000 times to empirically verify your answer.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The optimal strategy is:
+1. Reject the first $r$ candidates (the "learning phase")
+2. Then hire the first candidate who is better than all of the first $r$
+
+b) The optimal $r$ is approximately $n/e$ for large $n$. This is an asymptotic approximation, however, and it can differ from the exact discrete optimum for small $n$.
+```{r}
+n <- 10
+r_optimal <- round(n / exp(1))
+cat("Asymptotic approximation: r =", r_optimal, "\n")
+```
+For $n = 10$ this approximation gives $r = 4$, but the exact optimum (computed in part (c)) is $r = 3$.
+
+c) The probability of success with optimal $r$:
+
+For large $n$: $P(\text{success}) \approx 1/e \approx 0.368$
+
+For $n = 10$, computing the exact success probability for every candidate $r$:
+```{r}
+# Exact calculation
+prob_success <- function(n, r) {
+  if (r == 0) return(1/n)  # Random selection
+
+  prob <- 0
+  for (best_pos in (r+1):n) {
+    # Best candidate at position best_pos
+    # We succeed if the best among first (best_pos - 1) is in positions 1 to r
+    prob <- prob + (1/n) * (r / (best_pos - 1))
+  }
+  return(prob)
+}
+
+probs <- sapply(0:(n-1), function(r) prob_success(n, r))
+cat("Success probabilities by r:\n")
+print(round(probs, 4))
+cat("Optimal r =", which.max(probs) - 1, "with P(success) =", round(max(probs), 4), "\n")
+```
+
+d) Simulation:
+```{r}
+set.seed(42)
+n_sim <- 10000
+
+simulate_secretary <- function(n, r) {
+  # Generate random permutation (rank 1 = best)
+  candidates <- sample(1:n)
+
+  if (r == 0) {
+    return(candidates[1] == 1)  # Pick first one
+  }
+
+  # Best among first r (learning phase)
+  threshold <- min(candidates[1:r])
+
+  # Look for someone better in positions (r+1) to n
+  for (i in (r+1):n) {
+    if (candidates[i] < threshold) {
+      return(candidates[i] == 1)  # Hired - check if best overall
+    }
+  }
+  return(candidates[n] == 1)  # Hired last candidate by default
+}
+
+# Simulate with r = 4
+success_count <- sum(replicate(n_sim, simulate_secretary(10, 4)))
+empirical_prob <- success_count / n_sim
+cat("Empirical P(success) with r=4:", round(empirical_prob, 4), "\n")
+cat("Theoretical:", round(prob_success(10, 4), 4), "\n")
+```
+
+:::
+:::
+
+::: {#exr-}
+## Q-Learning Update
+
+A simple MDP has states {A, B, C} and actions {left, right}. The discount factor is $\gamma = 0.9$ and learning rate is $\alpha = 0.1$.
+
+Current Q-table:
+|       | left | right |
+|-------|------|-------|
+| A     | 2.0  | 3.0   |
+| B     | 1.5  | 2.5   |
+| C     | 0.0  | 0.0   |
+
+The agent is in state A, takes action "right", receives reward $r = 5$, and transitions to state B.
+
+a) Write the Q-learning update formula.
+b) Calculate the new value of $Q(A, \text{right})$.
+c) If instead the agent transitioned to state C (terminal), what would be the update?
+d) After 1000 Q-learning iterations in this environment, what would you expect Q(A, right) to converge to?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Q-learning update formula:
+$$
+Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]
+$$
+
+b) Current values:
+- $Q(A, \text{right}) = 3.0$
+- Next state: B
+- $\max_{a'} Q(B, a') = \max(1.5, 2.5) = 2.5$
+- Reward: $r = 5$
+
+Update:
+```{r}
+Q_old <- 3.0
+alpha <- 0.1
+gamma <- 0.9
+r <- 5
+max_Q_next <- 2.5
+
+Q_new <- Q_old + alpha * (r + gamma * max_Q_next - Q_old)
+cat("New Q(A, right) =", Q_new, "\n")
+```
+
+c) If C is terminal: $\max_{a'} Q(C, a') = 0$
+
+```{r}
+Q_new_terminal <- Q_old + alpha * (r + gamma * 0 - Q_old)
+cat("Q(A, right) if C terminal =", Q_new_terminal, "\n")
+```
+
+d) At convergence, Q(A, right) should equal the expected discounted return:
+- Immediate reward: 5
+- Plus $\gamma \times V^*(B)$ where $V^*(B) = \max Q(B, \cdot)$
+
+If the environment is deterministic and optimal from B is known, Q(A, right) converges to the true action-value.
+
+For example, if B→C with reward 2, and C is terminal:
+$$
+Q^*(A, \text{right}) = 5 + 0.9 \times (2 + 0.9 \times 0) = 5 + 1.8 = 6.8
+$$
+
+:::
+:::
+
+::: {#exr-td-vs-mc}
+## TD(0) versus Monte Carlo
+
+Consider a 3-state Markov reward chain $1 \to 2 \to 3$, where state 3 is terminal. The reward for transitioning $1\to 2$ is $R_1$ and for $2 \to 3$ is $R_2$, both random with means $\E{R_1}=3$ and $\E{R_2}=5$. Discount factor $\gamma = 0.9$, learning rate $\alpha = 0.1$. Current value estimates are $V(1)=2.0$, $V(2)=4.0$, $V(3)=0$ (terminal).
+
+a) The agent is in state 1, observes reward $r=3$, and transitions to state 2. Compute the TD(0) update
+$$
+V(1) \leftarrow V(1) + \alpha\big[r + \gamma V(2) - V(1)\big].
+$$
+b) In the same episode, the agent then observes reward $r_2=5$ transitioning from state 2 into the terminal state 3. Using the full realized return $G_1 = r + \gamma r_2$ from state 1, compute the every-visit Monte Carlo update $V(1) \leftarrow V(1) + \alpha(G_1-V(1))$, and compare to (a).
+c) Simulate 2,000 independent replications of learning $V(1)$ from only 10 episodes each, with $R_1 \sim N(3,3^2)$ and $R_2 \sim N(5,3^2)$ resampled every episode, and both estimators starting from $V(1)=V(2)=0$. Compare the bias (distance of the mean estimate from the true $V(1)$) and the variance of the TD(0) and Monte Carlo estimators of $V(1)$ after 10 episodes.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)
+```{r}
+alpha <- 0.1
+gamma <- 0.9
+V1 <- 2.0; V2 <- 4.0; r <- 3
+
+V1_TD <- V1 + alpha * (r + gamma * V2 - V1)
+cat("TD(0): V(1) <-", V1_TD, "\n")
+```
+$V(1) \leftarrow 2.0 + 0.1(3 + 0.9\times 4.0 - 2.0) = 2.46$.
+
+b)
+```{r}
+r2 <- 5
+G1 <- r + gamma * r2
+V1_MC <- V1 + alpha * (G1 - V1)
+cat("MC: G1 =", G1, " V(1) <-", V1_MC, "\n")
+```
+The full return is $G_1 = 3 + 0.9\times 5 = 7.5$, giving $V(1) \leftarrow 2.0+0.1(7.5-2.0)=2.55$, slightly higher than TD(0)'s $2.46$. The entire gap traces back to $V(2)=4.0$ sitting below its true value: had $V(2)$ already equaled $\E{R_2}=5$, TD(0) would have given $2.0+0.1(3+0.9\times 5-2.0)=2.55$, identical to the Monte Carlo update. TD(0) is biased whenever it bootstraps off an estimate that has not yet converged, while Monte Carlo uses the actually realized downstream reward and carries no such bootstrapping bias, at the cost of depending on the full (and noisier) trajectory.
+
+c)
+```{r}
+set.seed(123)
+alpha <- 0.1; gamma <- 0.9
+n_episodes <- 10; n_reps <- 2000
+true_V1 <- 3 + gamma * 5
+
+V_TD1 <- numeric(n_reps)
+V_MC1 <- numeric(n_reps)
+for (rep in 1:n_reps) {
+  V_td <- c(0, 0); V_mc <- c(0, 0)
+  for (ep in 1:n_episodes) {
+    r1 <- rnorm(1, 3, 3); r2 <- rnorm(1, 5, 3)
+    V_td[1] <- V_td[1] + alpha * (r1 + gamma * V_td[2] - V_td[1])
+    V_td[2] <- V_td[2] + alpha * (r2 - V_td[2])
+    G1 <- r1 + gamma * r2
+    V_mc[1] <- V_mc[1] + alpha * (G1 - V_mc[1])
+    V_mc[2] <- V_mc[2] + alpha * (r2 - V_mc[2])
+  }
+  V_TD1[rep] <- V_td[1]; V_MC1[rep] <- V_mc[1]
+}
+
+cat("True V(1) =", true_V1, "\n")
+cat("Mean TD(0):", round(mean(V_TD1), 3), " bias:", round(mean(V_TD1) - true_V1, 3), "\n")
+cat("Mean MC:   ", round(mean(V_MC1), 3), " bias:", round(mean(V_MC1) - true_V1, 3), "\n")
+cat("SD TD(0):", round(sd(V_TD1), 3), "  SD MC:", round(sd(V_MC1), 3),
+    "  variance ratio (MC/TD):", round(var(V_MC1) / var(V_TD1), 2), "\n")
+```
+After only 10 episodes, both estimators still carry substantial bias toward their zero starting point (a constant step size of $\alpha=0.1$ leaves about $(1-\alpha)^{10}\approx 0.35$ of the initial value's weight in place), but TD(0) is more biased ($-4.381$ vs. $-2.636$): it bootstraps its target off $V(2)$, which is itself still under-converged after only 10 updates, so the slow start in $V(2)$ compounds into $V(1)$. At the same time, TD(0) has visibly lower variance across the 2,000 replications (SD $0.68$ vs. $0.842$, a variance ratio of $1.53$), because its update depends on the single reward $r_1$ plus a bootstrap term $V(2)$ that fluctuates less than a full realized second-step reward would. This is the textbook bias-variance trade-off between the two update rules: TD(0) accepts more early bias in exchange for lower variance, and in practice this often makes it converge faster in mean-squared error.
+
+:::
+:::
+
+::: {#exr-}
+## Regret in Bandits
+
+A 3-armed bandit has true success probabilities:
+
+- Arm 1: $\theta_1 = 0.3$
+- Arm 2: $\theta_2 = 0.5$ (optimal)
+- Arm 3: $\theta_3 = 0.4$
+
+An agent uses $\epsilon$-greedy with $\epsilon = 0.1$, playing 1000 rounds.
+
+a) What is the expected regret per round of pulling arm 1 instead of arm 2?
+b) What is the expected regret per round of the $\epsilon$-greedy strategy (assuming it correctly identifies arm 2 as best)?
+c) Calculate the expected cumulative regret after 1000 rounds.
+d) Compare to Thompson Sampling: simulate both algorithms and plot cumulative regret.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Regret of arm 1 vs optimal arm 2:
+$$
+\Delta_1 = \theta^* - \theta_1 = 0.5 - 0.3 = 0.2
+$$
+
+b) With $\epsilon$-greedy:
+- Probability 0.9: exploit (pull arm 2, regret = 0)
+- Probability 0.1: explore uniformly
+  - Pull arm 1 (prob 1/3): regret = 0.2
+  - Pull arm 2 (prob 1/3): regret = 0
+  - Pull arm 3 (prob 1/3): regret = 0.1
+
+Expected regret per round:
+```{r}
+eps <- 0.1
+regret_per_round <- eps * (1/3 * 0.2 + 1/3 * 0 + 1/3 * 0.1)
+cat("Expected regret per round:", round(regret_per_round, 4), "\n")
+```
+
+c) Cumulative regret after 1000 rounds:
+```{r}
+T <- 1000
+cumulative_regret <- T * regret_per_round
+cat("Expected cumulative regret:", round(cumulative_regret, 2), "\n")
+```
+
+d) Simulation comparison:
+```{r}
+set.seed(42)
+theta <- c(0.3, 0.5, 0.4)
+T <- 1000
+
+# Epsilon-greedy
+eps_greedy <- function(theta, T, eps = 0.1) {
+  k <- length(theta)
+  counts <- rep(0, k)
+  rewards <- rep(0, k)
+  cumulative_regret <- numeric(T)
+  total_regret <- 0
+
+  for (t in 1:T) {
+    if (t <= k) {
+      arm <- t  # Pull each arm once
+    } else if (runif(1) < eps) {
+      arm <- sample(1:k, 1)  # Explore
+    } else {
+      arm <- which.max(rewards / pmax(counts, 1))  # Exploit
+    }
+
+    reward <- rbinom(1, 1, theta[arm])
+    counts[arm] <- counts[arm] + 1
+    rewards[arm] <- rewards[arm] + reward
+    total_regret <- total_regret + (max(theta) - theta[arm])
+    cumulative_regret[t] <- total_regret
+  }
+  return(cumulative_regret)
+}
+
+# Thompson Sampling
+thompson_sampling <- function(theta, T) {
+  k <- length(theta)
+  alpha <- rep(1, k)
+  beta_param <- rep(1, k)
+  cumulative_regret <- numeric(T)
+  total_regret <- 0
+
+  for (t in 1:T) {
+    # Sample from posteriors
+    samples <- rbeta(k, alpha, beta_param)
+    arm <- which.max(samples)
+
+    reward <- rbinom(1, 1, theta[arm])
+    alpha[arm] <- alpha[arm] + reward
+    beta_param[arm] <- beta_param[arm] + 1 - reward
+    total_regret <- total_regret + (max(theta) - theta[arm])
+    cumulative_regret[t] <- total_regret
+  }
+  return(cumulative_regret)
+}
+
+# Run simulations
+regret_eg <- eps_greedy(theta, T)
+regret_ts <- thompson_sampling(theta, T)
+
+plot(1:T, regret_eg, type = "l", col = "blue",
+     xlab = "Round", ylab = "Cumulative Regret",
+     main = "Epsilon-Greedy vs Thompson Sampling")
+lines(1:T, regret_ts, col = "red")
+legend("bottomright", c("Epsilon-greedy", "Thompson Sampling"),
+       col = c("blue", "red"), lty = 1, bty = "n")
+```
+
+In this run the two curves end almost level, at 13.2 for epsilon-greedy and 13.6 for Thompson Sampling, but they get there differently. Thompson Sampling pays most of its regret early, while it is still learning which arm is best, and then flattens out. Epsilon-greedy pays about 0.01 per round for its random exploration, plus a jump of about 4 between rounds 410 and 450, when it kept exploiting a worse arm whose running average had overtaken the best arm's. In the long run Thompson Sampling has the lower regret, because it balances exploration and exploitation more efficiently, but a single run can go either way, so repeat the simulation with other seeds.
+
+:::
+:::
+
+::: {#exr-}
+## True/False: Reinforcement Learning
+
+a) The Bellman equation is always linear in the value function.
+
+b) Q-learning is an off-policy algorithm.
+
+c) In the secretary problem, the probability of selecting the best candidate approaches 1 as the number of candidates increases.
+
+d) Thompson Sampling requires knowing the true reward distributions of each arm.
+
+e) The discount factor $\gamma$ must be strictly less than 1 for the value function to be finite in infinite-horizon MDPs.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) **FALSE**. The Bellman *expectation* equation (for a fixed policy) is linear. But the Bellman *optimality* equation involves a $\max$ operator, making it nonlinear.
+
+b) **TRUE**. Q-learning learns about the optimal policy while following a different behavior policy (e.g., $\epsilon$-greedy). It uses $\max_a Q(s', a)$ rather than the action actually taken.
+
+c) **FALSE**. The probability of selecting the best candidate converges to $1/e \approx 0.368$ as $n \to \infty$. It does not approach 1.
+
+d) **FALSE**. Thompson Sampling uses the posterior distributions, which are updated based on observed rewards. It does not require knowing the true distributions: it learns them through experience.
+
+e) **TRUE** (with caveats). For continuing tasks with non-zero expected rewards, $\gamma < 1$ ensures convergence. However, in episodic tasks (with terminal states), $\gamma = 1$ can be used. Also, if rewards are bounded and eventually zero, $\gamma = 1$ may work.
+
+:::
+:::
+
+### Computing {.unnumbered}
+
+::: {.content-visible when-format="pdf" unless-meta="showsln"}
+The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
+:::
+
+:::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+::: {#exr-}
+## Multi-Armed Bandit: Thompson Sampling
+
+A website tests 3 button colors: Red (A), Green (B), Blue (C). Each has an unknown click-through rate $\theta_i$. After some initial testing, the posterior distributions are:
+
+- Red: Beta(15, 85)
+- Green: Beta(22, 78)
+- Blue: Beta(18, 82)
+
+a) Calculate the posterior mean click-through rate for each button.
+b) Using Thompson Sampling, simulate which button would be selected in the next trial.
+c) Repeat part (b) 1000 times and report the selection frequencies.
+d) After 100 more trials with 25 clicks on Green, update the Green posterior and recalculate.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) Posterior means:
+```{r}
+# Beta posterior means: alpha / (alpha + beta)
+mean_red <- 15 / (15 + 85)
+mean_green <- 22 / (22 + 78)
+mean_blue <- 18 / (18 + 82)
+
+cat("Red mean:", round(mean_red, 4), "\n")
+cat("Green mean:", round(mean_green, 4), "\n")
+cat("Blue mean:", round(mean_blue, 4), "\n")
+```
+
+b) Thompson Sampling - one trial:
+```{r}
+set.seed(42)
+# Sample from each posterior
+theta_red <- rbeta(1, 15, 85)
+theta_green <- rbeta(1, 22, 78)
+theta_blue <- rbeta(1, 18, 82)
+
+selected <- which.max(c(theta_red, theta_green, theta_blue))
+colors <- c("Red", "Green", "Blue")
+cat("Sampled values:", round(c(theta_red, theta_green, theta_blue), 4), "\n")
+cat("Selected:", colors[selected], "\n")
+```
+
+c) 1000 Thompson Sampling trials:
+```{r}
+set.seed(123)
+n_trials <- 1000
+selections <- replicate(n_trials, {
+  samples <- c(rbeta(1, 15, 85), rbeta(1, 22, 78), rbeta(1, 18, 82))
+  which.max(samples)
+})
+
+freq <- table(selections) / n_trials
+cat("Selection frequencies:\n")
+cat("Red:", freq["1"], ", Green:", freq["2"], ", Blue:", freq["3"], "\n")
+```
+
+Green is selected most often because it has the highest posterior mean and reasonable uncertainty.
+
+d) Updated Green posterior after 100 trials with 25 clicks:
+```{r}
+# Green: Beta(22 + 25, 78 + 75) = Beta(47, 153)
+new_green_alpha <- 22 + 25
+new_green_beta <- 78 + 75
+new_green_mean <- new_green_alpha / (new_green_alpha + new_green_beta)
+cat("New Green posterior: Beta(", new_green_alpha, ",", new_green_beta, ")\n")
+cat("New Green mean:", round(new_green_mean, 4), "\n")
+
+# New Thompson Sampling frequencies
+selections_new <- replicate(1000, {
+  samples <- c(rbeta(1, 15, 85),
+               rbeta(1, new_green_alpha, new_green_beta),
+               rbeta(1, 18, 82))
+  which.max(samples)
+})
+freq_new <- table(selections_new) / 1000
+cat("New selection frequencies:\n")
+cat("Red:", freq_new["1"], ", Green:", freq_new["2"], ", Blue:", freq_new["3"], "\n")
+```
+
+:::
+:::
+
+<!-- https://analytics.googleblog.com/2013/01/multi-armed-bandit-experiments.html -->
+::: {#exr-}
+## Multi-Armed Bandit A/B Test
+Consider a complex A/B experiment, with 6 alternatives, when you have 5 variations to your page, plus the original.
+
+a) Use Bonferroni correction for multiple comparisons. Calculate the significance level for each of the 5 tests and find the number of samples per arm needed to achieve a power of 0.95, in a two-sided test, against an improvement from the original's 4% conversion rate to 5%. Assume that the overall significance level is .05.
+a) Implement TS for the same experiment, with 100 visits per day. Assume an original arm with a 4% conversion rate, and an optimal arm with a 5% conversion rate. The other 4 arms include one suboptimal arm that beats the original with a conversion rate of 4.5%, and three inferior arms with rates of 3%, 2%, and 3.5%. End the experiment when the potential value remaining, the stopping rule of this chapter, falls below 1% of the champion's conversion rate, or after 919 days, the length of the classical test, whichever comes first. Plot the savings from a six-armed experiment, relative to a Bonferroni adjusted power calculation for a classical experiment. First plot should show the number of days required to end the experiment, with the vertical line showing the time required by the classical power calculation. The second plot should show the number of conversions that were saved by the bandit. What is the overall cost savings due to ending the experiment more quickly, and due to the experiment being less wasteful while it is running?
+a) Run your simulator 500 times and show the history of the serving weights for all the arms in the first of our 500 simulation runs. Comment on the results.
+a) Plot the daily cost of running the multi-armed bandit relative to an "oracle" strategy of always playing arm 2, the optimal arm.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) With the Bonferroni-corrected significance level 0.05/(6 - 1) = 0.01 and power 0.95, the standard power calculation (`power.prop.test` in R) gives 15,308 observations in each arm of the experiment. With 6 arms that's a total of 91,848 observations, or 919 days at 100 visits per day.
+a) The bandit saves conversions in two ways: it shifts traffic toward the better arms as the evidence accumulates, so it loses fewer conversions each day than the equal split of the classical test, and it ends the experiment sooner. To measure both we stop each simulated run with the rule of this chapter. At the end of each day we draw 1,000 samples from the six Beta posteriors (all starting at $\text{Beta}(1,1)$) and use the same draws twice: the share of draws in which an arm is the best is its weight $w_{at}$, which splits the next day's 100 visits, and the 95th percentile of the regret relative to the champion (the arm with the largest weight) is the potential value remaining. A run ends on the first day on which this value falls below 1% of the champion's conversion rate, or on day 919, the length of the classical test. We count the savings against the classical test over the same 919 days, in expected conversions at the true rates rather than realized counts. While the bandit runs, each day saves $100\left(\sum_a w_a\theta_a-\bar\theta\right)$ conversions, where $w_a$ are the weights that split that day's visits and $\bar\theta$ is the average rate of the six arms, which is what an equal split earns. When the bandit ends on day $T$, all traffic goes to its champion for the remaining $919-T$ days while the classical test keeps splitting equally, which saves another $(919-T)\cdot 100\left(\theta_{\text{champion}}-\bar\theta\right)$ conversions. The histograms show the day on which each of 500 runs ends (left, with the 919 days of the classical test as the vertical line) and the total conversions saved (right, with the mean as the vertical line).
+
+```{r}
+#| fig-height: 3
+set.seed(2025)
+theta_true <- c(0.040, 0.050, 0.045, 0.030, 0.020, 0.035)
+K <- length(theta_true)
+daily_visits <- 100
+horizon <- 919  # days of the classical test, from part (a)
+n_draws <- 1000
+
+# One run: split each day's traffic by the weights w_at and stop on the first day
+# on which the potential value remaining (95th percentile of the regret) is below 1%
+run_until_stop <- function() {
+  a <- rep(1, K); b <- rep(1, K)  # Beta(1, 1) priors
+  w <- rep(1 / K, K)              # day 1: no data yet, equal split
+  saved <- 0; fired <- FALSE
+  for (day in 1:horizon) {
+    saved <- saved + daily_visits * (sum(w * theta_true) - mean(theta_true))
+    served <- as.vector(rmultinom(1, daily_visits, w))
+    conv <- rbinom(K, served, theta_true)
+    a <- a + conv; b <- b + served - conv
+    draws <- matrix(rbeta(n_draws * K, rep(a, each = n_draws), rep(b, each = n_draws)), n_draws, K)
+    best <- max.col(draws)        # the best arm within each draw
+    w <- tabulate(best, K) / n_draws
+    champ <- which.max(w)
+    regret <- (draws[cbind(1:n_draws, best)] - draws[, champ]) / draws[, champ]
+    if (quantile(regret, 0.95) < 0.01) { fired <- TRUE; break }
+  }
+  c(day = day, champion = champ, fired = fired, saved_running = saved)
+}
+
+runs <- as.data.frame(t(replicate(500, run_until_stop())))
+runs$saved_stopping <- (horizon - runs$day) * daily_visits * (theta_true[runs$champion] - mean(theta_true))
+runs$saved_total <- runs$saved_running + runs$saved_stopping
+
+par(mfrow = c(1, 2), mar = c(3.5, 3.5, 2, 1))
+hist(runs$day, breaks = seq(0, 950, by = 50), col = "gray80", border = "gray40",
+     xlab = "Days until the experiment ends", ylab = "Number of runs",
+     main = "Stopping day of the bandit (500 runs)")
+abline(v = horizon, lwd = 2, lty = 2)
+text(horizon, 0.9 * par("usr")[4], "Classical test, 919 days", pos = 2, cex = 0.6)
+hist(runs$saved_total, col = "gray80", border = "gray40",
+     xlab = "Expected conversions saved", ylab = "Number of runs",
+     main = "Conversions saved against the classical test")
+abline(v = mean(runs$saved_total), lwd = 2, lty = 2)
+text(mean(runs$saved_total), 0.9 * par("usr")[4], "Mean", pos = 2, cex = 0.6)
+par(mfrow = c(1, 1))
+```
+
+The experiment ends after 296 days on average, against 919 for the classical test, with a median of 236 days. One run in twenty takes more than 713 days, and 13 of the 500 runs (2.6%) reach day 919 without the rule firing. In 490 runs (98%) the champion is the optimal arm. In the other 10 it is the suboptimal arm (4.5%), and these runs end early, after 144 days on average. They still save 725 conversions on average, because 4.5% beats the 3.67% of an equal split, against 1,131 for the runs whose champion is the optimal arm. Averaged over all 500 runs the bandit saves 1,122 conversions: 823 by ending the experiment sooner and 299 by being less wasteful while it runs, so about three quarters of the saving comes from stopping early and one quarter from the allocation. For scale, over its 919 days the classical test loses 1,225 conversions against an oracle that always plays the optimal arm, and the bandit recovers 92% of them. The 13 runs that reach day 919 without stopping still save 1,009 conversions on average, all of it from the less wasteful allocation, so a late stop costs the bandit little.
+
+For this experiment, the Google Analytics documentation [@scott2013bandit] reports that the bandit ends after 88 days on average, against the 919 days of the classical calculation, and saves 1,173 conversions on average, more than 800 even in the worst cases. Our bandit ends later (within 88 days in only 10% of our runs), and its worst runs, the ten that end on the suboptimal arm, save less than 800, but its average saving of 1,122 conversions is close to the 1,173 reported. The stopping day depends on details that the documentation does not give, such as the number of posterior draws a day and which of its stopping criteria ended the runs, so the two need not agree on it, while the saving is much less sensitive to them. Parts (c) and (d) below follow a similar bandit, without the stopping rule, over its first 120 days, and part (c) shows why the rule has to wait: 120 days are nowhere near enough to fully resolve the optimal and suboptimal arms.
+
+c) Label the six arms Original, Optimal, Suboptimal, and Inferior 1 through 3, in that order (so arm 2 is the Optimal arm referenced in part (d)). We simulate 500 independent runs of the day-by-day bandit and track the serving weight $w_{at} = P(a \text{ is optimal} \mid \text{data through day } t)$ for every arm, estimated by Monte Carlo sampling from the current Beta posteriors and counting how often each arm produces the largest draw, the same idea used by the `bandit()` function earlier in this chapter. Traffic is reallocated once a day: assuming 100 visits per day, we split that day's visitors across arms according to $w_{at}$, observe the resulting conversions, and update the posteriors before moving on.
+
+```{r}
+#| fig-height: 3
+set.seed(777)
+theta_true <- c(0.040, 0.050, 0.045, 0.030, 0.020, 0.035)
+arm_names  <- c("Original", "Optimal", "Suboptimal", "Inferior 1", "Inferior 2", "Inferior 3")
+K <- length(theta_true)
+opt_arm <- which.max(theta_true)
+
+# w_at = P(arm a is optimal | data), by Monte Carlo sampling from the current
+# Beta posteriors, the same idea as the bandit() function earlier in this chapter
+serving_weights <- function(alpha_params, beta_params, n_mc = 1500) {
+  draws <- matrix(rbeta(n_mc * K, rep(alpha_params, each = n_mc), rep(beta_params, each = n_mc)),
+                   n_mc, K)
+  tabulate(max.col(draws), nbins = K) / n_mc
+}
+
+visits_per_day <- 100
+n_days  <- 120
+n_reps  <- 500
+
+run_bandit_day <- function() {
+  alpha_params <- rep(1, K); beta_params <- rep(1, K)
+  W <- matrix(0, n_days, K)
+  cost <- numeric(n_days)
+  for (d in 1:n_days) {
+    wat <- serving_weights(alpha_params, beta_params)
+    W[d, ] <- wat
+    cost[d] <- visits_per_day * (theta_true[opt_arm] - sum(wat * theta_true))
+    served <- as.vector(rmultinom(1, visits_per_day, wat))  # traffic split by w_at
+    conv <- rbinom(K, served, theta_true)
+    alpha_params <- alpha_params + conv
+    beta_params  <- beta_params + served - conv
+  }
+  list(W = W, cost = cost)
+}
+
+W1 <- NULL
+cost_mat <- matrix(0, n_reps, n_days)
+for (i in 1:n_reps) {
+  res <- run_bandit_day()
+  if (i == 1) W1 <- res$W
+  cost_mat[i, ] <- res$cost
+}
+
+par(mar = c(4, 4, 3, 7.5))
+matplot(1:n_days, W1, type = "l", lty = 1, col = 1:K, lwd = 2,
+        xlab = "Day", ylab = "Serving weight",
+        main = "Serving weights over time (run 1 of 500)")
+legend("topright", arm_names, col = 1:K, lty = 1, lwd = 2, cex = 0.65,
+       bty = "n", xpd = TRUE, inset = c(-0.4, 0))
+
+cat("Samples to tell the top two arms apart (4.5% vs 5%) at the same power:\n",
+    ceiling(power.prop.test(p1 = 0.045, p2 = 0.050, sig.level = 0.05 / 5, power = 0.95)$n),
+    "per arm, versus 15,308 for the 4% vs 5% gap in part (a)\n")
+```
+
+All six weights start near 1/6, since no data have accumulated yet. Fading is not in order of quality in this particular run: Inferior 2 (2%) drops out by about day 15 and Original (4%) by about day 25, but Inferior 1 and Inferior 3, at 3% and 3.5%, stay in contention until about day 55, and Suboptimal leads for most of days 14 to 39. The real contest is between the Optimal and Suboptimal arms: the Optimal arm takes the lead on day 40 and pulls decisively ahead only around day 55 to 60, after which it holds 65 to 90% of the traffic, with Suboptimal still drawing about a tenth. This matches part (a): distinguishing arms half a percentage point apart needs about 64,475 observations per arm at the same power, more than four times the 15,308 needed for the 4% vs 5% gap, so the 12,000 visits simulated here (120 days at 100 per day) are nowhere near enough to fully resolve it. Other runs among the 500 converge faster or slower depending on the specific sequence of conversions observed; part (d) averages over all 500 runs to smooth out this variation.
+
+d) Define the daily cost of the bandit as the gap between the conversions an oracle who always plays the Optimal arm would expect on a given day and the conversions the bandit expects that day given its serving weights,
+$$
+\text{cost}_t = n\left(\theta_2 - \sum_a w_{at}\,\theta_a\right),
+$$
+where $n = 100$ is the number of visits per day and $\theta_2$ is the Optimal arm's true conversion rate. Averaging this over the 500 runs from part (c) smooths out the run-to-run noise seen above.
+
+```{r}
+#| fig-height: 3
+par(mar = c(4, 4, 3, 2) + 0.1)
+mean_cost <- colMeans(cost_mat)
+uniform_cost <- visits_per_day * (theta_true[opt_arm] - mean(theta_true))
+
+plot(1:n_days, mean_cost, type = "l", col = "blue", lwd = 2,
+     xlab = "Day", ylab = "Daily cost (conversions)",
+     main = "Daily cost vs. an oracle playing arm 2",
+     ylim = c(0, uniform_cost))
+abline(h = uniform_cost, col = "red", lty = 2)
+legend("topright", c("Bandit (mean of 500 runs)", "Classical equal allocation"),
+       col = c("blue", "red"), lty = c(1, 2), lwd = 2, cex = 0.7, bty = "n")
+
+cat("Day-1 cost:", round(mean_cost[1], 2),
+    " Day-120 cost:", round(mean_cost[n_days], 2), "\n")
+cat("Cumulative bandit cost over", n_days, "days:", round(sum(mean_cost), 1), "\n")
+cat("Cumulative cost under equal allocation over the same window:",
+    round(uniform_cost * n_days, 1), "\n")
+cat("Classical Bonferroni test duration at", visits_per_day, "visits/day:",
+    ceiling(91848 / visits_per_day), "days\n")
+```
+
+On day 1 the bandit knows nothing, so it serves traffic close to uniformly across all six arms, and its daily cost (about 1.33 conversions) matches what a classical experiment splitting traffic equally across six arms would lose every single day, no matter how long it ran. By day 120 the average daily cost has fallen to about 0.27, roughly a fivefold drop, because most traffic now goes to the Optimal arm, with a shrinking share to the nearly-as-good Suboptimal arm while the algorithm remains unsure. Summed over the 120 simulated days, the bandit costs about 60 conversions versus about 160 for equal allocation over the same window, a savings of roughly 62%. That comparison actually understates the bandit's advantage: from part (a), the classical Bonferroni-corrected test needs 91,848 total observations, or 919 days (about two and a half years) to complete at 100 visits per day, all the while sending a sixth of its traffic to arms known, in hindsight, to convert at only 2%, 3%, and 3.5%.
+
+:::
+:::
+
+::: {#exr-contextual-bandit-weekend}
+## Contextual Bandits: Weekday versus Weekend
+
+The chapter's Contextual Bandits section describes, without ever simulating it, an experiment in which "Arm A performs slightly better during the weekdays, while Arm B excels during the weekends." Make this concrete. Let $x_t=1$ denote a weekend, with $\prob{x_t=1}=2/7$, and $x_t=0$ a weekday. The true click-through rates are: arm A is $0.06$ on weekdays and $0.03$ on weekends; arm B is $0.03$ on weekdays and $0.08$ on weekends. A fresh context $x_t$ is drawn each round.
+
+a) Implement a context-blind Thompson sampling bandit that keeps a single $Beta(1,1)$ posterior per arm (as in the chapter's `bandit()` function) and never observes $x_t$.
+
+b) Implement a context-aware Thompson sampling bandit that keeps a separate $Beta(1,1)$ posterior for each of the four (arm, context) cells. Explain why this is the Bayesian-conjugate analogue of the chapter's logistic bandit model $\mathrm{logit}\,\prob{\text{click}_a \mid \theta, x} = \theta_{0a} + \beta^\top x$ only once $\beta$ is allowed to depend on the arm (an arm-by-context interaction, $\beta_a$), and why the shared-$\beta$ version as literally written in the chapter cannot represent a crossover in which different arms are optimal in different contexts.
+
+c) Simulate $T=5000$ rounds for each policy and plot cumulative regret for both on the same axes, where the regret at round $t$ is $\max(\theta_A(x_t),\theta_B(x_t)) - \theta_{\text{chosen}}(x_t)$.
+
+d) Report the final cumulative regret of each policy and their ratio. In terms of the blended (marginal) rates $\bar\theta_a = \prob{x=0}\theta_{a,\text{weekday}} + \prob{x=1}\theta_{a,\text{weekend}}$, explain which arm the context-blind bandit converges to playing almost exclusively, and why. By extending the simulation to $T=50{,}000$, argue whether the context-blind bandit's regret grows linearly or sub-linearly in $T$, and contrast with the context-aware bandit and the chapter's $O(\log T)$ Thompson sampling claim.
+
+e) Using only the (arm, context, outcome) triples logged by the context-blind bandit, fit `glm(y ~ arm * ctx, family = binomial)`. Show that it recovers the true crossover even though the policy that generated the data never used context to choose an arm. Explain why this does not help the context-blind bandit's own regret, and what it implies about needing context in the decision rule itself rather than only in a post-hoc analysis.
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a) The context-blind policy carries one Beta posterior per arm and updates it from the reward alone, discarding $x_t$. It therefore learns each arm's *blended* success rate, averaged over weekdays and weekends.
+```{r}
+p_weekend <- 2 / 7
+theta_tab <- rbind(A = c(0.06, 0.03), B = c(0.03, 0.08))
+colnames(theta_tab) <- c("weekday", "weekend")
+
+# context-blind: one Beta(1,1) per arm, x_t never observed
+blind_ts <- function(T) {
+  a <- c(1, 1); b <- c(1, 1); cum <- 0
+  reg <- numeric(T); arm <- integer(T); ctx <- integer(T); y <- integer(T)
+  for (t in 1:T) {
+    xt <- rbinom(1, 1, p_weekend)               # 1 = weekend
+    k  <- which.max(rbeta(2, a, b))             # Thompson draw
+    p  <- theta_tab[k, xt + 1]
+    r  <- rbinom(1, 1, p)
+    a[k] <- a[k] + r; b[k] <- b[k] + 1 - r      # update, blind to context
+    cum <- cum + (max(theta_tab[, xt + 1]) - p)
+    reg[t] <- cum; arm[t] <- k; ctx[t] <- xt; y[t] <- r
+  }
+  list(regret = reg, arm = arm, ctx = ctx, y = y)
+}
+```
+
+b) The context-aware policy conditions every draw and every update on the current context, so it maintains four independent Beta posteriors, one per (arm, context) cell.
+```{r}
+# context-aware: one Beta(1,1) per (arm, context) cell
+aware_ts <- function(T) {
+  a <- matrix(1, 2, 2); b <- matrix(1, 2, 2); cum <- 0
+  reg <- numeric(T)
+  for (t in 1:T) {
+    xt <- rbinom(1, 1, p_weekend); c <- xt + 1
+    k  <- which.max(rbeta(2, a[, c], b[, c]))
+    p  <- theta_tab[k, c]
+    r  <- rbinom(1, 1, p)
+    a[k, c] <- a[k, c] + r; b[k, c] <- b[k, c] + 1 - r
+    cum <- cum + (max(theta_tab[, c]) - p)
+    reg[t] <- cum
+  }
+  reg
+}
+
+theta_bar <- (1 - p_weekend) * theta_tab[, 1] + p_weekend * theta_tab[, 2]
+opt_rate  <- (1 - p_weekend) * max(theta_tab[, 1]) + p_weekend * max(theta_tab[, 2])
+cat("Blended rates: A =", round(theta_bar[1], 4), " B =", round(theta_bar[2], 4), "\n")
+cat("Optimal context-aware rate =", round(opt_rate, 4), "\n")
+```
+Placing an independent $Beta(1,1)$ on each of the four cells and updating by conjugacy is Bayesian estimation of one success probability per (arm, context) combination with no pooling. That is exactly the saturated logistic model $\mathrm{logit}\,p_a(x) = \theta_{0a} + \beta_a x$ with a free intercept and a free slope for each arm, i.e., the chapter's model once the context coefficient $\beta$ is allowed to depend on the arm. The literal shared-$\beta$ model gives $\mathrm{logit}\,p_A(x) = \theta_{0A} + \beta x$ and $\mathrm{logit}\,p_B(x) = \theta_{0B} + \beta x$, so $\mathrm{logit}\,p_A(x) - \mathrm{logit}\,p_B(x) = \theta_{0A} - \theta_{0B}$ is constant in $x$. Because the logit is monotone, whichever arm is better on weekdays is better on weekends too: a shared slope can shift both arms together as the context changes but can never reorder them. Only an arm-specific slope $\beta_a$, equivalently the arm-by-context interaction fitted in part (e), can represent the crossover in which A wins on weekdays and B wins on weekends.
+
+c) A single run of each policy over $T=5000$ rounds. The context-aware curve flattens once it has learned the best arm in each context; the context-blind curve keeps climbing.
+```{r}
+#| fig-cap: "Cumulative regret over 5000 rounds for context-blind versus context-aware Thompson sampling on the weekday/weekend problem. The blind policy keeps accruing regret because it plays the marginally-better arm A even on weekends, when arm B is far superior."
+set.seed(13)
+rb <- blind_ts(5000)
+ra <- aware_ts(5000)
+plot(rb$regret, type = "l", col = "firebrick", lwd = 2,
+     xlab = "Round", ylab = "Cumulative regret",
+     main = "Context-blind vs context-aware Thompson sampling")
+lines(ra, col = "steelblue", lwd = 2)
+legend("topleft", c("Context-blind (one Beta per arm)",
+                    "Context-aware (one Beta per arm x context)"),
+       col = c("firebrick", "steelblue"), lwd = 2, bty = "n", cex = 0.8)
+cat("Single-run final regret: blind =", round(rb$regret[5000], 1),
+    " aware =", round(ra[5000], 1), "\n")
+```
+In this run the context-blind policy ends with cumulative regret $74.1$ against $16.9$ for the context-aware policy. Because a single run is noisy, part (d) averages over many replications.
+
+d) Averaging the final regret over 300 independent replications, then extending a single run to $T=50{,}000$.
+```{r}
+set.seed(1)
+R <- 300; T <- 5000
+fb <- numeric(R); fa <- numeric(R); tailA <- numeric(R)
+for (i in 1:R) {
+  bi <- blind_ts(T)
+  fb[i] <- bi$regret[T]
+  tailA[i] <- mean(bi$arm[(T - 999):T] == 1)   # share of last 1000 rounds on arm A
+  fa[i] <- aware_ts(T)[T]
+}
+cat("Mean final regret over", R, "reps: blind =", round(mean(fb), 1),
+    " aware =", round(mean(fa), 1), " ratio =", round(mean(fb) / mean(fa), 1), "\n")
+cat("Mean fraction of last 1000 rounds on arm A (blind) =", round(mean(tailA), 3), "\n")
+
+set.seed(7)
+bl <- blind_ts(50000); al <- aware_ts(50000)
+cat("T=50000: blind =", round(bl$regret[50000]), " aware =", round(al[50000]),
+    " ratio =", round(bl$regret[50000] / al[50000], 1), "\n")
+cat("Fraction of last 10000 rounds on arm A (blind) =",
+    round(mean(bl$arm[40001:50000] == 1), 3), "\n")
+cat("Asymptotic blind per-round regret =", round(opt_rate - theta_bar[1], 4), "\n")
+```
+Averaged over 300 replications the context-blind policy accrues about $81.9$ regret by $T=5000$ against about $16.0$ for the context-aware policy, roughly a fivefold gap ($5.1\times$). The context-blind bandit converges to arm A: its posterior sees only the blended rates $\bar\theta_A = (5/7)(0.06)+(2/7)(0.03) \approx 0.0514$ and $\bar\theta_B \approx 0.0443$, and since $\bar\theta_A > \bar\theta_B$, Thompson sampling steadily concentrates on A, playing it in about $77\%$ of the last thousand rounds by $T=5000$ and about $96\%$ of the last ten thousand by $T=50{,}000$. It can never recover, because a posterior that cannot condition on $x$ has no way to notice that B beats A by $0.08$ versus $0.03$ on weekends.
+
+Extending to $T=50{,}000$ makes the two growth rates plain: the context-blind regret reaches about $744$ while the context-aware regret reaches only about $38$, widening the ratio to about $19.5\times$. The context-blind regret grows *linearly*. Once the policy always plays A, it is already optimal on weekdays (prob $5/7$, zero regret) and loses $0.08-0.03=0.05$ per weekend (prob $2/7$), an asymptotic rate of $(2/7)(0.05)=0.0143$ per round, equivalently $\text{opt}-\bar\theta_A = 0.0657 - 0.0514 = 0.0143$; multiplied by $50{,}000$ this predicts about $715$, close to the observed $744$. The context-aware regret grows *sub-linearly*: a tenfold increase in $T$ (from $5000$ to $50{,}000$) raises its regret only about $2.4\times$ (from $16$ to $38$), consistent with the chapter's $O(\log T)$ Thompson sampling bound, because it learns the best arm within each context and thereafter explores less and less.
+
+e) Fitting a saturated logistic regression to the context-blind bandit's own log recovers the crossover.
+```{r}
+dat <- data.frame(y = bl$y,
+                  arm = factor(ifelse(bl$arm == 1, "A", "B"), levels = c("A", "B")),
+                  ctx = factor(ifelse(bl$ctx == 1, "weekend", "weekday"),
+                               levels = c("weekday", "weekend")))
+print(table(arm = dat$arm, ctx = dat$ctx))
+fit <- glm(y ~ arm * ctx, family = binomial, data = dat)
+nd <- expand.grid(arm = c("A", "B"), ctx = c("weekday", "weekend"))
+nd$fitted <- round(predict(fit, nd, type = "response"), 4)
+nd$true <- c(0.06, 0.03, 0.03, 0.08)
+print(nd)
+cat("arm:ctx interaction =", round(coef(fit)["armB:ctxweekend"], 3),
+    " (z =", round(summary(fit)$coefficients["armB:ctxweekend", "z value"], 1), ")\n")
+```
+Although the blind policy badly misallocated its traffic (playing A about $33{,}015$ times on weekdays and $13{,}310$ on weekends, but B only $2{,}616$ and $1{,}059$ times), it still tried both arms in both contexts often enough for the regression to resolve the pattern. The fitted cell probabilities, $0.061/0.029/0.031/0.090$ for A-weekday, B-weekday, A-weekend, B-weekend, track the true $0.06/0.03/0.03/0.08$ closely, and the arm-by-context interaction is large and unambiguous ($1.906$, $z \approx 11.4$): B improves sharply relative to A on weekends. The crossover was statistically detectable in the log all along.
+
+This does not help the context-blind bandit's own regret, because the crossover is recovered only after the fact, from data the policy has already generated. The decision rule that produced the log never conditioned on $x$, so it kept sending most weekend traffic to A and paid the linear regret in part (d) regardless of what a later regression could reveal. Reducing the regret requires building context into the decision rule itself, through segmented posteriors (the four-cell model) or arm-specific slopes, not a retrospective regression on already-collected data. Detecting a crossover in a log is not the same as acting on it in real time.
+
+:::
+:::
+
+::: {#exr-bayesopt-ei}
+## Bayesian Optimization: Expected Improvement
+
+Continue the chapter's Taxi Fleet Optimisation example (@exm-bayesopt): a GP surrogate is fit to the initial design $x=(10,30,90)$ with observed profits $(3.1,3.6,6.6)$, using the chapter's squared-exponential kernel and hyperparameters, on $y=-\text{profit}$ so that $x^*=\arg\min_x f(x)$.
+
+a) Fit the GP to these three points and extract the posterior mean $\mu(x)$ and standard deviation $\sigma(x)$ at two candidate fleet sizes, $x=50$ and $x=70$.
+b) By hand, i.e., directly from the closed-form formula rather than a library call, compute the Expected Improvement at each candidate,
+$$
+z = \frac{f^*-\mu(x)}{\sigma(x)}, \qquad EI(x) = \big(f^*-\mu(x)\big)\Phi(z) + \sigma(x)\phi(z),
+$$
+where $f^*=\min(y_1,\ldots,y_n)$ is the best (most negative) value observed so far and $\phi,\Phi$ are the standard normal density and CDF. Which candidate does Bayesian optimization sample next, and why?
+c) Since the actual taxi simulator is not available outside the Emukit demo, implement the full Bayesian optimization loop (fit GP, maximize $EI$ over a grid, evaluate, update) on the synthetic profit curve $\text{profit}(x)=9\exp\big(-(x-45)^2/1250\big)$, which peaks at essentially the same fleet size the chapter's own search converged to. Starting from the same three points, run 5 iterations. Does the search find the true optimum $x^*=45$?
+
+::: {.content-hidden unless-meta="showsln"}
+**Solution**:
+
+a)-b)
+```{r}
+library(laGP)
+set.seed(42)
+
+x <- matrix(c(10, 30, 90), ncol = 1)
+y <- -c(3.1, 3.6, 6.6)                     # minimize negative profit
+gp <- newGP(x, y, 1000, 1e-6, dK = TRUE)
+
+xcand <- matrix(c(50, 70), ncol = 1)
+p  <- predGP(gp, xcand)
+mu <- p$mean
+sigma <- sqrt(diag(p$Sigma))
+fstar <- min(y)
+
+z  <- (fstar - mu) / sigma
+EI <- (fstar - mu) * pnorm(z) + sigma * dnorm(z)
+
+cat("mu(50), mu(70)       =", round(mu, 4), "\n")
+cat("sigma(50), sigma(70) =", round(sigma, 4), "\n")
+cat("z(50), z(70)         =", round(z, 4), "\n")
+cat("EI(50), EI(70)       =", round(EI, 4), "\n")
+```
+At $x=50$: $\mu=-3.2545$, $\sigma=2.7713$, $z=-1.2072$, so $EI=0.1532$. At $x=70$: $\mu=-4.9123$, $\sigma=3.0659$, $z=-0.5505$, so $EI=0.56$. Bayesian optimization samples $x=70$ next, even though $x=50$ sits closer to where the profit curve eventually peaks: with only three training points, $x=70$ has both a more favorable predicted mean and slightly higher uncertainty, and EI's balance of exploitation (low $\mu$) against exploration (high $\sigma$) favors it. (This is the standardized-$z$ form of the chapter's own closed-form result $a(x)=\sigma^2\phi(f^*,\mu,\sigma^2)+(f^*-\mu)\Phi(f^*,\mu,\sigma^2)$, since $\sigma^2\phi(f^*,\mu,\sigma^2)=\sigma\varphi(z)$ for the standard normal density $\varphi$. The chapter's `acq()` helper computes exactly this and reproduces both numbers.)
+
+c)
+```{r}
+true_profit <- function(x) 9 * exp(-(x - 45)^2 / 1250)
+f <- function(x) -true_profit(x)
+
+x2   <- matrix(c(10, 30, 90), ncol = 1)
+yobs <- f(x2)
+grid <- matrix(seq(1, 100, length = 500), ncol = 1)
+
+for (it in 1:5) {
+  gp2 <- newGP(x2, yobs, 1000, 1e-6, dK = TRUE)
+  p2  <- predGP(gp2, grid)
+  fstar2 <- min(yobs)
+  s2 <- sqrt(diag(p2$Sigma))
+  z2 <- (fstar2 - p2$mean) / s2
+  ei <- (fstar2 - p2$mean) * pnorm(z2) + s2 * dnorm(z2)
+  xnext <- grid[which.max(ei), ]
+  x2    <- rbind(x2, xnext)
+  yobs  <- c(yobs, f(xnext))
+  deleteGP(gp2)
+}
+
+cat("Sampled fleet sizes:", round(x2, 2), "\n")
+best <- which.min(yobs)
+cat("Best x found:", round(x2[best], 2), " best profit:", round(-yobs[best], 4), "\n")
+cat("True optimum: x* = 45, profit(x*) =", true_profit(45), "\n")
+```
+After the initial three points, EI samples $x=44.65, 56.55, 46.04, 45.04, 45.04$: it lands within half a taxi of the true peak on the very first iteration, then refines around it, echoing the chapter's own run (whose first EI-suggested point was 44). The best point found, $x=45.04$ with profit $9$, matches the true optimum $x^*=45$, $\text{profit}(x^*)=9$, essentially exactly, confirming that a handful of well-chosen samples is enough for Bayesian optimization to locate the peak of an expensive, otherwise-unknown objective.
+
+:::
+:::
+
+::::
