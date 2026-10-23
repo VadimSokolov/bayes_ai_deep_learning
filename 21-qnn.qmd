@@ -314,18 +314,8 @@ where $X_t$ contains information available when the forecast is issued. Training
 
 Product embeddings can share information across related items, while recurrent or attention layers encode history and its interactions with numerical features. Such sharing may help products with little history when their relationships transfer. One possible architecture uses the same two branches as @sec-qnn-implementation.
 
-::: {#fig-demand-architecture}
+![A possible demand quantile architecture. Product embeddings, encoded sales history and numeric features are fused into $h_t$; an independent branch embeds the requested quantile level $\tau$, and the quantile head combines the two.](fig/mermaid/21-qnn-demand-architecture.png){#fig-demand-architecture width=70% fig-alt="Product ID and category each pass through an embedding, sales history through an LSTM or Transformer; these and the numeric features enter feature fusion, giving h_t. Separately, the quantile level tau passes through a cosine embedding phi(tau). Both feed the quantile head g of h_t times phi(tau), which outputs the quantile forecast q(x_t, tau)."}
 
-$$
-\begin{aligned}
-\text{product, history, covariates}&\longrightarrow h_t,\\
-\tau&\longrightarrow\phi(\tau),\\
-(h_t,\phi(\tau))&\longrightarrow g(h_t\circ\phi(\tau))=q_{\varphi}(x_t,\tau).
-\end{aligned}
-$$
-
-A possible demand quantile architecture. Product embeddings, encoded history, and known covariates form $h_t$; an independent branch embeds the requested quantile level.
-:::
 
 In @fig-demand-architecture, the branch $\phi(\tau)$, a cosine embedding as in @sec-qnn-implementation, receives only $\tau$, independently of feature fusion. Training can sample products and historical forecast origins in mini-batches and minimize averaged pinball loss. This is a possible design, not a claim about a retailer's production architecture.
 

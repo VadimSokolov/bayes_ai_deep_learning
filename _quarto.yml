@@ -8,9 +8,9 @@ book:
   author: "Nick Polson and Vadim Sokolov"
   date: today
   cover-image: "fig/cover_gpt4o_mucha.png"
-  # Adds a Download menu to the HTML sidebar linking the rendered PDF/EPUB.
-  # The files must exist in _book/, so build all three formats before publishing.
-  downloads: [pdf, epub]
+  # Adds a Download menu to the HTML sidebar linking the PDF, which the HTML edition carries.
+  downloads: [pdf]
+  site-url: https://vsokolov.org/bayes_ai_deep_learning/
   open-graph: true
   twitter-card: true
   sidebar:

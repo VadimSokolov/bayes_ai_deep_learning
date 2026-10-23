@@ -1,7 +1,7 @@
 # Chapter 7. Stochastic Processes
 
 <!-- cite:begin -->
-From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 7. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
+From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 7. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1, https://doi.org/10.5281/zenodo.23603837. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
 <!-- cite:end -->
 
 The chapter introduces stochastic processes as distributions over functions from an index set to a state space, with the Markov property, and develops Brownian motion (the Wiener process) and the Poisson process as building blocks of continuous time models. For geometric Brownian motion it derives the mean and variance of a price at a horizon and states the Merton rule, the continuous time analog of the Kelly criterion. Sports betting examples define implied volatility: a Brownian motion model of the score difference gives win probabilities and a time varying implied volatility for Super Bowl XLVII, and a Skellam process calibrated to bookmaker odds does the same for an English Premier League match. It states the Lévy Itô decomposition and presents stochastic volatility models with jumps (SV, SVJ, SVCJ, SVIJ) with Bayesian MCMC inference.

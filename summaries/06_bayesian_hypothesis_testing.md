@@ -1,7 +1,7 @@
 # Chapter 6. Bayesian Hypothesis Testing
 
 <!-- cite:begin -->
-From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 6. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
+From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 6. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1, https://doi.org/10.5281/zenodo.23603837. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
 <!-- cite:end -->
 
 How does a Bayesian decide between a null and an alternative hypothesis, and how does that compare with p values and Neyman Pearson tests? The chapter covers errors, size and power, the likelihood principle, posterior odds and Bayes factors for sharp and composite hypotheses, and decisions by expected loss. It derives the Bayes factor for a normal mean, defines credible and highest posterior density (HPD) sets, and proves that an HPD set is smallest among sets of equal posterior probability. It treats sequential analysis, clinical trial design, and multi armed bandit experiments with Thompson sampling. It closes with Lindley's paradox, a Neyman Pearson paradox, lower bounds on the posterior probability of a point null over classes of priors, Jeffreys' decision rule, and Cromwell's rule.

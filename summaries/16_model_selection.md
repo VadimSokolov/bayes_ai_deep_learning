@@ -1,7 +1,7 @@
 # Chapter 16. Model Selection
 
 <!-- cite:begin -->
-From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 16. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
+From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 16. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1, https://doi.org/10.5281/zenodo.23603837. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
 <!-- cite:end -->
 
 How should a predictive model be chosen without fitting noise? The chapter covers overfitting and underfitting, prediction versus interpretation (Breiman's two cultures), Q Q plots, the Runge function, and the bias variance decomposition of squared error, which it derives. It compares a single split, cross validation and the bootstrap on simulated data, and presents ROC, AUC, calibration and proper scoring rules. It develops Bayesian model selection: marginal likelihood (evidence), posterior model probabilities, Occam's razor, dice and death penalty examples, the Bayesian information criterion (BIC) via the Laplace approximation, MacKay's evidence framework with automatic relevance determination, and WBIC. It also covers the asymptotic carrier, explainability methods, and the Dickey Savage density ratio.

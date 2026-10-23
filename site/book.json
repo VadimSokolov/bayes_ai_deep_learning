@@ -23,9 +23,10 @@
  "credit_names": "Polson and Sokolov",
  "year": "2026",
  "edition": "1",
- "version": "1.0.0",
+ "version": "1.0.1",
  "date_released": "2026-10-23",
  "publisher": "Independently published",
+ "doi": "10.5281/zenodo.23603837",
  "language": "en",
  "keywords": [
   "Bayesian learning",
@@ -35,14 +36,14 @@
   "neural networks",
   "probabilistic inference",
   "reinforcement learning",
-  "data science foundations",
+  "quantile neural networks",
   "AI agents",
   "transformer models",
   "decision theory",
   "Gaussian processes"
  ],
  "short_description": "A textbook that develops Bayesian reasoning, statistical learning and deep learning as one probabilistic framework, from Bayes' rule and decision theory to neural networks, transformers and AI agents, with code in R and Python.",
- "description": "Modern AI rests on one principle: learning from data under uncertainty. This book builds that principle from the ground up, from Bayes' rule and decision theory to the transformers behind today's large language models.\n\nThree parts follow the way the ideas developed. Bayesian learning covers probability, utility and decisions, A/B testing, hypothesis testing, stochastic processes, Gaussian processes and reinforcement learning. Statistical learning covers data and pattern matching, regression, logistic regression, tree models, forecasting and model selection. Deep learning covers neural networks, stochastic gradient descent, convolutional networks, language models and AI agents. Worked examples come from finance, sports, medicine, marketing and operations, with code in R and Python and exercises at the end of every chapter.\n\nUnlike treatments that present machine learning as a toolbox of algorithms, this book treats uncertainty as a first class concern and shows how linear regression, logistic regression and neural networks sit inside one probabilistic framework. Readers learn to quantify what a model does not know, to turn a prediction into a decision, and to see why large language models hallucinate.\n\nThe book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes calculus and basic probability and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.",
+ "description": "Modern AI rests on one principle: learning from data under uncertainty. This book builds that principle from the ground up, from Bayes' rule and decision theory to the transformers behind today's large language models.\n\nThree parts follow the way the ideas developed. Bayesian learning covers probability, utility and decisions, A/B testing, hypothesis testing, stochastic processes, Gaussian processes and reinforcement learning. Statistical learning covers data and pattern matching, regression, logistic regression, tree models, forecasting and model selection. Deep learning covers neural networks, stochastic gradient descent, convolutional networks, language models and AI agents. Worked examples come from finance, sports, medicine, marketing and operations, with code in R and Python and exercises at the end of every chapter.\n\nUnlike treatments that present machine learning as a toolbox of algorithms, this book treats uncertainty as a first class concern and shows how linear regression, logistic regression and neural networks sit inside one probabilistic framework. Readers learn to quantify what a model does not know, to turn a prediction into a decision, and to see why large language models hallucinate.\n\nThe book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes introductory statistics and high school calculus and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.",
  "license_text": {
   "id": "CC-BY-4.0",
   "name": "CC BY 4.0",
@@ -54,31 +55,34 @@
   "url": "https://opensource.org/license/mit"
  },
  "release": {
-  "tag": "v1.0.0",
-  "url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/tag/v1.0.0"
+  "tag": "v1.0.1",
+  "url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/tag/v1.0.1"
  },
  "links": {
   "page": "https://vsokolov.org/books/bayes_ai_deep_learning/",
   "page_markdown": "https://vsokolov.org/books/bayes_ai_deep_learning/index.html.md",
   "results": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html",
   "results_markdown": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html.md",
-  "pdf": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/download/v1.0.0/bayes_ai_deep_learning.pdf",
+  "pdf": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/download/v1.0.1/bayes_ai_deep_learning.pdf",
   "repository": "https://github.com/VadimSokolov/bayes_ai_deep_learning",
-  "source": "https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/v1.0.0",
+  "source": "https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/v1.0.1",
+  "doi": "https://doi.org/10.5281/zenodo.23603837",
   "icon_pdf": "https://vsokolov.org/books/icon-pdf.svg",
-  "icon_github": "https://vsokolov.org/books/icon-github.svg"
+  "icon_github": "https://vsokolov.org/books/icon-github.svg",
+  "icon_web": "https://vsokolov.org/books/icon-web.svg",
+  "html": "https://vsokolov.org/bayes_ai_deep_learning/"
  },
  "citation": {
-  "text": "Polson and Sokolov (2026), Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science, edition 1.",
-  "bibtex": "@book{polsonsokolov2026bayes_ai_deep_learning,\n  author = {Polson, Nick and Sokolov, Vadim},\n  title = {{Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science}},\n  year = {2026},\n  publisher = {Independently published},\n  url = {https://vsokolov.org/books/bayes_ai_deep_learning/}\n}",
+  "text": "Polson and Sokolov (2026), Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science, edition 1, https://doi.org/10.5281/zenodo.23603837.",
+  "bibtex": "@book{polsonsokolov2026bayes_ai_deep_learning,\n  author = {Polson, Nick and Sokolov, Vadim},\n  title = {{Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science}},\n  year = {2026},\n  publisher = {Independently published},\n  doi = {10.5281/zenodo.23603837},\n  url = {https://vsokolov.org/books/bayes_ai_deep_learning/}\n}",
   "bibkey": "polsonsokolov2026bayes_ai_deep_learning",
   "example": "Polson and Sokolov (2026), Example 2.10"
  },
  "pdf": {
   "file": "bayes_ai_deep_learning.pdf",
   "pages": 840,
-  "bytes": 38599694,
-  "sha256": "3ca696b8669d6dad2416315a07e0dc50013ef50584b988f8d2b635534f37ca9a"
+  "bytes": 38709150,
+  "sha256": "78ce78c0146d78210798230876b8119d6b1706a26df492078a65aebaa9ec8743"
  },
  "bundle": {
   "page": "site/index.md",
@@ -97,7 +101,7 @@
    "last_page": "72",
    "pages": 46,
    "summary_markdown": "https://raw.githubusercontent.com/VadimSokolov/bayes_ai_deep_learning/main/summaries/01_probability_and_uncertainty.md",
-   "summary": "This chapter asks how uncertainty is measured and which rules probabilities must obey. It presents probability as a degree of belief revealed by betting odds, and argues through the Dutch book that coherence (no sure loss) implies the axioms of probability and the rule for conditional probability, derived in an appendix with payoff matrices and determinants. It then covers odds, random variables, mass, density and cumulative distribution functions, the inverse CDF method, change of variables, expectation, variance, covariance, correlation, portfolio variance, the weak law of large numbers (proved under finite variance with Chebyshev's inequality), the strong law and the ergodic theorem (stated), the Bernoulli, binomial, Poisson and normal distributions, joint, marginal and conditional distributions, and independence. Examples include exacta betting, the birthday problem, confounding in batting averages, and a normal model for the 1987 crash.\n\n#### From the literature\n\nthe betting definition of subjective probability (Ramsey 1926; de Finetti 1937); Dutch book coherence as the basis of the probability axioms (Ramsey 1926; de Finetti 1937; Shimony 1955); the axioms of probability (Kolmogorov 1933); the frequency definition through collectives (von Mises), criticized by Ville 1939; the weak law of large numbers (Jakob Bernoulli 1713, generalized by Poisson 1837 and Chebyshev 1867); the strong law for Bernoulli trials (Borel 1909); the strong law under a variance condition (Kolmogorov 1933); methods for studying coincidences, applied to the birthday problem (Diaconis and Mosteller 1989); the Harville formula for exacta bets (named in the chapter, no reference); the three coin paradox (Galton 1894, essay linked in the chapter); subjective expected utility (Savage, building on von Neumann and Morgenstern).\n\n#### New results\n\nNo new results of this chapter are catalogued.\n\n#### Key terms\n\nprobability, uncertainty, subjective probability, degree of belief, betting odds, Dutch book, coherence, no arbitrage, Kolmogorov axioms, conditional probability, Bayes rule, Bayes theorem, law of total probability, joint distribution, marginal distribution, independence, random variable, probability mass function, probability density function, cumulative distribution function, inverse transform sampling, expected value, variance, covariance, correlation, portfolio variance, law of large numbers, convergence in probability, almost sure convergence, Chebyshev inequality, ergodic theorem, Bernoulli distribution, binomial distribution, Poisson distribution, normal distribution, Gaussian distribution, birthday problem, Simpson's paradox, confounding, exacta, Harville formula, prosecutor's fallacy"
+   "summary": "This chapter asks how uncertainty is measured and which rules probabilities must obey. It presents probability as a degree of belief revealed by betting odds, and argues through the Dutch book that coherence (no sure loss) implies the rules of finitely additive probability and conditional probability, derived in an appendix with payoff matrices and determinants. It then covers odds, random variables, mass, density and cumulative distribution functions, the inverse CDF method, change of variables, expectation, variance, covariance, correlation, portfolio variance, the weak law of large numbers (proved under finite variance with Chebyshev's inequality), the strong law and the ergodic theorem (stated), the Bernoulli, binomial, Poisson and normal distributions, joint, marginal and conditional distributions, and independence. Examples include exacta betting, the birthday problem, confounding in batting averages, and a normal model for the 1987 crash.\n\n#### From the literature\n\nthe betting definition of subjective probability (Ramsey 1926; de Finetti 1937); Dutch book coherence as the basis of finitely additive probability (Ramsey 1926; de Finetti 1937; Shimony 1955); the axioms of probability (Kolmogorov 1933); the frequency definition through collectives (von Mises), criticized by Ville 1939; the weak law of large numbers (Jakob Bernoulli 1713, generalized by Poisson 1837 and Chebyshev 1867); the strong law for Bernoulli trials (Borel 1909); the strong law under a variance condition (Kolmogorov 1933); methods for studying coincidences, applied to the birthday problem (Diaconis and Mosteller 1989); the Harville formula for exacta bets (named in the chapter, no reference); the three coin paradox (Galton 1894, essay linked in the chapter); subjective expected utility (Savage, building on von Neumann and Morgenstern).\n\n#### New results\n\nNo new results of this chapter are catalogued.\n\n#### Key terms\n\nprobability, uncertainty, subjective probability, degree of belief, betting odds, Dutch book, coherence, no arbitrage, Kolmogorov axioms, conditional probability, Bayes rule, Bayes theorem, law of total probability, joint distribution, marginal distribution, independence, random variable, probability mass function, probability density function, cumulative distribution function, inverse transform sampling, expected value, variance, covariance, correlation, portfolio variance, law of large numbers, convergence in probability, almost sure convergence, Chebyshev inequality, ergodic theorem, Bernoulli distribution, binomial distribution, Poisson distribution, normal distribution, Gaussian distribution, birthday problem, Simpson's paradox, confounding, exacta, Harville formula, prosecutor's fallacy"
   },
   {
    "key": "2",
@@ -174,7 +178,7 @@
    "last_page": "308",
    "pages": 12,
    "summary_markdown": "https://raw.githubusercontent.com/VadimSokolov/bayes_ai_deep_learning/main/summaries/08_gaussian_processes.md",
-   "summary": "How can a prior be placed directly on an unknown function, updated with observations, and used to report uncertainty at every input? The chapter introduces the Gaussian process (GP), a collection of random variables any finite number of which have a joint Gaussian distribution, specified by a mean function and a covariance (kernel) function and written $f \\sim \\mathcal{GP}(m, k)$. It uses the zero mean squared exponential kernel (radial basis function, RBF) with signal variance and length scale hyperparameters, and draws sample paths from the prior with mvrnorm in R. It states the closed form posterior mean and covariance of GP regression, obtained by conditioning a multivariate normal vector on noiseless observations, and applies them to the sine function. Hyperparameters are estimated by maximizing the log marginal likelihood (maximum likelihood estimation, MLE), which the chapter reads as an Occam's razor balance between data fit and a log determinant complexity penalty. The chapter states the gradient for the squared exponential kernel, passes it to BFGS through optim, compares the result with the laGP package, and fits the motorcycle accident data (mcycle in the R package MASS), with wider uncertainty where observations are few. Exercises cover kernel ridge regression and the Matern kernel.\n\n#### From the literature\n\nthe laGP package, developed by Bobby Gramacy, for estimating Gaussian process hyperparameters and approximate inference on large data sets; the closed form conditioning of a multivariate normal vector that yields the GP posterior mean and covariance, described in the chapter as a standard property of the multivariate normal distribution, with no author named. The chapter gives no authors or years for the squared exponential kernel, jitter or BFGS.\n\n#### New results\n\nNo new results of this chapter are catalogued.\n\n#### Key terms\n\nGaussian process, GP, Gaussian process regression, distribution over functions, mean function, covariance function, kernel function, squared exponential kernel, radial basis function, RBF kernel, signal variance, length scale, lengthscale, hyperparameters, marginal likelihood, maximum likelihood estimation, MLE, Occam's razor, BFGS, laGP, MASS, mcycle, motorcycle accident data, jitter, posterior mean, kernel ridge regression, Matern kernel, Matérn kernel"
+   "summary": "How can a prior be placed directly on an unknown function, updated with observations, and used to report uncertainty at every input? The chapter introduces the Gaussian process (GP), a collection of random variables any finite number of which have a joint Gaussian distribution, specified by a mean function and a covariance (kernel) function and written $f \\sim \\mathcal{GP}(m, k)$. It uses the zero mean squared exponential kernel (radial basis function, RBF) with signal variance and length scale hyperparameters, and draws sample paths from the prior with mvrnorm in R. It states the closed form posterior mean and covariance of GP regression, obtained by conditioning a multivariate normal vector on noiseless observations, and applies them to the sine function. Hyperparameters are estimated by maximizing the log marginal likelihood (maximum likelihood estimation, MLE), which the chapter reads as an Occam's razor balance between data fit and a log determinant complexity penalty. The chapter states the gradient for the squared exponential kernel, passes it to BFGS through optim, compares the result with the laGP package, and fits the motorcycle accident data (mcycle in the R package MASS), with wider uncertainty where observations are few. Exercises cover kernel ridge regression and the Matern kernel.\n\n#### From the literature\n\nthe laGP package, developed by Bobby Gramacy, for estimating Gaussian process hyperparameters and approximate inference on large data sets; the closed form conditioning of a multivariate normal vector that yields the GP posterior mean and covariance, described as a standard property of the multivariate normal distribution, with a reference to Rasmussen and Williams (2006), Appendix A.2. The chapter gives no authors or years for the squared exponential kernel, jitter or BFGS.\n\n#### New results\n\nNo new results of this chapter are catalogued.\n\n#### Key terms\n\nGaussian process, GP, Gaussian process regression, distribution over functions, mean function, covariance function, kernel function, squared exponential kernel, radial basis function, RBF kernel, signal variance, length scale, lengthscale, hyperparameters, marginal likelihood, maximum likelihood estimation, MLE, Occam's razor, BFGS, laGP, MASS, mcycle, motorcycle accident data, jitter, posterior mean, kernel ridge regression, Matern kernel, Matérn kernel"
   },
   {
    "key": "9",
@@ -382,7 +386,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#nakamura_streak_posterior_innocence",
    "source": "02-bayes.qmd",
    "label": "exm-nakamura",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/02-bayes.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/02-bayes.qmd"
   },
   {
    "id": "bernoulli_beta_option_value_of_learning",
@@ -401,7 +405,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#bernoulli_beta_option_value_of_learning",
    "source": "04-dec.qmd",
    "label": "res-option-value-of-learning",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/04-dec.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/04-dec.qmd"
   },
   {
    "id": "livermore_maxims_bellman_view",
@@ -420,7 +424,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#livermore_maxims_bellman_view",
    "source": "04-dec.qmd",
    "label": "res-livermore-maxims",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/04-dec.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/04-dec.qmd"
   },
   {
    "id": "polya_gamma_integral_identity",
@@ -439,7 +443,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#polya_gamma_integral_identity",
    "source": "13-logistic.qmd",
    "label": "res-polya-gamma-identity",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/13-logistic.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/13-logistic.qmd"
   },
   {
    "id": "polya_gamma_gibbs_sampler_logistic",
@@ -458,7 +462,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#polya_gamma_gibbs_sampler_logistic",
    "source": "13-logistic.qmd",
    "label": "res-polya-gamma-gibbs",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/13-logistic.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/13-logistic.qmd"
   },
   {
    "id": "bayesian_bridge_bartlett_fejer_mixture",
@@ -477,7 +481,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#bayesian_bridge_bartlett_fejer_mixture",
    "source": "17-theoryai.qmd",
    "label": "res-bartlett-fejer-mixture",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/17-theoryai.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/17-theoryai.qmd"
   },
   {
    "id": "posterior_concentration_sparse_deep_learning",
@@ -492,11 +496,11 @@
    "origin_text": "First stated in Polson and Ročková (2018), Posterior Concentration for Sparse Deep Learning, Advances in Neural Information Processing Systems 31, arXiv:1803.09138.",
    "highlight": true,
    "summary": "Under smoothness and prior mass conditions, the posterior distribution of the regression function concentrates around the true function at the minimax rate, up to a factor of log N.",
-   "statement": "Consider nonparametric regression $y_i = f(x_i) + \\epsilon_i$ with $x_i = (x_{1i},\\ldots,x_{di}) \\in [0,1]^d$ and $N$ observations, and let $\\hat f_N$ be the regularized MAP (maximum a posteriori) estimator $\\hat f_N = \\arg\\min_{\\hat f} \\frac{1}{N}\\sum_{i=1}^N (y_i - \\hat f(x_i))^2 + \\phi(\\hat f)$, where $\\phi$ is a regularization term. Under smoothness and prior mass conditions, the posterior distribution $\\Pi(f \\mid x, y)$ concentrates around the true function at the minimax rate, up to a factor of $\\log N$. Here, under standard assumptions, the minimax rate over $\\beta$-Hölder smooth functions $f$ is of order $N^{-2\\beta/(2\\beta+d)}$ for the risk $R(f,\\hat f_N) = \\mathbb{E}_{X,Y}\\|f-\\hat f_N\\|^2$, where $\\|\\cdot\\|$ is the $L^2(P_X)$ norm.",
+   "statement": "Consider nonparametric regression $y_i = f(x_i) + \\epsilon_i$ with $x_i = (x_{1i},\\ldots,x_{di}) \\in [0,1]^d$ and $N$ observations, and let $\\hat f_N$ be the regularized MAP (maximum a posteriori) estimator $\\hat f_N = \\arg\\min_{\\hat f} \\frac{1}{N}\\sum_{i=1}^N (y_i - \\hat f(x_i))^2 + \\phi(\\hat f)$, where $\\phi$ is a regularization term. Under smoothness and prior mass conditions, the posterior distribution $\\Pi(f \\mid x, y)$ concentrates around the true function at the minimax rate, up to a factor of $\\log N$. Here, under standard assumptions, the minimax rate over Hölder smooth functions $f$ of order $\\beta$ is of order $N^{-2\\beta/(2\\beta+d)}$ for the risk $R(f,\\hat f_N) = \\mathbb{E}_{X,Y}\\|f-\\hat f_N\\|^2$, where $\\|\\cdot\\|$ is the $L^2(P_X)$ norm.",
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#posterior_concentration_sparse_deep_learning",
    "source": "19-theorydl.qmd",
    "label": "res-posterior-concentration",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/19-theorydl.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/19-theorydl.qmd"
   },
   {
    "id": "meu_quantile_network_method",
@@ -515,7 +519,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#meu_quantile_network_method",
    "source": "21-qnn.qmd",
    "label": "res-meu-quantile-network",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/21-qnn.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/21-qnn.qmd"
   },
   {
    "id": "quantile_trend_filtering_hierarchical_model",
@@ -534,7 +538,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#quantile_trend_filtering_hierarchical_model",
    "source": "21-qnn.qmd",
    "label": "res-quantile-trend-filtering",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.0/21-qnn.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.1/21-qnn.qmd"
   }
  ]
 }

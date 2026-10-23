@@ -17,16 +17,17 @@ authors:
 credit_names: ""                 # how a citation names the authors, e.g. "Polson and Sokolov"; empty: built from the family names
 year: 2026
 edition: "1"
-version: "1.0.0"                 # the release tag is v<version>
+version: "1.0.1"                 # the release tag is v<version>
 date_released: "2026-10-23"      # YYYY-MM-DD, set at release (23 October 2026; move it if the release is later)
 publisher: "Independently published"                    # "Independently published" (the imprint KDP shows for a free KDP ISBN)
 # no isbn: a free KDP ISBN may be used only on KDP, so it goes on the ISBN line of kdp.md (private) and is printed
 # only in the print edition (kdp.py interior); this file is published (references/publishing.md)
-doi: ""                          # this edition's DOI; zenodo.py reserve writes it before the final build
+doi: "10.5281/zenodo.23603837" # this edition's DOI; zenodo.py reserve writes it before the final build
 license_text: CC-BY-4.0          # text, figures and PDF
 license_code: MIT
 repository: https://github.com/VadimSokolov/bayes_ai_deep_learning   # the public repository, named after the slug like the other books (22 Oct 2026)
 site_page: https://vsokolov.org/books/bayes_ai_deep_learning/    # the book page on the website; the PDF is served next to it
+html_url: https://vsokolov.org/bayes_ai_deep_learning/   # the HTML edition, GitHub Pages of the repository (23 Oct 2026)
 language: en
 print_url: ""                    # where to buy the printed book (optional)
 cover_image: ""                  # front cover image (PNG or JPEG, about 1600 px tall) in the repository, e.g. pdf/cover.png
@@ -39,7 +40,7 @@ keywords:                        # 5 to 12 search terms
   - "neural networks"
   - "probabilistic inference"
   - "reinforcement learning"
-  - "data science foundations"
+  - "quantile neural networks"
   - "AI agents"
   - "transformer models"
   - "decision theory"
@@ -52,7 +53,7 @@ description: |
 
   Unlike treatments that present machine learning as a toolbox of algorithms, this book treats uncertainty as a first class concern and shows how linear regression, logistic regression and neural networks sit inside one probabilistic framework. Readers learn to quantify what a model does not know, to turn a prediction into a decision, and to see why large language models hallucinate.
 
-  The book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes calculus and basic probability and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.
+  The book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes introductory statistics and high school calculus and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.
 source:
   format: quarto
   dir: .

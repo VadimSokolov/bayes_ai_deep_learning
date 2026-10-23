@@ -10,7 +10,8 @@ authors:
   given-names: Vadim
   orcid: https://orcid.org/0000-0002-6618-2965
   affiliation: George Mason University
-version: 1.0.0
+version: 1.0.1
+doi: 10.5281/zenodo.23603837
 date-released: '2026-10-23'
 license: CC-BY-4.0
 repository-code: https://github.com/VadimSokolov/bayes_ai_deep_learning
@@ -23,7 +24,7 @@ keywords:
 - neural networks
 - probabilistic inference
 - reinforcement learning
-- data science foundations
+- quantile neural networks
 - AI agents
 - transformer models
 - decision theory
@@ -37,7 +38,7 @@ abstract: 'Modern AI rests on one principle: learning from data under uncertaint
   Unlike treatments that present machine learning as a toolbox of algorithms, this book treats uncertainty as a first class concern and shows how linear regression, logistic regression and neural networks sit inside one probabilistic framework. Readers learn to quantify what a model does not know, to turn a prediction into a decision, and to see why large language models hallucinate.
 
 
-  The book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes calculus and basic probability and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.'
+  The book grew out of courses the authors teach to MBA students at the University of Chicago Booth School of Business and to engineering students at George Mason University. It assumes introductory statistics and high school calculus and suits graduate students, data scientists and practitioners who want the mathematics behind the methods.'
 preferred-citation:
   type: book
   title: 'Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science'
@@ -50,6 +51,7 @@ preferred-citation:
     orcid: https://orcid.org/0000-0002-6618-2965
     affiliation: George Mason University
   year: 2026
+  doi: 10.5281/zenodo.23603837
   url: https://vsokolov.org/books/bayes_ai_deep_learning/
   publisher:
     name: Independently published

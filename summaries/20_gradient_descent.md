@@ -1,7 +1,7 @@
 # Chapter 20. Gradient Descent
 
 <!-- cite:begin -->
-From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 20. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
+From *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov (2026), chapter 20. Cite as Polson and Sokolov (2026), *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science*, edition 1, https://doi.org/10.5281/zenodo.23603837. Book page: https://vsokolov.org/books/bayes_ai_deep_learning/. Source: https://github.com/VadimSokolov/bayes_ai_deep_learning.
 <!-- cite:end -->
 
 How are the parameters of a model with millions of weights fitted when second order methods such as Newton's method and BFGS are too costly? The chapter treats estimation as minimizing a negative log likelihood and develops first order methods. It covers gradient descent and the learning rate, with least squares and logistic regression fitted on the iris data and compared with lm and glm, and stochastic gradient descent with mini batches. It traces backpropagation from the perceptron and the delta rule, and explains automatic differentiation in forward mode and reverse mode with dual numbers, a computational graph and a JAX example. It surveys momentum, Nesterov acceleration, AdaGrad, RMSprop and Adam, states the Robbins Monro stochastic approximation algorithm and its step size conditions, and presents the EM, ECM and ECME algorithms and simulated annealing.

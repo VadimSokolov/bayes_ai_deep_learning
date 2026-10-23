@@ -1,0 +1,14 @@
+%%{init: {"flowchart": {"padding": 6, "nodeSpacing": 18, "rankSpacing": 28}}}%%
+graph TB
+    P["Product ID"] --> E1["Embedding"]
+    C["Category"] --> E2["Embedding"]
+    H["Sales history"] --> R["LSTM or<br/>Transformer"]
+    N["Numeric features"]
+    E1 --> F["Feature fusion<br/>h<sub>t</sub>"]
+    E2 --> F
+    R --> F
+    N --> F
+    T["Quantile level τ"] --> CE["Cosine embedding<br/>φ(τ)"]
+    F --> Q["Quantile head<br/>g(h<sub>t</sub> ∘ φ(τ))"]
+    CE --> Q
+    Q --> O["Quantile forecast<br/>q(x<sub>t</sub>, τ)"]
