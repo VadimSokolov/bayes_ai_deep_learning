@@ -74,7 +74,8 @@
   "icon_pdf": "https://vsokolov.org/books/icon-pdf.svg",
   "icon_github": "https://vsokolov.org/books/icon-github.svg",
   "icon_web": "https://vsokolov.org/books/icon-web.svg",
-  "html": "https://vsokolov.org/bayes_ai_deep_learning/"
+  "html": "https://vsokolov.org/bayes_ai_deep_learning/",
+  "cover": "https://vsokolov.org/books/bayes_ai_deep_learning/cover.png"
  },
  "citation": {
   "text": "Polson and Sokolov (2026), Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science, edition 1, https://doi.org/10.5281/zenodo.23603837.",
@@ -95,6 +96,12 @@
   "results": "site/results.md",
   "results_head": "site/results-head.html"
  },
+ "serve": [
+  {
+   "path": "cover.png",
+   "url": "https://raw.githubusercontent.com/VadimSokolov/bayes_ai_deep_learning/v1.0.1/fig/cover_gpt4o_mucha.png"
+  }
+ ],
  "chapters": [
   {
    "key": "1",
