@@ -1,4 +1,4 @@
-flowchart LR
+flowchart TB
     subgraph Composition
         direction LR
         xc[x] --> f1((f1))
@@ -17,6 +17,8 @@ flowchart LR
         g3 --> Sum
         Sum --> ya[y]
     end
+
+    Composition ~~~ Addition
 
     style xc fill:#F0F8FF,stroke:#4682B4,stroke-width:2px
     style yc fill:#F0F8FF,stroke:#4682B4,stroke-width:2px

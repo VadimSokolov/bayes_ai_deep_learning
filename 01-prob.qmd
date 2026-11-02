@@ -20,7 +20,7 @@ plot(cumsum(y) / seq_along(y), type = "l",
      xlab = "Number of Trials", ylab = "Proportion of Heads", ylim = c(0, 1))
 abline(h = 0.5, col = "red")
 ```
-We can see that as $N$ grows, the curve converges to $0.5$. This is the law of large numbers. When $N$ is large, $n/N$ will be close to $P(A)$.  The probability as a limit definition is natural and was proposed by von Mises. 
+We can see that as $N$ grows, the curve settles near $0.5$. This is the law of large numbers. When $N$ is large, $n/N$ will be close to $P(A)$.  The probability as a limit definition is natural and was proposed by von Mises. 
 $$
 P(\text{Heads}) = \lim_{N \to \infty} \frac{n}{N}.
 $$
@@ -37,9 +37,9 @@ For many events, most people will agree on their probabilities, for example, $P(
 
 This book primarily adopts the Bayesian (subjective) interpretation of probability, formalized through coherence (the Dutch book principle here, and de Finetti's representation in @sec-bl). We still use frequentist language and long-run intuition as operational tools, but the organizing viewpoint is probabilistic modeling and belief updating.
 
-Suppose you believe the probability of an event $A$ is $p$. According to Ramsey's definition, this means you should be indifferent between paying $p \cdot S$ dollars to receive $S$ dollars if event $A$ occurs (and nothing otherwise) and accepting $p \cdot S$ dollars to pay someone $S$ dollars if event $A$ occurs. However, not all probability assignments lead to rational behavior. Suppose someone assigns probabilities to events in an incoherent way. In that case, a clever adversary could construct a series of bets, called a *Dutch book*, where the individual is guaranteed to lose money regardless of which events occur. The requirement that probabilities must be assigned in such a way that no Dutch book can be constructed against you is known as *coherence*. For a detailed derivation of probability rules using Dutch Book arguments, see the [Appendix](#sec-dutch-book).
+Suppose you believe the probability of an event $A$ is $p$. According to Ramsey's definition, this means you should be indifferent between paying $p \cdot S$ dollars to receive $S$ dollars if event $A$ occurs (and nothing otherwise) and accepting $p \cdot S$ dollars to pay someone $S$ dollars if event $A$ occurs. However, not all probability assignments lead to rational behavior. Suppose someone assigns probabilities to events in an incoherent way. In that case, a clever adversary could construct a series of bets, called a *Dutch book*, where the individual is guaranteed to lose money regardless of which events occur. The requirement that probabilities must be assigned in such a way that no Dutch book can be constructed against you is known as *coherence*. For a detailed derivation of probability rules using Dutch Book arguments, see @sec-dutch-book.
 
-The principle of coherence for subjective probability is the fundamental rationality constraint, in finance, that would be called the no-arbitrage condition [@poincare1952science; @bachelier1900theorie].
+The principle of coherence for subjective probability is the fundamental rationality constraint, in finance, that would be called the no-arbitrage condition [@harrison1979martingales]. Bachelier [-@bachelier1900theorie] used the related fair-game condition.
 
 Let us consider a simple example. Suppose you assign probability $P(A) = 0.7$ to event $A$ occurring and probability $P(\bar A) = 0.2$ to event $A$ not occurring, where $\bar A$ denotes the complement of $A$. A Dutch book can be constructed as follows:
 
@@ -60,11 +60,11 @@ The normalization requirement $P(\Omega) = 1$ ensures that you assign probabilit
 
 The additivity axiom ensures consistency across mutually exclusive events. If $A$ and $B$ cannot both occur, then betting on "$A$ or $B$" should cost the same as placing separate bets on $A$ and on $B$. Violating this principle again opens the door to Dutch books.
 
-Another axiom $P(A) + P(\bar A) = 1$ just follows from the normalization requirement and the additivity axiom.
+The rule $P(A) + P(\bar A) = 1$ just follows from the normalization requirement and the additivity axiom.
 
 These are, in their finitely additive form, the axioms proposed by Andrey Kolmogorov [-@kolmogorov1933grundbegriffe] in his foundational work on probability theory. Although Kolmogorov's axioms are agnostic to any definition of probability and are purely mathematical in nature, the fact that they can be derived from the Dutch book argument shows their applicability to rational decision-making under uncertainty. Any violation of these axioms opens you to guaranteed losses through carefully constructed bets. However, Kolmogorov's axiomatic approach helps us to derive results in more complex settings. For example, Kolmogorov's framework is applicable in infinite sample spaces and continuous random variables. This rests on his further requirement of countable additivity, $P(\bigcup_{i=1}^{\infty} A_i) = \sum_{i=1}^{\infty} P(A_i)$ for mutually exclusive events $A_1, A_2, \ldots$, which a Dutch book built from finitely many bets does not deliver.
 
-The axioms provide a number of rules that probabilities must follow. Here are some important corollaries that follow from the Kolmogorov axioms:
+The axioms provide a number of rules that probabilities must follow. Here are some important rules and definitions built on the Kolmogorov axioms:
 
 <!-- https://www.york.ac.uk/depts/maths/histstat/kolmogorov_foundations.pdf -->
 
@@ -81,7 +81,7 @@ $$
 $$
     P(A\text{ or } B)=P(A)+P(B)-P(A\text{ and }B). 
 $$
-5.  *Conditional probability*: The conditional probability of $A$ given $B$ is
+5.  *Conditional probability*: For $P(B) > 0$, the conditional probability of $A$ given $B$ is
 $$ 
     P(A\mid B) = \dfrac{P(A \text{ and } B)}{P(B)}.
 $$
@@ -89,14 +89,14 @@ $$
 $$ 
     P(A\mid B) = \dfrac{P(B\mid A)P(A)}{P(B)}.   
 $$
-7.  *Law of total probability* is a direct consequence of the definition of conditional probability and the normalization axiom. It states that if $B_1, B_2, \ldots, B_n$ are mutually exclusive and exhaustive events, then
+7.  *Law of total probability* is a direct consequence of the definition of conditional probability and the additivity axiom. It states that if $B_1, B_2, \ldots, B_n$ are mutually exclusive and exhaustive events, then
 $$
 P(A) = \sum_{i=1}^n P(A \text{ and } B_i) = \sum_{i=1}^n P(A \mid B_i)P(B_i).
 $$
 
-All of these axioms follow simply from the principle of coherence and the avoidance of Dutch book arbitrage. This includes Bayes' rule itself [@definetti1937foresight; @shimony1955coherence]. If there is arbitrage present in the market, it should be "traded". It often happens when subjective probabilities do not match.
+All of these rules follow simply from the principle of coherence and the avoidance of Dutch book arbitrage. This includes Bayes' rule itself [@definetti1937foresight; @shimony1955coherence].
 
-Bayes' rule is a fundamental rule of probability that allows us to calculate conditional probabilities. It is a direct consequence of the definition of conditional probability and the normalization axiom. This rule will become central to learning and inference in artificial intelligence.
+Bayes' rule is a fundamental rule of probability that allows us to calculate conditional probabilities. It is a direct consequence of the definition of conditional probability. This rule will become central to learning and inference in artificial intelligence.
 
 Bayes' rule simply provides a disciplined probability accounting of how probabilities get updated in light of evidence. A rational agent requires that their subjective probabilities must obey the principle of coherence. Namely in announcing the set of probabilities, they cannot undergo a sure loss. This is enough to provide a similar framework to the axiomatic approach of Kolmogorov.
 
@@ -144,7 +144,7 @@ Frequency probability is based on the idea that the probability of an event can 
 
 ## Odds as Probabilities
 
-Another way, sometimes more convenient, to talk about uncertainty and to express probabilities via odds, such as 9 to 2 or 3 to 1. Odds in favor express the ratio of favorable to unfavorable outcomes (Success:Failure), while probability is the chance of an event happening out of all possibilities (Success / Total).
+Another way, sometimes more convenient, to talk about uncertainty is to express probabilities via odds, such as 9 to 2 or 3 to 1. Odds in favor express the ratio of favorable to unfavorable outcomes (Success:Failure), while probability is the chance of an event happening out of all possibilities (Success / Total).
 
 We assign odds "on $A$" (or "in favor of $A$") versus odds "against $A$". For example, if the probability of a Chicago Bears' Super Bowl win is $P(A) = 2/11$, the odds against them are $(1 - 2/11) / (2/11) = 9/2$, or "9 to 2". This means for every 2 times they win, they lose 9 times. Conventionally, "odds on" often refers to the reverse, but to avoid ambiguity, we will speak of probability or odds against.
 $$
@@ -158,11 +158,11 @@ For example, if the odds are one $O(A) = 1$, then for every \$1 bet, you will pa
 
 If $O(A) = 2$, then you are willing to offer $2:1$. For a \$1 bet, you'll payback \$3. In terms of probability, $P(A) = 1/3$.
 
-Odds are primarily used in betting markets. For example, let's re-analyze the 2016 election in the US. 
+Odds are primarily used in betting markets. For example, let's look at the 2016 election in the US. 
 
 ::: {#exm-odds}
 ## Odds
-One of the main sources of prediction markets is bookmakers who take bets on outcomes of events (mostly sporting) at agreed-upon odds. @fig-odds shows the odds used by several bookmakers to take bets on the winner of the US presidential election in 2016. At that time, the market was predicting that Hillary Clinton would win over Donald Trump, the second favorite, with odds of 7/3. The table is generated by the Oddschecker website. 
+One of the main sources of prediction markets is bookmakers who take bets on outcomes of events (mostly sporting) at agreed-upon odds. @fig-odds shows the odds used by several bookmakers to take bets on the winner of the US presidential election in 2016. At that time, the market was predicting that Hillary Clinton would win over Donald Trump, the second favorite, whose odds ran from 5/2 to 3/1. The table is generated by the Oddschecker website. 
 
 ![Presidential Odds 2016.](fig/hilary.png){#fig-odds}
 
@@ -172,7 +172,7 @@ Ahead of time, we can assign probabilities of winning to each candidate. Accordi
 ::: {#exm-derby}
 ## Kentucky Derby
 
-The Kentucky Derby happens once a year---the first Saturday in May. In horse racing, the odds are set by the betting public. The racetrack collects all the bets, takes a fee (18\%), and then redistributes the pool to the winning tickets. The race is $1 \frac{1}{4}$ miles (2 kilometers) and is the first time the three-year old horses have raced the distance.
+The Kentucky Derby happens once a year, the first Saturday in May. In horse racing, the odds are set by the betting public. The racetrack collects all the bets, takes a fee (18\%), and then redistributes the pool to the winning tickets. The race is $1 \frac{1}{4}$ miles (2 kilometers) and is the first time the three-year old horses have raced the distance.
 
 There was a long period where favorites rarely won. Only six favorites have won in the 35 year period from 1979 to 2013. Recently, favorites have won many times in a row. The market is getting better at predicting who's going to win. Here's the data
 
@@ -243,7 +243,7 @@ There are many other factors to consider: jockey performance, bloodlines, and po
 
 ::: {#exm-odds2}
 ## Boy-Girl Paradox
-If a woman has two children and one is a girl, the chance that the other child is also female has to be $50-50$, right? But it's not. Let's list the possibilities of girl-girl, girl-boy and boy-girl. So the chance that both children are girls is 33 percent. Once we are told that one child is female, this extra information constrains the odds. (Even weirder, the author demonstrates that the odds change again if we're told that one of the girls is named Florida.) In terms of conditional probability, the four possible combinations are
+If a woman has two children and at least one is a girl, the chance that the other child is also female has to be $50-50$, right? But it's not. Let's list the possibilities of girl-girl, girl-boy and boy-girl. So the chance that both children are girls is 33 percent. Once we are told that one child is female, this extra information constrains the odds. In terms of conditional probability, the four possible combinations are
 $$
 BB \; \; BG \; \; GB \; \; GG
 $$
@@ -251,7 +251,7 @@ Conditional on the information that one is a girl means that you know we can't h
 $$
 BG \; \; GB \; \; GG
 $$
-In one of these is the other, a girl. Hence $1/3$.
+In one of these, the other child is also a girl. Hence $1/3$.
 
 It's a different question if we say that the first child is a girl. Then the probability that the other is a girl is $1/2$, as there are two possibilities
 $$
@@ -305,7 +305,7 @@ Hence, the probability is $2/3$ and not the intuitive $1/2$.
 
 ::: {#exm-Patriots}
 ## NFL: New England Patriots Coin Toss
-Let's consider another example and calculate the probability of winning 19 coin tosses out of 25. The NFL team New England Patriots won 19 out of 25 coin tosses in the 2014-15 season. What is the probability of this happening?
+Let's consider another example and calculate the probability of winning 19 coin tosses out of 25. The NFL team New England Patriots won 19 of 25 consecutive coin tosses around the 2014 and 2015 seasons. What is the probability of this happening?
 
 Let $X$ be a random variable equal to $1$ if the Patriots win and $0$ otherwise. It's reasonable to assume $P(X = 1) = \frac{1}{2}$. The probability of observing the sequence in which there is 1 on the first 19 positions, and 0 afterwards is $(1/2)^{25}$. We can code a typical sequence as, 
 $$
@@ -365,7 +365,7 @@ P ( A_1 ) & = 1 - P ( \mathrm{ not} \; A_1 ) \\
 For the winning streak, then we have $(0.76)^{44} = 0.0000057$, a very low probability. In terms of odds, there are three basic inferences
 
 1.  This means that the odds against a particular player as good as Pete Rose, starting a hitting streak today are 175,470 to 1.
-2.  This doesn't mean that the run of $44$ won't be beaten by some player at some time: the Law of Very Large Numbers
+2.  This doesn't mean that the run of $44$ won't be beaten by some player at some time: the Law of Truly Large Numbers
 3.  Joe DiMaggio's record is 56. He is a 325 hitter, thus we have $(0.792)^{56} = 2.13 \times 10^{-6}$ or 469,234 to 1. It's going to be hard to beat.
 
 The independence assumption underlying this calculation does not account for the popular belief in the "hot hand", the idea that a player who has been successful recently is more likely to succeed again. 
@@ -381,7 +381,7 @@ Sample averages can have paradoxical behavior. This is related to the field of c
 | Derek Jeter   | 12/48   | 0.250 | 183/582 | 0.314 | 195/630  | 0.310 |
 | David Justice | 104/411 | 0.253 | 45/140  | 0.321 | 149/551  | 0.270 |
 
-This situation is known as *confounding*. It occurs when two separate and different populations are aggregated to give misleading conclusions. The example shows that if $A,B,C$ are events, it is possible to have the three inequalities
+This situation is known as *Simpson's paradox* [@simpson1951interpretation], and it arises through confounding. It occurs when two separate and different populations are aggregated to give misleading conclusions. The example shows that if $A,B,C$ are events, it is possible to have the three inequalities
 \begin{align*}
 &P( A \mid B \text{ and } C ) > P( A \mid B \text{ and } \bar C )\\
 &P( A \mid \bar  B \text{ and } C ) > P( A \mid \bar  B \text{ and } \bar  C )\\
@@ -399,11 +399,11 @@ In general, given $N$ items (people) randomly distributed into $c$ categories (b
 $$
 P(\text{no match}) \approx \exp\left(-N^2/2c\right).
 $$ 
-Given $A_i$ is the event that person $i$ has a matching birthday with someone, we have 
+Let $A_i$ be the event that person $i+1$ shares a birthday with one of the first $i$ people, given that those $i$ have no match. Then 
 $$
 P(\text{no match})  = \prod_{i=1}^{N-1}(1-P(A_i)) = \exp\left(\sum_{i=1}^{N-1}\log (1-P(A_i))\right).
 $$ 
-Here $P(A_i) =\dfrac{i}{c}$ Then use the approximation $\log(1-x) \approx -x$ for small $x$ to get $P(\text{no match})$. 
+Here $P(A_i) =\dfrac{i}{c}$. Then use the approximation $\log(1-x) \approx -x$ for small $x$ to get $P(\text{no match})$. 
 $$
 \sum_{i=1}^{N-1}\log (1-P(A_i)) \approx -\sum_{i=1}^{N-1}\dfrac{i}{c} = -\dfrac{N(N-1)}{2c}.
 $$
@@ -484,7 +484,7 @@ $$
 
 Under this model, the probability of temperature being between 25 and 27 degrees is
 $$
-P(25 \le x \le 27) = \int_{25}^{27} p(x)dx = (27-25)/10 = 0.2
+P(25 \le X \le 27) = \int_{25}^{27} p(x)dx = (27-25)/10 = 0.2
 $$
 
 ![Uniform Distribution: Probability of temperature being between 25 and 27.](fig/uniform.svg){width=60%}
@@ -515,15 +515,15 @@ The CDF, $F(x)$, is obtained by integrating the PDF:
 So, the CDF of this uniform distribution is a linear function that increases from 0 to 1 as $x$ goes from 0 to 1.
 
 
-Graphically, the CDF of a continuous random variable is a smooth curve. It starts at 0, increases as $x$ increases, and eventually reaches 1. Figure below shows the CDF of a uniform and normal random variable, respectively.
+Graphically, the CDF of a continuous random variable is a continuous curve. It starts at 0, increases as $x$ increases, and eventually reaches 1. Figure below shows the empirical CDF of uniform and normal draws, respectively.
 ```{r}
 #| echo: true
 #| layout-ncol: 2
 #| fig-width: 2.6
 #| fig-height: 1.8
 #| fig-cap:
-#|   - "CDF of a uniform random variable"
-#|   - "CDF of a normal random variable"
+#|   - "Empirical CDF of 500 uniform draws"
+#|   - "Empirical CDF of 500 normal draws"
 
 set.seed(33) # Patrick Roy
 plot(ecdf(runif(500)), main = "", ylab = expression(F[n](x)), col = "lightblue", pch = 21, bg = "grey")
@@ -532,7 +532,7 @@ plot(ecdf(rnorm(500)), main = "", ylab = expression(F[n](x)), col = "lightblue",
 :::
 
 ### The Inverse CDF Method
-The inverse distribution method uses samples of uniform random variables to generate draws from random variables with a continuous distribution function, $F$. Since $F\left(  x\right)$ is uniformly distributed on $\left[ 0,1\right]$, draw a uniform random variable and invert the CDF to get a draw from $F$. Thus, to sample from $F$,
+The inverse distribution method uses samples of uniform random variables to generate draws from random variables with a continuous distribution function, $F$. Since $F\left(  X\right)$ is uniformly distributed on $\left[ 0,1\right]$, draw a uniform random variable and invert the CDF to get a draw from $F$. Thus, to sample from $F$,
 \begin{align*}
 &  \text{Step 1}\text{: Draw }U\sim U\left[  0,1\right]  \ \\
 &  \text{Step 2}\text{: }\text{Set }X=F^{-1}\left(  U\right)  ,
@@ -542,11 +542,11 @@ where $F^{-1}\left(  U\right)  =\inf\left\{  x:F\left(  x\right)  =U\right\}$.
 This inversion method provides i.i.d. draws from $F$ provided that $F^{-1}\left(  U\right)$ can be exactly calculated. For example, the CDF of an exponential random variable with parameter $\mu$ is $F\left(  x\right) =1-\exp\left(  -\mu x\right)$, which can easily be inverted. When $F^{-1}$ cannot be analytically calculated, approximate inversions can be used. For example, suppose that the density is a known analytical function. Then, $F\left(  x\right)$ can be computed to an arbitrary degree of accuracy on a grid, and inversions can be approximately calculated, generating an approximate draw from $F$. With all approximations, there is a natural trade-off between computational speed and accuracy. One example where efficient approximations are possible are inversions involving normal distributions, which is useful for generating truncated normal random variables. Outside of these limited cases, the inverse transform method does not provide a computationally attractive approach for drawing random variables from a given distribution function. In particular, it does not work well in multiple dimensions.
 
 ### Functional Transformations
-The second main method uses functional transformations to express the distribution of a random variable that is a known function of another random variable. Suppose that $X\sim F$, admitting a density $f$, and that $y=h\left(  x\right)$ is an increasing continuous function. Thus, we can define $x=h^{-1}\left(  y\right)$ as the inverse of the function $h$. The distribution of $y$ is given by
+The second main method uses functional transformations to express the distribution of a random variable that is a known function of another random variable. Suppose that $X\sim F$, admitting a density $f$, and that $y=h\left(  x\right)$ is an increasing differentiable function. Thus, we can define $x=h^{-1}\left(  y\right)$ as the inverse of the function $h$. The distribution of $y$ is given by
 $$
-F_Y\left(y\right)  =P\left(  Y\leq y\right)  =\int_{-\infty}^{h^{-1}\left(  y\right)  }f\left(  x\right)  dx=F_X\left(  X\leq h^{-1}\left(y\right)  \right).
+F_Y\left(y\right)  =P\left(  Y\leq y\right)  =\int_{-\infty}^{h^{-1}\left(  y\right)  }f\left(  x\right)  dx=F_X\left(  h^{-1}\left(y\right)  \right).
 $$
-Differentiating with respect to $y$ gives the density via Leibnitz's rule:
+Differentiating with respect to $y$ gives the density via the chain rule:
 $$
 f_{Y}\left(  y\right)  =f\left(  h^{-1}\left(  y\right)  \right)  \left\vert\frac{d}{dy}\left(  h^{-1}\left(  y\right)  \right)  \right\vert,
 $$
@@ -558,11 +558,11 @@ Transformations are widely used to simulate both univariate and multivariate ran
 
 
 ## Expectation and Variance (Reward and Risk)
-An expected value of a random variable, denoted by $\E{X}$ is a weighted average. Each possible value of a random variable is weighted by its probability. For example, Google Maps uses expected value when calculating travel times. We might compute two different routes by their expected travel time. Typically, a forecast or expected value is all that is required; these expected values can be updated in real time as we travel. Say I am interested in the travel time from Washington National Airport to Fairfax, Virginia. The histogram below shows the travel times observed for a work day evening and were obtained from [Uber](https://movement.uber.com/). 
+An expected value of a random variable, denoted by $\E{X}$ is a weighted average. Each possible value of a random variable is weighted by its probability. For example, Google Maps uses expected value when calculating travel times. We might compute two different routes by their expected travel time. Typically, a forecast or expected value is all that is required; these expected values can be updated in real time as we travel. Say I am interested in the travel time from Arlington to Annandale, Virginia. The histogram below shows the travel times observed for a work day evening and were obtained from [Uber](https://movement.uber.com/). 
 
 ::: {#exm-Uber}
 ## Uber
-Let's look at the histogram of travel times from Fairfax, VA to Washington, DC
+Let's look at the histogram of travel times from Arlington to Annandale, Virginia
 ```{r} 
 #| fig-cap: "Travel times in the evening."
 d <- read.csv("data/dc_travel_time.csv")
@@ -579,7 +579,7 @@ bins <- hist(evening_tt, breaks = 3, plot = F)
 knitr::kable(data.frame("tt" = bins$mids, "Probability" = bins$counts / length(evening_tt)), col.names = c("Travel Time", "Probability"), digits = c(1, 2), format.args = list(digits = 3))
 ```
 
-There is a small chance (5%) I can get to Washington, DC in 17.5 minutes, which probably happens on a holiday, and a non-trivial chance (18%) to travel for 27.5 minutes, possibly due to a sports game or bad weather. Most of the time (77%), our travel time is 22.5 minutes. However, when Uber shows you the travel time, it uses the expected value as a forecast rather than the full distribution. Specifically, you will be given an expected travel time of 23 minutes. 
+There is a small chance (5%) I can get to Annandale in 17.5 minutes, which probably happens on a holiday, and a non-trivial chance (18%) to travel for 27.5 minutes, possibly due to a sports game or bad weather. Most of the time (77%), our travel time is 22.5 minutes. However, when Uber shows you the travel time, it uses the expected value as a forecast rather than the full distribution. Specifically, you will be given an expected travel time of 23 minutes. 
 ```{r}
 #| echo: true
 0.05 * 17.5 + 0.77 * 22.5 + 0.18 * 27.5
@@ -643,7 +643,7 @@ $$
 \Cor{X,Y} & 1
 \end{bmatrix}.
 $$
-If $X$ and $Y$ have an exact linear relationship, then $\Cor{X,Y} = 1$ and $\Cov{X,Y}$ is the product of standard deviations. In matrix notation, the relation between the covariance matrix and correlation matrix is given by
+If $Y$ is an exact increasing linear function of $X$, then $\Cor{X,Y} = 1$ and $\Cov{X,Y}$ is the product of standard deviations (for a decreasing one, $-1$ and minus the product). In matrix notation, the relation between the covariance matrix and correlation matrix is given by
 $$
 \rho = \mathrm{diag}\left(\Sigma\right)^{-1/2} \Sigma\mathrm{diag}\left(\Sigma\right)^{-1/2},
 $$
@@ -769,7 +769,7 @@ This is equivalent to saying that the set of sequences for which the limit fails
 
 The independence assumption is central to Kolmogorov's results, but it can be relaxed in various ways for different applications. For stochastic processes with dependent observations, the key question becomes: how much dependence can we tolerate while still obtaining convergence of averages?
 
-For *stationary processes*, where the joint distribution of $(X_t, X_{t+1}, \ldots, X_{t+k})$ does not depend on $t$, a law of large numbers holds under considerably weaker conditions than independence. If the process is *ergodic* (roughly, if it eventually "forgets" its initial conditions), then time averages converge to ensemble averages:
+For *stationary processes*, where the joint distribution of $(X_t, X_{t+1}, \ldots, X_{t+k})$ does not depend on $t$, a law of large numbers holds under considerably weaker conditions than independence. If the process is *ergodic* (roughly, if it eventually "forgets" its initial conditions), and $\E{|X_1|} < \infty$, then time averages converge to the ensemble average $\mu = \E{X_1}$:
 
 $$
 \frac{1}{n}\sum_{i=1}^n X_i \to \mu \quad \text{almost surely}
@@ -781,7 +781,7 @@ Every time we estimate a population mean from a sample, test a hypothesis, or tr
 
 In the context of stochastic processes, the law of large numbers justifies estimating process parameters from a single long trajectory. When modeling financial returns, climate data, or network traffic, we typically observe one realization over time rather than multiple independent realizations. The ergodic theorem ensures that time averages from this single path converge to the true population moments, enabling inference from the data we actually have.
 
-The Kolmogorov's formalization is the culmination of several decades of work on the foundations of probability theory. The weak law of large numbers was first proved by Jakob Bernoulli in 1713 for the special case of binomial random variables, an achievement that took him over twenty years. The result was later generalized by Poisson (1837) and Chebyshev (1867) to broader classes of random variables.
+Kolmogorov's formalization is the culmination of several decades of work on the foundations of probability theory. The weak law of large numbers was first proved by Jakob Bernoulli in 1713 for the special case of binomial random variables, an achievement that took him over twenty years. The result was later generalized by Poisson (1837) and Chebyshev (1867) to broader classes of random variables.
 
 The strong law required deeper mathematical machinery. Émile Borel proved a version for Bernoulli trials in 1909, but the general result awaited the development of measure-theoretic probability. Francesco Cantelli made progress in the 1910s, but it was Kolmogorov who provided the definitive treatment in 1933, unifying diverse results under a single rigorous framework.
 
@@ -813,7 +813,7 @@ $$
 The expected value (mean) of a Bernoulli distributed random variable $X$ is given by:
 $$\E{X} = p
 $$
-Simply speaking, if you are to toss a coin many times, you expect $p$ heads.
+Simply speaking, if you are to toss a coin many times, you expect a fraction $p$ of heads.
 
 The variance of $X$ is given by:
 $$ 
@@ -872,7 +872,7 @@ $$
 $$ 
 The probability distribution of $X$ is Binomial with parameters $n = 3, p= 1/2$, where $n$ denotes the sample size (a.k.a. number of trials) and $p$ is the probability of heads; we have a fair coin. The notation is $X \sim \mathrm{Bin} \left ( n = 3 , p = \frac{1}{2} \right )$ where the sign $\sim$ is read as *distributed as*.
 
-| Result | $X$ |   $P(X=x)$ |
+| Result | $X$ | $P(\text{Result})$ |
 | :----: | :-: | -------------: |
 |  HHH   |  3  |          $p^3$ |
 |  HHT   |  2  |  $p^2 ( 1- p)$ |
@@ -1136,23 +1136,23 @@ for all possible $x$ and $y$ values. That is, learning information $X=x$ doesn't
 
 Conditional probabilities are counter-intuitive. For example, one of the most important properties is typically $p( x \mid y ) \neq p( y\mid x )$. Confusing these two, specifically equating $P(A \mid B)$ with $P(B \mid A)$, is a common error known as the *Prosecutor's Fallacy*.
 
-We just derived an important relation that allows us to calculate the conditional probability $p(x \mid y)$ when we know joint probability $p(x,y)$ and marginal probability $p(y)$. The total probability or evidence can be calculated as usual, via $p(y) = \sum_{x}p(x,y)$.
+The definition of conditional probability gives a relation that allows us to calculate the conditional probability $p(x \mid y)$ when we know joint probability $p(x,y)$ and marginal probability $p(y)$. The total probability or evidence can be calculated as usual, via $p(y) = \sum_{x}p(x,y)$.
 
-We will see that independence will lead to a different conclusion than the Bayes conditional probability decomposition: specifically, independence yields $p( x,y ) = p(x) p(y)$, whereas Bayes implies $p(x ,y) = p(x)p(y \mid x)$.
+The factorization $p(x,y) = p(x)p(y\mid x)$ always holds; independence is the special case $p(y\mid x) = p(y)$, which gives $p(x,y) = p(x)p(y)$.
 
 ## Further Notes: Dutch Book Arguments {#sec-dutch-book}
 
 If probabilities are degrees of belief and subjective, where do they come from and what rules must they satisfy? These questions were answered to varying degrees by Ramsey, de Finetti, and Savage. Ramsey and de Finetti, working independently and at roughly the same time, developed the first primitive theories of subjective probability and expected utility, and Savage placed the theories on a more rigorous footing, combining the insights of Ramsey with the expected utility theory of von Neumann and Morgenstern.
 
-The starting point for Ramsey's and de Finetti's theories is the measurement of one's subjective probabilities using betting odds, which have been used for centuries to gauge the uncertainty over an event. As noted by de Finetti, "*It is a question of simply making mathematically precise the trivial and obvious idea that the degree of probability attributed by an individual to a given event is revealed by the conditions under which he would be disposed to bet on that event*" (p. 101). Notice the difference between the frequentist and Bayesian approach. Instead of defining the probabilities via an infinite repeated experiment, the Bayesian approach elicits probabilities from an individual's observed behavior.
+The starting point for Ramsey's and de Finetti's theories is the measurement of one's subjective probabilities using betting odds, which have been used for centuries to gauge the uncertainty over an event. As noted by de Finetti, "*It is a question of simply making mathematically precise the trivial and obvious idea that the degree of probability attributed by an individual to a given event is revealed by the conditions under which he would be disposed to bet on that event*" [@definetti1937foresight, p. 101]. Notice the difference between the frequentist and Bayesian approach. Instead of defining the probabilities via an infinite repeated experiment, the Bayesian approach elicits probabilities from an individual's observed behavior.
 
 Formally, for any event $A$, the identity
 $$
 P(A)  =\frac{1}{1+\text{odds}(A)}\text{ or }\text{odds}(A)=\frac{1-P(A)}{P(A)},
 $$
-where $\bar A$ is the complement of $A$, links odds and probabilities. Throughout, we use $P$ as a generic term to denote probabilities when there is no specific reference to an underlying distribution or density. If a horse in a race has odds of 2, commonly expressed as 2:1 (read two to one), then the probability the horse wins is $1/3$. The basic idea of using betting odds to elicit probabilities is simple and intuitive: ask an individual to place odds on various mutually exclusive events, and use these odds to calculate the probabilities. Odds are *fair* if lower odds would induce a person to take the bet, and higher odds would induce the person to take the other side of the bet.
+where $\bar A$ is the complement of $A$, links odds and probabilities. Throughout, we use $P$ as a generic term to denote probabilities when there is no specific reference to an underlying distribution or density. If a horse in a race has odds of 2, commonly expressed as 2:1 (read two to one), then the probability the horse wins is $1/3$. The basic idea of using betting odds to elicit probabilities is simple and intuitive: ask an individual to place odds on various mutually exclusive events, and use these odds to calculate the probabilities. Odds are *fair* if higher odds would induce a person to take the bet, and lower odds would induce the person to take the other side of the bet.
 
-In constructing a collection of betting odds over various events, de Finetti and Ramsey argued that not all odds are rational (i.e., consistent or coherent). For example, the sum of the probability of each horse winning a race cannot be greater than one. If a person has inconsistent beliefs, then he "*could have a book made against him by a cunning bettor and would then stand to lose in any event*" (Ramsey (1931), p. 22). This situation is called a Dutch book arbitrage, and a rational theory of probability should rule out such inconsistencies. By avoiding Dutch books, Ramsey and de Finetti showed that the degrees of beliefs elicited from coherent odds satisfy the standard axioms of probability theory, such as the restriction that probabilities are between zero and one, finite additivity, and the laws of conditional probability. The converse also holds: probabilities satisfying the standard axioms generate odds excluding Dutch-book arbitrages. Absence of arbitrage is natural in finance and economics and is a primary assumption for many foundational results in asset pricing. In fact, the derivations given below have a similar flavor to those used to prove the existence of a state price density assuming discrete states.
+In constructing a collection of betting odds over various events, de Finetti and Ramsey argued that not all odds are rational (i.e., consistent or coherent). For example, the sum of the probability of each horse winning a race cannot be greater than one. If a person has inconsistent beliefs, then he "*could have a book made against him by a cunning bettor and would then stand to lose in any event*" [@ramsey1926truth]. This situation is called a Dutch book arbitrage, and a rational theory of probability should rule out such inconsistencies. By avoiding Dutch books, Ramsey and de Finetti showed that the degrees of beliefs elicited from coherent odds satisfy the standard axioms of probability theory, such as the restriction that probabilities are between zero and one, finite additivity, and the laws of conditional probability. The converse also holds: probabilities satisfying the standard axioms generate odds excluding Dutch-book arbitrages. Absence of arbitrage is natural in finance and economics and is a primary assumption for many foundational results in asset pricing. In fact, the derivations given below have a similar flavor to those used to prove the existence of a state price density assuming discrete states.
 
 Dutch-book arguments are simple to explain. To start, they require an individual to post odds on events. A bettor or bookie can then post stakes or make bets at those odds with a given payoff, $S$. The choice of the stakes is up to the bettor. A Dutch book occurs when a cunning bettor makes money for sure by placing carefully chosen stakes at the given odds. Alternatively, one can view the odds as prices of lottery tickets that pay off \$1 when the event occurs, and the stakes as the number of tickets bought. Thus, probabilities are essentially lottery ticket prices. In fact, de Finetti used the notation 'Pr' to refer to both prices and probabilities.
 

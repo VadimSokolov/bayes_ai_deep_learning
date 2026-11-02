@@ -36,7 +36,7 @@ a / (1 - a)
 
 # [hockey-prior-prob]
 a <- 1 - pnorm(24, mu, sqrt(sigma02))
-print(a)
+a
 a / (1 - a)
 
 # ---- Hypothesis Testing for Normal Mean: Two-Sided Test --------------------
@@ -63,26 +63,19 @@ a
 
 # [proportions-monte-carlo]
 set.seed(92) # Kuzy
-y1 <- 1755
-n1 <- 2500
-alpha1 <- 1
-beta1 <- 1
-y2 <- 1818
-n2 <- 2500
-alpha2 <- 1
-beta2 <- 1
 m <- 10000
-p1 <- rbeta(m, y1 + alpha1, n1 - y1 + beta1)
-p2 <- rbeta(m, y2 + alpha2, n2 - y2 + beta2)
+p1 <- rbeta(m, 1755 + 1, 2500 - 1755 + 1)
+p2 <- rbeta(m, 1818 + 1, 2500 - 1818 + 1)
 rd <- p2 - p1
+quantile(rd, c(.05, .95))
+
+# [fig-proportions-posterior]
 plot(density(rd), main = "", xlab = expression(p[2] - p[1]), ylab = "Density", lwd = 3)
-q <- quantile(rd, c(.05, .95))
-print(q)
-abline(v = q, col = "red", lwd = 2)
+abline(v = quantile(rd, c(.05, .95)), col = "red", lwd = 2)
 
 # ---- Highest Posterior Density (HPD) Credible Set --------------------------
 
-# [hpd-visualization]
+# [fig-hpd-visualization]
 theta <- seq(0, 1, 0.01)
 p <- dbeta(theta, 8, 5)
 plot(theta, p, type = "l", xlab = expression(theta), ylab = "Density")
@@ -97,7 +90,7 @@ text(0.62, 0.25, "C", col = "blue", cex = 1)
 # [cauchy-data]
 y <- c(2, -7, 4, -6)
 
-# [cauchy-posterior]
+# [fig-cauchy-posterior]
 par(mar = c(4, 4, 0, 0), bty = "n")
 lhood <- function(theta) 1 / prod(1 + (y - theta)^2)
 theta <- seq(-10, 10, 0.1)
@@ -109,15 +102,11 @@ abline(h = c(0.008475, 0.0159, 0.1, 0.2), col = "red")
 # ---- Ulcer Treatment Clinical Trial ----------------------------------------
 
 # [ulcer-posterior]
-# Posterior distributions for death rates
-# Treatment A: 7 deaths out of 100
-# Treatment B: 1 death out of 100
 alpha_A <- 1 + 7
 beta_A <- 1 + 93
 alpha_B <- 1 + 1
 beta_B <- 1 + 99
 
-# Monte Carlo estimate of P(p_A > p_B | data)
 set.seed(123)
 n_sims <- 100000
 p_A_samples <- rbeta(n_sims, alpha_A, beta_A)
@@ -127,8 +116,6 @@ prob_A_worse <- mean(p_A_samples > p_B_samples)
 cat("P(death rate A > death rate B | data) =", round(prob_A_worse, 3), "\n")
 
 # [ulcer-chisquare]
-# Frequentist chi-square test of homogeneity
-# Construct the contingency table (Excellent, Fair, Death) x (Treatment A, B, C, D)
 outcome_matrix <- matrix(c(
   76, 17, 7, # Treatment A
   89, 10, 1, # Treatment B
@@ -138,19 +125,12 @@ outcome_matrix <- matrix(c(
 rownames(outcome_matrix) <- c("A", "B", "C", "D")
 colnames(outcome_matrix) <- c("Excellent", "Fair", "Death")
 
-# Chi-square test
 chisq_result <- suppressWarnings(chisq.test(outcome_matrix))
-cat("Chi-square statistic:", round(chisq_result$statistic, 2), "\n")
-cat("Degrees of freedom:", chisq_result$parameter, "\n")
-cat("P-value:", round(chisq_result$p.value, 3), "\n")
 
-# Fisher's exact test for just the death column (A vs B)
 death_table <- matrix(c(7, 93, 1, 99), nrow = 2, byrow = TRUE)
 rownames(death_table) <- c("A", "B")
 colnames(death_table) <- c("Death", "Survival")
 fisher_result <- fisher.test(death_table, alternative = "greater")
-cat("\nFisher's exact test (A vs B, deaths only):\n")
-cat("P-value:", round(fisher_result$p.value, 3), "\n")
 
 # [ulcer-plot-posteriors]
 p_grid <- seq(0, 0.2, length.out = 500)
@@ -256,7 +236,6 @@ results <- data.frame(
 )
 
 # Conduct sequential analysis
-final_decision <- "Continue"
 for (k in seq_along(interim_points)) {
   n_current <- interim_points[k]
 
@@ -278,12 +257,14 @@ for (k in seq_along(interim_points)) {
   # Decision
   if (p_superior > theta_E) {
     decision <- "Stop for Efficacy"
-    final_decision <- decision
   } else if (p_superior < theta_F) {
     decision <- "Stop for Futility"
-    final_decision <- decision
   } else {
-    decision <- "Continue"
+    decision <- if (k < length(interim_points)) {
+      "Continue"
+    } else {
+      "Inconclusive"
+    }
   }
 
   results <- rbind(results, data.frame(
@@ -325,8 +306,7 @@ par(mar = c(4, 4, 2, 1))
 plot(p_grid, dbeta(p_grid, alpha_T_final, beta_T_final),
   type = "l",
   col = "blue", lwd = 2, ylim = c(0, 6),
-  xlab = "Response probability", ylab = "Posterior density",
-  main = "Posterior distributions at final analysis"
+  xlab = "Response probability", ylab = "Posterior density"
 )
 lines(p_grid, dbeta(p_grid, alpha_C_final, beta_C_final), col = "red", lwd = 2, lty = 4)
 abline(v = p_control_true, col = "gray", lty = 2)
@@ -343,29 +323,17 @@ p_C_samples <- rbeta(50000, alpha_C_final, beta_C_final)
 p_T_samples <- rbeta(50000, alpha_T_final, beta_T_final)
 risk_diff <- p_T_samples - p_C_samples
 
-# [berry-summary]
-# Summary statistics
-cat("Posterior summary for risk difference (p_T - p_C):\n")
-cat("  Mean:", round(mean(risk_diff), 3), "\n")
-cat(
-  "  95% Credible Interval: [", round(quantile(risk_diff, 0.025), 3), ",",
-  round(quantile(risk_diff, 0.975), 3), "]\n"
-)
-cat("  P(p_T > p_C):", round(mean(risk_diff > 0), 4), "\n")
-cat("  P(p_T > p_C + 0.10):", round(mean(risk_diff > 0.10), 4), "\n")
-
-# Plot
+# [fig-berry-risk-diff]
 hist(risk_diff,
   breaks = 50, probability = TRUE, col = "lightblue",
-  main = "Posterior distribution of risk difference",
-  xlab = expression(p[T] - p[C])
+  main = "", xlab = expression(p[T] - p[C])
 )
 abline(v = 0, col = "red", lwd = 2, lty = 2)
 abline(v = mean(risk_diff), col = "blue", lwd = 2)
 abline(v = quantile(risk_diff, c(0.025, 0.975)), col = "gray", lwd = 1, lty = 2)
 legend("topleft",
   legend = c("Posterior mean", "Null (no effect)", "95% CI"),
-  col = c("blue", "red", "gray"), lwd = 2, lty = c(1, 2, 2), bty = "n", cex = 0.5
+  col = c("blue", "red", "gray"), lwd = 2, lty = c(1, 2, 2), bty = "n", cex = 0.8
 )
 
 # ---- Operating Characteristics via Simulation ------------------------------
@@ -440,7 +408,7 @@ legend("topleft",
 
 # ---- Reproducing Scott's Bandit Experiment ---------------------------------
 
-# [bandit-single-trial]
+# [fig-bandit-single-trial]
 set.seed(42)
 
 # True conversion rates
@@ -492,25 +460,16 @@ for (day in 1:max_days) {
 }
 
 # Plot: Optimal arm probabilities over time
-par(mfrow = c(1, 2))
 plot(1:end_day, prob_optimal_history[1:end_day, 1],
   type = "l",
   col = "black", lwd = 2, ylim = c(0, 1),
-  xlab = "Time period", ylab = "Probability of being optimal",
-  main = "Optimal Arm Probabilities"
+  xlab = "Time period", ylab = "Probability of being optimal"
 )
 lines(1:end_day, prob_optimal_history[1:end_day, 2], col = "red", lwd = 2, lty = 2)
 abline(h = c(0.05, 0.95), lty = 3, col = "gray40")
 legend("right",
   legend = arm_names, col = c("black", "red"),
   lwd = 2, lty = c(1, 2), cex = 0.8, bty = "n"
-)
-
-# True success rates
-barplot(theta_true,
-  names.arg = 1:2, col = c("black", "red"),
-  xlab = "Arm", ylab = "", main = "True success rate",
-  ylim = c(0, 0.06)
 )
 
 cat("Experiment ended on day:", end_day, "\n")

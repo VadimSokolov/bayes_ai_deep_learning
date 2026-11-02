@@ -12,45 +12,40 @@ This chapter introduces *quantile neural networks*, which learn posterior distri
 
 The key insight is straightforward. Any expectation, including the expected utility central to decision theory, can be represented as an integral over quantiles:
 $$
-\E{f(\theta)} = \int_0^1 F^{-1}_{f(\theta) \mid y}(\tau) d\tau
+\E{f(\theta)\mid y} = \int_0^1 F^{-1}_{f(\theta) \mid y}(\tau) d\tau
 $$
 Rather than learning densities and then computing expectations via sampling, we can directly learn the quantile function $F^{-1}_{f(\theta) \mid y}(\tau)$ using neural networks. This approach is not only more efficient but also naturally handles simulation-based models where likelihoods are unavailable or computationally expensive.[^qnn-amortization]
 
-We begin with quantile regression (@sec-qnn-quantile-regression) and neural network implementation (@sec-qnn-implementation), then use demand forecasts for an inventory decision. Posterior and utility quantiles extend the same learning objective to Bayesian inference and decision theory.
+We begin with quantile regression (@sec-qnn-quantile-regression) and neural network implementation (@sec-qnn-implementation), then use demand forecasts for an inventory decision. Posterior and utility quantiles extend the same learning objective to Bayesian inference and decision theory. Quantile trend filtering and distributional reinforcement learning follow as further comparisons.
 
 ## Quantile Regression {#sec-qnn-quantile-regression}
 
 A retailer must choose tomorrow's stock before observing demand $D$. Under a single-period model with no fixed ordering cost or capacity constraint, let $c_u$ be the cost per unit of unmet demand and $c_o$ the cost per unit left over. Writing $v^+ = \max(v,0)$, the expected cost is
 $$
-C(q) = E[c_u(D-q)^+ + c_o(q-D)^+] = (c_u+c_o)E[\rho_\tau(D-q)], \qquad \tau = \frac{c_u}{c_u+c_o}.
+C(q) = \E{c_u(D-q)^+ + c_o(q-D)^+} = (c_u+c_o)\E{\rho_\tau(D-q)}, \qquad \tau = \frac{c_u}{c_u+c_o}.
 $$
-If a shortage costs nine times as much as a leftover, the optimal stock level is the 90th percentile of demand. The asymmetric costs determine the statistical target.
+Here $\rho_\tau$ is the check loss defined below. If a shortage costs nine times as much as a leftover, the optimal stock level is the 90th percentile of demand. The asymmetric costs determine the statistical target.
 
 For observed values $y_1, \ldots, y_n$, a sample median minimizes the sum of absolute deviations:
 $$
 m \in \arg\min_q \frac{1}{n} \sum_{i=1}^n |y_i-q|.
 $$
-A population median similarly minimizes $E[|Y-q|]$, assuming a finite first moment. At least half the probability lies on each side of a median.
+A population median similarly minimizes $\E{|Y-q|}$, assuming a finite first moment. At least half the probability lies on each side of a median.
 
-The median is the special case $\tau = 0.5$, but the same principle generalizes to any quantile $\tau \in (0,1)$. We use a generalization of the absolute value function, the *check loss* or *pinball loss*, to find the minimizer:
+The median is the special case $\tau = 0.5$, but the same principle generalizes to any quantile $\tau \in (0,1)$. We use a generalization of the absolute value function, the *check loss* or *pinball loss* [@koenker1978regression], to find the minimizer:
 $$
 q_\tau = \arg\min_q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i - q).
 $$
-Here $\rho_\tau(u)$ is the *check loss* or *pinball loss* and is defined as:
+Here $\rho_\tau(u)$ is the check loss, defined as:
 $$
 \rho_\tau(u) = u(\tau - I(u < 0)) = \begin{cases}
 \tau u & \text{if } u \geq 0 \\
 (\tau - 1) u & \text{if } u < 0
 \end{cases}
 $$
-This can also be written in the more computationally convenient form:
-$$
-\rho_\tau(u) = \max(u\tau, u(\tau-1))
-$$
-
 For a continuous conditional distribution, differentiating the population risk gives
 $$
-\frac{\partial}{\partial q} E[\rho_\tau(Y-q)\mid X=x] = F_{Y\mid X=x}(q)-\tau.
+\frac{\partial}{\partial q} \E{\rho_\tau(Y-q)\mid X=x} = F_{Y\mid X=x}(q)-\tau.
 $$
 The derivative is negative below the requested quantile and positive above it. For discrete demand, the corresponding subgradient condition is $F(q^-)\leq\tau\leq F(q)$. Thus minimizing check loss selects a conditional quantile, including the stock level required by the cost ratio.
 
@@ -85,7 +80,7 @@ We minimize this objective with `optim` (BFGS, started at the least squares fit)
 
 ```{r}
 #| cache: true
-#| fig-cap: "Quantile regression on mtcars dataset. The relationship between engine displacement and fuel efficiency varies across quantiles, revealing heteroskedasticity in the data."
+#| fig-cap: "Quantile regression on mtcars dataset. The relationship between engine displacement and fuel efficiency varies across quantiles."
 #| label: fig-plot-mtcars
 
 # Fit quantile regression models using optim()
@@ -158,48 +153,21 @@ legend("topright",
 @tbl-quantile-regression-results shows the estimated coefficients.
 
 ```{r}
-#| code-fold: true
-#| code-summary: "Quantile regression results"
 #| label: tbl-quantile-regression-results
 #| tbl-cap: "Quantile regression results."
-# Print model summaries
-# Create results table
 results_table <- data.frame(
-    Model = character(),
-    Intercept = numeric(),
-    Slope = numeric(),
-    stringsAsFactors = FALSE
+    Model = c(sprintf("Quantile tau = %.1f", quantiles), "OLS (Mean)"),
+    Intercept = sprintf("%.4f", c(sapply(results, function(r) r$coefficients[1]), coef(ols_model)[1])),
+    Slope = sprintf("%.4f", c(sapply(results, function(r) r$coefficients[2]), coef(ols_model)[2]))
 )
-
-# Add quantile regression results
-for (tau in quantiles) {
-    results_table <- rbind(results_table, data.frame(
-        Model = sprintf("Quantile tau = %.1f", tau),
-        Intercept = results[[as.character(tau)]]$coefficients[1],
-        Slope = results[[as.character(tau)]]$coefficients[2]
-    ))
-}
-
-# Add OLS results
-results_table <- rbind(results_table, data.frame(
-    Model = "OLS (Mean)",
-    Intercept = coef(ols_model)[1],
-    Slope = coef(ols_model)[2]
-))
-
-# Display as kable table
-knitr::kable(results_table,
-    digits = 4,
-    caption = "Quantile Regression Results: Fuel Efficiency vs. Engine Displacement",
-    col.names = c("Model", "Intercept", "Slope")
-)
+knitr::kable(results_table, row.names = FALSE)
 ```
 
 The slopes differ across quantiles: the 10th percentile slope is `r sprintf("%.4f", results[["0.1"]]$coefficients[2])`, while the 90th percentile slope is `r sprintf("%.4f", results[["0.9"]]$coefficients[2])`. The fitted negative relationship is stronger at the lower quantile, so the gap between the fitted quantiles widens with displacement. These data do not identify the causes of that spread.
 
 Unlike squared-error loss, absolute loss does not give increasingly large residuals increasingly large slopes. Median regression is therefore less sensitive to extreme response values than OLS, although unusual predictor values can still have substantial influence.
 
-Finally, the check loss $\rho_\tau(u)$ is piecewise linear, making it non-differentiable at zero. `BFGS` assumes a smooth objective, so it is not guaranteed to reach the minimum here, and in this example `optim` stops slightly short of it: the slopes are within 0.01 of those of the linear programming algorithm of `quantreg::rq`, the standard way to fit quantile regression.
+Finally, the check loss $\rho_\tau(u)$ is piecewise linear, making it non-differentiable at zero. `BFGS` assumes a smooth objective, so it is not guaranteed to reach the minimum here, and in this example `optim` stops slightly short of it: the slopes are within 0.01 of those of the linear programming algorithm of `quantreg::rq`, the standard way to fit quantile regression [@koenker2005quantile].
 
 :::
 
@@ -219,8 +187,6 @@ $$
 $$
 No MSE term is needed to identify quantiles. Adding squared error to the same output generally shifts its population minimizer away from the requested quantile; a conditional median need not equal a conditional mean. A separate mean output could share features, but would estimate a different target.
 
-### Learning Multiple Quantiles Simultaneously
-
 Rather than training separate networks for each $\tau_k$, one network takes $\tau$ as an input and shares features across levels. It can also be evaluated at untrained levels. Neither sharing nor interpolation guarantees accuracy or prevents quantile crossing.
 
 ### Cosine Embedding for $\tau$
@@ -235,7 +201,7 @@ $$
 $$
 The scalar $\tau$ becomes an $m$-dimensional vector using $n$ cosine frequencies. This branch depends only on $\tau$; the feature branch $\psi(x)$ supplies the conditioning information. Sharing these branches across quantiles can reduce parameter counts relative to separate networks.
 
-The Fourier representation motivates the embedding, but does not guarantee smooth or monotone quantiles. Discrete outcomes can have discontinuous quantile functions, and ReLU introduces kinks. @barron1993universal gives $O(N^{-1/2})$ approximation rates for networks with $N$ sigmoidal units under a finite first Fourier-moment condition; that result is not a rate for this cosine embedding.
+The cosine basis motivates the embedding, but does not guarantee smooth or monotone quantiles. Discrete outcomes can have discontinuous quantile functions, and ReLU introduces kinks. @barron1993universal gives $O(N^{-1/2})$ approximation rates for networks with $N$ sigmoidal units under a finite first Fourier-moment condition; that result is not a rate for this cosine embedding.
 
 ### Non-Crossing Constraints
 
@@ -249,7 +215,7 @@ Consider synthetic data generated from the model:
 $$
 x\sim U(-1,1),\qquad y\mid x\sim N\left(\frac{\sin(\pi x)}{\pi x},\frac{\exp(1-x)}{10}\right).
 $$
-The variance increases as $x$ decreases. Define $\operatorname{sinc}(0)=1$ by continuity; the true conditional quantile is
+The variance increases as $x$ decreases. Write $\operatorname{sinc}(x)=\sin(\pi x)/(\pi x)$, with $\operatorname{sinc}(0)=1$ by continuity. The true conditional quantile is
 $$
 f_\tau(x)=\operatorname{sinc}(x)+\Phi^{-1}(\tau)\sqrt{\frac{\exp(1-x)}{10}}.
 $$
@@ -266,7 +232,7 @@ For an inspectable comparison on the same model, the computing exercise "Cosine 
 
 : Mean absolute quantile error at $\tau=0.37$ from the reproducible exercise, evaluated against the known quantile on $x\in\{-0.9,-0.7,\ldots,0.9\}$. {#tbl-qnn-synthetic-error}
 
-The implicit network answers directly at the untrained level 0.37; the explicit approach linearly interpolates its 0.3 and 0.4 fits. The errors in @tbl-qnn-synthetic-error are similar, with the explicit interpolation slightly better in this run. Sharing uses fewer parameters here, but establishes neither an accuracy advantage nor calibration across all levels. This experiment is separate from the illustration in @fig-qnn-synthetic, whose training settings are not recorded in the chapter.
+The implicit network answers directly at the untrained level 0.37; the explicit approach linearly interpolates its 0.3 and 0.4 fits. The errors in @tbl-qnn-synthetic-error are similar, with the explicit interpolation slightly better in this run. Sharing uses fewer parameters here, but establishes neither an accuracy advantage nor calibration across all levels. This experiment is separate from the illustration in @fig-qnn-synthetic.
 
 ### Quantiles and Wasserstein Distance
 
@@ -282,11 +248,11 @@ Wasserstein GANs use this distributional distance because it can distinguish dis
 
 Large retailers must choose stock levels for many products and locations. Too little inventory leads to stockouts and lost sales; too much ties up capital and risks obsolescence. We return to the asymmetric inventory choice that motivated check loss.
 
-For the single-period costs defined in @sec-qnn-quantile-regression, the optimal stock target is $F^{-1}_{D\mid x}(c_u/(c_u+c_o))$. P50 is optimal only when the unit costs are equal. P90 corresponds to a shortage cost nine times the overage cost; it is a demand level, whereas safety stock usually means inventory above an expected-demand baseline over a specified replenishment period. Capacity planning can also use a high quantile, with the level determined by the relevant costs or service constraint.
+For the single-period costs defined in @sec-qnn-quantile-regression, the optimal stock target is $F^{-1}_{D\mid x}(c_u/(c_u+c_o))$. Here $P_k$ (written Pk in the figures) is the $k$th percentile of demand. P50 is optimal only when the unit costs are equal. P90 corresponds to a shortage cost nine times the overage cost; it is a demand level, whereas safety stock usually means inventory above an expected-demand baseline over a specified replenishment period. Capacity planning can also use a high quantile, with the level determined by the relevant costs or service constraint.
 
 For a high-margin item with $c_u/c_o$ between $7/3$ and $4$, the optimal policy may target $P_{70}$ or $P_{80}$. For perishable goods with $c_u/c_o$ between $3/7$ and $2/3$, target $P_{30}$ or $P_{40}$. These are cost-based examples, not fixed rules for product categories (@exr-newsvendor-fractile).
 
-DeepAR [@salinas2019deepar] is a recurrent probabilistic forecasting model that predicts parameters of a chosen distribution, such as a Gaussian or negative binomial, from related time series. Quantiles can be obtained analytically where available or by sampling. Wen and colleagues' 2017 multi-horizon quantile recurrent forecaster directly predicts demand quantiles at several horizons using check loss: https://www.amazon.science/publications/a-multi-horizon-quantile-recurrent-forecaster. These are distinct approaches, rather than a documented sequence of internal retail deployments. Chronos-2 (2025) extends pretrained forecasting to univariate, multivariate, and covariate-informed tasks: https://arxiv.org/abs/2510.15821.
+DeepAR [@salinas2019deepar] is a recurrent probabilistic forecasting model that predicts parameters of a chosen distribution, such as a Gaussian or negative binomial, from related time series. Quantiles can be obtained analytically where available or by sampling. The multi-horizon quantile recurrent forecaster of @wen2017multihorizon directly predicts demand quantiles at several horizons using check loss. Chronos-2 [@ansari2025chronos2] extends pretrained forecasting to univariate, multivariate, and covariate-informed tasks.
 
 Direct quantile prediction accommodates asymmetric costs without choosing a parametric response family. It can represent zero-demand quantiles, although intermittent demand still requires adequate data and a suitable model. Linear growth of the loss limits the influence of extreme response residuals; promotional effects still need predictors. Feature choices and network restrictions remain modeling assumptions.
 
@@ -317,17 +283,16 @@ Product embeddings can share information across related items, while recurrent o
 ![A possible demand quantile architecture. Product embeddings, encoded sales history and numeric features are fused into $h_t$; an independent branch embeds the requested quantile level $\tau$, and the quantile head combines the two.](fig/mermaid/21-qnn-demand-architecture.png){#fig-demand-architecture width=70% fig-alt="Product ID and category each pass through an embedding, sales history through an LSTM or Transformer; these and the numeric features enter feature fusion, giving h_t. Separately, the quantile level tau passes through a cosine embedding phi(tau). Both feed the quantile head g of h_t times phi(tau), which outputs the quantile forecast q(x_t, tau)."}
 
 
-In @fig-demand-architecture, the branch $\phi(\tau)$, a cosine embedding as in @sec-qnn-implementation, receives only $\tau$, independently of feature fusion. Training can sample products and historical forecast origins in mini-batches and minimize averaged pinball loss. This is a possible design, not a claim about a retailer's production architecture.
+In @fig-demand-architecture, the branch $\phi(\tau)$, a cosine embedding as in @sec-qnn-implementation, receives only $\tau$, independently of feature fusion. Training can sample products and historical forecast origins in mini-batches and minimize averaged pinball loss.
 
 ### An Instructional Linear Baseline
 
-The following simulation uses three products over two years. It includes positive trends, weekly and monthly seasonality, promotions on approximately 10% of days, and noise whose standard deviation grows with demand. The promotional increments range from 50 to 90 units. These patterns are stipulated by the simulator, rather than evidence from retail data.
+The following simulation uses three products over two years. It includes positive trends, weekly and monthly seasonality, promotions on approximately 10% of days, and noise whose standard deviation grows with demand. The promotional increments range from 50 to 90 units. These patterns are stipulated by the simulator.
 
 Five linear quantile regressions are fitted separately at $\tau\in\{0.1,0.3,0.5,0.7,0.9\}$, using product identifier, day, promotion, numerical day-of-week and day-of-month features, and 1-, 7-, and 30-day demand lags. Training covers days 31 to 640. The final 90 days are evaluated as rolling one-step forecasts: each day uses demand observed through the preceding day, including realized test-period lags, and assumes that day's promotion is known before forecasting. The fitted coefficients remain fixed. These are not 90-day-ahead forecasts issued together on day 640.
 
-```{r amazon-demand-forecast}
-#| code-fold: true
-#| code-summary: "Demand forecasting with linear quantile regression"
+```{r}
+#| label: fig-demand-forecast
 #| cache: true
 #| warning: false
 #| message: false
@@ -406,9 +371,7 @@ test_data <- demand_data %>% filter(day > train_days)
 quantiles <- c(0.1, 0.3, 0.5, 0.7, 0.9)
 models <- list()
 
-# cat("Training quantile regression models...\n")
 for (q in quantiles) {
-    # cat(sprintf("  Quantile %.2f...\n", q))
     models[[as.character(q)]] <- rq(
         demand ~ product + day + promo + day_of_week + day_of_month +
             lag_1 + lag_7 + lag_30,
@@ -428,18 +391,13 @@ for (q in quantiles) {
 predictions <- predictions %>%
     mutate(
         in_80_interval = (demand >= q_010 & demand <= q_090),
-        in_60_interval = (demand >= q_030 & demand <= q_070)
+        in_40_interval = (demand >= q_030 & demand <= q_070)
     )
 
 # Calculate metrics
 coverage_80 <- mean(predictions$in_80_interval, na.rm = TRUE)
-coverage_60 <- mean(predictions$in_60_interval, na.rm = TRUE)
+coverage_40 <- mean(predictions$in_40_interval, na.rm = TRUE)
 mae_median <- mean(abs(predictions$demand - predictions$q_050), na.rm = TRUE)
-
-# cat(sprintf("\nForecast Performance:\n"))
-# cat(sprintf("  80%% interval coverage: %.1f%% (target: 80%%)\n", coverage_80 * 100))
-# cat(sprintf("  40%% interval coverage: %.1f%% (target: 40%%)\n", coverage_60 * 100))
-# cat(sprintf("  Median absolute error: %.2f units\n", mae_median))
 
 # Visualization
 par(mfrow = c(2, 1))
@@ -513,21 +471,21 @@ The held-out results are mixed. The P10-P90 interval has 79.6% coverage against 
 
 : Marginal quantile checks across all three products and rolling test days. {#tbl-demand-calibration}
 
-The central levels in @tbl-demand-calibration help locate the narrower interval's undercoverage. Aggregation can hide product-specific errors; calibration should also be checked by product and promotion status. Coverage measures how often observations fall inside an interval, while width measures its sharpness. A wide interval can cover well without being useful.
+The central levels in @tbl-demand-calibration help locate the narrower interval's undercoverage. Aggregation can hide product-specific errors: the 80% coverage is 74.4%, 84.4% and 80.0% for the three products. Calibration should also be checked by product and promotion status. Coverage measures how often observations fall inside an interval, while width measures its sharpness. A wide interval can cover well without being useful.
 
-The top panel shows Product 1's training demand and promotions. The bottom fan chart shows rolling forecasts: P50 is dashed, and the bands span P10-P90 and P30-P70. For an illustrative decision, suppose shortages cost nine times leftovers. The first test-day P90 forecast for Product 1 is about 135 units, giving a stock target of about 135 under the single-period assumptions. A whole-unit implementation and stock already on hand require corresponding adjustments. The undercoverage checks matter because an inaccurate P90 can change the intended service level and cost.
+The top panel of @fig-demand-forecast shows Product 1's training demand and promotions. The bottom fan chart shows rolling forecasts: P50 is dashed, and the bands span P10-P90 and P30-P70. For an illustrative decision, suppose shortages cost nine times leftovers. The first test-day P90 forecast for Product 1 is about 135 units, giving a stock target of about 135 under the single-period assumptions. A whole-unit implementation and stock already on hand require corresponding adjustments. The undercoverage checks matter because an inaccurate P90 can change the intended service level and cost.
 
 ## From Densities to Quantiles: A Generative Approach {#sec-qnn-generative}
 
 The same network can estimate a scalar posterior quantile. Generate a look-up table of simulated pairs $\{\theta^{(i)},y^{(i)}\}_{i=1}^N$ by drawing $\theta^{(i)}\sim\pi(\theta)$ and then $y^{(i)}\sim p(y\mid\theta^{(i)})$. The latter step needs a simulator, not an evaluable likelihood. A deterministic forward map is also possible. @polson2023generative develops this approach to Bayesian computation.
 
-Squared-error regression of $\theta$ on $Y$, whether by kernel smoothing, nearest neighbors, or a neural network, targets the conditional mean $E[\theta\mid Y]$. This point estimate discards spread and shape, including multimodality. Here $\theta$ may represent a parameter or a latent state. To estimate scalar posterior quantiles, replace the response in our training objective by $\theta$ and the features by $S(Y)$:
+Squared-error regression of $\theta$ on $Y$, whether by kernel smoothing, nearest neighbors, or a neural network, targets the conditional mean $\E{\theta\mid Y}$. This point estimate discards spread and shape, including multimodality. Here $\theta$ may represent a parameter or a latent state. To estimate scalar posterior quantiles, replace the response in our training objective by $\theta$ and the features by $S(Y)$:
 $$
-\mathcal{R}(\varphi)=E_{\theta,Y,\tau}\left[\rho_\tau\big(\theta-q_{\varphi}(S(Y),\tau)\big)\right],\qquad \tau\sim U(0,1),\quad \tau\perp(\theta,Y).
+\mathcal{R}(\varphi)=\E[\theta,Y,\tau]{\rho_\tau\big(\theta-q_{\varphi}(S(Y),\tau)\big)},\qquad \tau\sim U(0,1),\quad \tau\perp(\theta,Y).
 $$
 The joint expectation uses the prior and simulator. At each $(S(y),\tau)$, its population minimizer is the corresponding conditional quantile. If $S$ is sufficient, this is a quantile of $\theta\mid Y=y$; otherwise it is a quantile of $\theta\mid S(Y)=S(y)$, which may discard information. Independent uniform levels do not give a pointwise regression identity $\theta^{(i)}=H(S(y^{(i)}),\tau^{(i)})$.
 
-Once trained, the scalar map can generate approximate posterior draws by evaluating it at fresh uniforms. The gain is *amortization*: an upfront simulation and training investment can make repeated inference fast for datasets represented by the training distribution. Posterior Monte Carlo does not require fitting a density estimator. Training cost, simulator misspecification, summary information loss, and extrapolation must enter the comparison.
+Once trained, the scalar map can generate approximate posterior draws by evaluating it at fresh uniforms. The gain is *amortization*: an upfront simulation and training investment can make repeated inference fast for datasets represented by the training distribution. Training cost, simulator misspecification, summary information loss, and extrapolation must enter the comparison.
 
 The theoretical foundation for a random-input representation is the *noise outsourcing theorem* [@kallenberg1997foundations]. For $(Y,\Theta)$ taking values in standard Borel spaces, there is, on an enlarged probability space if necessary, a uniform variable $\tau$ independent of $Y$ and a measurable $H$ such that
 $$
@@ -548,9 +506,17 @@ $$
 $$
 Each component conditions on the data and previously generated components. The conditional factorization represents dependence without requiring normalized density outputs.
 
+### Optional Measure Notation
+
+Let $P(dy\mid\theta)$ denote the simulator's conditional law and $\Pi(d\theta\mid y)$ the posterior. If the latter has a density relative to a measure $\nu$, write
+$$
+\Pi(d\theta\mid y)=\pi(\theta\mid y)\nu(d\theta).
+$$
+The transport representation covers both likelihood-based models, $P(dy\mid\theta)=p(y\mid\theta)\kappa(dy)$, and deterministic forward simulators $y=f(\theta)$. Learning a scalar posterior or utility quantile uses simulated pairs from this joint model; it does not remove its assumptions.
+
 ## Bayes' Rule for Quantiles {#sec-qnn-bayes-quantiles}
 
-@parzen2004quantile showed that quantile methods provide direct alternatives to density-based Bayesian computations.
+@parzen2004quantile develops quantile-based approaches to statistical data modeling.
 
 Given a conditional CDF $F_{\theta\mid y}$, define its generalized inverse by
 $$
@@ -558,9 +524,9 @@ Q_{\theta\mid y}(u)\defeq F^{-1}_{\theta\mid y}(u)=\inf\{t:F_{\theta\mid y}(t)\g
 $$
 It is non-decreasing and left-continuous. Inverse-CDF sampling gives $Q_{\theta\mid y}(\tau)\sim p(\theta\mid y)$ for $\tau\sim U(0,1)$. Sorting posterior samples estimates this map on a probability grid; it does not make independent training targets equal to specified quantiles.
 
-Quantiles also compose under non-decreasing, left-continuous transformations $g$. Writing $Q_Y$ for the quantile function of $Y$,
+Quantiles also compose under non-decreasing, left-continuous transformations $h$. Writing $Q_Y$ for the quantile function of $Y$,
 $$
-Q_{g(Y)}(u)=g(Q_Y(u)).
+Q_{h(Y)}(u)=h(Q_Y(u)).
 $$
 This gives a compositional representation that a neural network may approximate.
 
@@ -607,7 +573,7 @@ $$
 \lambda_1 = \frac{\alpha}{\sigma_*}, \quad \lambda = \frac{\alpha\lambda_1(n\bar{y}-n\mu)}{t}
 $$
 
-The form of $g$ follows by writing both normal survival functions in standardized coordinates. It is a location-and-scale extension of the normal-quantile distortions used in risk management [@wang1996premium]. Here its parameters depend on the observed sample mean and prior hyperparameters. In more complex models, a neural network can learn this distortion function $g$ directly from data, without requiring conjugacy.
+The form of $g$ follows by writing both normal survival functions in standardized coordinates. It is a location-and-scale extension of the normal-quantile distortions used in risk management [@wang2000class]. Here its parameters depend on the observed sample mean and prior hyperparameters. In more complex models, a neural network can learn this distortion function $g$ directly from data, without requiring conjugacy.
 
 *Numerical Example*: Consider prior $\theta \sim N(0,5)$ and data from $y_i \sim N(3,10)$ with $n=100$ observations. The posterior is $\theta \mid y \sim N(2.941, 0.098)$, since the posterior precision is $1/\alpha^2 + n/\sigma^2 = 1/5 + 100/10 = 10.2$ and the posterior mean is $(n\bar y/\sigma^2)/10.2 = 30/10.2 = 2.941$ for $\bar y = 3$.
 
@@ -626,7 +592,7 @@ The Normal-Normal learning model. Left: Prior, likelihood, and posterior densiti
 
 Recall from @sec-Decisions that optimal Bayesian decisions maximize expected utility:
 $$
-d^\star(y)=\arg\max_d E_{\theta\mid y}[U(d,\theta)]=\arg\max_d\int U(d,\theta)p(\theta\mid y)d\theta.
+d^\star(y)=\arg\max_d \E[\theta\mid y]{U(d,\theta)}=\arg\max_d\int U(d,\theta)p(\theta\mid y)d\theta.
 $$
 Posterior samples can estimate this expectation without density estimation. When many datasets and candidate decisions must be evaluated, a trained utility-quantile map offers another amortized approximation. It concentrates the prediction target on a scalar utility rather than every component of a potentially high-dimensional parameter.
 
@@ -636,9 +602,9 @@ $$
 $$
 Thus, for each decision $d$,
 $$
-E_{\theta\mid y}[U(d,\theta)]=\int_0^1F^{-1}_{U\mid d,y}(\tau)d\tau.
+\E[\theta\mid y]{U(d,\theta)}=\int_0^1F^{-1}_{U\mid d,y}(\tau)d\tau.
 $$
-The full integral gives the expectation; a Lorenz curve uses a partial, and usually normalized, quantile integral. Heavy utility tails still require adequate simulation and numerical resolution near the endpoints.
+Heavy utility tails still require adequate simulation and numerical resolution near the endpoints.
 
 ### Implementation Strategy
 
@@ -664,13 +630,13 @@ Consider exponential (CARA) utility of a normally distributed payoff $W$, withou
 $$
 W(\omega)=(1-\omega)r_f+\omega R,\qquad R\sim N(\mu,\sigma^2).
 $$
-The transformed quantity $X=e^W$ is log-normal, but the utility below acts on $W$, not on $X$. Here $\omega\in(0,1)$ is the allocation weight, $r_f$ is the risk-free return, and $\mu$ and $\sigma^2$ describe the risky return. The utility is
+Here $\omega\in(0,1)$ is the allocation weight, $r_f$ is the risk-free return, and $\mu$ and $\sigma^2$ describe the risky return. The utility is
 $$
 U(W)=-e^{-\gamma W}.
 $$
 The normal exponential moment gives expected utility
 $$
-U(\omega)=E[-e^{-\gamma W}]=-\exp\left\{-\gamma\{(1-\omega)r_f+\omega\mu\}+\frac12\gamma^2\omega^2\sigma^2\right\}.
+U(\omega)=\E{-e^{-\gamma W}}=-\exp\left\{-\gamma\{(1-\omega)r_f+\omega\mu\}+\frac12\gamma^2\omega^2\sigma^2\right\}.
 $$
 When the optimum lies in $(0,1)$, it has the fractional-Kelly algebraic form
 $$
@@ -694,7 +660,7 @@ The decision variable $\omega$ affects the distribution of the returns. The util
 3. Learn $F_{Z_{\omega}}^{-1}$ with a quantile NN
 4. Find the optimal portfolio weight $\omega^\star$ via
 $$
-E(Z_{\omega}) \approx \frac{1}{N}\sum_{i=1}^{N}F^{-1}_{Z_{\omega}}(u_i) \rightarrow \underset{\omega}{\mathrm{maximize}}
+\E{Z_{\omega}} \approx \frac{1}{N}\sum_{i=1}^{N}F^{-1}_{Z_{\omega}}(u_i) \rightarrow \underset{\omega}{\mathrm{maximize}}
 $$
 
 ### Known-Parameter Sanity Check
@@ -710,12 +676,12 @@ We can simulate the expected utility and compare with the closed-form solution.
 
 ![Expected utility integral as function of portfolio weight $\omega$.](fig/portfolio.png){#fig-portfolio-eu}
 
-Portfolio utility integration. Left: sorted simulated utilities $-\exp(-\gamma W)$ plotted against probability levels, with $\gamma=2$ and $\omega=0.1$. Right: utility integrals computed by the trapezoid rule across allocation weights. The dashed line is the analytic optimum $\omega=0.4$. These plots check empirical quantile integration; they do not measure a trained network's error or the effect of posterior parameter uncertainty.
+Portfolio utility integration. Left: sorted simulated utilities $-\exp(-\gamma W)$ plotted against probability levels, with $\gamma=2$ and $\omega=0.1$. Right: utility integrals computed by the trapezoid rule across allocation weights (points, $N=200{,}000$ draws shared across weights) and the closed-form expected utility (curve). The dashed line is the analytic optimum $\omega=0.4$. These plots check empirical quantile integration; they do not measure a trained network's error or the effect of posterior parameter uncertainty.
 :::
 
 ## Optional Comparison: Quantile Trend Filtering {#sec-qnn-trend-filtering}
 
-Trend filtering offers a nonlinear alternative for ordered, low-dimensional inputs. It estimates function values by penalizing discrete differences; @polson2016mixtures develops related hierarchical representations through envelope duality.
+Trend filtering [@kim2009trend] offers a nonlinear alternative for ordered, low-dimensional inputs. It estimates function values by penalizing discrete differences; @polson2016mixtures develops related hierarchical representations through envelope duality.
 
 ::: {#res-quantile-trend-filtering}
 
@@ -729,7 +695,7 @@ Here $\Delta^k$ is the $k$th finite-difference operator. On an equally spaced gr
 
 For $k=2$, the penalty is $\sum_{i=2}^{n-1}|f_{i+1}-2f_i+f_{i-1}|$. On a regular grid, with the appropriate spacing factor, it approximates $\int|f''(x)|dx$. Smoothing splines instead penalize $\int(f''(x))^2dx$. The $\ell_1$ penalty allows locally adaptive changes in slope.
 
-An asymmetric Laplace working likelihood and Laplace priors on differences connect penalized check loss with posterior modes. With unit likelihood scale, a second-order specification is
+An asymmetric Laplace working likelihood [@yu2001bayesian] and Laplace priors on differences connect penalized check loss with posterior modes. With unit likelihood scale, a second-order specification is
 
 $$
 \begin{aligned}
@@ -742,16 +708,15 @@ The asymmetric Laplace negative log likelihood is check loss up to scale and con
 
 :::
 
-Data augmentation can support EM or Gibbs algorithms. Here we minimize the non-smooth objective directly with `optim`, so the example does not demonstrate those computational advantages.
+Data augmentation can support EM or Gibbs algorithms. Here we minimize the non-smooth objective directly, so the example does not demonstrate those computational advantages.
 
-We now demonstrate trend filtering for nonlinear quantile regression using synthetic data with both smooth regions and sharp transitions. For this small example we minimize the $k = 2$ objective with $\lambda = 2$ directly, using `optim` (L-BFGS-B) for $\tau = 0.1, 0.5, 0.9$, rather than through the data augmentation above. @fig-trend-filtering-quantile shows the results.
+We now demonstrate trend filtering for nonlinear quantile regression using synthetic data with both smooth regions and sharp transitions. For this small example we minimize the $k = 2$ objective with $\lambda = 2$ exactly, for $\tau = 0.1, 0.5, 0.9$. Because $\rho_\tau(z)+\rho_\tau(-z)=|z|$, each second difference enters as a pair of pseudo-observations at zero with weight $\lambda$, and the problem is a linear quantile regression program that `quantreg::rq.fit` solves. A generic smooth optimizer such as `optim` stops far from the minimum of this non-smooth objective. @fig-trend-filtering-quantile shows the results.
 
 ```{r}
-#| code-fold: true
-#| code-summary: "Trend filtering for nonlinear quantile regression"
 #| cache: true
+#| warning: false
 #| label: fig-trend-filtering-quantile
-#| fig-cap: "Nonlinear quantile regression via trend filtering. The method adapts to both smooth regions and sharp transitions while estimating conditional quantiles."
+#| fig-cap: "Nonlinear quantile regression via trend filtering at $\\tau=0.1,0.5,0.9$. Each fit is piecewise linear with few changes of slope."
 #| fig-width: 5.5
 #| fig-height: 2.4
 
@@ -782,44 +747,21 @@ D2 <- function(n) {
     return(D)
 }
 
-# Trend filtering objective function for quantile regression
-trend_filter_obj <- function(f, y, lambda, tau, D) {
-    # Check loss
-    residuals <- y - f
-    quantile_loss <- sum(residuals * (tau - (residuals < 0)))
-
-    # L1 penalty on second differences
-    penalty <- lambda * sum(abs(D %*% f))
-
-    return(quantile_loss + penalty)
+# Exact trend filtering fit as a quantile regression linear program
+library(quantreg)
+trend_filter <- function(y, lambda, tau, D) {
+    n <- length(y)
+    as.numeric(rq.fit(rbind(diag(n), lambda * D, -lambda * D),
+        c(y, rep(0, 2 * (n - 2))), tau = tau)$coefficients)
 }
 
-# Fit trend filtering for multiple quantiles using optim
-# For better performance, we use BFGS with box constraints
 quantiles <- c(0.1, 0.5, 0.9)
 lambda <- 2.0 # Smoothing parameter
 D <- D2(n)
 
 results_tf <- list()
-
 for (tau in quantiles) {
-    # Initialize with linear quantile regression
-    X_init <- cbind(1, x)
-    init_fit <- lm(y ~ x)
-    f_init <- predict(init_fit)
-
-    # Optimize using L-BFGS-B
-    opt_result <- optim(
-        par = f_init,
-        fn = trend_filter_obj,
-        y = y,
-        lambda = lambda,
-        tau = tau,
-        D = D,
-        method = "L-BFGS-B"
-    )
-
-    results_tf[[as.character(tau)]] <- opt_result$par
+    results_tf[[as.character(tau)]] <- trend_filter(y, lambda, tau, D)
 }
 
 # Visualization
@@ -881,27 +823,15 @@ legend("bottomright",
     cex = 0.6
 )
 par(mfrow = c(1, 1))
-
-# Calculate empirical coverage
-# coverage <- mean(y >= results_tf[["0.1"]] & y <= results_tf[["0.9"]])
-# cat(sprintf("\nEmpirical 80%% interval coverage: %.1f%%\n", coverage * 100))
 ```
 
-@fig-trend-filtering-quantile shows the fitted 10th, 50th, and 90th percentiles and their nominal 80% band. Its empirical coverage is 68.0% on the same observations used for fitting. This is an observed failure requiring diagnosis, not evidence that sample size or function complexity caused it. Penalty selection, the index-based difference approximation, and non-smooth optimization are possible contributors; held-out check loss and coverage are needed to assess a repair.
+@fig-trend-filtering-quantile shows the fitted 10th, 50th, and 90th percentiles and their nominal 80% band. On the same observations used for fitting, 69% lie strictly inside the band and 18% lie exactly on its edges, because each fit passes through some points. The fits have 9, 9 and 5 changes of slope. Penalty selection and the index-based difference approximation remain modeling choices; held-out check loss and coverage are needed to assess calibration.
 
 Trend filtering is useful when ordered inputs and adaptive piecewise polynomial fits make interpretation straightforward. Neural networks instead compose learned nonlinear features and can accommodate high-dimensional, unordered inputs. The choice depends on the structure and amount of data; neither method guarantees calibrated intervals.
 
-### Optional Measure Notation
-
-Let $P(dy\mid\theta)$ denote the simulator's conditional law and $\Pi(d\theta\mid y)$ the posterior. If the latter has a density relative to a measure $\mu$, write
-$$
-\Pi(d\theta\mid y)=\pi(\theta\mid y)\mu(d\theta).
-$$
-The transport representation covers both likelihood-based models, $P(dy\mid\theta)=p(y\mid\theta)\lambda(dy)$, and deterministic forward simulators $y=f(\theta)$. Learning a scalar posterior or utility quantile uses simulated pairs from this joint model; it does not remove its assumptions.
-
 ## Distributional Reinforcement Learning {#sec-qnn-rl}
 
-Quantile neural networks also apply to reinforcement learning. Recall from @sec-RL that a policy $\pi$ is evaluated by its expected discounted return $Q^\pi(s,a)=E[R\mid s,a,\pi]$. Q-learning seeks optimal action values. *Distributional reinforcement learning* [@bellemare2017distributional] models the return distribution, including randomness from rewards and transitions, rather than only its mean.
+Quantile neural networks also apply to reinforcement learning. Recall from @sec-RL that a policy $\pi$ is evaluated by its expected discounted return $Q^\pi(s,a)=\E{R\mid s,a,\pi}$. Q-learning seeks optimal action values. *Distributional reinforcement learning* [@bellemare2017distributional] models the return distribution, including randomness from rewards and transitions, rather than only its mean.
 
 A quantile network estimates $F^{-1}_{R\mid s,a,\pi}(\tau)$. Expected returns follow from
 $$
@@ -915,7 +845,7 @@ With learned approximations, this step alone is not a guarantee of an optimal po
 
 Return risk and learning uncertainty are different. A thoroughly known action that pays either zero or ten with equal probability has high return variance but offers little new information. A nearly deterministic action tried only once can have low outcome variance and substantial uncertainty about its mean. A learned return distribution alone does not identify epistemic uncertainty or justify exploration.
 
-For a fixed policy, discount factor below one, and finite relevant moments, the exact distributional Bellman evaluation operator contracts in the maximal Wasserstein metric over state-action pairs [@bellemare2017distributional]. This does not give a generic convergence guarantee for greedy control with neural approximation. @dabney2018implicit trains implicit quantile networks using a quantile Huber loss and reports Atari-57 results, rather than robotic-control experiments.
+For a fixed policy, discount factor below one, and finite relevant moments, the exact distributional Bellman evaluation operator contracts in the maximal Wasserstein metric over state-action pairs [@bellemare2017distributional]. This does not give a generic convergence guarantee for greedy control with neural approximation. @dabney2018implicit trains implicit quantile networks using a quantile Huber loss and reports Atari-57 results.
 
 Lower return quantiles can inform downside-sensitive decisions, but P10 is a lower-tail threshold, not the literal worst case. Higher quantiles instead emphasize upside. Weighting quantile levels through probability distortions connects to dual utility theory [@yaari1987dual]. Such risk-sensitive objectives require their own policy specification; changing the return summary does not automatically solve every utility-maximization problem.
 
@@ -927,7 +857,7 @@ The practical test is whether the learned quantiles support the intended decisio
 
 [^qnn-density]: Posterior Monte Carlo does not require fitting a posterior density estimator. The computational comparison in the opening concerns repeated posterior computation across datasets, which may use an evaluable likelihood or a simulator.
 
-[^qnn-amortization]: Efficiency here means possible savings after reusing an upfront simulation and training investment, not a universal advantage. The learned map inherits the prior, simulator, summaries, and training distribution. Scalar quantiles do not by themselves encode multivariate dependence. The expectation in the opening identity is conditional on $y$ and assumes $E[|f(\theta)|\mid y]<\infty$.
+[^qnn-amortization]: Efficiency here means possible savings after reusing an upfront simulation and training investment, not a universal advantage. The learned map inherits the prior, simulator, summaries, and training distribution. Scalar quantiles do not by themselves encode multivariate dependence. The expectation in the opening identity is conditional on $y$ and assumes $\E{|f(\theta)|\mid y}<\infty$.
 
 ## Exercises {.unnumbered}
 

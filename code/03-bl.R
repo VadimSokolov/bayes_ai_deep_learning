@@ -1,7 +1,7 @@
 # Code of chapter: Bayesian Learning
 # Every R chunk of the chapter in book order, including the ones the book does not print. Chunks the book does not run are commented out.
 # Run from the book folder: Rscript code/03-bl.R. Data are read from the data folder. Figures go to the graphics device (Rplots.pdf under Rscript).
-# Data: data/GOOG2019.csv, data/SPMonthly.csv, data/epl.csv, data/epl_season_match_stats.json
+# Data: data/GOOG2019.csv, data/epl.csv, data/epl_season_match_stats.json
 # Packages: Lock5Data, dplyr, knitr
 
 source("code/common.R")
@@ -19,6 +19,7 @@ likelihood <- function(theta, n, Y) {
 }
 posterior <- likelihood(theta, 10, 3) * prior
 posterior <- posterior / sum(posterior) # normalize
+pred10 <- sum(theta * posterior)
 barplot(posterior, names.arg = theta, xlab = expression(theta), ylab = "posterior", ylim = c(0, 0.4), col = "lightblue")
 
 posterior <- likelihood(theta, 100, 30) * prior
@@ -261,13 +262,6 @@ lines(x, dnorm(x, rbar, sqrt(s2)), col = "red", lwd = 3)
 
 pnorm(log(1 - 0.03), rbar, sqrt(s2)) * 100
 
-sp <- read.csv("data/SPMonthly.csv")$Adj.Close
-n <- length(sp)
-spret <- sp[602:n] / sp[601:(n - 1)] - 1 # Calculate returns, February 1978 to September 1987
-
-mean(spret)
-sd(spret)
-
 # ---- Stylized Example ------------------------------------------------------
 
 mu0 <- -1
@@ -304,7 +298,6 @@ print(pnorm(-2.76 / 18))
 
 # ---- Satya Nadella: CEO of Microsoft ---------------------------------------
 
-# [fig-portfolio]
 getSymbols(c("MSFT", "SPY"), from = "2001-01-01", to = "2023-12-31")
 s <- 3666 # 2015-07-30
 prior <- 1:s
@@ -326,9 +319,9 @@ muPost <- SigmaPost %*% (solve(Sigma0) %*% mu0 + solve(Sigma) %*% mu)
 # [fig-portfolio-plot]
 # Plot
 par(mar = c(2.5, 3.2, 1.8, 0.5))
-plot(a[obs], c[obs],
-  xlab = "MSFT", ylab = "", xlim = c(-0.005, 0.005),
-  ylim = c(-0.005, 0.005), pch = 16, cex = 0.5, las = 1, tcl = -0.3
+plot(NA,
+  xlab = "MSFT", ylab = "", xlim = c(-0.0015, 0.0015),
+  ylim = c(-0.0015, 0.0015), las = 1, tcl = -0.3
 )
 title(ylab = "SPY", line = 2.2)
 abline(v = 0, h = 0, col = "grey")
@@ -350,7 +343,6 @@ mu3 <- (mu0 / sigma02 + y) / (1 / sigma02 + 1)
 sigma3 <- 1 / (1 / sigma02 + 1)
 Z <- dnorm(y - mu0, 0, sqrt(1 + sigma02)) * w0
 w <- Z / sum(Z)
-# To add a new line in sprintf, use "\n" inside the format string.
 print("Component parameters:")
 sprintf(
   "Mean = (%1.1f,%2.1f)  Var = (%1.1f,%1.1f)  weights = (%1.2f,%1.2f)",

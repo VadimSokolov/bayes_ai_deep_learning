@@ -15,7 +15,7 @@ noise <- 0.0001 # amount of noise to be added to the data
 d <- matrix(0, ncol = 3, nrow = numSamples)
 # matrix to store our generated data
 
-# Generate positive points inside the circle.
+# Generate points inside the circle (label 0).
 for (i in 1:(numSamples / 2)) {
   r <- runif(1, 0, radius * 0.4)
   angle <- runif(1, 0, 2 * pi)
@@ -26,7 +26,7 @@ for (i in 1:(numSamples / 2)) {
   d[i, ] <- c(0, x, y)
 }
 
-# Generate negative points outside the circle.
+# Generate points on the outer ring (label 1).
 for (i in (numSamples / 2 + 1):numSamples) {
   r <- runif(1, radius * 0.8, radius)
   angle <- runif(1, 0, 2 * pi)
@@ -37,9 +37,6 @@ for (i in (numSamples / 2 + 1):numSamples) {
   d[i, ] <- c(1, x, y)
 }
 colnames(d) <- c("label", "x1", "x2")
-# Plot the training dataset
-# plot(d[,2],d[,3], col=d[,1]+2, pch=16, xlab="x1", ylab="x2")
-# utils$save_pdf("~/papers/twocultures/fig/","nn-circle-2")
 x1 <- seq(-11, 11, length.out = 100)
 
 # [circle-lr]
@@ -53,7 +50,7 @@ abline(-th[1] / th[3], -th[2] / th[3], col = 2)
 
 # [sep-lines]
 plot(d[, 2], d[, 3], col = d[, 1] + 2, pch = 16 + d[, 1], xlab = expression(x[1]), ylab = expression(x[2]), asp = 1)
-# Plot lines that separate once class (red) from another (green)
+# Plot lines that separate one class (red) from another (green)
 lines(x1, -x1 - 6)
 text(-4.6, -3.6, 1)
 lines(x1, -x1 + 6)
@@ -91,7 +88,7 @@ predict_prob <- function(x) {
 }
 
 # [circle-pred]
-# Predict the probability of the positive class for a given point
+# Predict the probability of the inner class for a given point
 predict_prob(c(0, 0))
 predict_prob(c(0, 10))
 
@@ -135,17 +132,16 @@ y <- 0.5 + 0.3 * x^2 + rnorm(length(x), 0, 0.02)
 loss <- function(W) sum((nn(W)$yhat - y)^2)
 # BFGS is a quasi-Newton optimization method
 res <- optim(params, loss, method = "BFGS")
-res$par
 
 # [fig-relu]
 o <- nn(res$par)
 plot(x, y)
 lines(x, o$yhat, lwd = 2)
 lines(x, 0.5 + o$z0[, 1], col = 2, lwd = 2, lty = 2)
-lines(x, 0.5 + o$z0[, 2], col = 3, lwd = 2, lty = 2)
-lines(x, 0.5 + o$z0[, 3], col = 4, lwd = 2, lty = 2)
+lines(x, 0.5 + o$z0[, 2], col = 3, lwd = 2, lty = 3)
+lines(x, 0.5 + o$z0[, 3], col = 4, lwd = 2, lty = 4)
 
-set.seed(8) # gretzky
+set.seed(8) # ovi
 params <- c(0, rnorm(3), 0, rnorm(3))
 loss <- function(W) mean((nn(W, f = tanh)$yhat - y)^2)
 res <- optim(params, loss, method = "BFGS")
@@ -153,10 +149,10 @@ o <- nn(res$par, f = tanh)
 plot(x, y, ylim = c(0.4, 0.95))
 lines(x, o$yhat, lwd = 2)
 lines(x, 0.5 * o$z0[, 1] + 0.9, lwd = 2, lty = 2, col = 2)
-lines(x, 0.5 * o$z0[, 2] + 0.9, lwd = 2, lty = 2, col = 3)
-lines(x, 0.5 * o$z0[, 3] + 0.9, lwd = 2, lty = 2, col = 4)
+lines(x, 0.5 * o$z0[, 2] + 0.9, lwd = 2, lty = 3, col = 3)
+lines(x, 0.5 * o$z0[, 3] + 0.9, lwd = 2, lty = 4, col = 4)
 
-set.seed(99) # ovi
+set.seed(99) # gretzky
 x1 <- runif(200, -1, 1)
 x2 <- runif(200, -1, 1)
 y <- 0.5 + 0.1 * x1 + 0.2 * x2 + 0.5 * x1 * x2 + rnorm(length(x1), 0, 0.02)
@@ -184,6 +180,7 @@ legend("top", c("data", "network output", "hidden unit 1 (rescaled)", "hidden un
 
 # ---- Activation Functions --------------------------------------------------
 
+# [fig-activations]
 x <- seq(-2.5, 2.5, 0.05)
 ytanh <- tanh(x)
 yhardtanh <- pmax(-1, pmin(1, x))

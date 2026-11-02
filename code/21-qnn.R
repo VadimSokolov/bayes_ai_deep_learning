@@ -92,41 +92,16 @@ legend("topright",
 )
 
 # [tbl-quantile-regression-results]
-# Print model summaries
-# Create results table
 results_table <- data.frame(
-    Model = character(),
-    Intercept = numeric(),
-    Slope = numeric(),
-    stringsAsFactors = FALSE
+    Model = c(sprintf("Quantile tau = %.1f", quantiles), "OLS (Mean)"),
+    Intercept = sprintf("%.4f", c(sapply(results, function(r) r$coefficients[1]), coef(ols_model)[1])),
+    Slope = sprintf("%.4f", c(sapply(results, function(r) r$coefficients[2]), coef(ols_model)[2]))
 )
-
-# Add quantile regression results
-for (tau in quantiles) {
-    results_table <- rbind(results_table, data.frame(
-        Model = sprintf("Quantile tau = %.1f", tau),
-        Intercept = results[[as.character(tau)]]$coefficients[1],
-        Slope = results[[as.character(tau)]]$coefficients[2]
-    ))
-}
-
-# Add OLS results
-results_table <- rbind(results_table, data.frame(
-    Model = "OLS (Mean)",
-    Intercept = coef(ols_model)[1],
-    Slope = coef(ols_model)[2]
-))
-
-# Display as kable table
-knitr::kable(results_table,
-    digits = 4,
-    caption = "Quantile Regression Results: Fuel Efficiency vs. Engine Displacement",
-    col.names = c("Model", "Intercept", "Slope")
-)
+knitr::kable(results_table, row.names = FALSE)
 
 # ---- An Instructional Linear Baseline --------------------------------------
 
-# [amazon-demand-forecast]
+# [fig-demand-forecast]
 # Load required libraries
 library(quantreg) # For quantile regression
 library(ggplot2)
@@ -198,9 +173,7 @@ test_data <- demand_data %>% filter(day > train_days)
 quantiles <- c(0.1, 0.3, 0.5, 0.7, 0.9)
 models <- list()
 
-# cat("Training quantile regression models...\n")
 for (q in quantiles) {
-    # cat(sprintf("  Quantile %.2f...\n", q))
     models[[as.character(q)]] <- rq(
         demand ~ product + day + promo + day_of_week + day_of_month +
             lag_1 + lag_7 + lag_30,
@@ -220,18 +193,13 @@ for (q in quantiles) {
 predictions <- predictions %>%
     mutate(
         in_80_interval = (demand >= q_010 & demand <= q_090),
-        in_60_interval = (demand >= q_030 & demand <= q_070)
+        in_40_interval = (demand >= q_030 & demand <= q_070)
     )
 
 # Calculate metrics
 coverage_80 <- mean(predictions$in_80_interval, na.rm = TRUE)
-coverage_60 <- mean(predictions$in_60_interval, na.rm = TRUE)
+coverage_40 <- mean(predictions$in_40_interval, na.rm = TRUE)
 mae_median <- mean(abs(predictions$demand - predictions$q_050), na.rm = TRUE)
-
-# cat(sprintf("\nForecast Performance:\n"))
-# cat(sprintf("  80%% interval coverage: %.1f%% (target: 80%%)\n", coverage_80 * 100))
-# cat(sprintf("  40%% interval coverage: %.1f%% (target: 40%%)\n", coverage_60 * 100))
-# cat(sprintf("  Median absolute error: %.2f units\n", mae_median))
 
 # Visualization
 par(mfrow = c(2, 1))
@@ -322,44 +290,21 @@ D2 <- function(n) {
     return(D)
 }
 
-# Trend filtering objective function for quantile regression
-trend_filter_obj <- function(f, y, lambda, tau, D) {
-    # Check loss
-    residuals <- y - f
-    quantile_loss <- sum(residuals * (tau - (residuals < 0)))
-
-    # L1 penalty on second differences
-    penalty <- lambda * sum(abs(D %*% f))
-
-    return(quantile_loss + penalty)
+# Exact trend filtering fit as a quantile regression linear program
+library(quantreg)
+trend_filter <- function(y, lambda, tau, D) {
+    n <- length(y)
+    as.numeric(rq.fit(rbind(diag(n), lambda * D, -lambda * D),
+        c(y, rep(0, 2 * (n - 2))), tau = tau)$coefficients)
 }
 
-# Fit trend filtering for multiple quantiles using optim
-# For better performance, we use BFGS with box constraints
 quantiles <- c(0.1, 0.5, 0.9)
 lambda <- 2.0 # Smoothing parameter
 D <- D2(n)
 
 results_tf <- list()
-
 for (tau in quantiles) {
-    # Initialize with linear quantile regression
-    X_init <- cbind(1, x)
-    init_fit <- lm(y ~ x)
-    f_init <- predict(init_fit)
-
-    # Optimize using L-BFGS-B
-    opt_result <- optim(
-        par = f_init,
-        fn = trend_filter_obj,
-        y = y,
-        lambda = lambda,
-        tau = tau,
-        D = D,
-        method = "L-BFGS-B"
-    )
-
-    results_tf[[as.character(tau)]] <- opt_result$par
+    results_tf[[as.character(tau)]] <- trend_filter(y, lambda, tau, D)
 }
 
 # Visualization
@@ -421,7 +366,3 @@ legend("bottomright",
     cex = 0.6
 )
 par(mfrow = c(1, 1))
-
-# Calculate empirical coverage
-# coverage <- mean(y >= results_tf[["0.1"]] & y <= results_tf[["0.9"]])
-# cat(sprintf("\nEmpirical 80%% interval coverage: %.1f%%\n", coverage * 100))

@@ -39,6 +39,6 @@ cat(sprintf("Double Machine Learning   %9.2f  %8.2f\n", th, sqrt(mean(psi^2)/n)/
 ## (5) Causal BART (ATT)
 set.seed(1)
 sb <- summary(bartc(response=d$re78, treatment=d$treat, confounders=d[,conf],
-                    estimand="att", commonSup.rule="sd", verbose=FALSE))$estimates
+                    estimand="att", commonSup.rule="sd", seed=1, verbose=FALSE))$estimates
 cat(sprintf("Causal BART               %9.2f  %8.2f   ci [%.0f, %.0f]\n",
     sb$estimate, sb$sd, sb$ci.lower, sb$ci.upper))

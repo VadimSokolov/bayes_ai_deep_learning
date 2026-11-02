@@ -27,7 +27,7 @@ The datasets are not in the repository. Download `data.zip` from the release of 
 |---|---|---|---|
 | Chapter 1: Probability and Uncertainty | `01-prob.R` |  | data/dc_travel_time.csv |
 | Chapter 2: Bayes' Rule | `02-bayes.R` |  | data/pres_polls.csv |
-| Chapter 3: Bayesian Learning | `03-bl.R` |  | data/GOOG2019.csv, data/SPMonthly.csv, data/epl.csv, data/epl_season_match_stats.json |
+| Chapter 3: Bayesian Learning | `03-bl.R` |  | data/GOOG2019.csv, data/epl.csv, data/epl_season_match_stats.json |
 | Chapter 4: Utility, Risk and Decisions | `04-dec.R` |  |  |
 | Chapter 5: A/B Testing | `05-ab.R` |  | data/PNAS_data_2011.csv, data/cancer-diet.csv |
 | Chapter 6: Bayesian Hypothesis Testing | `06-hyp.R` |  |  |

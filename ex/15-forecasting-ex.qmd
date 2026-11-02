@@ -6,7 +6,7 @@
 
 Write out the observation and transition equations for a structural time series model with a local linear trend and quarterly seasonality ($S=4$).
 
-a) Define the state vector $\alpha_t$ and write the observation equation $y_t = Z_t^T \alpha_t + \varepsilon_t$.
+a) Define the state vector $\alpha_t$ and write the observation equation $y_t = Z_t^\top \alpha_t + \varepsilon_t$.
 b) Write the transition equations for the level $\mu_t$, slope $\delta_t$, and seasonal component $\tau_t$.
 c) How many state variables does this model have?
 d) If you add a regression component with $k$ predictors using spike-and-slab priors, how does the model change?
@@ -14,11 +14,11 @@ d) If you add a regression component with $k$ predictors using spike-and-slab pr
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) The state vector is $\alpha_t = (\mu_t, \delta_t, \tau_t, \tau_{t-1}, \tau_{t-2})^T$. The observation equation is:
+a) The state vector is $\alpha_t = (\mu_t, \delta_t, \tau_t, \tau_{t-1}, \tau_{t-2})^\top$. The observation equation is:
 $$
 y_t = \mu_t + \tau_t + \varepsilon_t, \quad \varepsilon_t \sim N(0, \sigma_\varepsilon^2)
 $$
-In matrix form: $Z_t = (1, 0, 1, 0, 0)^T$.
+In matrix form: $Z_t = (1, 0, 1, 0, 0)^\top$.
 
 b) Transition equations:
 $$
@@ -36,7 +36,7 @@ c) The state vector has 5 components: level, slope, and $S-1 = 3$ seasonal lags.
 
 d) With $k$ regression predictors, the observation equation becomes:
 $$
-y_t = \mu_t + \tau_t + \beta^T x_t + \varepsilon_t
+y_t = \mu_t + \tau_t + \beta^\top x_t + \varepsilon_t
 $$
 The spike-and-slab prior on $\beta$ introduces a latent inclusion indicator $\gamma_j \in \{0,1\}$ for each predictor, with $\beta_j \mid \gamma_j = 1 \sim N(0, \sigma_\beta^2)$ and $\beta_j \mid \gamma_j = 0 = 0$. The state vector itself does not change, but the regression coefficients are estimated jointly via MCMC.
 :::
@@ -160,7 +160,7 @@ low, low, high, high: the model places the regime shift exactly at the transitio
 
 c) From (a), $\arg\max_j \prob{x_4 = j \mid y_{1:4}} = 2$; from (b), the Viterbi state at $t = 4$ is also 2, so they agree. In general they need not. The marginal decoder chooses, at each $t$ separately, the state that maximizes its own posterior marginal $\prob{x_t = j \mid y_{1:T}}$, whereas Viterbi maximizes the probability of one entire path $\prob{x_{1:T} \mid y_{1:T}}$. Optimizing each marginal independently is a different objective from optimizing the joint, so the pointwise-most-likely states need not line up into the single most probable sequence; marginal decoding can even return a sequence that uses a forbidden, zero-probability transition. At the terminal time $t = 4$ the filtered marginal coincides with the smoothed marginal and state 2 dominates decisively, so the two decoders agree here. A mismatch is most likely near an ambiguous transition, such as around $t = 3$, where the two states are close to evenly matched.
 
-d) Let $\beta_t(j) = p(y_{t+1:T} \mid x_t = j)$ be the backward messages, with $\beta_T(j) = 1$ and $\beta_t(i) = \sum_j P_{ij}\, b_j(y_{t+1})\, \beta_{t+1}(j)$, as in the chapter's forwards-and-backwards smoothing recursion. Then
+d) Let $\beta_t(j) = p(y_{t+1:T} \mid x_t = j)$ be the backward messages, with $\beta_T(j) = 1$ and $\beta_t(i) = \sum_j P_{ij}\, b_j(y_{t+1})\, \beta_{t+1}(j)$. Then
 
 $$
 \gamma_t(j) = \frac{\alpha_t(j)\, \beta_t(j)}{p(y_{1:T})}, \qquad \xi_t(i, j) = \frac{\alpha_{t-1}(i)\, P_{ij}\, b_j(y_t)\, \beta_t(j)}{p(y_{1:T})}.
@@ -194,7 +194,7 @@ c) Which model would you choose for S&P 500 forecasting? For quarterly GDP growt
 
 a) The slope $\delta_{t+1} = \delta_t + \eta_{1t}$ is a random walk with $\Var{\delta_t} = t \sigma_{\delta}^2$. Unrolling the level recursion $h$ steps ahead gives $\mu_{t+h} = \mu_t + h\delta_t + \sum_{j=0}^{h-1}\eta_{0,t+j} + \sum_{i=0}^{h-2}(h-1-i)\eta_{1,t+i}$. The first noise sum contributes variance $h\sigma_\mu^2$, which is $O(h)$. The second contributes $\sigma_\delta^2\sum_{i=0}^{h-2}(h-1-i)^2 = \sigma_\delta^2\,(h-1)h(2h-1)/6$, which is $O(h^3)$, because each slope innovation is carried forward cumulatively into every subsequent level. This second term dominates for large $h$, so $\Var{\mu_{t+h}}$ grows as $O(h^3)$. This means forecast intervals widen without bound, leading to implausibly wide confidence intervals for long horizons.
 
-b) Taking expectations: $\E{\delta_{t+1}} = D + \rho(\E{\delta_t} - D)$. Unrolling the recursion gives $\E{\delta_t} = D + \rho^t(\E{\delta_0} - D)$. Since $|\rho| < 1$, $\rho^t \to 0$ as $t \to \infty$, so $\E{\delta_t} \to D$. The slope mean-reverts to $D$, producing bounded long-term forecast intervals.
+b) Taking expectations: $\E{\delta_{t+1}} = D + \rho(\E{\delta_t} - D)$. Unrolling the recursion gives $\E{\delta_t} = D + \rho^t(\E{\delta_0} - D)$. Since $|\rho| < 1$, $\rho^t \to 0$ as $t \to \infty$, so $\E{\delta_t} \to D$. The slope mean-reverts to $D$, so the forecast variance grows like $O(h)$ rather than $O(h^3)$.
 
 c) For S&P 500: semilocal linear trend. Stock prices should not have unbounded slope growth (no stock grows exponentially forever at an accelerating rate). The semilocal model with $D$ set to a reasonable long-term growth rate (e.g., 7% annualized) produces more realistic long-horizon forecasts.
 
@@ -213,7 +213,7 @@ c) A local linear trend model produces forecast intervals that converge to a fix
 
 d) The `bsts` package uses maximum likelihood estimation to fit structural time series models.
 
-e) Stationarity of a time series means that its mean and variance do not change over time, and the autocovariance Cov(y_t, y_{t+k}) depends only on the lag k, not on t.
+e) Stationarity of a time series means that its mean and variance do not change over time, and the autocovariance $\Cov{y_t, y_{t+k}}$ depends only on the lag $k$, not on $t$.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -222,7 +222,7 @@ a) True. The standard Kalman filter requires linear state transitions ($x_{t+1} 
 
 b) True. The spike-and-slab prior places probability $\pi$ on each predictor being included. Setting the expected model size to $k$ means $\pi = k/p$ where $p$ is the total number of predictors.
 
-c) False. The local linear trend has a random walk slope, so forecast variance grows as $O(h^3)$, producing intervals that widen without bound. The semilocal linear trend produces bounded intervals.
+c) False. The local linear trend has a random walk slope, so forecast variance grows as $O(h^3)$, producing intervals that widen without bound. The semilocal linear trend has variance growing only like $O(h)$, so its intervals widen much more slowly.
 
 d) False. The `bsts` package uses MCMC (Markov chain Monte Carlo) for Bayesian posterior inference, not maximum likelihood.
 
@@ -230,13 +230,9 @@ e) True (for weak/second-order stationarity). Strict stationarity requires the e
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Structural Time Series with bsts
@@ -355,6 +351,7 @@ P_pred_ss <- (sigma_w^2 + sqrt(sigma_w^4 + 4 * sigma_w^2 * sigma_v^2)) / 2
 K_ss <- P_pred_ss / (P_pred_ss + sigma_v^2)
 abline(h = K_ss, col = "blue", lty = 2)
 cat("Steady-state Kalman gain:", round(K_ss, 4), "\n")
+cat("First t with |K_t - K_(t-1)| < 1e-6:", which(abs(diff(K)) < 1e-6 & seq_along(diff(K)) >= 2)[1] + 1, "\n")
 
 # d) Precise observations
 sigma_v2 <- 0.1
@@ -376,7 +373,7 @@ legend("topleft", c("True", "Filtered (sigma_v=0.1)"),
        col = c("black", "red"), lwd = 2, cex = 0.8)
 ```
 
-With precise observations ($\sigma_v = 0.1$), the Kalman gain approaches 1 and the filtered state tracks the observations almost exactly.
+The gain converges to the steady-state value 0.3904, and $|K_t - K_{t-1}|$ first falls below $10^{-6}$ at $t=15$. With precise observations ($\sigma_v = 0.1$), the Kalman gain approaches 1 and the filtered state tracks the observations almost exactly.
 :::
 :::
 

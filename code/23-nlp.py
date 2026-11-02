@@ -6,31 +6,27 @@
 
 # ---- Global Vectors and Matrix Factorization -------------------------------
 
+with open('data/warpeace.txt', 'r') as file:
+    Text = file.read()
+sentences = [s.split() for s in Text.split('. ')]
+sentences = [[word.strip('.,!?;:()[]') for word in sentence if word.strip('.,!?;:()[]')] for sentence in sentences]
+sentences = [sentence for sentence in sentences if sentence]
+
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
 
-# define training data, read from data/warpeace.txt
-with open('data/warpeace.txt', 'r') as file:
-    Text = file.read()
-sentences = [s.split() for s in Text.split('. ')]  # split the text into sentences
-# Strip punctuation from each word and drop empty tokens
-sentences = [[word.strip('.,!?;:()[]') for word in sentence if word.strip('.,!?;:()[]')] for sentence in sentences]
-
-# Remove empty sentences
-sentences = [sentence for sentence in sentences if sentence]
 model = Word2Vec(sentences, vector_size=100, window=5, min_count=1, seed=42, workers=1)
-# fit a 2d PCA model to the vectors, only use the words from data/embedding_words.txt
+# PCA of the selected words (data/embedding_words.txt)
 with open('data/embedding_words.txt', 'r') as file:
     words = file.read().splitlines()
-X = model.wv[words]  # get the vectors for the words
-# reduce the dimensionality of the vectors to 2D using PCA
+X = model.wv[words]
 pca = PCA(n_components=2)
 result = pca.fit_transform(X)
 
 import matplotlib.pyplot as plt
 
 # create a scatter plot of the projection
-fig, ax = plt.subplots(figsize=(10, 4))
+fig, ax = plt.subplots(figsize=(5.5, 2.8))
 ax.scatter(result[:, 0], result[:, 1])
 ax.set_xlabel('PC 1')
 ax.set_ylabel('PC 2')
@@ -61,6 +57,8 @@ x2 = np.random.uniform(0, 1, 100)
 y = np.sin(2 * np.pi * x1) + x2*x2+ np.random.normal(0, 0.1, 100)
 
 plt.scatter(x1, x2, c=y, cmap='viridis')
+plt.xlabel('$x_1$')
+plt.ylabel('$x_2$')
 plt.colorbar();
 plt.show()
 
@@ -96,7 +94,7 @@ def gaussian_kernel_smoothing(X1, X2, x1_train, x2_train, y_train, bandwidth=0.1
     
     return y_pred
 
-# [smoothing_debug]
+# [fig-kernel-smoothing-fit]
 import numpy as np
 import matplotlib.pyplot as pyplot
 
@@ -146,15 +144,15 @@ axes[2].scatter(x1_train, x2_train, c='white', edgecolors='black', marker='o', s
 axes[2].set_title('Error (True - Predicted)')
 axes[2].set_xlabel('$x_1$')
 axes[2].set_ylabel('$x_2$')
-plt.colorbar(im3, ax=axes[2]);
+pyplot.colorbar(im3, ax=axes[2]);
 
 for ax in fig.axes:
     ax.tick_params(labelsize=6)
     ax.title.set_fontsize(7)
     ax.xaxis.label.set_fontsize(8)
     ax.yaxis.label.set_fontsize(8)
-plt.tight_layout()
-plt.show()
+pyplot.tight_layout()
+pyplot.show()
 
 # ---- Skip-Gram with Negative Sampling --------------------------------------
 

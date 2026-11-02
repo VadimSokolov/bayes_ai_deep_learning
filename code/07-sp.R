@@ -26,41 +26,20 @@ set.seed(92)
 lambda <- 5
 T_max <- 1
 
-# Function to simulate one Poisson process trajectory
+# Event times: cumulative sums of exponential waiting times, kept up to T_max
 simulate_poisson <- function(lambda, T_max) {
-  # Generate inter-arrival times (exponential with rate lambda)
-  event_times <- c(0)
-  current_time <- 0
-
-  while (current_time < T_max) {
-    inter_arrival <- rexp(1, rate = lambda)
-    current_time <- current_time + inter_arrival
-    if (current_time <= T_max) {
-      event_times <- c(event_times, current_time)
-    }
-  }
-
-  # Create step function, carrying the last count to T_max
-  n_events <- length(event_times)
-  counts <- 0:(n_events - 1)
-
-  return(list(times = c(event_times, T_max), counts = c(counts, n_events - 1)))
+  times <- cumsum(rexp(100, rate = lambda))
+  times[times <= T_max]
 }
 
 # [fig-poisson]
-# Simulate three trajectories
-traj1 <- simulate_poisson(lambda, T_max)
-traj2 <- simulate_poisson(lambda, T_max)
-traj3 <- simulate_poisson(lambda, T_max)
-
-# Plot
-plot(traj1$times, traj1$counts,
-  type = "s", xlab = "t", ylab = expression(N[t]),
-  lwd = 2, ylim = c(0, max(c(traj1$counts, traj2$counts, traj3$counts)) + 1),
-  xlim = c(0, T_max), col = 1
-)
-lines(traj2$times, traj2$counts, type = "s", lwd = 2, col = 2)
-lines(traj3$times, traj3$counts, type = "s", lwd = 2, col = 3)
+paths <- lapply(1:3, function(i) simulate_poisson(lambda, T_max))
+plot(NULL, xlim = c(0, T_max), ylim = c(0, max(lengths(paths)) + 1),
+  xlab = "t", ylab = expression(N[t]))
+for (i in 1:3) {
+  x <- paths[[i]]
+  lines(c(0, x, T_max), c(0, seq_along(x), length(x)), type = "s", lwd = 2, col = i)
+}
 
 # ---- Newton and the South Sea Bubble ---------------------------------------
 

@@ -61,7 +61,7 @@ If x < 33/34, then an expected utility maximizer would choose option C. If x>33/
 Why no utility maximizer would prefer B and C?
 
 
-A utility maximizer would pick B if x>33/34, and would pick C if x<33/34. These regions do not overlap. By definition, an expected utility maximizer has a consistent utility value for a given payout regardless of the probability structure. Therefore, no utility maximizer would prefer B and C. A utility maximizer would be indifferent among all four of these gambles if x = 33/34. But no utility maximizer would strictly prefer B over A, and C over D.
+A utility maximizer would pick B if x>33/34, and would pick C if x<33/34. These regions do not overlap. By definition, an expected utility maximizer has a consistent utility value for a given payout regardless of the probability structure. Therefore, no utility maximizer would prefer B and C. A utility maximizer would be indifferent between A and B and between C and D if x = 33/34. But no utility maximizer would strictly prefer B over A, and C over D.
 
 
 Many people's choices violate subjective expected utility theory in this problem. In fact, Allais carefully crafted this problem to exploit what Kahneman and Tversky called the "certainty effect." In the choice of A vs B, many prefer a sure gain to a small chance of no gain. On the other hand, in the choice of C vs D, there is no certainty, and so people are willing to reduce their chances of winning by what feels like a small amount to give themselves a chance to win a larger amount. When given an explanation for why these choices are inconsistent with "economic rationality," some people say they made an error and revise their choices, but others stand firmly by their choices and reject expected utility theory.
@@ -208,7 +208,7 @@ Further, assume the following losses for Marjorie
 
 a) Assume that about 2 in every 1,000 persons in the population is currently infected. What is the posterior probability that an individual with a positive test has the disease?
 a) Suppose case counts have decreased substantially to about 15 in 100,000. What is the posterior probability that an individual with a positive test has the disease?
-a) Suppose Marjorie is deciding whether to visit her relative and if so whether to test for the disease before visiting. If the prior probability that Marjorie has the disease is 200 in 100,000, find the policy that minimizes expected loss. That is, given each of the possible test results, should Marjorie visit her relative? Find the EVSI. Repeat for a prior probability of 15 in 100,000. Discuss.
+a) Suppose Marjorie is deciding whether to visit her relative and if so whether to test for the disease before visiting. If the prior probability that Marjorie has the disease is 200 in 100,000, find the policy that minimizes expected loss. That is, given each of the possible test results, should Marjorie visit her relative? Find the expected value of sample information (EVSI), the reduction in expected loss from having the test. Repeat for a prior probability of 15 in 100,000. Discuss.
 a) For the decision of whether Marjorie should visit her relative, find the range of prior probabilities for which taking the at-home test results in lower expected loss than ignoring or not taking the test (assuming the test is free). Discuss your results.
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -454,7 +454,7 @@ c) Setting $8-8\pi=2+8\pi$ gives $6=16\pi$, so $\pi^\star=0.375$. The common Bay
 
 d) The worst-case risk of $a_1$ is $\max(0,8)=8$, and of $a_2$ is $\max(10,2)=10$. Since $8<10$, the pure-strategy minimax rule is $a_1$, with minimax risk $8$. This is *larger* than the Bayes risk of $5$ found at $\pi^\star$ in part (c): restricting to non-randomized actions makes the minimax criterion strictly more conservative than the least-favorable-prior Bayes risk.
 
-e) If $a_1$ is chosen with probability $q$, the expected loss is $0\cdot q + 10(1-q) = 10-10q$ if $\theta_1$ is true, and $8q+2(1-q)=2+6q$ if $\theta_2$ is true. The randomized minimax rule chooses $q$ to minimize $\max(10-10q,\,2+6q)$; since the first expression decreases and the second increases in $q$, the minimum of the max occurs where the two cross: $10-10q=2+6q \Rightarrow q=0.5$. At $q=0.5$, both expressions equal $5$: flipping a fair coin between $a_1$ and $a_2$ gives expected loss exactly $5$ *no matter which state is true*, an equalizer rule. Its worst-case risk of $5$ strictly improves on the best pure-strategy minimax risk of $8$ from part (d), and it exactly matches the Bayes risk under the least favorable prior $\pi^\star=0.375$ from part (c). This is the minimax theorem at work: the same statistician-versus-nature zero-sum game described in the chapter's discussion of minimax and Bayes risk, once randomized rules are allowed, has a value equal to the maximum Bayes risk over all priors (attained at the least favorable prior), and the minimax-optimal rule is a Bayes' rule against that prior. The two notions coincide precisely when Bayes' rule against the least favorable prior turns out to have constant risk across $\theta$ (an equalizer rule): here that required randomizing, since neither pure action alone has constant risk across $\theta_1$ and $\theta_2$. Whenever a Bayes' rule can be shown to have constant risk, that alone certifies it as minimax, without having to check every competing rule.
+e) If $a_1$ is chosen with probability $q$, the expected loss is $0\cdot q + 10(1-q) = 10-10q$ if $\theta_1$ is true, and $8q+2(1-q)=2+6q$ if $\theta_2$ is true. The randomized minimax rule chooses $q$ to minimize $\max(10-10q,\,2+6q)$; since the first expression decreases and the second increases in $q$, the minimum of the max occurs where the two cross: $10-10q=2+6q \Rightarrow q=0.5$. At $q=0.5$, both expressions equal $5$: flipping a fair coin between $a_1$ and $a_2$ gives expected loss exactly $5$ *no matter which state is true*, an equalizer rule. Its worst-case risk of $5$ strictly improves on the best pure-strategy minimax risk of $8$ from part (d), and it exactly matches the Bayes risk under the least favorable prior $\pi^\star=0.375$ from part (c). This is the minimax theorem at work: the same statistician-versus-nature zero-sum game described in the chapter's discussion of minimax and Bayes risk, once randomized rules are allowed, has a value equal to the maximum Bayes risk over all priors (attained at the least favorable prior), and the minimax-optimal rule is a Bayes' rule against that prior. In a finite game like this one a minimax rule is always Bayes against a least favorable prior; it need not have constant risk in general, but here it does (an equalizer rule), and that required randomizing, since neither pure action alone has constant risk across $\theta_1$ and $\theta_2$. Whenever a Bayes' rule can be shown to have constant risk, that alone certifies it as minimax, without having to check every competing rule.
 :::
 :::
 
@@ -530,7 +530,7 @@ b) With $\prob{N=k}=(1/2)^k$,
 $$
 \E{\log X} = \sum_{k=1}^\infty \left(\frac12\right)^k \log(c^k) = \log(c)\sum_{k=1}^\infty k\left(\frac12\right)^k = \log(c)\cdot\frac{1/2}{(1-1/2)^2} = 2\log(c) = \log(c^2).
 $$
-Setting $\log(x^\star)=\log(c^2)$ gives $x^\star=c^2$. For $c=3$: $x^\star=9$ dollars (for $c=2$: $x^\star=4$, matching @exm-stpetersburg). So a log-utility gambler would pay at most \$9 to play the tripling version of the game, compared to \$4 for the doubling version, even though both games have infinite expected monetary value.
+Setting $\log(x^\star)=\log(c^2)$ gives $x^\star=c^2$. For $c=3$: $x^\star=9$ dollars (for $c=2$: $x^\star=4$, matching @exm-stpetersburg). So, ignoring other wealth, the tripling version of the game is worth a sure \$9 to a log-utility gambler, compared to \$4 for the doubling version, even though both games have infinite expected monetary value.
 
 c) If $U(x)\le M$ for every payoff $x$ that $X$ can take, then $U(X)\le M$ pointwise, so
 $$
@@ -588,13 +588,9 @@ so $A$'s equilibrium probability moves from $1/2$ to $5/8$. Player $A$'s payoff 
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-certainty-equivalent}
 ## Certainty Equivalent and Risk Premium
@@ -740,7 +736,7 @@ a) Using the prior alone, find the expected monetary value (EMV) of the optimal 
 
 b) The expected value of perfect information (EVPI) is the expected payoff if the company could learn the true state before deciding, minus the EMV from part (a). Compute EVPI in R and interpret it as the maximum amount worth paying for a perfect signal about the site.
 
-c) A seismic survey is available, with $\prob{\text{Positive}\mid\text{Oil}} = 0.80$ and $\prob{\text{Negative}\mid\text{Dry}} = 0.75$; the survey costs $2$ (\$ million). In R, compute $\prob{\text{Positive}}$ and $\prob{\text{Negative}}$, the posterior probability of oil given each result, the optimal action and its expected payoff given each result, and the overall expected value with sample information (EVSI, before subtracting the survey's cost). Should the company purchase the survey?
+c) A seismic survey is available, with $\prob{\text{Positive}\mid\text{Oil}} = 0.80$ and $\prob{\text{Negative}\mid\text{Dry}} = 0.75$; the survey costs $2$ (\$ million). In R, compute $\prob{\text{Positive}}$ and $\prob{\text{Negative}}$, the posterior probability of oil given each result, the optimal action and its expected payoff given each result, the overall expected value with sample information, and the EVSI (that value minus the EMV of part (a), before subtracting the survey's cost). Should the company purchase the survey?
 
 d) Confirm numerically that $0\leq\text{EVSI}\leq\text{EVPI}$. Then run a Monte Carlo check of your analytic EVSI: simulate the true state, the (correlated) test result, and the resulting test-contingent decision for a large number of draws, and compare the simulated average payoff to your analytic answer. Explain intuitively why a perfect signal can never be worth less than an imperfect one about the same uncertainty.
 

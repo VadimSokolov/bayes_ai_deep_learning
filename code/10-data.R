@@ -8,14 +8,14 @@ source("code/common.R")
 
 # ---- Boscovich and Shape of Earth ------------------------------------------
 
+# [tbl-boscovich-data]
 d <- read.csv("data/boscovich.csv")
-knitr::kable(d, digits = 8)
-plot(d$sin2Latitude, d$ArcLength, ylab = "Arc Length", xlab = expression(10^4 ~ sin^2 ~ (theta)), pch = 16, ylim = c(56700, 57450), xlim = c(-30, 8590), col = as.factor(d$Location))
-text(d$sin2Latitude, d$ArcLength, labels = d$Location, pos = 1, offset = 0.5, cex = 0.7)
+knitr::kable(d, col.names = c("Location", "Latitude", "Arc length", "$10^4 \\sin^2\\theta$"))
 
+# [tbl-boscovich-slopes]
 d <- read.csv("data/boscovich.csv")
 sl <- matrix(NA, 5, 5)
-for (i in 1:5) {
+for (i in 2:5) {
     for (j in 1:(i - 1)) {
         dx <- d$sin2Latitude[i] - d$sin2Latitude[j]
         dy <- d$ArcLength[i] - d$ArcLength[j]
@@ -24,12 +24,14 @@ for (i in 1:5) {
 }
 rownames(sl) <- d$Location
 colnames(sl) <- d$Location
-options(knitr.kable.NA = "")
-knitr::kable(sl, digits = 4)
+old <- options(knitr.kable.NA = "")
+tab <- knitr::kable(sl[-1, -5], digits = 4)
+options(old)
+tab
 
 # [fig-boscovich-pairs]
-plot(d$sin2Latitude, d$ArcLength, ylab = "Arc Length", xlab = expression(10^4 ~ sin^2 ~ (theta)), pch = 16, ylim = c(56700, 57800), xlim = c(-30, 8590), col = as.factor(d$Location))
-text(d$sin2Latitude, d$ArcLength, labels = d$Location, pos = c(3, 3, 3, 1, 3), offset = 1.6, cex = 0.7)
+plot(d$sin2Latitude, d$ArcLength, ylab = "Arc Length", xlab = expression(10^4 ~ sin^2 ~ (theta)), pch = 16, ylim = c(56700, 57800), xlim = c(-30, 8590))
+text(d$sin2Latitude, d$ArcLength, labels = d$Location, pos = c(3, 3, 1, 1, 2), offset = 0.6, cex = 0.7)
 for (i in 1:4) {
     for (j in (i + 1):5) {
         slope <- (d$ArcLength[i] - d$ArcLength[j]) / (d$sin2Latitude[i] - d$sin2Latitude[j])

@@ -3,7 +3,7 @@
 ::: {#exr-}
 ## Bellman Equation
 
-Consider a simple grid world where a robot can move in 4 directions. The state is the robot's position, and the reward is $-1$ for each step (to encourage efficiency) except reaching the goal (reward = 0, terminal).
+Consider a simple grid world where a robot can move in 4 directions. The state is the robot's position, and the reward is $-1$ for each step, including the step into the goal (to encourage efficiency), and the goal is terminal with value 0.
 
 In a 3×3 grid:
 ```
@@ -13,6 +13,7 @@ In a 3×3 grid:
 | 4 | 5 | 6 |
 +---+---+---+
 | 7 | 8 | G |
++---+---+---+
 ```
 State 9 is the goal (G). Discount factor $\gamma = 0.9$.
 
@@ -94,7 +95,7 @@ You are hiring for a position and will interview exactly 10 candidates. After ea
 a) What is the optimal strategy? (Hint: reject the first $r$ candidates, then hire the first one better than all previous)
 b) For $n = 10$ candidates, what is the optimal $r$?
 c) What is the probability of success with the optimal strategy?
-d) Simulate this problem 10,000 times to empirically verify your answer.
+d) (Optional, with a computer.) Simulate this problem 10,000 times to empirically verify your answer.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -161,11 +162,11 @@ simulate_secretary <- function(n, r) {
   return(candidates[n] == 1)  # Hired last candidate by default
 }
 
-# Simulate with r = 4
-success_count <- sum(replicate(n_sim, simulate_secretary(10, 4)))
+# Simulate with r = 3
+success_count <- sum(replicate(n_sim, simulate_secretary(10, 3)))
 empirical_prob <- success_count / n_sim
-cat("Empirical P(success) with r=4:", round(empirical_prob, 4), "\n")
-cat("Theoretical:", round(prob_success(10, 4), 4), "\n")
+cat("Empirical P(success) with r=3:", round(empirical_prob, 4), "\n")
+cat("Theoretical:", round(prob_success(10, 3), 4), "\n")
 ```
 
 :::
@@ -177,6 +178,7 @@ cat("Theoretical:", round(prob_success(10, 4), 4), "\n")
 A simple MDP has states {A, B, C} and actions {left, right}. The discount factor is $\gamma = 0.9$ and learning rate is $\alpha = 0.1$.
 
 Current Q-table:
+
 |       | left | right |
 |-------|------|-------|
 | A     | 2.0  | 3.0   |
@@ -188,7 +190,7 @@ The agent is in state A, takes action "right", receives reward $r = 5$, and tran
 a) Write the Q-learning update formula.
 b) Calculate the new value of $Q(A, \text{right})$.
 c) If instead the agent transitioned to state C (terminal), what would be the update?
-d) After 1000 Q-learning iterations in this environment, what would you expect Q(A, right) to converge to?
+d) Suppose the environment is deterministic: A with action right goes to B with reward 5, B with action right goes to C with reward 2, B with action left goes to C with reward 1, and C is terminal. To what value does Q(A, right) converge under Q-learning, if every state-action pair keeps being visited?
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -227,9 +229,8 @@ d) At convergence, Q(A, right) should equal the expected discounted return:
 - Immediate reward: 5
 - Plus $\gamma \times V^*(B)$ where $V^*(B) = \max Q(B, \cdot)$
 
-If the environment is deterministic and optimal from B is known, Q(A, right) converges to the true action-value.
+In the deterministic environment of the statement, Q(A, right) converges to the true action-value. The best action at B is right, with $Q^*(B, \text{right}) = 2$, so
 
-For example, if B→C with reward 2, and C is terminal:
 $$
 Q^*(A, \text{right}) = 5 + 0.9 \times (2 + 0.9 \times 0) = 5 + 1.8 = 6.8
 $$
@@ -247,7 +248,7 @@ $$
 V(1) \leftarrow V(1) + \alpha\big[r + \gamma V(2) - V(1)\big].
 $$
 b) In the same episode, the agent then observes reward $r_2=5$ transitioning from state 2 into the terminal state 3. Using the full realized return $G_1 = r + \gamma r_2$ from state 1, compute the every-visit Monte Carlo update $V(1) \leftarrow V(1) + \alpha(G_1-V(1))$, and compare to (a).
-c) Simulate 2,000 independent replications of learning $V(1)$ from only 10 episodes each, with $R_1 \sim N(3,3^2)$ and $R_2 \sim N(5,3^2)$ resampled every episode, and both estimators starting from $V(1)=V(2)=0$. Compare the bias (distance of the mean estimate from the true $V(1)$) and the variance of the TD(0) and Monte Carlo estimators of $V(1)$ after 10 episodes.
+c) (Optional, with a computer.) Simulate 2,000 independent replications of learning $V(1)$ from only 10 episodes each, with $R_1 \sim N(3,3^2)$ and $R_2 \sim N(5,3^2)$ resampled every episode, and both estimators starting from $V(1)=V(2)=0$. Compare the bias (distance of the mean estimate from the true $V(1)$) and the variance of the TD(0) and Monte Carlo estimators of $V(1)$ after 10 episodes.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -319,7 +320,7 @@ An agent uses $\epsilon$-greedy with $\epsilon = 0.1$, playing 1000 rounds.
 a) What is the expected regret per round of pulling arm 1 instead of arm 2?
 b) What is the expected regret per round of the $\epsilon$-greedy strategy (assuming it correctly identifies arm 2 as best)?
 c) Calculate the expected cumulative regret after 1000 rounds.
-d) Compare to Thompson Sampling: simulate both algorithms and plot cumulative regret.
+d) (Optional, with a computer.) Compare to Thompson Sampling: simulate both algorithms and plot cumulative regret.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -432,7 +433,7 @@ c) In the secretary problem, the probability of selecting the best candidate app
 
 d) Thompson Sampling requires knowing the true reward distributions of each arm.
 
-e) The discount factor $\gamma$ must be strictly less than 1 for the value function to be finite in infinite-horizon MDPs.
+e) In a continuing infinite-horizon MDP in which rewards stay bounded away from zero, the discount factor $\gamma$ must be strictly less than 1 for the value function to be finite.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -445,18 +446,14 @@ c) **FALSE**. The probability of selecting the best candidate converges to $1/e 
 
 d) **FALSE**. Thompson Sampling uses the posterior distributions, which are updated based on observed rewards. It does not require knowing the true distributions: it learns them through experience.
 
-e) **TRUE** (with caveats). For continuing tasks with non-zero expected rewards, $\gamma < 1$ ensures convergence. However, in episodic tasks (with terminal states), $\gamma = 1$ can be used. Also, if rewards are bounded and eventually zero, $\gamma = 1$ may work.
+e) **TRUE**. If rewards stay bounded away from zero, the undiscounted sum diverges, so $\gamma < 1$ is needed. In episodic tasks, or when the process is absorbed in a zero-reward state, $\gamma = 1$ is fine.
 
 :::
-:::
-
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
 :::
 
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Multi-Armed Bandit: Thompson Sampling
@@ -706,15 +703,15 @@ On day 1 the bandit knows nothing, so it serves traffic close to uniformly acros
 ::: {#exr-contextual-bandit-weekend}
 ## Contextual Bandits: Weekday versus Weekend
 
-The chapter's Contextual Bandits section describes, without ever simulating it, an experiment in which "Arm A performs slightly better during the weekdays, while Arm B excels during the weekends." Make this concrete. Let $x_t=1$ denote a weekend, with $\prob{x_t=1}=2/7$, and $x_t=0$ a weekday. The true click-through rates are: arm A is $0.06$ on weekdays and $0.03$ on weekends; arm B is $0.03$ on weekdays and $0.08$ on weekends. A fresh context $x_t$ is drawn each round.
+The chapter's Contextual Bandits section describes, without ever simulating it, an experiment in which "Arm A performs slightly better during the weekdays when users browse but don't make purchases, while Arm B excels during the weekends when users are more likely to make purchases." Make this concrete. Let $x_t=1$ denote a weekend, with $\prob{x_t=1}=2/7$, and $x_t=0$ a weekday. The true click-through rates are: arm A is $0.06$ on weekdays and $0.03$ on weekends; arm B is $0.03$ on weekdays and $0.08$ on weekends. A fresh context $x_t$ is drawn each round.
 
 a) Implement a context-blind Thompson sampling bandit that keeps a single $Beta(1,1)$ posterior per arm (as in the chapter's `bandit()` function) and never observes $x_t$.
 
-b) Implement a context-aware Thompson sampling bandit that keeps a separate $Beta(1,1)$ posterior for each of the four (arm, context) cells. Explain why this is the Bayesian-conjugate analogue of the chapter's logistic bandit model $\mathrm{logit}\,\prob{\text{click}_a \mid \theta, x} = \theta_{0a} + \beta^\top x$ only once $\beta$ is allowed to depend on the arm (an arm-by-context interaction, $\beta_a$), and why the shared-$\beta$ version as literally written in the chapter cannot represent a crossover in which different arms are optimal in different contexts.
+b) Implement a context-aware Thompson sampling bandit that keeps a separate $Beta(1,1)$ posterior for each of the four (arm, context) cells. Explain why this is the Bayesian-conjugate analogue of the chapter's logistic bandit model $\mathrm{logit}\,\prob{\text{click}_a \mid \theta, x} = \beta_{0a} + \beta_a^\top x$ (an arm-by-context interaction), and why a version with one $\beta$ shared by the arms cannot represent a crossover in which different arms are optimal in different contexts.
 
 c) Simulate $T=5000$ rounds for each policy and plot cumulative regret for both on the same axes, where the regret at round $t$ is $\max(\theta_A(x_t),\theta_B(x_t)) - \theta_{\text{chosen}}(x_t)$.
 
-d) Report the final cumulative regret of each policy and their ratio. In terms of the blended (marginal) rates $\bar\theta_a = \prob{x=0}\theta_{a,\text{weekday}} + \prob{x=1}\theta_{a,\text{weekend}}$, explain which arm the context-blind bandit converges to playing almost exclusively, and why. By extending the simulation to $T=50{,}000$, argue whether the context-blind bandit's regret grows linearly or sub-linearly in $T$, and contrast with the context-aware bandit and the chapter's $O(\log T)$ Thompson sampling claim.
+d) Report the final cumulative regret of each policy and their ratio. In terms of the blended (marginal) rates $\bar\theta_a = \prob{x=0}\theta_{a,\text{weekday}} + \prob{x=1}\theta_{a,\text{weekend}}$, explain which arm the context-blind bandit converges to playing almost exclusively, and why. By extending the simulation to $T=50{,}000$, argue whether the context-blind bandit's regret grows linearly or sub-linearly in $T$, and contrast with the context-aware bandit and the logarithmic regret of Thompson sampling in the chapter.
 
 e) Using only the (arm, context, outcome) triples logged by the context-blind bandit, fit `glm(y ~ arm * ctx, family = binomial)`. Show that it recovers the true crossover even though the policy that generated the data never used context to choose an arm. Explain why this does not help the context-blind bandit's own regret, and what it implies about needing context in the decision rule itself rather than only in a post-hoc analysis.
 
@@ -767,7 +764,7 @@ opt_rate  <- (1 - p_weekend) * max(theta_tab[, 1]) + p_weekend * max(theta_tab[,
 cat("Blended rates: A =", round(theta_bar[1], 4), " B =", round(theta_bar[2], 4), "\n")
 cat("Optimal context-aware rate =", round(opt_rate, 4), "\n")
 ```
-Placing an independent $Beta(1,1)$ on each of the four cells and updating by conjugacy is Bayesian estimation of one success probability per (arm, context) combination with no pooling. That is exactly the saturated logistic model $\mathrm{logit}\,p_a(x) = \theta_{0a} + \beta_a x$ with a free intercept and a free slope for each arm, i.e., the chapter's model once the context coefficient $\beta$ is allowed to depend on the arm. The literal shared-$\beta$ model gives $\mathrm{logit}\,p_A(x) = \theta_{0A} + \beta x$ and $\mathrm{logit}\,p_B(x) = \theta_{0B} + \beta x$, so $\mathrm{logit}\,p_A(x) - \mathrm{logit}\,p_B(x) = \theta_{0A} - \theta_{0B}$ is constant in $x$. Because the logit is monotone, whichever arm is better on weekdays is better on weekends too: a shared slope can shift both arms together as the context changes but can never reorder them. Only an arm-specific slope $\beta_a$, equivalently the arm-by-context interaction fitted in part (e), can represent the crossover in which A wins on weekdays and B wins on weekends.
+Placing an independent $Beta(1,1)$ on each of the four cells and updating by conjugacy is Bayesian estimation of one success probability per (arm, context) combination with no pooling. That is exactly the saturated logistic model $\mathrm{logit}\,p_a(x) = \beta_{0a} + \beta_a x$ with a free intercept and a free slope for each arm, i.e., the chapter's model. A model with one shared $\beta$ would give $\mathrm{logit}\,p_A(x) = \beta_{0A} + \beta x$ and $\mathrm{logit}\,p_B(x) = \beta_{0B} + \beta x$, so $\mathrm{logit}\,p_A(x) - \mathrm{logit}\,p_B(x) = \beta_{0A} - \beta_{0B}$ is constant in $x$. Because the logit is monotone, whichever arm is better on weekdays is better on weekends too: a shared slope can shift both arms together as the context changes but can never reorder them. Only an arm-specific slope $\beta_a$, equivalently the arm-by-context interaction fitted in part (e), can represent the crossover in which A wins on weekdays and B wins on weekends.
 
 c) A single run of each policy over $T=5000$ rounds. The context-aware curve flattens once it has learned the best arm in each context; the context-blind curve keeps climbing.
 ```{r}
@@ -812,7 +809,7 @@ cat("Asymptotic blind per-round regret =", round(opt_rate - theta_bar[1], 4), "\
 ```
 Averaged over 300 replications the context-blind policy accrues about $81.9$ regret by $T=5000$ against about $16.0$ for the context-aware policy, roughly a fivefold gap ($5.1\times$). The context-blind bandit converges to arm A: its posterior sees only the blended rates $\bar\theta_A = (5/7)(0.06)+(2/7)(0.03) \approx 0.0514$ and $\bar\theta_B \approx 0.0443$, and since $\bar\theta_A > \bar\theta_B$, Thompson sampling steadily concentrates on A, playing it in about $77\%$ of the last thousand rounds by $T=5000$ and about $96\%$ of the last ten thousand by $T=50{,}000$. It can never recover, because a posterior that cannot condition on $x$ has no way to notice that B beats A by $0.08$ versus $0.03$ on weekends.
 
-Extending to $T=50{,}000$ makes the two growth rates plain: the context-blind regret reaches about $744$ while the context-aware regret reaches only about $38$, widening the ratio to about $19.5\times$. The context-blind regret grows *linearly*. Once the policy always plays A, it is already optimal on weekdays (prob $5/7$, zero regret) and loses $0.08-0.03=0.05$ per weekend (prob $2/7$), an asymptotic rate of $(2/7)(0.05)=0.0143$ per round, equivalently $\text{opt}-\bar\theta_A = 0.0657 - 0.0514 = 0.0143$; multiplied by $50{,}000$ this predicts about $715$, close to the observed $744$. The context-aware regret grows *sub-linearly*: a tenfold increase in $T$ (from $5000$ to $50{,}000$) raises its regret only about $2.4\times$ (from $16$ to $38$), consistent with the chapter's $O(\log T)$ Thompson sampling bound, because it learns the best arm within each context and thereafter explores less and less.
+Extending to $T=50{,}000$ makes the two growth rates plain: the context-blind regret reaches about $744$ while the context-aware regret reaches only about $38$, widening the ratio to about $19.5\times$. The context-blind regret grows *linearly*. Once the policy always plays A, it is already optimal on weekdays (prob $5/7$, zero regret) and loses $0.08-0.03=0.05$ per weekend (prob $2/7$), an asymptotic rate of $(2/7)(0.05)=0.0143$ per round, equivalently $\text{opt}-\bar\theta_A = 0.0657 - 0.0514 = 0.0143$; multiplied by $50{,}000$ this predicts about $715$, close to the observed $744$. The context-aware regret grows *sub-linearly*: a tenfold increase in $T$ (from $5000$ to $50{,}000$) raises its regret only about $2.4\times$ (from $16$, averaged over 300 runs, to $38$ in one run), far below the tenfold increase of linear growth, because it learns the best arm within each context and thereafter explores less and less.
 
 e) Fitting a saturated logistic regression to the context-blind bandit's own log recovers the crossover.
 ```{r}
@@ -839,7 +836,7 @@ This does not help the context-blind bandit's own regret, because the crossover 
 ::: {#exr-bayesopt-ei}
 ## Bayesian Optimization: Expected Improvement
 
-Continue the chapter's Taxi Fleet Optimisation example (@exm-bayesopt): a GP surrogate is fit to the initial design $x=(10,30,90)$ with observed profits $(3.1,3.6,6.6)$, using the chapter's squared-exponential kernel and hyperparameters, on $y=-\text{profit}$ so that $x^*=\arg\min_x f(x)$.
+Continue the chapter's Taxi Fleet Optimisation example (@exm-bayesopt): a GP surrogate is fit to the initial design $x=(10,30,90)$ with observed profits $(3.1,6.6,3.6)$, using the chapter's squared-exponential kernel and hyperparameters, on $y=-\text{profit}$ so that $x^*=\arg\min_x f(x)$.
 
 a) Fit the GP to these three points and extract the posterior mean $\mu(x)$ and standard deviation $\sigma(x)$ at two candidate fleet sizes, $x=50$ and $x=70$.
 b) By hand, i.e., directly from the closed-form formula rather than a library call, compute the Expected Improvement at each candidate,
@@ -858,7 +855,7 @@ library(laGP)
 set.seed(42)
 
 x <- matrix(c(10, 30, 90), ncol = 1)
-y <- -c(3.1, 3.6, 6.6)                     # minimize negative profit
+y <- -c(3.1, 6.6, 3.6)                     # minimize negative profit
 gp <- newGP(x, y, 1000, 1e-6, dK = TRUE)
 
 xcand <- matrix(c(50, 70), ncol = 1)
@@ -875,7 +872,7 @@ cat("sigma(50), sigma(70) =", round(sigma, 4), "\n")
 cat("z(50), z(70)         =", round(z, 4), "\n")
 cat("EI(50), EI(70)       =", round(EI, 4), "\n")
 ```
-At $x=50$: $\mu=-3.2545$, $\sigma=2.7713$, $z=-1.2072$, so $EI=0.1532$. At $x=70$: $\mu=-4.9123$, $\sigma=3.0659$, $z=-0.5505$, so $EI=0.56$. Bayesian optimization samples $x=70$ next, even though $x=50$ sits closer to where the profit curve eventually peaks: with only three training points, $x=70$ has both a more favorable predicted mean and slightly higher uncertainty, and EI's balance of exploitation (low $\mu$) against exploration (high $\sigma$) favors it. (This is the standardized-$z$ form of the chapter's own closed-form result $a(x)=\sigma^2\phi(f^*,\mu,\sigma^2)+(f^*-\mu)\Phi(f^*,\mu,\sigma^2)$, since $\sigma^2\phi(f^*,\mu,\sigma^2)=\sigma\varphi(z)$ for the standard normal density $\varphi$. The chapter's `acq()` helper computes exactly this and reproduces both numbers.)
+At $x=50$: $\mu=-5.615$, $\sigma=2.8144$, $z=-0.35$, so $EI=0.6984$. At $x=70$: $\mu=-3.8308$, $\sigma=3.1136$, $z=-0.8894$, so $EI=0.3188$. Bayesian optimization samples $x=50$ next: it lies between the best observed design $x=30$ and the poor design $x=90$, where the predicted mean is much lower than at $x=70$, and this outweighs the slightly smaller uncertainty. This agrees with the chapter's own first suggestion, 48. (This is the standardized-$z$ form of the chapter's own closed-form result $a(x)=\sigma^2\phi(f^*,\mu,\sigma^2)+(f^*-\mu)\Phi(f^*,\mu,\sigma^2)$, since $\sigma^2\phi(f^*,\mu,\sigma^2)=\sigma\varphi(z)$ for the standard normal density $\varphi$. The chapter's `acq()` helper computes exactly this and reproduces both numbers.)
 
 c)
 ```{r}
@@ -904,7 +901,7 @@ best <- which.min(yobs)
 cat("Best x found:", round(x2[best], 2), " best profit:", round(-yobs[best], 4), "\n")
 cat("True optimum: x* = 45, profit(x*) =", true_profit(45), "\n")
 ```
-After the initial three points, EI samples $x=44.65, 56.55, 46.04, 45.04, 45.04$: it lands within half a taxi of the true peak on the very first iteration, then refines around it, echoing the chapter's own run (whose first EI-suggested point was 44). The best point found, $x=45.04$ with profit $9$, matches the true optimum $x^*=45$, $\text{profit}(x^*)=9$, essentially exactly, confirming that a handful of well-chosen samples is enough for Bayesian optimization to locate the peak of an expensive, otherwise-unknown objective.
+After the initial three points, EI samples $x=44.65, 56.55, 46.04, 45.04, 45.04$: it lands within half a taxi of the true peak on the very first iteration, then refines around it, echoing the chapter's own run (whose first EI-suggested point was 48). The best point found, $x=45.04$ with profit $9$, matches the true optimum $x^*=45$, $\text{profit}(x^*)=9$, essentially exactly, confirming that a handful of well-chosen samples is enough for Bayesian optimization to locate the peak of an expensive, otherwise-unknown objective.
 
 :::
 :::

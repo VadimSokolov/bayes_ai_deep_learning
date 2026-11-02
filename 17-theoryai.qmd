@@ -2,7 +2,7 @@
 
 # Statistical Learning Theory and Regularization {#sec-theoryai}
 
-> "*In God we trust; all others must bring data.*"---W. Edwards Deming
+> "*In God we trust; all others must bring data.*" (W. Edwards Deming)
 
 When AlphaGo defeated world champion Lee Sedol in 2016, its neural networks contained millions of parameters. How did such a high-capacity model avoid simply memorizing the training data? The answer lies in regularization: the systematic imposition of constraints that prevent models from overfitting to noise. This chapter reveals that regularization is not merely a computational trick but emerges naturally from Bayesian reasoning about uncertainty.
 
@@ -35,7 +35,7 @@ $$
 $$
 where the MLE estimate is $\hat \theta_i = \bar y_i$. This is exact in the normal model (not merely asymptotic).
 
-On the other hand, the Bayes estimator is based on $\theta_i \mid \hat \theta_i$, where $\hat \theta_i = \bar y_i$. In other words, the classical approach is subject to the *prosecutor's fallacy*, the logical error of confusing $P(\text{data} \mid \text{hypothesis})$ with $P(\text{hypothesis} \mid \text{data})$. Classical estimators are unbiased, whereas a Bayes estimator is biased.
+On the other hand, the Bayes estimator is based on $\theta_i \mid \hat \theta_i$, where $\hat \theta_i = \bar y_i$. In other words, the classical approach is subject to the *prosecutor's fallacy*, the logical error of confusing $P(\text{data} \mid \text{hypothesis})$ with $P(\text{hypothesis} \mid \text{data})$. In this model the classical estimator is unbiased, whereas a Bayes estimator is biased.
 
 :::{#exm-corporate-performance}
 ## Screening Corporate Performance
@@ -95,7 +95,7 @@ $$
 
 This shows that the MLE risk is constant and does not depend on the true parameter values $\theta$, only on the dimension $p$ and the noise variance $\sigma^2$.
 
-Given that MLE provides a natural baseline estimator with known risk properties, one might ask: can we do better? The Bayesian paradigm offers a fundamentally different perspective that often yields estimators with uniformly lower risk.
+Given that MLE provides a natural baseline estimator with known risk properties, one might ask: can we do better? The Bayesian paradigm offers a fundamentally different perspective that often yields estimators with lower risk.
 
 The Bayesian approach begins with a prior distribution $p(\theta)$ over the parameter space and updates this belief using Bayes' rule:
 $$
@@ -120,9 +120,9 @@ $$
 
 The Bayes risk quantifies the expected performance of an estimator, taking into account both the uncertainty in the data and the prior uncertainty about the parameter. It serves as a benchmark for comparing different estimators: an estimator with lower Bayes risk is preferred under the chosen prior and loss function. In particular, the Bayes estimator achieves the minimum possible Bayes risk for the given prior and loss.
 
-In 1956, Charles Stein proved a startling result, later refined with Willard James in 1961: they constructed an estimator for the mean of a multivariate normal distribution that uniformly dominates the sample mean under squared error loss, a finding that challenged what seemed like an elementary law of statistical theory. This result, now known as *Stein's paradox*, demonstrates that for dimensions $p \geq 3$, there always exists an estimator with strictly lower risk than the MLE for all parameter values.
+In 1956, Charles Stein proved a startling result, later refined with Willard James in 1961 [@james1961estimation]: they constructed an estimator for the mean of a multivariate normal distribution that uniformly dominates the sample mean under squared error loss, a finding that challenged what seemed like an elementary law of statistical theory. This result, now known as *Stein's paradox*, demonstrates that for dimensions $p \geq 3$, there always exists an estimator with strictly lower risk than the MLE for all parameter values.
 
-The empirical evidence is striking: in applications ranging from baseball batting averages to toxoplasmosis prevalence rates to Pearson's chi-square tests, the James-Stein estimator achieves mean squared errors less than half that of the sample mean. This result is paradoxical because it overturns the intuition that unbiased estimators should be optimal: despite introducing bias, the James-Stein estimator achieves strictly lower risk for all parameter values when $p \geq 3$. The philosophical implications extend beyond estimation theory: by demonstrating that individual estimates can be improved by considering them jointly, Stein's paradox provides deep connections to Bayesian thinking and the empirical Bayes framework.
+The empirical evidence is striking: in applications ranging from baseball batting averages to toxoplasmosis prevalence rates to Pearson's chi-square tests, the James-Stein estimator achieves mean squared errors less than half that of the sample mean [@efron1975data]. This result is paradoxical because it overturns the intuition that unbiased estimators should be optimal: despite introducing bias, the James-Stein estimator achieves strictly lower risk for all parameter values when $p \geq 3$. The philosophical implications extend beyond estimation theory: by demonstrating that individual estimates can be improved by considering them jointly, Stein's paradox provides deep connections to Bayesian thinking and the empirical Bayes framework.
 
 Stein's phenomenon where $y_i \mid \theta_i \sim N(\theta_i, 1)$ and $\theta_i \sim N(0, \tau^2)$ where $\tau \rightarrow \infty$ illustrates this point well. The MLE approach is equivalent to the use of the improper "non-informative" uniform prior and leads to an estimator with poor risk properties.
 
@@ -147,11 +147,11 @@ $$
 
 This shows that careful specification of default priors matters in high dimensions. 
 
-The resulting estimator is called the James-Stein estimator and is a shrinkage estimator that shrinks the MLE towards the prior mean. The prior mean is typically the sample mean of the data. The James-Stein estimator is given by:
+The resulting estimator is called the James-Stein estimator and is a shrinkage estimator that shrinks the MLE towards a common target, either zero or the grand mean of the data. The James-Stein estimator is given by:
 $$
 \hat{\theta}_{i}^{JS} = (1 - \lambda) \hat{\theta}_{i}^{MLE} + \lambda \bar{y},
 $$
-where $\lambda$ is a shrinkage parameter, and $\bar{y}$ is the sample mean of the data. The shrinkage parameter is typically chosen to minimize the risk of the estimator.
+where $\bar{y}$ is the grand mean and $\lambda = (p-3)\sigma^2/\sum_j (y_j - \bar{y})^2$. This is the variant that shrinks toward $\bar{y}$; the rule above is the variant that shrinks toward zero.
 
 The key idea behind James-Stein shrinkage is that one can "borrow strength" across components. In this sense, the multivariate parameter estimation problem is easier than the univariate one.
 
@@ -196,7 +196,7 @@ $$
 
 Efron and Morris show that the empirical Bayes interpretation provides insight into why the James-Stein estimator dominates the MLE. The key insight is that the MLE implicitly assumes an improper flat prior $\pi(\theta) \propto 1$, which leads to poor risk properties in high dimensions.
 
-The Bayes risk of the James-Stein estimator can be explicitly calculated due to the conjugacy of the normal prior and likelihood:
+The risk of the James-Stein estimator at a fixed $\theta$ can be calculated explicitly using Stein's lemma (integration by parts):
 $$
 R(\theta, \hat{\theta}^{JS}) = p\sigma^2 - (p-2)^2\sigma^2 \E{\frac{1}{\|\theta + \epsilon\|^2/\sigma^2}}
 $$
@@ -211,9 +211,9 @@ This uniform domination demonstrates the *inadmissibility* of the MLE under squa
 In an applied problem, the gap in risk between MLE and JS estimators can be large. For example, in the normal means problem with $p=100$ and $n=100$, the risk of the MLE is $R(\theta,\hat{\theta}_{MLE}) = 100$ while the risk of the JS estimator is $R(\theta,\hat{\theta}_{JS}) = 2$ at its most favorable configuration ($\theta = 0$). The JS estimator is then 50 times more efficient than the MLE; @efron1977steins provide an accessible treatment of this phenomenon. The JS estimator is also minimax optimal in the sense that it attains the minimax risk bound for the normal means problem. The minimax risk bound is the smallest worst-case risk that can be attained by any estimator. 
 
 
-The James-Stein estimator illustrates how incorporating prior information (via shrinkage) can lead to estimators with lower overall risk compared to the MLE, especially in high-dimensional settings. However, it is not the only shrinkage estimator that dominates the MLE. Other shrinkage estimators, such as the ridge regression estimator, also have lower risk than the MLE.
+The James-Stein estimator illustrates how incorporating prior information (via shrinkage) can lead to estimators with lower overall risk compared to the MLE, especially in high-dimensional settings. However, it is not the only shrinkage estimator that can improve on the MLE. Ridge regression with a fixed penalty also has lower risk than the MLE when $\|\theta\|$ is not too large, though not for every $\theta$.
 
-Note that we used the empirical Bayes version of the definition of risk. Full Bayes approach incorporates both the data and the prior distribution of the parameter, as in @eq-bayes-risk.
+Note that so far the risk is frequentist, at a fixed $\theta$. The Bayes risk of @eq-bayes-risk also averages over the prior.
 
 ## Unbiasedness and the Optimality of Bayes Rules {#sec-unbiasedness-optimality}
 
@@ -259,17 +259,18 @@ shrink <- 1 - (k - 3) * sigma2_hat / sum((baseball$BattingAverage - mu_hat)^2)
 baseball <- baseball %>% mutate(JS = mu_hat + shrink * (BattingAverage - mu_hat))
 kable(baseball)
 ```
-Here $c = 0.21$, so each estimate keeps about a fifth of the distance between the observed average and the grand mean, .265. Clemente, the best hitter after 45 at-bats (.400), is pulled down to .294.
+Here $c = 0.21$, so each estimate keeps about a fifth of the distance between the observed average and the grand mean, .265. Clemente, the best hitter after 45 at-bats (.400), is pulled down to .294 (@fig-js-shrinkage, @fig-js-slope).
 
 ```{r}
 #| code-fold: true
+#| label: fig-js-shrinkage
+#| fig-cap: "Observed averages after 45 at-bats against James-Stein estimates; the dashed line is the identity."
 ggplot(baseball, aes(x = BattingAverage, y = JS)) +
   geom_point(alpha = 0.6) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
   labs(
     x = "Observed Batting Average",
-    y = "James-Stein Estimate",
-    title = "Empirical Bayes Shrinkage of Batting Averages"
+    y = "James-Stein Estimate"
   )
 ```
 
@@ -286,6 +287,8 @@ We can see that the James-Stein estimator has a lower MSE than the observed batt
 
 ```{r}
 #| code-fold: true
+#| label: fig-js-slope
+#| fig-cap: "First 45 at-bats, season average and James-Stein estimate for each player."
 #| fig-width: 5.5
 #| fig-height: 5.5
 a <- matrix(rep(1:3, nrow(baseball)), 3, nrow(baseball))
@@ -301,8 +304,10 @@ text(2, 0.14, "Season\naverage", cex = 0.5)
 text(3, 0.14, "J-S\nestimator", cex = 0.5)
 ```
 
-The figure below shows the season dynamics for Clemente: his running batting average (cumulative hits over cumulative at-bats) against the number of at-bats, with dashed lines at his season average (145/412), his James-Stein estimate and his average after the first 45 at-bats. The early values are noise: they sit near or above .400, and no American or National League hitter has finished a season above .400 since Ted Williams hit .406 in 1941.
+@fig-clemente shows the season dynamics for Clemente: his running batting average (cumulative hits over cumulative at-bats) against the number of at-bats, with dashed lines at his season average (145/412), his James-Stein estimate and his average after the first 45 at-bats. The early values are noise: they sit near or above .400, and no American or National League hitter has finished a season above .400 since Ted Williams hit .406 in 1941.
 ```{r}
+#| label: fig-clemente
+#| fig-cap: "Clemente's running batting average in 1970."
 #| fig-width: 5.5
 
 # Data source: https://www.baseball-almanac.com/players/hittinglogs.php?p=clemero01&y=1970
@@ -342,15 +347,15 @@ $$
 
 For example, in the normal-normal model, when $\theta \sim N(\mu,\tau^2)$ with $\mu=0$,  we can integrate out the high-dimensional $\theta$ and find $m(y \mid \tau)$ in closed form as $y_i \sim N(0, \sigma^2 + \tau^2)$ 
 $$
-m( y \mid \tau ) = ( 2 \pi)^{-n/2} ( \sigma^2 + \tau^2 )^{- n/2}  \exp \left ( - \frac{ \sum y_i^2 }{ 2 ( \sigma^2 + \tau^2) } \right )
+m( y \mid \tau ) = ( 2 \pi)^{-p/2} ( \sigma^2 + \tau^2 )^{- p/2}  \exp \left ( - \frac{ \sum y_i^2 }{ 2 ( \sigma^2 + \tau^2) } \right )
 $$
 The original JS estimator shrinks to zero and estimates prior variance using empirical Bayes (marginal MLE or Type II MLE). Efron and Morris and Lindley showed that you want to shrink to overall mean $\bar y$ and in this approach
 $$
 \theta \sim N(\mu,\tau^2).
 $$
-The original JS is $\mu=0$. To estimate the $\mu$ and $\tau$ you can do full Bayes or empirical Bayes that shrinks to overall grand mean $\bar y$, which serves as the estimate of the original prior mean $\mu$. It seems paradoxical that you estimate prior parameters from the data. However, this is not the case. You simply use mixture prior @diaconis1983quantifying with marginal MLE (MMLE). The MMLE is the product
+The original JS is $\mu=0$. To estimate the $\mu$ and $\tau$ you can do full Bayes or empirical Bayes that shrinks to overall grand mean $\bar y$, which serves as the estimate of the original prior mean $\mu$. It seems paradoxical that you estimate prior parameters from the data. However, this is not the case. You simply use mixture prior @diaconis1983quantifying with marginal MLE (MMLE). The MMLE maximizes the marginal likelihood, the product
 $$
-\int_{\theta_i}\prod_{i=1}^k p(\bar y_i \mid \theta_i)p(\theta_i \mid \mu, \tau^2).
+\prod_{i=1}^p \int p(\bar y_i \mid \theta_i)\,p(\theta_i \mid \mu, \tau^2)\,d\theta_i.
 $$
 
 The motivation for the shrinkage prior rather than a flat uniform prior are the following probabilistic arguments. They have an ability to balance signal detection and noise suppression in high-dimensional settings. Unlike flat uniform priors, shrinkage priors adaptively shrink small signals towards zero while preserving large signals. This behavior is essential for sparse estimation problems, where most parameters are expected to be zero or near-zero. The James-Stein procedure is an example of *global shrinkage*, when the overall sparsity level across all parameters is controlled, ensuring that the majority of parameters are shrunk towards zero. Later in this section, we will discuss *local shrinkage* priors, such as the horseshoe prior, which allow individual parameters to escape shrinkage if they represent significant signals.
@@ -362,7 +367,7 @@ In summary, flat uniform priors (MLE) fail to provide adequate regularization in
 ## Bias-Variance Decomposition
 The discussion of shrinkage priors and James-Stein estimation naturally leads us to a fundamental concept in statistical learning: the bias-variance decomposition. This decomposition provides the theoretical foundation for understanding why shrinkage methods like James-Stein can outperform maximum likelihood estimation, even when they introduce bias.
 
-The key insight is that estimation error can be decomposed into two components: *bias* (systematic error) and *variance* (random error). While unbiased estimators like maximum likelihood have zero bias, they often suffer from high variance, especially in high-dimensional settings. Shrinkage methods intentionally introduce a small amount of bias to achieve substantial reductions in variance, leading to better overall performance.
+The key insight is that estimation error can be decomposed into two components: *bias* (systematic error) and *variance* (random error). While unbiased estimators, such as the MLE of a normal mean, have zero bias, they often suffer from high variance, especially in high-dimensional settings. Shrinkage methods intentionally introduce a small amount of bias to achieve substantial reductions in variance, leading to better overall performance.
 
 This trade-off between bias and variance is the driving force behind many successful machine learning algorithms, from ridge regression to neural networks with dropout.
 
@@ -418,7 +423,7 @@ $$
 $$
 The bound depends on the ambient dimension $p$ and the signal energy, not on how few coordinates are actually nonzero, which is precisely why global shrinkage cannot exploit sparsity. When $\|\theta\|^2 \geq p$ (equivalently $M \geq p$), this implies that $R(\hat{\theta}^{JS}, \theta_r) \geq p/2$, no matter how small $r$ is.
 
-In the sparse case, a simple thresholding rule can beat MLE and JS when the signal is sparse. Assuming $\sigma^2 = 1$, the thresholding estimator is:
+A simple thresholding rule can beat MLE and JS when the signal is sparse. Assuming $\sigma^2 = 1$, the thresholding estimator is:
 $$
 \hat{\theta}_{thr} = \begin{cases} 
 \hat{\theta}_i & \text{if } |\hat{\theta}_i| > \sqrt{2 \ln p} \\
@@ -427,7 +432,7 @@ $$
 $$
 This simple example shows that the choice of penalty should not be taken for granted, as different estimators will have different risk profiles.
 
-One such estimator that achieves the optimal minimax rate is the horseshoe estimator @carvalho2010horseshoe, which we discuss in detail in @sec-horseshoe. It is a local shrinkage estimator that dominates the sample mean in MSE and has good posterior concentration properties for sparse signal problems.
+One such estimator that achieves the optimal minimax rate is the horseshoe estimator @carvalho2010horseshoe, which we discuss in detail in @sec-horseshoe. It is a local shrinkage estimator with good posterior concentration properties for sparse signal problems.
 
 
 ## Maximum a Posteriori Estimation (MAP) and Regularization
@@ -474,13 +479,13 @@ $$
 $$
 which is a variation of the Hodrick-Prescott filter [@hodrick1997postwar].
 
-This approach requires us to choose the regularization parameter $\lambda$. A small value of $\lambda$ will lead to a function that fits the data well, but may not capture the underlying trend. A large value of $\lambda$ will lead to a function that captures the underlying trend, but may not fit the data well. The optimal value of $\lambda$ can be chosen using cross-validation or other model selection techniques. The upper panel of @fig-traffic shows the trend filtering for different values of $\lambda \in \{5,50,500\}$. The lower panel shows the optimal value of $\lambda$ chosen by cross-validation (by visual inspection).
+This approach requires us to choose the regularization parameter $\lambda$. A small value of $\lambda$ will lead to a function that fits the data well, but may not capture the underlying trend. A large value of $\lambda$ will lead to a function that captures the underlying trend, but may not fit the data well. The optimal value of $\lambda$ can be chosen using cross-validation or other model selection techniques. The upper panel of @fig-traffic shows the trend filtering for different values of $\lambda \in \{5,50,500\}$. The lower panel shows a value of $\lambda$ chosen by visual inspection.
 
 :::{#fig-traffic layout-ncol="1"}
 
 ![Trend filter for different penalty](fig/traffic_l1.svg){width=85%}
 
-![Trend filtering with optimal penalty](fig/day_295_tf.svg){width=85%}
+![Trend filtering with a penalty chosen by visual inspection](fig/day_295_tf.svg){width=85%}
 
 Trend Filtering for Traffic Speed Data.
 
@@ -530,9 +535,7 @@ $$
 $$
 where $\phi(f)$ is the penalty term that corresponds to the prior distribution of $f$. Below we will consider several choices for the prior distribution of $f$ and the corresponding penalty term $\phi(f)$ commonly used in practice.
 
-## Ridge Regression ($\ell_2$ Norm)
-
-### Tikhonov Regularization Framework
+## Tikhonov Regularization (Ridge)
 
 The Tikhonov regularization framework provides a general setting for regression that connects classical regularization theory with modern Bayesian approaches. Given observed data $(x_i, y_i)_{i=1}^n$ and a parametric model $f(x,w)$ with parameter vector $w \in \mathbb{R}^k$, we define a data misfit functional:
 $$
@@ -594,12 +597,12 @@ $$
 $$
 The regularization parameter $\lambda$ is related to the variance of the prior distribution.  When $\lambda=0$, the function $f$ is the maximum likelihood estimate of the parameters.  When $\lambda$ is large, the function $f$ is the prior mean of the parameters.  
 
-Notice that the OLS estimate (invented by Gauss) is a special case of ridge regression when $\lambda = 0$:
+Notice that the OLS estimate (due to Legendre and Gauss [@stigler1981gauss]) is a special case of ridge regression when $\lambda = 0$:
 $$
 \hat{\beta}_{\text{OLS}} = ( X^\top X )^{-1} X^\top y.
 $$  
 
-The original motivation for ridge regularization was to address the problem of numerical instability in the OLS solution when the design matrix $X$ is ill-conditioned, i.e., when $X^\top X$ is close to singular. In this case, the OLS solution can be very sensitive to small perturbations in the data, leading to large variations in the estimated coefficients $\hat{\beta}$.
+The original motivation for ridge regularization [@hoerl1970ridge] was to address the problem of numerical instability in the OLS solution when the design matrix $X$ is ill-conditioned, i.e., when $X^\top X$ is close to singular. In this case, the OLS solution can be very sensitive to small perturbations in the data, leading to large variations in the estimated coefficients $\hat{\beta}$.
 This is particularly problematic when the number of features $p$ is large, as the condition number of $X^\top X$ can grow rapidly with $p$. The ridge regression solution stabilizes the OLS solution by adding a small positive constant $\lambda$ to the diagonal of the $X^\top X$ matrix, which improves the condition number and makes the solution more robust to noise in the data. The additional term $\lambda I$ simply shifts the eigenvalues of $X^\top X$ away from zero, thus improving the numerical stability of the inversion.
 
 Another way to think and write the objective function of Ridge as the following constrained optimization problem:
@@ -633,11 +636,11 @@ The key question is: what value of the regularization parameter $\lambda$ should
 
 @fig-ridge-bias-variance decomposes Ridge regression's prediction error into its constituent parts as a function of $\lambda$. The black dashed horizontal line at approximately 0.63 is the error of ordinary linear regression (Linear MSE), its squared bias plus variance. The figure leaves out the irreducible error from noise in the data ($\sigma^2=1$), which accounts for the gap to the 1.633 in @fig-ridge-mse. The falling curve (Ridge Var) shows variance decreasing monotonically as $\lambda$ increases: stronger regularization makes the model more stable across different training sets. The rising curve (Ridge Bias$^2$) shows squared bias increasing as $\lambda$ grows: we move further from the true model by shrinking coefficients. The U-shaped curve (Ridge MSE) is the sum of these two components; adding the irreducible error gives the Ridge curve in @fig-ridge-mse. The optimal $\lambda$ occurs where the rate of variance reduction exactly balances the rate of bias increase, minimizing total prediction error.
 
-::: {#fig-ridge-analysis layout-ncol=1}
+::: {#fig-ridge-analysis layout-ncol=2}
 
-![Prediction error as a function of $\lambda$.](fig/ridge_mse.svg){#fig-ridge-mse width=85%}
+![Prediction error as a function of $\lambda$.](fig/ridge_mse.svg){#fig-ridge-mse}
 
-![Bias-variance decomposition](fig/ridge_bias_variance.svg){#fig-ridge-bias-variance width=85%}
+![Bias-variance decomposition](fig/ridge_bias_variance.svg){#fig-ridge-bias-variance}
 
 Ridge regression performance metrics.
 :::
@@ -656,7 +659,7 @@ $$
 (aI + UV)^{-1}U = U(aI + VU)^{-1}
 $$
 for $a$, $U$, $V$ such that the products are well-defined and the inverses exist. We can obtain this from $U(aI + VU) = (aI + UV)U$,
-followed by multiplication by $(aI + UV)^{-1}$ on the left and the right. Applying the identity above to the ridge regression solution with $a = \lambda$, $U = X^\top$, and $V = X$, we obtain an alternative form for the ridge solution:
+followed by multiplication by $(aI + UV)^{-1}$ on the left and $(aI + VU)^{-1}$ on the right. Applying the identity above to the ridge regression solution with $a = \lambda$, $U = X^\top$, and $V = X$, we obtain an alternative form for the ridge solution:
 $$
 \hat{\beta} = X^\top (XX^\top + \lambda I)^{-1} Y.
 $$
@@ -664,7 +667,7 @@ This is often referred to as the kernel form of the ridge estimator. From this, 
 $$
 X\hat{\beta} = XX^\top (XX^\top + \lambda I)^{-1} Y.
 $$
-What does this remind you of? This is precisely $K(K + \lambda I)^{-1}Y$ where $K = XX^\top$, which, recall, is the fit from RKHS regression with a linear kernel $k(x, z) = x^\top z$. Therefore, we can think of RKHS regression as generalizing ridge regression by replacing the standard linear inner product with a general kernel. (Indeed, RKHS regression is often called kernel ridge regression.)
+This is precisely $K(K + \lambda I)^{-1}Y$ where $K = XX^\top$, which is the fit of kernel ridge regression (regression in a reproducing kernel Hilbert space, RKHS) with the linear kernel $k(x, z) = x^\top z$. Replacing the linear inner product with a general kernel generalizes ridge regression.
 
 ## Scale Mixtures Representations
 
@@ -675,7 +678,7 @@ Why should we care about expressing distributions as mixtures? The answer lies i
 
 ## Lasso Regression ($\ell_1$ Norm)
 
-The Lasso (Least Absolute Shrinkage and Selection Operator) regression uses a Laplace prior on the parameters of the model $f$, which leads to an $\ell_1$ penalty term. Specifically, we assume that the parameters $\beta$ of the model $f(x) = x^\top\beta$ are distributed as:
+The Lasso (Least Absolute Shrinkage and Selection Operator) regression [@tibshirani1996regression] uses a Laplace prior on the parameters of the model $f$, which leads to an $\ell_1$ penalty term. Specifically, we assume that the parameters $\beta$ of the model $f(x) = x^\top\beta$ are distributed as:
 $$
 \beta_j \sim \text{Laplace}(0, b) \quad \text{independently for } j = 1, \ldots, p,
 $$
@@ -730,13 +733,13 @@ where $t$ is a positive constant that controls the sparsity of the solution. The
 
 From a Bayesian perspective, the Lasso estimator corresponds to the maximum a posteriori (MAP) estimate under independent Laplace priors on the coefficients. We use Bayes' rule to calculate the posterior as a product of Normal likelihood and Laplace prior:
 $$
--\log p(\beta \mid y, b) = \|y-X\beta\|_2^2 + \frac{2\sigma^2}{b}\|\beta\|_1.
+-2\sigma^2 \log p(\beta \mid y, b) = \|y-X\beta\|_2^2 + \frac{2\sigma^2}{b}\|\beta\|_1 + \text{const}.
 $$
 For fixed $\sigma^2$ and $b>0$, the posterior mode is equivalent to the Lasso estimate with $\lambda = 2\sigma^2/b$. Large variance $b$ of the prior is equivalent to small penalty weight $\lambda$ in the Lasso objective function.
 
 One of the most popular algorithms for solving the Lasso problem is coordinate descent. The algorithm iteratively updates each coefficient while holding all others fixed. For the $j$-th coefficient, the update rule (for the objective $\frac{1}{2n}\|y - X\beta\|_2^2 + \lambda\|\beta\|_1$ with standardized columns) is:
 $$
-\hat{\beta}_j \leftarrow \text{soft}\left(\frac{1}{n}\sum_{i=1}^n x_{ij}(y_i - \sum_{k \neq j} x_{ik}\hat{\beta}_k), \frac{\lambda}{n}\right),
+\hat{\beta}_j \leftarrow \text{soft}\left(\frac{1}{n}\sum_{i=1}^n x_{ij}(y_i - \sum_{k \neq j} x_{ik}\hat{\beta}_k), \lambda\right),
 $$
 where the soft-thresholding operator is defined as:
 $$
@@ -837,9 +840,9 @@ ggplot(plot_data, aes(x = Variable, y = value, fill = variable)) +
   labs(y = "Coefficient Value", fill = "Method") +
   scale_fill_grey(start = 0.15, end = 0.85, labels = c("True", "LASSO (min)", "LASSO (1se)"))
 ```
-It seems like LASSO has successfully identified the non-zero coefficients and shrunk the noise variables to zero. Let's calculate the prediction errors and evaluate the variable selection performance of LASSO at both optimal $\lambda$ values.
+LASSO keeps all the true signals, but at the CV minimum it also keeps several noise variables, and even at the larger `lambda.1se` some remain. Let's calculate the in-sample errors of LASSO at both optimal $\lambda$ values.
 ```{r, echo=TRUE}
-# Calculate prediction errors
+# Calculate in-sample errors
 pred_min <- predict(lasso_fit, newx = X, s = lambda_min)
 pred_1se <- predict(lasso_fit, newx = X, s = lambda_1se)
 
@@ -851,7 +854,7 @@ cat("Mean Squared Error (lambda.1se):", round(mse_1se, 3), "\n")
 ```
 
 
-In summary, this example demonstrates how LASSO regression can be used for both variable selection and regularization in high-dimensional settings. By tuning the regularization parameter $\lambda$, LASSO is able to shrink irrelevant coefficients to zero, effectively identifying the true underlying predictors while controlling model complexity.
+In summary, this example demonstrates how LASSO regression can be used for both variable selection and regularization in high-dimensional settings. By tuning the regularization parameter $\lambda$, LASSO keeps the true predictors and shrinks many irrelevant coefficients to zero, but it does not remove all of them.
 
 :::
 
@@ -872,7 +875,7 @@ p(\beta_j\mid \sigma^2,\alpha) &= \int_{0}^{\infty} \frac{1}{\sqrt{2\pi \tau_j^2
 &= \frac{\alpha}{2\sigma}\exp\left(-\frac{\alpha|\beta_j|}{\sigma}\right).
 \end{aligned}
 $$
-Thus it is a Laplace distribution with location 0 and scale $\sigma/\alpha$. Representing the Laplace prior as a scale mixture of Normals allows us to apply an efficient numerical algorithm for computing samples from the posterior distribution. This algorithm is called a Gibbs sampler and it iteratively samples from $\theta \mid a,y$ and $b\mid \theta,y$ to estimate the joint distribution over $(\hat \theta, \hat b)$. Thus, we do not need to apply cross-validation to find the optimal value of $b$; the Bayesian algorithm does it "automatically."
+Thus it is a Laplace distribution with location 0 and scale $\sigma/\alpha$. Representing the Laplace prior as a scale mixture of Normals allows us to apply an efficient numerical algorithm for computing samples from the posterior distribution. This algorithm is called a Gibbs sampler and it iteratively samples from $\beta \mid \tau, \sigma^2, y$ and $\tau \mid \beta, \sigma^2, y$ to estimate their joint posterior. Thus, we do not need to apply cross-validation to find the optimal value of $\alpha$; the Bayesian algorithm does it "automatically."
 
 ### More Mixture Representations
 
@@ -884,15 +887,15 @@ $$
 p(z_i \mid \beta, \sigma) = \int_0^{\infty} \phi(z_i \mid \mu_z + \kappa_z \omega_i, \sigma^2 \omega_i) \, dP(\omega_i)
 $$
 
-where $\phi(\cdot \mid m, v)$ denotes the normal density with mean $m$ and variance $v$, and $P(\omega_i)$ is an appropriate mixing distribution. The following table summarizes representations for several important loss functions:
+where $\phi(\cdot \mid m, v)$ denotes the normal density with mean $m$ and variance $v$, and $P(\omega_i)$ is an appropriate mixing distribution. The following table summarizes representations for several important loss functions, each up to a multiplicative constant:
 
 | Loss Function | $f(z_i \mid \beta, \sigma)$ | $\kappa_z$ | $\mu_z$ | Mixing Distribution $P(\omega_i)$ |
 |:--------------|:---------------------------|:-----------|:--------|:----------------------------------|
 | Squared-error | $z_i^2/\sigma^2$ | 0 | 0 | $\omega_i = 1$ |
-| Absolute-error | $\|z_i/\sigma\|$ | 0 | 0 | Exponential |
-| Check loss | $\|z_i\| + (2q-1)z_i$ | $1-2q$ | 0 | Generalized inverse Gaussian |
+| Absolute-error | $\lvert z_i/\sigma\rvert$ | 0 | 0 | Exponential |
+| Check loss | $\lvert z_i\rvert + (2q-1)z_i$ | $1-2q$ | 0 | Generalized inverse Gaussian |
 | Support vector machines | $\max(1-z_i, 0)$ | 1 | 1 | Generalized inverse Gaussian |
-| Logistic | $\log(1+e^{z_i})$ | $1/2$ | 0 | Pólya-Gamma |
+| Logistic | $\log(1+e^{-z_i})$ | $1/2$ | 0 | Pólya-Gamma |
 
 By introducing latent variables $\{\omega_i\}$ and $\{\lambda_j\}$ through appropriate equations, the exponential form $\exp\{-L(\beta)\}$ reduces to a Gaussian linear model with heteroscedastic errors. This enables straightforward Gibbs sampling where each conditional distribution has closed form.
 
@@ -905,7 +908,7 @@ This framework characterizes the general case for many models. Previous studies 
 
 The horseshoe prior represents a significant advancement in Bayesian sparse estimation, addressing fundamental limitations of the Lasso while maintaining computational tractability [@carvalho2010horseshoe]. The name derives from the shape of its shrinkage profile, which resembles an inverted horseshoe: it applies minimal shrinkage to large signals while aggressively shrinking noise coefficients toward zero. This behavior makes it particularly attractive for high-dimensional problems where strong sparsity is expected, but we want to avoid over-shrinking the true signals.
 
-Unlike the Lasso, which applies constant shrinkage across all coefficient magnitudes, the horseshoe exhibits *adaptive shrinkage*. Small coefficients receive heavy regularization approaching zero, while large coefficients are left nearly unregularized. This is precisely the behavior we desire in sparse estimation: confidently shrink noise to zero while preserving signal fidelity. The horseshoe achieves this through a hierarchical Bayesian structure that places a half-Cauchy prior on local scale parameters.
+Unlike the Lasso, which subtracts the same amount from every surviving coefficient, the horseshoe exhibits *adaptive shrinkage*. Small coefficients receive heavy regularization approaching zero, while large coefficients are left nearly unregularized. This is precisely the behavior we desire in sparse estimation: confidently shrink noise to zero while preserving signal fidelity. The horseshoe achieves this through a hierarchical Bayesian structure that places a half-Cauchy prior on local scale parameters.
 
 ### Mathematical Formulation
 
@@ -931,7 +934,7 @@ This hierarchical representation enables efficient Gibbs sampling for posterior 
 
 ### Shrinkage Properties
 
-The horseshoe prior induces a shrinkage factor $\kappa_j = 1/(1 + \lambda_j^2\tau^2)$, whose posterior mean $\E{\kappa_j \mid \beta_j, y}$ adapts to the data. We follow the convention of Carvalho, Polson, and Scott [-@carvalho2010horseshoe], under which $\kappa_j \to 1$ denotes complete shrinkage toward zero and $\kappa_j \to 0$ no shrinkage; the complementary quantity $1 - \kappa_j$ is the *keep* factor. For large coefficient values $|\beta_j|$, the shrinkage factor approaches 0 (no shrinkage), while for small values it approaches 1 (complete shrinkage). This can be seen through the marginal prior:
+The horseshoe prior induces a shrinkage factor $\kappa_j = 1/(1 + \lambda_j^2\tau^2)$, whose posterior mean $\E{\kappa_j \mid y}$ adapts to the data. We follow the convention of Carvalho, Polson, and Scott [-@carvalho2010horseshoe], under which $\kappa_j \to 1$ denotes complete shrinkage toward zero and $\kappa_j \to 0$ no shrinkage; the complementary quantity $1 - \kappa_j$ is the *keep* factor. For large coefficient values $|\beta_j|$, the shrinkage factor approaches 0 (no shrinkage), while for small values it approaches 1 (complete shrinkage). This can be seen through the marginal prior:
 
 $$
 p(\beta_j \mid \tau, \sigma^2) = \int_0^{\infty} N(\beta_j \mid 0, \lambda_j^2 \tau^2 \sigma^2) \cdot \text{Cauchy}^+(\lambda_j \mid 0, 1) d\lambda_j
@@ -945,7 +948,7 @@ $$
 \E{\beta_j \mid y} \approx \kappa_j \cdot 0 + (1 - \kappa_j) \cdot \hat{\beta}_j^{\text{OLS}} = (1 - \kappa_j)\,\hat{\beta}_j^{\text{OLS}}
 $$
 
-where $\hat{\beta}_j^{\text{OLS}}$ is the ordinary least squares estimate, and $\kappa_j \in (0,1)$ is the data-dependent shrinkage factor. Unlike Lasso, where the shrinkage is constant across coefficients, $\kappa_j$ adapts to the observed magnitude of $\hat{\beta}_j^{\text{OLS}}$.
+where $\hat{\beta}_j^{\text{OLS}}$ is the ordinary least squares estimate, and $\kappa_j \in (0,1)$ is the data-dependent shrinkage factor. Unlike Lasso, where the amount subtracted is the same for every coefficient, $\kappa_j$ adapts to the observed magnitude of $\hat{\beta}_j^{\text{OLS}}$.
 
 ### Comparison with Other Priors
 
@@ -953,7 +956,7 @@ The horseshoe prior occupies a distinctive position in the landscape of sparse p
 
 - *Ridge* ($\ell_2$): Shrinkage factor $\kappa_j = \lambda/(1 + \lambda)$ is constant, providing uniform shrinkage regardless of signal strength
 - *Lasso* ($\ell_1$): Shrinkage is constant for small coefficients and decays for large ones, $\kappa_j \approx \lambda/|\beta_j|$ for large $|\beta_j|$
-- *Horseshoe*: Shrinkage factor varies from nearly 1 for noise to nearly 0 for signals, $\kappa_j \approx \sigma^2/(\lambda_j^2 \tau^2 + \sigma^2)$
+- *Horseshoe*: Shrinkage factor varies from nearly 1 for noise to nearly 0 for signals, $\kappa_j = 1/(1 + \lambda_j^2 \tau^2)$
 
 The global-local structure separates two tasks: $\tau$ determines how many coefficients should be non-zero (controlling overall sparsity), while each $\lambda_j$ determines whether its specific coefficient belongs to the signal or noise group. This separation leads to superior performance in recovering sparse signals compared to the Lasso, particularly when true coefficients vary substantially in magnitude.
 
@@ -1100,7 +1103,7 @@ legend("topright",
 
 @fig-horseshoe-comparison compares horseshoe (open circles) and Lasso (crosses) estimates against true coefficients (filled circles) for the first 20 predictors. The horseshoe keeps the true signals nearly intact and the null coefficients near zero. The Lasso shrinks every non-zero coefficient by about the same amount, which is too far for the smaller signals: the true values `r beta_true[4]` and `r beta_true[5]` are estimated at `r round(beta_lasso[4], 1)` and `r round(beta_lasso[5], 1)`. It sets all the null coefficients exactly to zero, where the horseshoe leaves small non-zero estimates. This illustrates the horseshoe's key advantage: heavy tails allow large coefficients to escape shrinkage, while the sharp peak near zero shrinks the noise.
 
-@tbl-horseshoe-mse confirms these advantages quantitatively. The horseshoe achieves lower coefficient MSE because it is nearly unbiased on the signals. The horseshoe also attains lower prediction MSE here, because Lasso's uniform shrinkage biases the large signals and inflates the residuals. The global shrinkage $\tau^2 \approx$ `r round(tau_hs, 3)` is learned automatically, enabling model selection without cross-validation.
+@tbl-horseshoe-mse confirms these advantages quantitatively. The horseshoe achieves lower coefficient MSE because it is nearly unbiased on the signals. The horseshoe also attains lower training MSE here, because Lasso's shrinkage biases the large signals and inflates the residuals. The global shrinkage $\tau^2 \approx$ `r round(tau_hs, 3)` is learned automatically, enabling model selection without cross-validation.
 
 ```{r}
 #| code-fold: true
@@ -1113,7 +1116,7 @@ library(knitr)
 mse_hs <- mean((beta_true - beta_hs)^2)
 mse_lasso <- mean((beta_true - beta_lasso)^2)
 
-# Calculate prediction mean squared errors
+# Calculate in-sample mean squared errors
 pred_hs <- X %*% beta_hs
 pred_lasso <- X %*% beta_lasso
 pmse_hs <- mean((y - pred_hs)^2)
@@ -1123,13 +1126,13 @@ pmse_lasso <- mean((y - pred_lasso)^2)
 results_table <- data.frame(
   Method = c("Horseshoe", "Lasso"),
   `Coefficient MSE` = c(round(mse_hs, 4), round(mse_lasso, 4)),
-  `Prediction MSE` = c(round(pmse_hs, 4), round(pmse_lasso, 4))
+  `Training MSE` = c(round(pmse_hs, 4), round(pmse_lasso, 4))
 )
 ```
 ```{r}
 #| echo: false
 #| label: tbl-horseshoe-mse
-#| tbl-cap: "Comparison of Coefficient and Prediction Mean Squared Errors."
+#| tbl-cap: "Comparison of Coefficient and Training Mean Squared Errors."
 kable(results_table)
 ```
 
@@ -1213,7 +1216,7 @@ ggplot(data = df, aes(x = y, y = post.mean, group = tau, color = factor(tau), li
   theme(legend.key.width = unit(1.5, "cm"))
 ```
 
-Smaller values of $\tau$ lead to stronger shrinkage behaviour of the horseshoe. Observations that are in absolute value at most equal to $\sqrt{2\sigma^2\log(1/\tau)}$ are shrunk to values close to zero (Van der Pas et al (2014)). For larger observed values, the horseshoe posterior mean will tend to the identity (that is, barely any shrinkage; the estimate will be very close to the observed value). The optimal value of $\tau$ is the proportion of true signals. This value is typically not known in practice but can be estimated.
+Smaller values of $\tau$ lead to stronger shrinkage behaviour of the horseshoe. Observations that are in absolute value at most equal to $\sqrt{2\sigma^2\log(1/\tau)}$ are shrunk to values close to zero [@vanderpas2014horseshoe]. For larger observed values, the horseshoe posterior mean will tend to the identity (that is, barely any shrinkage; the estimate will be very close to the observed value). The optimal value of $\tau$ is, up to a log factor, the proportion of true signals. This value is typically not known in practice but can be estimated.
 
 #### The Normal Means Problem
 
@@ -1221,7 +1224,7 @@ The normal means model is:
 $$
 y_i = \beta_i + \varepsilon_i, \quad i = 1, \ldots, n,
 $$
-with $\varepsilon_i$ i.i.d. $\mathcal{N}(0, \sigma^2/n_i)$. First, we will be computing the posterior mean only, with known variance $\sigma^2$. The function `HS.post.mean` computes the posterior mean of $(\beta_1, \ldots, \beta_n)$. 
+with $\varepsilon_i$ i.i.d. $\mathcal{N}(0, \sigma^2)$. First, we will be computing the posterior mean only, with known variance $\sigma^2$. The function `HS.post.mean` computes the posterior mean of $(\beta_1, \ldots, \beta_n)$. 
 
 As an example, we generate 50 data points, the first 10 of which are coming from true signals. The first 10 $\beta_i$'s are equal to five and the remaining $\beta_i$'s are equal to zero. Then, we estimate $\tau$ using the MMLE and use it to find the posterior mean (crosses). Finally, we use the function `HS.normal.means` to compute posterior means and credible intervals using MCMC.
 
@@ -1231,8 +1234,8 @@ As an example, we generate 50 data points, the first 10 of which are coming from
 #| fig-cap: "Normal means problem. Filled diamonds = truth, open circles = observations, crosses = estimates."
 #| fig-subcap:
 #|   - "Truth vs observations"
-#|   - "Horseshoe posterior mean estimates"
-#|   - "Posterior mean with 95% credible intervals"
+#|   - "Posterior mean"
+#|   - "95% credible intervals"
 #| layout-ncol: 3
 #| label: fig-hs-normal-means
 #| fig-width: 1.74
@@ -1322,7 +1325,7 @@ The bridge prior with $\alpha < 1$ satisfies the oracle property under regularit
 Thus far we have considered penalized optimization approaches that yield point estimates through maximum a posteriori (MAP) estimation. While these methods provide computationally efficient solutions for high-dimensional problems, they do not fully quantify uncertainty about which variables should be included in the model. In this section, we explore full Bayesian approaches to variable selection that compute the complete posterior distribution over both parameters and model structure, allowing us to assess uncertainty about sparsity patterns themselves. 
 
 ### Spike-and-Slab Prior
-The gold standard for Bayesian variable selection is spike-and-slab priors, also known as Bernoulli-Gaussian mixtures. These priors provide full model uncertainty quantification by explicitly modeling which variables should be included. Consider a linear regression problem
+The gold standard for Bayesian variable selection is spike-and-slab priors [@mitchell1988bayesian; @george1993variable; @polson2019bayesiana], also known as Bernoulli-Gaussian mixtures. These priors provide full model uncertainty quantification by explicitly modeling which variables should be included. Consider a linear regression problem
 $$
 y = \beta_1x_1+\ldots+\beta_px_p + e \ , \ \  \text{where } e \sim N(0, \sigma^2),~-\infty \le \beta_i \le \infty \ .
 $$
@@ -1331,8 +1334,7 @@ Our goal is to identify which input variables $x_i$ should be included in the mo
 Under spike-and-slab, each $\beta_i$ exchangeably follows a mixture prior consisting of $\delta_0$, a point mass at $0$, and a Gaussian distribution centered at zero. Hence we write,
 
 $$
-\label{eqn:ss}
-\beta_i | \theta, \sigma_\beta^2 \sim (1-\theta)\delta_0 + \theta N\left(0, \sigma_\beta^2\right) \ .
+\beta_i \mid \theta, \sigma_\beta^2 \sim (1-\theta)\delta_0 + \theta N\left(0, \sigma_\beta^2\right) \ .
 $$
 Here $\theta\in \left(0, 1\right)$ controls the overall sparsity in $\beta$ and $\sigma_\beta^2$ accommodates non-zero signals. This family is termed the Bernoulli-Gaussian mixture model in the signal processing community.
 
@@ -1342,7 +1344,6 @@ $\gamma = \left(\gamma_1, \ldots, \gamma_p\right)'$ and
 $\alpha = \left(\alpha_1, \ldots, \alpha_p\right)'$ such that
 $\beta_i  =  \gamma_i\alpha_i$, with probabilistic structure
 $$
-\label{eq:bg}
 \begin{array}{rcl}
 \gamma_i\mid\theta & \sim & \text{Bernoulli}(\theta) \ ;
 \\
@@ -1431,15 +1432,21 @@ Therefore, our Bayesian objective inference is connected to
 $\ell_0$-regularized least squares, which we summarize in the following
 proposition.
 
-(Spike-and-slab MAP & $\ell_0$ regularization)
+::: {#prp-spike-slab-l0}
 
-For some $\lambda > 0$, assuming $\theta < \frac12$, $\sigma_\beta^2 \gg \sigma_e^2$, the Bayesian MAP estimate defined by @eq-obj:map is equivalent to the $\ell_0$ regularized least squares objective, for some $\lambda > 0$,
+## Spike-and-slab MAP and $\ell_0$ regularization
+
+Assuming $\theta < \frac12$ and $\sigma_\beta^2 \gg \sigma_e^2$, the Bayesian MAP estimate defined by @eq-obj:map is equivalent to the $\ell_0$ regularized least squares objective, for some $\lambda > 0$,
 $$
 \min_{\beta}
 \frac12\left\|y - X\beta\right\|_2^2
 + \lambda
 \left\|\beta\right\|_0 \ .
 $$ {#eq-obj:l0}
+
+:::
+
+::: {.proof}
 
 First, assuming that
 $$
@@ -1459,6 +1466,8 @@ On the one hand, assuming $\hat\beta$ is an optimal solution, then we can corres
 
 On the other hand, assuming $\left\{\hat\gamma, \hat\alpha\right\}$ is optimal implies that we must have all of the elements in $\hat\alpha_\gamma$ should be non-zero; otherwise, a new $\tilde\gamma_i \defeq I\left\{\hat\alpha_i \neq 0\right\}$ will give a lower objective value. As a result, if we define $\hat\beta_i \defeq \hat\gamma_i\hat\alpha_i$, $\hat\beta$ will be feasible and gives the same objective value as $\left\{\hat\gamma, \hat\alpha\right\}$.
 
+
+:::
 
 
 
@@ -1540,10 +1549,10 @@ The overall computational complexity analysis reveals that each iteration requir
 
 The algorithm demonstrates finite convergence, provably converging in finite steps since there are only finitely many possible active sets. It exhibits monotonic improvement where the objective function decreases or stays the same at each iteration. Finally, the algorithm achieves local optimality, with the final solution satisfying local optimality conditions.
 
-SBR can be viewed as a coordinate-wise proximal gradient method, establishing a connection to proximal gradient methods. The proximal operator for the $\ell_0$ norm is:
+SBR is connected to proximal gradient methods. The proximal operator for the $\ell_0$ norm is:
 $$\text{prox}_{\lambda\|\cdot\|_0}(z) = z \odot \mathbf{1}_{|z|>\sqrt{2\lambda}}$$
 
-This hard thresholding operation is exactly what SBR implements in a coordinate-wise manner.
+Under an orthonormal design, the decision of SBR to add or remove one variable reduces to this hard threshold.
 
 Under standard regularity conditions on the design matrix (restricted eigenvalue or compatibility conditions), SBR achieves variable selection consistency, estimation consistency, and optimal prediction error rates; see @zhang2012general for precise statements.
 
@@ -1584,7 +1593,7 @@ $$
 [\text{prox}_{\gamma \lambda \|\cdot\|_0}(v)]_j = v_j \odot \mathbf{1}_{|v_j| > \sqrt{2\gamma\lambda}}
 $$
 
-This reveals that SBR essentially performs coordinate-wise hard thresholding, where the decision to include or exclude a variable depends on whether its magnitude exceeds a threshold derived from the regularization parameter. This contrasts with the Lasso's soft thresholding (which shrinks all coefficients) and Ridge's uniform shrinkage. This perspective unifies SBR with continuous optimization approaches, showing it implements the "hard" decision boundary required for exact sparsity.
+This reveals that, under an orthonormal design, SBR performs coordinate-wise hard thresholding, where the decision to include or exclude a variable depends on whether its magnitude exceeds a threshold derived from the regularization parameter. This contrasts with the Lasso's soft thresholding (which shrinks all coefficients) and Ridge's uniform shrinkage. This perspective unifies SBR with continuous optimization approaches, showing it implements the "hard" decision boundary required for exact sparsity.
 
 
 #### Spike-and-Slab Examples: Bernoulli-Gaussian and Bernoulli-Laplace
@@ -1602,7 +1611,7 @@ $$
 $$
 where the weight function is:
 $$
-w(y) = \frac{\sigma_\beta^2}{\sigma^2 + \sigma_\beta^2} \left(1 + \frac{(1-\theta)\phi(y/\sigma)}{\theta\phi(y/\sqrt{\sigma^2 + \sigma_\beta^2})\sqrt{1 + \sigma_\beta^2/\sigma^2}}\right)^{-1}
+w(y) = \frac{\sigma_\beta^2}{\sigma^2 + \sigma_\beta^2} \left(1 + \frac{(1-\theta)\phi(y/\sigma)\sqrt{1 + \sigma_\beta^2/\sigma^2}}{\theta\phi(y/\sqrt{\sigma^2 + \sigma_\beta^2})}\right)^{-1}
 $$
 
 and $\phi(\cdot)$ denotes the standard normal density.
@@ -1638,19 +1647,12 @@ bg_posterior_mean <- function(y, sigma, theta, sigma_beta) {
   return(weight * y)
 }
 
-# Bernoulli-Laplace posterior mean (simplified approximation)
+# Bernoulli-Laplace posterior mean, by numerical integration
 bl_posterior_mean <- function(y, sigma, theta, b) {
-  # Simplified version - in practice this involves complex integrals
-  weight_gaussian <- (1 - theta) * dnorm(y, 0, sigma)
-  weight_laplace <- theta * (1 / (2 * b)) * exp(-abs(y) / b) * exp(sigma^2 / (2 * b^2)) *
-    (pnorm(-y / sigma - sigma / b) + pnorm(y / sigma - sigma / b))
-
-  total_weight <- weight_gaussian + weight_laplace
-  weight <- weight_laplace / total_weight
-
-  # Simplified shrinkage factor
-  shrinkage_factor <- y - sign(y) * pmax(0, abs(y) - sqrt(2) * sigma / b)
-  return(weight * shrinkage_factor + (1 - weight) * 0)
+  f <- function(u) dnorm(y, u, sigma) * exp(-abs(u) / b) / (2 * b)
+  m <- integrate(f, -Inf, Inf)$value
+  n <- integrate(function(u) u * f(u), -Inf, Inf)$value
+  theta * n / ((1 - theta) * dnorm(y, 0, sigma) + theta * m)
 }
 
 # Create data for plotting
@@ -1682,7 +1684,7 @@ p1 <- ggplot(plot_data_bg, aes(x = y, y = posterior_mean, color = sigma_beta_lab
   theme_minimal() +
   theme(legend.position = "bottom") +
   xlim(-5, 5) +
-  coord_cartesian(ylim = c(-3, 3))
+  coord_cartesian(ylim = c(-5, 5))
 
 # Bernoulli-Laplace plot
 b_lab <- c("0.5", "1", "2")
@@ -1698,7 +1700,7 @@ p2 <- ggplot(plot_data_bl, aes(x = y, y = posterior_mean, color = b_label, linet
   theme_minimal() +
   theme(legend.position = "bottom") +
   xlim(-5, 5) +
-  coord_cartesian(ylim = c(-3, 3))
+  coord_cartesian(ylim = c(-5, 5))
 
 grid.arrange(p1, p2, ncol = 2)
 ```
@@ -1836,7 +1838,7 @@ This approach offers several advantages:
 
 - We can use sophisticated grids (Riemann) to approximate one-dimensional integrals
 - A grid on inverse CDF space is equivalent to importance weighting in the original $\mathcal{X}$ space
-- If $F_Y^{-1}(s)$ is known and bounded, we could use deterministic grids on $[0,1]$ with $O(N^{-4})$ convergence properties
+- If $F_Y^{-1}(s)$ is known and has four continuous derivatives, Simpson's rule on a deterministic grid on $[0,1]$ converges at rate $O(N^{-4})$
 
 The main caveats are:
 
@@ -1859,7 +1861,7 @@ where $p_{\text{pol}}$ denotes the Pólya density and $p_{\text{gig}}$ the GIG d
 
 ### Quantile Regression Example
 
-To illustrate these integral identities in practice, consider quantile regression. Start by choosing $q \in (0,1)$ and define the quantile loss function $l(x) = |x| + (2q-1)x$. This is also known as the check loss or hinge loss function, and is used in quantile regression for the $q$th quantile @koenker2005quantile. @johannes2009quantile represent this as a pseudo-likelihood involving the asymmetric Laplace distribution. 
+To illustrate these integral identities in practice, consider quantile regression. Start by choosing $q \in (0,1)$ and define the quantile loss function $l(x) = |x| + (2q-1)x$. This is also known as the check loss or pinball loss function, and is used in quantile regression for the $q$th quantile @koenker2005quantile. @johannes2009quantile represent this as a pseudo-likelihood involving the asymmetric Laplace distribution. 
 
 We can derive the corresponding envelope representation as a variance-mean Gaussian mixture. Let $\kappa = 1 - 2q$. Then $g(x) = l(x) + \kappa x = |x|$ is symmetric in $x$ and concave in $x^2$. Using the general envelope representation framework, we obtain:
 $$
@@ -1885,7 +1887,7 @@ These representations connect to several important regression methods. The first
 
 With GIG and Pólya mixing distributions alone, one can generate the following objective functions:
 $$
-\theta^2, \; |\theta|, \; \max(\theta,0), \; \frac{1}{2}|\theta| + (q - \frac{1}{2})\theta, \; \frac{1}{1+e^{-\theta}}, \; \frac{1}{(1+e^{-\theta})^r}
+\theta^2, \; |\theta|, \; \max(\theta,0), \; \frac{1}{2}|\theta| + (q - \frac{1}{2})\theta, \; \log(1+e^{\theta}), \; r\log(1+e^{\theta})
 $$
 
 These correspond to ridge, lasso, support vector machine, check loss/quantile regression, logit, and multinomial models, respectively. More general families can generate other penalty functions, for example the bridge penalty $|u|^\alpha$ from a stable mixing distribution.
@@ -1912,7 +1914,7 @@ $$
 
 With independent priors $\alpha_i \sim N(0, v_i)$, the posterior mean yields a shrinkage estimator:
 $$
-\alpha_i^* = \kappa_i \hat{\alpha}_i, \quad \text{with} \quad \kappa_i = \frac{d_i^2}{d_i^2 + k_i}
+\alpha_i^* = (1-\kappa_i) \hat{\alpha}_i, \quad \text{with} \quad \kappa_i = \frac{k_i}{d_i^2 + k_i}
 $$
 where $k_i = \sigma^2/v_i$ is the generalized ridge penalty.
 
@@ -1940,7 +1942,7 @@ A central theme throughout this chapter is the duality between Bayesian priors a
 |-----------------------|----------------------|---------------------------|-------------------------------------------------------|
 | Ridge      | $\beta^2$     | Gaussian           | Grows Quadratically. Shrinks slowly. Encourages smoothness and numerical stability         |
 | Lasso      | $|\beta|$     | Laplace            | Grows Linearly. Shrinks strongly. Induces sparsity but shrinks strong signals            |
-| Bridge     | $|\beta|^\alpha$| Exp  | Interpolates between Ridge and Lasso.            |
+| Bridge     | $|\beta|^\alpha$| Exponential power  | Interpolates between subset selection, Lasso and Ridge.            |
 | Cauchy     | $\log(1+\beta^2)$ | Cauchy          | Heavy-tailed. Grows logarithmically. Strong shrinkage near zero, minimal shrinkage for large signals        |
 | Horseshoe  | $-\log\log(1 + 2\tau^2/\beta^2)$ | Horseshoe          | Grows almost flat for large signals. Shrinks slowly. Optimal sparsity with strong signals preserved. $\tau$ is a scale parameter.       |
 | Subset selection      | $I(\beta \neq 0)$     | Spike-and-slab     |  Shrinks strongly. Exact sparsity through hard thresholding. Computationally hard.     |
@@ -1965,15 +1967,15 @@ Comparison of unit balls for norms induced by different priors.
 code/cauchy_unit_ball.R 
 code/horseshoe_unit_ball.R -->
 
-The @fig-horseshoe-bridge illustrates the unit balls for different penalty norms, each revealing distinct geometric properties. The $\ell_2$ (Ridge) penalty creates a circular unit ball that encourages smoothness across all parameters. The $\ell_1$ (Lasso) penalty forms a diamond shape that induces sparsity through soft thresholding. Bridge penalties with $\alpha = 0.5$ create more pointed shapes that provide stronger sparsity than Lasso, while $\alpha = 1.5$ produces shapes between the diamond and circle. The $\ell_0$ penalty reduces to discrete points on the coordinate axes, representing exact subset selection.
+@fig-horseshoe-bridge illustrates the unit balls for different penalty norms, each revealing distinct geometric properties. The $\ell_2$ (Ridge) penalty creates a circular unit ball that encourages smoothness across all parameters. The $\ell_1$ (Lasso) penalty forms a diamond shape that induces sparsity through soft thresholding. Bridge penalties with $\alpha = 0.5$ create more pointed shapes that provide stronger sparsity than Lasso, while $\alpha = 1.5$ produces shapes between the diamond and circle. The $\ell_0$ penalty reduces to discrete points on the coordinate axes, representing exact subset selection.
 
-@fig-horseshoe-unit-ball shows the unit ball for the horseshoe prior, which visually resembles the bridge prior with $\alpha = 0.5$. The horseshoe penalty $\phi(\theta_i) = -\log(\log(1 + 2\tau^2/\theta_i^2))$ has a double-logarithmic structure: it tends to $-\infty$ at the origin (the prior density has a pole there, which gives strong shrinkage toward zero) but stays nearly flat for large signals (minimal distortion). This asymmetric behavior is fundamentally different from Lasso, which shrinks uniformly regardless of signal magnitude. The global parameter $\tau$ controls the aggressiveness of shrinkage. The horseshoe achieves optimal minimax rates of $O(s \log(p/s))$ for $s$-sparse vectors and possesses oracle properties under regularity conditions.
+@fig-horseshoe-unit-ball shows the unit ball for the horseshoe prior, which visually resembles the bridge prior with $\alpha = 0.5$. The horseshoe penalty $\phi(\theta_i) = -\log(\log(1 + 2\tau^2/\theta_i^2))$ has a double-logarithmic structure: it tends to $-\infty$ at the origin (the prior density has a pole there, which gives strong shrinkage toward zero) but stays nearly flat for large signals (minimal distortion). This asymmetric behavior is fundamentally different from Lasso, which subtracts the same amount regardless of signal magnitude. The global parameter $\tau$ controls the aggressiveness of shrinkage. With a suitable $\tau$, the horseshoe attains the minimax rate $O(s \log(p/s))$ for $s$-sparse vectors [@vanderpas2014horseshoe].
 
-@fig-cauchy-unit-ball shows the Cauchy prior's unit ball, whose logarithmic penalty $\phi(\theta_i) = \log(1 + \theta_i^2)$ exhibits similar heavy-tailed behavior---strong shrinkage near zero, minimal shrinkage for large signals---but with a simpler single-logarithmic structure.
+@fig-cauchy-unit-ball shows the Cauchy prior's unit ball, whose logarithmic penalty $\phi(\theta_i) = \log(1 + \theta_i^2)$ exhibits similar heavy-tailed behavior (strong shrinkage near zero, minimal shrinkage for large signals) but with a simpler single-logarithmic structure.
 
 *Global shrinkage methods* such as James-Stein estimation and Ridge regression apply uniform regularization across all parameters. While computationally simple and numerically stable, they cannot adapt to local signal structure and may over-shrink large signals in sparse settings.
 
-*Adaptive shrinkage methods* like Lasso and horseshoe priors provide differential shrinkage based on signal strength. Lasso employs soft thresholding, while the horseshoe applies aggressive shrinkage to small signals while preserving large ones, achieving the optimal minimax rate $p_n \log(n/p_n)$. The horseshoe is particularly effective for needle-in-a-haystack problems.
+*Adaptive shrinkage methods* like Lasso and horseshoe priors provide differential shrinkage based on signal strength. Lasso employs soft thresholding, while the horseshoe applies aggressive shrinkage to small signals while preserving large ones, achieving the optimal minimax rate $s \log(p/s)$. The horseshoe is particularly effective for needle-in-a-haystack problems.
 
 *Variable selection methods* including spike-and-slab priors and $\ell_0$ regularization make discrete inclusion or exclusion decisions. These produce the most interpretable sparse solutions and can achieve oracle properties under appropriate conditions, though they are combinatorially challenging to implement.
 
@@ -1989,7 +1991,7 @@ Building on the theoretical foundations and geometric intuition developed above,
 
 : Practical guidelines for regularized models and sparse estimation. {.tab-small #tbl-practical-guidelines tbl-colwidths="[25,25,50]"}
 
-These principles extend to modern deep learning, where dropout, weight decay, and batch normalization all serve as implicit regularizers with Bayesian interpretations. The central insight---that Bayesian approaches can dominate MLE even from a frequentist perspective, as Stein's paradox demonstrates---motivates the regularization techniques used throughout the remainder of this book.
+These principles extend to modern deep learning, where dropout, weight decay, and batch normalization all serve as implicit regularizers with Bayesian interpretations. The central insight, that Bayesian approaches can dominate MLE even from a frequentist perspective as Stein's paradox demonstrates, motivates the regularization techniques used throughout the remainder of this book.
 
 Part II has developed the statistical and algorithmic tools for learning from data: pattern matching, regression, classification, trees, forecasting, model selection, and the regularization theory that ties them together. In Part III, we shift from feature engineering to representation learning. Neural networks learn both the features and the prediction function jointly, scaling to millions of parameters through the optimization and regularization ideas developed here.
 

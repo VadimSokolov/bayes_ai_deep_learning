@@ -8,7 +8,7 @@ source("code/common.R")
 
 # ---- Model Fitting ---------------------------------------------------------
 
-set.seed(92) # Kuzy
+set.seed(92)
 x <- seq(-3, 3, length.out = 100)
 y <- pnorm(x + rnorm(100)) > 0.5
 probitModel <- glm(y ~ x, family = binomial(link = "probit"))
@@ -129,12 +129,6 @@ race_df <- df |>
     race_id, venue, field_size, date, public_prob, win, win_odds,
     jockey_win_rate, trainer_win_rate, draw_normalized, rating_diff
   )
-
-cat(sprintf(
-  "Dataset: %d races from %s to %s\n",
-  nrow(race_df), min(race_df$date), max(race_df$date)
-))
-cat(sprintf("Favorite win rate: %.1f%%\n", mean(race_df$win) * 100))
 
 # [betting-model]
 glm.fit <- glm(win ~ public_prob, data = race_df, family = binomial)
@@ -277,22 +271,12 @@ abline(h = 0, lty = 2)
 
 # [betting-optimal-threshold]
 real_return <- mean((race_df$win * race_df$win_odds - 1)[pred_bet > alpha[which.max(profit)]])
-if (any(profit > 0)) {
-  cat(sprintf(
-    "Profitable threshold range: %.2f to %.2f\n",
-    min(alpha[profit > 0]), max(alpha[profit > 0])
-  ))
-  cat(sprintf("Optimal threshold: %.2f\n", alpha[which.max(profit)]))
-  cat(sprintf("Maximum expected profit: $%.3f per race\n", max(profit)))
-} else {
-  cat("No threshold produces positive expected profit at these odds\n")
-}
 
 # ---- Kernel Trick ----------------------------------------------------------
 
 gencircledata <- function(numSamples, radius, noise) {
   d <- matrix(0, ncol = 3, nrow = numSamples) # matrix to store our generated data
-  # Generate positive points inside the circle.
+  # Generate points of class 0 inside the circle.
   for (i in 1:(numSamples / 2)) {
     r <- runif(1, 0, radius * 0.4)
     angle <- runif(1, 0, 2 * pi)
@@ -303,7 +287,7 @@ gencircledata <- function(numSamples, radius, noise) {
     d[i, ] <- c(0, x + noiseX, y + noiseY)
   }
 
-  # Generate negative points outside the circle.
+  # Generate points of class 1 outside the circle.
   for (i in (numSamples / 2 + 1):numSamples) {
     r <- runif(1, radius * 0.8, radius)
     angle <- runif(1, 0, 2 * pi)
@@ -332,7 +316,6 @@ phi <- function(x1, x2) {
 # [scatterplot3d]
 library("scatterplot3d")
 
-# Generate sample 2D data (you can replace this with your actual data)
 # Apply the transformation
 transformed_data <- phi(d[, 2], d[, 3])
 par(xpd = TRUE)
@@ -344,47 +327,23 @@ scatterplot3d(transformed_data,
 )
 par(xpd = FALSE)
 
-# ---- The Data-Augmentation Strategy ----------------------------------------
+# ---- Polya-Gamma integral identity -----------------------------------------
 
 bayesian_logit_pg <- function(y, X, n_iter = 5000, burn_in = 1000) {
   n <- length(y)
   p <- ncol(X)
-  # Prior specification (weakly informative)
   beta_prior_mean <- rep(0, p)
-  beta_prior_prec <- diag(0.01, p) # Precision matrix
-
-  # Storage for samples
+  beta_prior_prec <- diag(0.01, p)
   beta_samples <- matrix(0, n_iter, p)
-  omega_samples <- matrix(0, n_iter, n)
-
-  # Initialize
   beta <- rep(0, p)
-
   for (iter in 1:n_iter) {
-    # Step 1: Sample omega (auxiliary variables)
-    psi <- X %*% beta
-    omega <- rpg(n, h = 1, z = psi)
-
-    # Step 2: Sample beta (regression coefficients)
-    # Posterior covariance and mean
+    omega <- rpg(n, h = 1, z = X %*% beta)
     V_omega <- solve(t(X) %*% diag(omega) %*% X + beta_prior_prec)
-    kappa <- y - 0.5
-    m_omega <- V_omega %*% (t(X) %*% kappa + beta_prior_prec %*% beta_prior_mean)
-
-    # Sample from multivariate normal
+    m_omega <- V_omega %*% (t(X) %*% (y - 0.5) + beta_prior_prec %*% beta_prior_mean)
     beta <- mvrnorm(1, m_omega, V_omega)
-
-    # Store samples
     beta_samples[iter, ] <- beta
-    omega_samples[iter, ] <- omega
   }
-
-  # Return samples after burn-in
-  list(
-    beta = beta_samples[(burn_in + 1):n_iter, ],
-    omega = omega_samples[(burn_in + 1):n_iter, ],
-    n_samples = n_iter - burn_in
-  )
+  beta_samples[(burn_in + 1):n_iter, , drop = FALSE]
 }
 
 # [bayesian-logit-implementation]
@@ -404,12 +363,12 @@ y <- rbinom(n, 1, probs)
 results <- bayesian_logit_pg(y, X, n_iter = 3000, burn_in = 500)
 
 # Posterior summaries
-posterior_means <- colMeans(results$beta)
-posterior_sds <- apply(results$beta, 2, sd)
+posterior_means <- colMeans(results)
+posterior_sds <- apply(results, 2, sd)
 # Visualize posterior distributions
 par(mfrow = c(1, 3))
 for (j in 1:3) {
-  hist(results$beta[, j],
+  hist(results[, j],
     breaks = 30, main = "", xlab = bquote(beta[.(j - 1)]),
     col = "lightblue", border = "white", cex.axis = 0.75, cex.lab = 1.05
   )

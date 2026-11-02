@@ -69,7 +69,7 @@ knitr::kable(t(coef(m)))
 
 # [iris-gd-loss]
 plot(loss[1:40], type='l', xlab="Iteration", ylab="Loss", bty='n', col="blue", lwd=2)
-abline(h=min(loss), lty=2, col="red")
+abline(h=sum(resid(m)^2), lty=2, col="red")
 
 # ---- Logistic Regression ---------------------------------------------------
 
@@ -120,7 +120,7 @@ lrgd_minibatch  = function(x,y, alpha, n_iter, bs) {
 }
 
 # [sgd-mb-run]
-set.seed(92) # kuzy
+set.seed(92)
 ind = sample(150)
 y = ifelse(iris$Species=="setosa",1,0)[ind] # shuffle data
 x = cbind(rep(1,150),iris$Sepal.Length)[ind,] # shuffle data

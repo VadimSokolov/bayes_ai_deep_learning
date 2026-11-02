@@ -6,7 +6,7 @@
 
 The feed-forward networks of @sec-nn treat every input dimension identically. When the input is an image, this ignores spatial structure: nearby pixels are more related than distant ones, and the same pattern (an edge, a texture) can appear anywhere in the frame. Convolutional neural networks encode these two priors, locality and translation equivariance, directly into the architecture.
 
-The foundational architecture for convolutional neural networks emerged in 1980, when Kunihiko Fukushima introduced the Neocognitron [@fukushima1980neocognitron], a hierarchical neural network inspired by Hubel and Wiesel's discoveries about simple and complex cells in the mammalian visual cortex. The Neocognitron was the first architecture to use convolutional layers for feature extraction and pooling layers for translation invariance, successfully recognizing simple patterns through unsupervised learning, regardless of their position in the image. In 1988, Wei Zhang and colleagues applied backpropagation to train a simplified Neocognitron for alphabet recognition [@zhang1988shift], demonstrating that supervised learning could be effectively combined with the convolutional architecture. This combination of Fukushima's architectural insights with gradient-based supervised learning became the foundation for modern CNNs, which now power everything from facial recognition on smartphones to autonomous vehicle perception systems.
+The foundational architecture for convolutional neural networks emerged in 1980, when Kunihiko Fukushima introduced the Neocognitron [@fukushima1980neocognitron], a hierarchical neural network inspired by Hubel and Wiesel's discoveries about simple and complex cells in the mammalian visual cortex [@hubel1962receptive]. The Neocognitron was the first architecture to use convolutional layers for feature extraction and pooling layers for translation invariance, successfully recognizing simple patterns through unsupervised learning, regardless of their position in the image. In 1988, Wei Zhang and colleagues applied backpropagation to train a simplified Neocognitron for alphabet recognition [@zhang1988shift], demonstrating that supervised learning could be effectively combined with the convolutional architecture. This combination of Fukushima's architectural insights with gradient-based supervised learning became the foundation for modern CNNs.
 
 We first calculate a filter response by hand, then combine two filters into a classifier. The MNIST example then learns filters from data and compares a CNN with the fully connected networks of @sec-nn.
 
@@ -14,7 +14,7 @@ We first calculate a filter response by hand, then combine two filters into a cl
 
 A *filter* (also called a *kernel*) is a small matrix of weights, typically $3\times3$ or $5\times5$, that extracts local features by computing a weighted sum of pixel values within a sliding window. The same weights are used at every position.
 
-### Key Concepts
+### A Worked Example
 
 Consider the upper-left and upper-right $3\times3$ patches of a $5\times5$ cross formed by its two diagonals. Call these patches $P$ and $Q$, and use a filter $f$ with ones along its main diagonal:
 $$
@@ -41,7 +41,7 @@ The response of 3 moves from $(0,0)$ to $(0,1)$. This is *translation equivarian
 
 The *stride* is the number of pixels by which the filter shifts at each step. A stride of 1 moves pixel by pixel; a stride of 2 skips positions. The *receptive field* is the input region influencing one output value, here $3\times3$. *Padding* adds zeros around the border: with stride one, "same" padding preserves the input dimensions, while "valid" padding uses no padding and shrinks the output.
 
-A related local weighted sum is kernel smoothing. For a one-dimensional signal $x$ and a filter $w$ of length $h$, the unflipped operation is
+For a one-dimensional signal $x$ and a filter $w$ of length $h$, the unflipped operation is
 $$
 C(t)=\sum_{i=0}^{h-1}x(t+i)w(i).
 $$
@@ -168,9 +168,9 @@ We now learn both filters and classifier weights from labeled images.
 
 ## The MNIST Dataset
 
-The MNIST dataset contains grayscale images of handwritten digits, each $28\times28$ pixels, labeled 0 through 9. The original dataset includes 60,000 training images and 10,000 test images. For simplicity, both examples below use only the official test data, shuffled into 8,000 training images and 2,000 held-out evaluation images. We call the latter the held-out set throughout; this is not the standard MNIST training/test protocol.
+The MNIST dataset [@lecun1998gradient] contains grayscale images of handwritten digits, each $28\times28$ pixels, labeled 0 through 9. The original dataset includes 60,000 training images and 10,000 test images. For simplicity, both examples below use only the official test data, shuffled into 8,000 training images and 2,000 held-out evaluation images. We call the latter the held-out set throughout; this is not the standard MNIST training/test protocol.
 
-Image data are represented as a matrix of pixel values. A grayscale image has shape (28, 28), with intensities from 0 (black) to 255 (white). Color images add red, green, and blue channels, giving shape (28, 28, 3). @fig-mnist shows sample digits.
+Image data are represented as a matrix of pixel values. A grayscale image has shape (28, 28), with intensities from 0 (black) to 255 (white). Color images add red, green, and blue channels, giving shape (28, 28, 3) in the channels-last convention (PyTorch, below, puts the channel axis first). @fig-mnist shows sample digits.
 
 ```{python load-mnist}
 #| eval: false
@@ -210,7 +210,7 @@ Sample MNIST digits.
 
 ## Fully Connected Approach
 
-A natural starting point is a fully connected neural network, which reshapes each image into a vector of 784 values with no built-in notion of neighboring positions. Its units combine pixels, but separate weights must learn the same pattern at different locations. The output contains probabilities for the 10 classes.
+A natural starting point is a fully connected neural network, which reshapes each image into a vector of 784 values with no built-in notion of neighboring positions. Its units combine pixels, but separate weights must learn the same pattern at different locations. The output contains log-probabilities for the 10 classes.
 
 The JAX implementation follows @sec-nn and the gradient updates of @sec-sgd. Pixel values are scaled to $[0,1]$, and labels are stored as one-hot vectors.
 
@@ -235,11 +235,18 @@ train_labels  = one_hot(y[traini],10)
 test_labels =  one_hot(y[testi],10)
 ```
 
-The cross-entropy loss selects the predicted log-probability of the true digit; accuracy compares the most probable class with the label.
+The network has two hidden layers with $\tanh$ activation, and its final layer returns log-probabilities, computed as $z_i-\log\sum_j e^{z_j}$. The cross-entropy loss selects the predicted log-probability of the true digit, and training is plain SGD. The full code is in `code/22-cnn.py`.
+
+```
+initialize the weights w
+repeat for 10 epochs
+    for each mini-batch (x, y) of 128 images
+        loss = -mean(sum(y * log_softmax(f(x; w))))
+        w = w - 0.001 * grad(loss, w)
+```
 
 ```{python mnist-fc1}
 #| eval: false
-#| echo: true
 from jax import jit, grad
 import jax.numpy as jnp
 from jax.scipy.special import logsumexp
@@ -256,11 +263,8 @@ def accuracy(params, batch):
   return jnp.mean(predicted_class == target_class)
 ```
 
-The network has two hidden layers with $\tanh$ activation. Its final layer returns log-probabilities, computed as $z_i-\log\sum_j e^{z_j}$ using `logsumexp` for numerical stability.
-
 ```{python mnist-fc2}
 #| eval: false
-#| echo: true
 def predict(params, inputs):
     activations = inputs
     for w, b in params[:-1]:
@@ -272,11 +276,8 @@ def predict(params, inputs):
     return logits - logsumexp(logits, axis=1, keepdims=True)
 ```
 
-We initialize the weights, form mini-batches of 128 images, and use SGD with step size 0.001 for 10 epochs.
-
 ```{python}
 #| eval: false
-#| echo: true
 layer_sizes = [784, 1024, 1024, 10]
 param_scale = 0.1
 step_size = 0.001
@@ -317,13 +318,13 @@ for epoch in range(num_epochs):
     test_acc = accuracy(params, (test_images, test_labels))
     log[:,epoch] = [train_acc,test_acc,]
 print(f"Training set accuracy {train_acc}")
-print(f"Test set accuracy {test_acc}")
+print(f"Held-out set accuracy {test_acc}")
 
 plt.plot(range(num_epochs),log[0,:]);
 plt.plot(range(num_epochs),log[1,:]);
 ```
 
-The architecture is shown in @fig-mnist-fc. The run achieves 80% training accuracy and 77% held-out accuracy; this run also leaves substantial training error.
+The architecture is shown in @fig-mnist-fc. The run achieves 80% training accuracy and 77% held-out accuracy.
 
 ![Fully Connected MNIST](fig/mermaid/22-cnn-mnist-fc.png){#fig-mnist-fc width=95% fig-alt="Fully connected network for MNIST with a 784-node input layer, two hidden layers of 1024 tanh nodes and a 10-node log-softmax output layer that gives the predicted digit, with the weight and bias shapes written on each connection."}
 
@@ -337,7 +338,7 @@ A fully connected layer connecting a $28\times28$ image to 1024 hidden units req
 
 We use PyTorch's `nn.Conv2d` to implement learned filters. Each first-layer filter produces one feature map. A second-layer filter spans all 32 input maps, sums their local weighted responses, and adds a bias to produce one new map. Thus each second-layer output channel has $32\times3\times3+1=289$ parameters, and its 64 channels have 18,496 parameters. Two stride-one $3\times3$ layers have a $5\times5$ receptive field before pooling: the second layer combines features from neighboring first-layer windows.
 
-The shapes in @fig-cnn-architecture follow $1\times28\times28$, $32\times26\times26$, $64\times24\times24$, then $64\times12\times12$ after local $2\times2$ max pooling. Unlike the toy's global maximum, local pooling retains a grid of responses. It can reduce sensitivity to some shifts, but does not guarantee invariance; the flattened dense head also uses position.
+The shapes in @fig-cnn-architecture follow $1\times28\times28$, $32\times26\times26$, $64\times24\times24$, then $64\times12\times12$ after local $2\times2$ max pooling (stride 2). Unlike the toy's global maximum, local pooling retains a grid of responses. It can reduce sensitivity to some shifts, but does not guarantee invariance; the flattened dense head also uses position.
 
 ![CNN Architecture](fig/mermaid/22-cnn-architecture.png){#fig-cnn-architecture width=95% fig-alt="Architecture of the convolutional network: a 1 by 28 by 28 grayscale input, two 3 by 3 convolutions with ReLU, max pooling and flattening to 9216 features, then a 9216 to 128 linear layer with ReLU and a 128 to 10 linear layer with log-softmax giving 10 digit classes."}
 
@@ -347,16 +348,12 @@ The shapes in @fig-cnn-architecture follow $1\times28\times28$, $32\times26\time
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-x = parse_images("data/t10k-images-idx3-ubyte.gz")
-y = parse_labels("data/t10k-labels-idx1-ubyte.gz")
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-
-        self.conv1 = nn.Conv2d(1, 32, 3, 1)  # 1 input channel (grayscale), 32 output channels, 3x3 kernel
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)  # 32 input channels, 64 output channels
-        # Note: PyTorch defaults to valid padding (no padding). 
-        # After conv1 (28->26), conv2 (26->24), pool (24->12): 64 channels × 12 × 12 = 9216
+        self.conv1 = nn.Conv2d(1, 32, 3, 1)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        # 64 channels × 12 × 12 = 9216 after pooling
         self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, 10)
     def forward(self, x):
@@ -380,7 +377,7 @@ def data_stream():
     perm = rng.permutation(num_train)
     while True:
         for i in range(num_batches):
-            # index into traini so we train on the same split as the FC network (no test leakage)
+            # index into traini so we train on the same split as the FC network (held-out images excluded)
             batch_idx = traini[perm[i * batch_size:(i + 1) * batch_size]]
             yield torch.from_numpy(x[batch_idx,:,:]/ np.float32(255.))[:, None, :, :], torch.from_numpy(y[batch_idx])
 
@@ -390,7 +387,6 @@ Training draws the same 8,000 images as the dense network, as tensors of shape (
 
 ```{python}
 #| eval: false
-#| echo: true
 def train(model, optimizer):
     model.train()
     batches = data_stream()
@@ -410,7 +406,7 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=0.1)
 train(model, optimizer)
 ```
 
-This run uses Adadelta with learning rate 0.1, rather than the dense network's SGD. We evaluate on the same 2,000 held-out images.
+This run uses Adadelta [@zeiler2012adadelta] with learning rate 0.1, rather than the dense network's SGD. We evaluate on the same 2,000 held-out images.
 
 ```{python mnist-cnn-eval}
 #| eval: false
@@ -422,23 +418,23 @@ with torch.no_grad():
     pred = output.argmax(dim=1)
     correct = pred.eq(test_targets).sum().item()
     accuracy = 100. * correct / len(testi)
-    print(f"CNN Test Accuracy: {accuracy:.1f}%")
+    print(f"CNN held-out accuracy: {accuracy:.1f}%")
 ```
 
-The two implementations give the following reported results. Both use 10 epochs and mini-batches of 128; parameter counts include biases.
+The two implementations give the following results. Both use 10 epochs and mini-batches of 128; parameter counts include biases.
 
 | Model | Training setup | Held-out accuracy | Parameters |
 | :--- | :--- | ---: | ---: |
 | Fully connected | JAX, $\tanh$, SGD, step size 0.001 | 77% | 1,863,690 |
-| CNN | PyTorch, ReLU, Adadelta, learning rate 0.1 | 93% | 1,199,882 |
+| CNN | PyTorch, ReLU, Adadelta, learning rate 0.1 | 94% | 1,199,882 |
 
-The accuracy gap does not isolate convolution: architecture, activation, optimizer, and framework all change. These are two illustrative implementations, not evidence that convolution alone raises accuracy from 77% to 93%. A controlled comparison would use matched training recipes and evaluate both models on the same held-out digits and their translated versions.
+The accuracy gap does not isolate convolution: architecture, activation, optimizer, and framework all change. These are two illustrative implementations, not evidence that convolution alone raises accuracy from 77% to 94%. A controlled comparison would use matched training recipes and evaluate both models on the same held-out digits and their translated versions.
 
 Weight sharing has a directly countable effect. The two convolutional layers together have 18,816 parameters, while the CNN's first dense layer, `Linear(9216, 128)`, has 1,179,776. Most parameters in this CNN are therefore in its dense head; shared filters do not by themselves ensure a small total model.
 
 ## Summary
 
-Moving the stroke moved its filter response: convolution is translation equivariant away from boundaries. Taking a global maximum erased its position, whereas local pooling retained some spatial information and offered no guarantee of an unchanged prediction. Stacked filters combine channels and enlarge the receptive field, so early layers detect simple features (edges, textures) and deeper layers combine them into complex patterns (shapes, objects). These are the architectural ideas illustrated by the MNIST network. Attention, developed in @sec-nlp, offers another way to combine information across positions.
+Moving the stroke moved its filter response: convolution is translation equivariant away from boundaries. Taking a global maximum erased its position, whereas local pooling retained some spatial information and offered no guarantee of an unchanged prediction. Stacked filters combine channels and enlarge the receptive field, so deeper layers respond to larger regions of the image. In deep networks trained on large image collections, early layers tend to learn edge- and texture-like filters [@zeiler2014visualizing], but the two convolutional layers here are too small to show a hierarchy of shapes or objects. These are the architectural ideas the MNIST network illustrates at small scale. Attention, developed in @sec-nlp, offers another way to combine information across positions.
 
 ## Exercises {.unnumbered}
 

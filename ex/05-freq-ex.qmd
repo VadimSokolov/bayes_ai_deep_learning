@@ -5,14 +5,14 @@
 ## A/B Testing
 
 During a recent breakout of the flu, 850 out of 6,224 people diagnosed with
-the virus presented severe symptoms. During the same flu season, a
+the virus presented severe symptoms. During the same flu season, an
 experimental anti-virus drug was being tested. The drug was given to 238
 people with the flu, and only 6 of them developed severe symptoms. Based
 on this information, can you conclude, for sure, that the drug is a
 success?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**: 
+*Solution*: 
 
 Null hypothesis is $H_0: p_1 - p_2 = 0$, $H_a: p_1 - p_2 \neq 0$.
 $$
@@ -27,7 +27,7 @@ $$
 t = \frac{\hat{p}_1 - \hat{p}_2 - 0}{s} = \frac{0.136 - 0.025}{0.011} = 10.09 > 1.96
 $$
 
-Yes, given this information we can conclude that the drug is working.
+The difference is highly significant, but not for sure: the 238 patients were not randomized, so the comparison does not establish that the drug caused it.
 
 If you do confidence interval, the $95\%$ confidence interval of $p_1 - p_2$ is
 $$
@@ -67,7 +67,7 @@ $$
 $$
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 The home and away winning proportions are given by
 $$
@@ -98,7 +98,7 @@ In a five-year study of the effects of aspirin on Myocardial Infarction (MI), or
 
    Treatment   with MI   without MI
   ----------- --------- ------------
-    Placebo      198       10845
+    Placebo      189       10845
     Aspirin      104       10933
 
 a) Find a $95$% confidence interval for the difference in proportions
@@ -107,25 +107,25 @@ a) Perform a hypothesis test of the null $H_0 : p_1 = p_2$ at a $1$%
     significance level.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 Converting to proportions:
 
    Treatment   with MI   without MI     n
   ----------- --------- ------------ -------
-    Placebo    0.01793    0.98207     11043
+    Placebo    0.01713    0.98287     11034
     Aspirin    0.00942    0.99058     11037
 
 a) The CI for a difference in proportion is:
     $$(\hat{p}_1-\hat{p}_2)\pm z_{\alpha/2}\sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1}+\frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}$$
-    $$=(0.01793-0.00942)\pm 1.96\sqrt{\frac{0.01793(1-0.01793)}{11043}+\frac{0.00942(1-0.00942)}{11037}}$$
-    $$=0.00851\pm 1.96\sqrt{0.0000015945+0.0000008454}=0.00851\pm 1.96\sqrt{0.0000024399}$$
-    $$=0.00851\pm 1.96*0.00156205=0.00851\pm 0.00306$$ Therefore, the CI
-    for the difference in these proportions is: $$(0.00545,0.01157)$$
+    $$=(0.01713-0.00942)\pm 1.96\sqrt{\frac{0.01713(1-0.01713)}{11034}+\frac{0.00942(1-0.00942)}{11037}}$$
+    $$=0.00771\pm 1.96\sqrt{0.0000015258+0.00000084571}=0.00771\pm 1.96\sqrt{0.0000023715}$$
+    $$=0.00771\pm 1.96*0.00154=0.00771\pm 0.00302$$ Therefore, the CI
+    for the difference in these proportions is: $$(0.00469,0.01072)$$
 a) At the 1% level, we would have a implied CI for the difference in
-    proportions of: $$=0.00851\pm 2.58*0.00156205=0.00851\pm 0.00403$$
+    proportions of: $$=0.00771\pm 2.58*0.00154=0.00771\pm 0.00397$$
     Therefore, the CI for the difference in these proportions is:
-    $$(0.00448,0.01254)$$ We can see that this CI does not contain 0, so
+    $$(0.00374,0.01168)$$ We can see that this CI does not contain 0, so
     therefore we can reject the null that $p_1=p_2$ at the 1%
     significance level.
 
@@ -142,11 +142,11 @@ of $625$ people, 50.7% would be disappointed by the move. Find a 95%
 confidence interval of the population proportion
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 The 95% CI is found by
 $$
-\hat{p} \pm z_{\alpha /2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}=.507\pm 1.96\sqrt{\frac{.507\times .493}{625}}=.507\pm 2\times .020=\left(.467,.547\right)
+\hat{p} \pm z_{\alpha /2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}=.507\pm 1.96\sqrt{\frac{.507\times .493}{625}}=.507\pm 1.96\times .020=\left(.468,.546\right)
 $$
 
 :::
@@ -159,16 +159,16 @@ million Viagra users, $77$ died from coronary problems such as heart
 attacks. Pfizer claimed that this rate is no more than that in the
 general population.
 
-You find from a clinical study of $1{,}500{,}000$ men who were not on Viagra
-that $11$ of them died of coronary problems in the same length of time
-during the $77$ Viagra users who dies in $1998$.
+Suppose that among $1{,}500{,}000$ men who were not on Viagra
+$11$ died of coronary problems in the same length of time
+as the $77$ Viagra users who died in $1998$.
 
 Do you agree with Pfizer's claim that the proportion of Viagra users
 dying from coronary problems is no more than that of other comparable
 men?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 A 95% confidence interval for a difference in proportions $p_1 - p_2$ is
 given by $$( \hat{p}_1 - \hat{p}_2 ) \pm 1.96 
@@ -185,9 +185,9 @@ With a $95$% confidence interval for $( p_1 - p_2 )$, you get an
 interval $( 0.0000003 , 0.0000107 )$ which doesn't contain zero. Hence
 evidence that the proportion is higher.
 
-Measured very accurately due to the large sample sizes.
+The standard errors are small due to the large sample sizes, but the comparison is observational.
 
-With testing might use a one-sided test and an $\alpha$ of $0.01$.
+In a test we might use a one-sided test and an $\alpha$ of $0.01$. The $p$-value is 0.052, larger than 0.01, so we cannot reject Pfizer's claim at that level.
 
 
 :::
@@ -202,7 +202,7 @@ interval for the true proportion of voters that will vote for him
 includes $45\%$.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 False, $\hat p = \frac{400}{1000} = 40\%$ and
 $$
@@ -226,7 +226,7 @@ a) Find a 95% confidence interval for the difference in the proportion
     of people that will vote for George Bush versus Ralph Nader.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) $H_{0}:p\leq 0.03$ $H_{1}:p>0.03$
     $z=\frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}$ where
@@ -250,7 +250,7 @@ Some defendants in southern states have challenged verdicts made during the '50s
 Using $n = 80$, $X = 12$, find a 99% confidence interval for the proportion $p$. Is that significantly different from $p = 0.5$.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 The sample proportion is $\hat{p} = 12/80 = 0.15$.
 The standard error is $\sqrt{\frac{0.15(1-0.15)}{80}} = 0.040$.
@@ -276,7 +276,7 @@ a) Is there a difference between using a $5$% and $1$% significance
     level.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 We are given the following:
 $\bar{x}=74,s_{x}=18,n_{x}=150,\bar{y}=78.4,s_{y}=12,n_{y}=200$
@@ -320,7 +320,7 @@ Find a $99$% confidence interval for the increase in the proportion of people wh
 Hint: a 99% confidence interval for a difference in proportions $p_1 - p_2$ is given by $( \hat{p}_1 - \hat{p}_2 ) \pm 2.58\sqrt{ \frac{ \hat{p}_1 ( 1 - \hat{p}_1 ) }{ n_1 }  + \frac{ \hat{p}_2 ( 1 - \hat{p}_2 ) }{ n_2 } }$
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**: 
+*Solution*: 
 
 We are interested in the distribution of $p_1-p_2$. We have that: 
 $$
@@ -364,7 +364,7 @@ $\mu_1 - \mu_2$ is given by $( \bar{x}_1 - \bar{x}_2 ) \pm 1.96
 \sqrt{ \frac{s_1^2 }{ n_1 }  + \frac{ s_2^2 }{ n_2 } }$
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Follow the hint, the answer is (-1.14, -1.06).
 ```{r}
@@ -372,7 +372,7 @@ a) Follow the hint, the answer is (-1.14, -1.06).
 (4.5-5.6)+1.96*sqrt(2.1^2/80000+2.5^2/20000) #-1.06
 ```
 Hence, the 95% confidence interval is (-1.14, -1.06).
-a)  As we have a large sample size, we can assume a normal distribution with given sample mean and standard deviation,
+a)  If we assume individual delivery times are normal with the given mean and standard deviation (a modelling assumption: the large sample only makes the mean normal),
     $P(T \leq 5) = 0.594$
 ```{r}
 pnorm(5,mean=4.5,sd=2.1) #0.594
@@ -384,7 +384,7 @@ Hence, 59.4% of deliveries will be under 5 hours.
 
 ::: {#exr-}
 ## Vitamin C
-In the very famous study of the benefits of Vitamin C, $279$ people were randomly assigned to a dose of vitamin C or a placebo (control of nothing). The objective was to study where vitamin C reduces the incidence of a common cold. The following table provides the responses from the experiment
+In the very famous study of the benefits of Vitamin C, $279$ people were randomly assigned to a dose of vitamin C or a placebo (control of nothing). The objective was to study whether vitamin C reduces the incidence of a common cold. The following table provides the responses from the experiment
 
      Group     Colds   Total
   ----------- ------- -------
@@ -400,7 +400,7 @@ $$
 $$
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 To test $$H_0: p_1 - p_2 = 0,$$ we could perform a two-sample $z$-test.
 $$
@@ -437,7 +437,7 @@ Test the hypothesis at the $5$% level that the claim of $96$% is correct.
 
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 We want to test the proportion of people under the age of 50 on
 Facebook. $$H_0: p = 96\%$$
@@ -478,7 +478,7 @@ a) Use a paired $t$-test to assess the statistical significance between
 a) How likely is Buffett to win his bet in two years?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 To conduct a paired $t$-test, we need define a new variable
 $$
@@ -533,17 +533,17 @@ for (i in 1:N)
   # simulate returns in 2016 and 2017
   return1 = c(0.657, rnorm(n=2, mean = m1, sd = s1)) 
   # compute the cumulative return
-  cum1 = c(cum1, cumprod(1+return1)) 
+  cum1 = c(cum1, prod(1+return1)) 
   
   return2 = c(0.219, rnorm(n=2, mean = m2, sd = s2))
-  cum2 = c(cum2, cumprod(1+return2))
+  cum2 = c(cum2, prod(1+return2))
 }
 
 # compute the prob. of Buffett winning
-mean(cum1>cum2) #0.9296667
+mean(cum1>cum2) #0.874
 ```
 
-The estimated probability is 92.97%, indicating that Buffett is very likely to win his bet. Since the paired t - test suggests no significant difference in average returns, you can also estimate the mean by pooling the data and redo the simulation, which gives a smaller estimate (89.27%).
+The estimated probability is 87.4%, indicating that Buffett is very likely to win his bet. Since the paired t - test suggests no significant difference in average returns, you can also estimate the mean by pooling the data and redo the simulation, which gives a smaller estimate (about 80%).
 
 :::
 :::
@@ -563,7 +563,7 @@ compares the first three years of Shaq's career to his last three years.
 Did Shaq get worse at free throws over his career?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 $$
 \hat{p}_1 = \frac{1352}{2425} = 0.5575, \quad \hat{p}_2 = \frac{1121}{2132} = 0.5258, 
@@ -590,14 +590,14 @@ a) Test the hypothesis that the average expenditure is \$2,500 or less
     at the 1% level.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) 90% Confidence Interval:
 $\bar{x} \pm t_{n-1, 0.05} \frac{s}{\sqrt{n}}$. With $n=1000$, we can use $z=1.645$.
 $3790 \pm 1.645 \times \frac{670}{\sqrt{1000}} = 3790 \pm 1.645 \times 21.19 = 3790 \pm 34.85 = (3755.15, 3824.85)$.
 
 a) Test $H_0: \mu \le 2500$ vs $H_a: \mu > 2500$.
-$t = \frac{3790 - 2500}{21.19} = 60.8$.
+$t = \frac{3790 - 2500}{21.19} = 60.9$.
 This far exceeds any conventional critical value, so the $p$-value is essentially 0.
 We reject the null hypothesis and conclude the average expenditure is greater than \$2500.
 :::
@@ -608,7 +608,7 @@ We reject the null hypothesis and conclude the average expenditure is greater th
 A grocery delivery service is studying the impact of weather on customer ordering behavior. To do so, they identified households which made orders both in October and in February on the same day of the week and approximately the same time of day. They found 112 such matched orders. The mean purchase amount in October was \$121.45, with a standard deviation of \$32.78, while the mean purchase amount in February was \$135.99 with a standard deviation of \$24.81. The standard deviation of the difference between the two orders was \$38.28. To quantify the evidence in the data regarding a difference in the average purchase amount between the two months, compute the $p$-value of the data.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 This is a paired comparison (same households, same day/time).
 We are given the standard deviation of the *difference* $s_d = 38.28$.
@@ -632,7 +632,7 @@ Test at the $1$% level whether EA should provide a promotional offer or not.
 
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 To see whether the promotion program works, we need to find out whether
 the proportion of people who want to buy the game is larger. Denote
@@ -664,8 +664,8 @@ example (@exm-simcity).
 ## True/False
 
 a) At the Apple conference, it was claimed that "$97$% of people love the iWatch." From a market survey, you found empirically that $1175$ out of a sample of $1400$ people love the new iWatch. Statistically speaking, you can reject Apple's claim at the $1$% significance level. Hint: You may use $pnorm(2.58) = 0.995$
-a) Given a random sample of $2000$ voters, $800$ say they will vote for Hillary Clinton in the 2016 US Presidential Election. At the $95$%level, I can reject the null hypothesis that Hillary has an evens chance of winning the election.
-a) The average movie is Netflix's database has an average customer rating of $3.1$ with a standard deviation of $1$. The last episode of Breaking Bad had a rating of $4.7$ with a standard deviation of $0.5$. The $p$-value for testing whether Breaking Bad's rating is statistical different from the average is a lot less than $1$%.
+a) Given a random sample of $2000$ voters, $800$ say they will vote for Hillary Clinton in the 2016 US Presidential Election. At the $95$%level, I can reject the null hypothesis that Hillary will get half of the vote.
+a) The average movie in Netflix's database has an average customer rating of $3.1$ with a standard deviation of $1$. The last episode of Breaking Bad had a rating of $4.7$ with a standard deviation of $0.5$. The $p$-value for testing whether Breaking Bad's rating is statistical different from the average is a lot less than $1$%.
 a) A chip manufacturer needs to add the right amount of chemicals to make the chips resistant to heat. On average, the population of chips needs to be able to withstand heat of 300 degrees. Suppose you have a random sample of $30$ chips with a mean of $305$ and a standard deviation of $8$. Then you can reject the null hypothesis $H_0: \mu= 300$ versus $H_a: \mu> 300$ at the $5$% level.
 a) Zagats rates restaurants on food quality. In a random sample of $100$ restaurants you observe a mean of $20$ with a standard deviation of $2.5$. Your favorite restaurant has a score of $25$. This is statistically different from the population mean at the $5$% level.
 a) The $t$-score is used to test whether a null hypothesis can be rejected.
@@ -676,7 +676,7 @@ a) As the absolute value of the $t$-ratio increases, the $p$-value of a hypothes
 
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) True. $$\hat{p} = \frac{1175}{1400} = 83.9\%$$$$\hat{\sigma} = \sqrt{\frac{\hat{p}(1-\hat{p})}{1400}} = 0.98\%$$ For $H_0: p = 97\%$,
 $$t\text{-stat} = \frac{\hat{p} - 97\%}{0.98\%} = -13.37 < -2.58 = \texttt{qnorm}(0.005)$$
@@ -684,10 +684,10 @@ Yes, we can reject the null hypothesis at 1% significance level.
 a) True. The $t$-statistic is $T = (\hat{p}-0.5)/\sqrt{\frac{\hat{p} \times (1-\hat{p})}{n}} = -9.13$, which is below the critical value $\texttt{qnorm}(0.025) = -1.96$.
 a) False. The formula for a T-ratio is $$\begin{aligned}T = \frac{\bar{x}_1-\bar{x}_2 - (\mu_1 -\mu_2)}{\sqrt{\frac{s_{x_1}^2}{n_1}+\frac{s_{x_2}^2}{n_2}}}\end{aligned}$$ However, since we do not know $n_1$ and $n_2$ we cannot get the T-ratio and thus $p$-value.
 a) True. Since the sample size is $n\ge30$ the t test is effectively the same as the z test. Therefore, we find the following z value:$$z=\frac{\bar{x}-\mu}{s/\sqrt{n}}=\frac{305-300}{8/\sqrt{30}}=3.4233$$Here we use a one-sided test: $$z_\alpha=1.65$$ Since $z>z_\alpha$, we can reject $H_0$ in favor of $H_a$ at the 5% level
-a) True. We can calculate the t statistic as $(25-20)/(2.5/10)>1.96$. Hence we reject the null.
+a) True. A single score has standard deviation $2.5$, so $z = (25-20)/2.5 = 2 > 1.96$. Hence we reject the null.
 a) True. The $t$ score can be used to test whether a null hypothesis can be rejected or not. Alternately, a z score can be used
 a) True. This is a one-side test $H_0 : \mu_x \leq 100$ versus $H_1 : \mu_X > 100$. The $Z$-score is $Z = \frac{105 -100}{ 20 / \sqrt{100} } = 2.5$. The critical value for a 1-sided test at the $5$% level is $1.64$. Therefore you can reject $H_0$ at the $5$% level.
-a) True. $z=\frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}=\frac{0.1-0.05}{\sqrt{\frac{0.05\cdot 0.95}{100}}}=2.29$ and $z_{\alpha /2}=1.96$. Reject the null hypothesis since $\left\vert z\right\vert >z_{\alpha/2}$
+a) True. $z=\frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}=\frac{0.1-0.05}{\sqrt{\frac{0.05\cdot 0.95}{100}}}=2.29$ and $z_{\alpha}=1.645$ for the one-sided claim. Reject the null hypothesis since $z >z_{\alpha}$
 a) True. As $\lvert t\rvert$ increases, the $p$-value decreases: if $t>0$, moving further into the right tail decreases the $p$-value, and if $t<0$, moving further into the left tail (more negative) also decreases the $p$-value.
 
 :::
@@ -709,7 +709,7 @@ a) The $p$-value is the probability that the Null hypothesis is true.
 
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**: 
+*Solution*: 
 
 a) False The $95\%$ confidence interval should be: $$\begin{aligned} \Bigg[.02 - 1.96\sqrt{\frac{.02(1-.02)}{500}},.02 + 1.96\sqrt{\frac{.02(1-.02)}{500}}\Bigg]\end{aligned}$$ So, the lower bound on this interval will definitely be less than 2 percent. 
 a) True Because you need to use the same data to estimate the standard deviation, and thus contains more noise or error. In other words, we are comparing between $z$ distribution and $t$ distribution 
@@ -738,12 +738,12 @@ a) Selection bias is not a problem when you are estimating a population mean.
 a) The kurtosis of a distribution is not sensitive to outliers. 
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**: 
+*Solution*: 
 
 a) True. The standard deviation of the sample mean is $\frac{\sigma}{\sqrt{n}}$. The CLT has (approximately) $\bar{X} \sim N(\mu, \frac{\sigma^2}{n})$, where $\mu$ and $\sigma^2$ are the population true value 
 a) True. If $X_i$ is a random sample (or $iid$) with mean $\mu$, then $\sqrt{n}\big(\bar{X} - \mu \big) \longrightarrow^d N(0,\sigma^2)$ 
 a) False. For some set of independent random variables, the mean of a sufficiently large number of them (each with finite mean and variance) will have a distribution with variance depending on the number of samples. 
-a) True. The CLT states that the $\bar{X} \sim N \left ( \mu, \frac{\sigma^2}{n} \right )$, or the best guess for the population mean is $\bar{x}$ 
+a) True. By the CLT, $\bar{X}$ is approximately $N \left ( \mu, \frac{\sigma^2}{n} \right )$, centered at $\mu$, so the best guess for the population mean is $\bar{x}$ 
 a) False. The trimmed mean is the average of the observations deleting the outer 5% in the tails. Hence, it is less sensitive to outliers than the sample mean.
 a) False. Many datasets have a negative mean and the standard deviation must be positive. 
 a) False. When sampling to estimate a population mean, you need to be certain to select a random sample, or selection bias may affect your results.
@@ -752,8 +752,6 @@ a) False. Kurtosis depends on each observation in the distribution and is extrem
 :::
 :::
 
-
-## Field vs Observational
 
 ::: {#exr-split-plot-cdn}
 ## Split-Plot Design: CDN and Recommendation Algorithm
@@ -766,7 +764,7 @@ a) Which effect, the CDN configuration (A) or the recommendation algorithm (B), 
 a) Sessions within the same cluster share an intraclass correlation of $\rho = 0.15$ (common network conditions), and each cluster contributes $m = 200$ sessions. A naive standard error for the CDN effect that ignores clustering treats all $8 \times 200 = 1600$ sessions as independent draws. The correctly adjusted variance inflates the naive variance by the design effect $\mathrm{DEFF} = 1 + (m-1)\rho$. Compute the DEFF and the factor by which the naive analysis underestimates the standard error of the CDN effect.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) The whole plots are the 8 regional server clusters, the unit to which a CDN configuration is applied. The subplots are the individual user sessions within each cluster, the unit to which a recommendation algorithm is applied. Factor A (CDN) is the whole-plot factor, held constant across every session in a cluster; Factor B (algorithm) is the subplot factor, varying session by session within each cluster.
 
@@ -791,11 +789,11 @@ Ignoring the whole-plot and subplot clustering understates the CDN effect's stan
 What is the difference between a randomized trial and an observational study?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
-In a **randomized trial** (or experiment), the researcher randomly assigns units (e.g., people) to different treatment groups (e.g., drug vs. placebo). This randomization helps ensure that the groups are comparable at the start, balancing both observed and unobserved confounders. As a result, differences in outcomes can be attributed to the treatment itself (causality).
+In a *randomized trial* (or experiment), the researcher randomly assigns units (e.g., people) to different treatment groups (e.g., drug vs. placebo). This randomization helps ensure that the groups are comparable at the start, balancing both observed and unobserved confounders. As a result, differences in outcomes can be attributed to the treatment itself (causality).
 
-In an **observational study**, the researcher observes units and measures variables of interest without assigning treatments. The subjects "select" their own treatments (or are selected by nature/circumstance). Because of this, the groups may differ systematically in other ways (confounding variables), making it difficult to establish causality. One can only observe associations.
+In an *observational study*, the researcher observes units and measures variables of interest without assigning treatments. The subjects "select" their own treatments (or are selected by nature/circumstance). Because of this, the groups may differ systematically in other ways (confounding variables), making it difficult to establish causality. One can only observe associations.
 :::
 :::
 
@@ -808,7 +806,7 @@ a) What is the estimated mean weight of the population?
 a) What is the 99% confidence interval for the mean?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) The estimated mean weight is $\bar{X} = 402.7$ grams.
 
@@ -831,7 +829,7 @@ a) What is the point estimate? Explain what it indicates.
 a) Using a 95% confidence interval, determine the confidence interval for $\mu$. Explain what it indicates.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) The point estimate is $\bar{X} = \$20$. It is the sample mean, our best single estimate of the population mean weekly spending on cigarettes.
 
@@ -843,16 +841,12 @@ We are 95% confident that the true mean weekly spending on cigarettes is between
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
 
+### Computing {.unnumbered}
+
 ::: {#exr-ab-banner}
-## A/B Testing: Banner Ad Click-Through
+## A/B Testing: Browser Click-Through
 
 Use dataset from `ab_browser_test.csv`. Here is the definition of the columns:
 
@@ -860,7 +854,7 @@ Use dataset from `ab_browser_test.csv`. Here is the definition of the columns:
 -   `browser`: browser which was used by userID
 -   `slot`: status of the user (exp = saw modified page, control = saw
     unmodified page)
--   `n_clicks`: number of total clicks user did during as a result of
+-   `n_clicks`: number of total clicks user did as a result of
     `n_queries`
 -   `n_queries`: number of queries made by `userID`, who used browser
     `browser`
@@ -879,18 +873,18 @@ a) Using bootstrap, construct 95% confidence interval for mean and
 a) Using bootstrap, check if mean of each group has a normal
     distribution. Generate $B = 1000$ bootstrap samples, calculate mean
     of each and plot `qqplot`.
-a) Use z-ratio for the means, to perform sis testing, with $H_0$: there
+a) Use z-ratio for the means, to perform hypothesis testing, with $H_0$: there
     is no difference in average number of clicks between 2 groups
 a) Mann-Whitney (<http://www.statmethods.net/stats/nonparametric.html>)
-    is another test for comparing means, that does not require normality
-    assumption. Use this test to check hypothesis that means are equal.
+    is another test for comparing two groups, that does not require normality
+    assumption. Use this test to check whether clicks tend to be larger in one group.
 a) For each browser type and each of the 2 groups (control and exp)
     count the percent of queries that did not result in any clicks. You
     can do it be dividing sum of `n_nonclk_queries` by sum of
-    `n_queries`. Comment your on your results.
+    `n_queries`. Comment on your results.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 #| eval: false
@@ -954,7 +948,7 @@ a) Set a seed and cross-check the $n$ found for 80% power with a short Monte Car
 a) Comment on how power depends on effect size and $n$: holding $n$ fixed, what happens to power as the effect size $p_2-p_1$ shrinks? Holding the effect size fixed, how much more data are needed to reach 80% power if $\alpha$ is tightened from 0.05 to 0.01?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 The power of a test is $P(\text{reject } H_0 \mid H_1 \text{ true})$, the complement of a Type II error. For the two-proportion $Z$-test used throughout this chapter, `power.prop.test` computes this power directly, or, given a target power, the required $n$.
 
@@ -1011,7 +1005,7 @@ a) Now let $m = 50$, with $T_0 = 40$ true nulls and $T_1 = 10$ true alternatives
 a) Compare the three procedures. Which controls FWER? Which controls FDR while retaining more power? What does this imply about when to prefer Bonferroni versus Benjamini-Hochberg in practice?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Under the null, a $p$-value is distributed $\text{Unif}(0,1)$, so $m$ independent $\text{Unif}(0,1)$ draws simulate $m$ independent true-null tests at level $\alpha$.
 
@@ -1084,7 +1078,7 @@ a) The CDN sum of squares is identical in both analyses. Explain, in terms of th
 a) State the practical lesson for A/B tests in which a factor is randomized at a coarse level (region, store, server cluster) rather than per user.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) In the split-plot ANOVA, the whole-plot factor CDN is tested in the `cluster` stratum against between-cluster variation (6 residual degrees of freedom); the subplot factor and the interaction are tested in the within-cluster stratum.
 ```{r}

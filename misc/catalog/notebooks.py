@@ -1268,7 +1268,7 @@ def check(out_dir):
                     probs.append(f'{name}: cell {i} has a dollar sign that is neither escaped nor part of math')
                 for what in table_problems(t):
                     probs.append(f'{name}: cell {i} has {what}')
-                if re.search(r'\*\*Solution|Solution\*\*|^Solution:', t, re.M):
+                if re.search(r'\*Solution|Solution\*|^Solution:', t, re.M):
                     probs.append(f'{name}: cell {i} has a solution')
                 for im in re.findall(r'!\[[^\]]*\]\(([^)\s]+)\)', t):
                     if im.startswith(RAW):

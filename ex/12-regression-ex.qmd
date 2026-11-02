@@ -3,7 +3,7 @@
 ::: {#exr-}
 ## OLS Derivation
 
-For the linear regression model $y = X\beta + \epsilon$, where $X$ is an $n \times p$ design matrix:
+For the linear regression model $y = X\beta + \epsilon$, where $X$ is an $n \times p$ design matrix of full column rank, $\E{\epsilon} = 0$ and $\Var{\epsilon} = \sigma^2 I$:
 
 a) Derive the OLS estimator $\hat{\beta} = (X^TX)^{-1}X^Ty$ by minimizing the sum of squared errors.
 b) Show that $\E{\hat{\beta}} = \beta$ (unbiasedness).
@@ -71,7 +71,7 @@ Call: lm(price ~ sqft)
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  50.2345    12.3456   4.071 0.000125 ***
+(Intercept)  50.2345    12.3456   4.069 0.000095 ***
 sqft          0.1234     0.0089  13.865  < 2e-16 ***
 
 Residual standard error: 45.67 on 98 degrees of freedom
@@ -120,6 +120,7 @@ d) A parabolic pattern in residuals indicates that a linear model is inadequate.
 The relationship between a company's advertising spending ($x$, in \$millions) and revenue ($y$, in \$millions) is believed to follow a power law: $y = ax^b$.
 
 You have the following data:
+
 | Advertising | 1 | 2 | 4 | 8 | 16 |
 |------------|---|---|---|---|-----|
 | Revenue    | 5 | 8 | 14| 25| 45  |
@@ -161,7 +162,7 @@ cat("Estimated b =", round(b, 4), "\n")
 
 c) Interpretation of $b$: This is an elasticity. A 1% increase in advertising spending is associated with a $b$% increase in revenue. 
 
-If $b \approx 0.75$, then advertising has diminishing returns (doubling spending increases revenue by $2^{0.75} \approx 1.68$ times, not double).
+Since $b \approx 0.80$, advertising has diminishing returns (doubling spending increases revenue by $2^{0.80} \approx 1.74$ times, not double).
 
 d) Predict revenue at \$10 million:
 ```{r}
@@ -202,12 +203,12 @@ d) For the Fama-French 3-factor model, you estimate coefficients SMB = 0.4 and H
 **Solution**:
 
 a) Beta = 1.35 means:
-- The stock is 35% more volatile than the market
+- The stock tends to move 35% more than the market, in either direction
 - When the market goes up 1%, this stock is expected to go up 1.35%
 - Systematic risk is higher than the market average
 - Tech stocks typically have high betas
 
-b) Test H0: α = 0
+b) Test $H_0: \alpha = 0$
 ```{r}
 alpha <- 0.005
 se_alpha <- 0.003
@@ -363,7 +364,7 @@ so
 $$
 \frac{n_-}{n} = \tau,
 $$
-that is, the fraction of observations below the fitted quantile equals $\tau$. At $\tau=1/2$ this recovers the familiar median property that half the data lie on each side, and it reconciles with the chapter's own subgradient $\sum_i \operatorname{sign}(y_i-\beta)$ for the median: since $\operatorname{sign}(u) = 2\rho_{1/2}'(u)$, the two optimality conditions differ only by the harmless factor of 2 already noted in part (b).
+that is, the fraction of observations below the fitted quantile equals $\tau$. At $\tau=1/2$ this recovers the familiar median property that half the data lie on each side, and it reconciles with the chapter's own subgradient $-\sum_i \operatorname{sign}(y_i-\beta)$ for the median: since $\operatorname{sign}(u) = 2\rho_{1/2}'(u)$, the two optimality conditions differ only by the harmless factor of 2 already noted in part (b).
 
 d) OLS squares each residual, so a single observation with a large residual contributes a term that grows quadratically and can dominate the objective, pulling the fitted line toward that one point. The check-loss objective instead grows only linearly in the size of each residual, and by part (c) the optimum depends on the residuals only through their signs, not their magnitudes. An outlier can flip whether one residual counts toward $n_+$ or $n_-$, but once its sign is fixed, moving it further away leaves the optimality condition ($*$) unchanged. This is exactly the property Boscovich exploited: two years after the 1755 meridian-arc survey with Christopher Maire, he abandoned simple averaging of the ten pairwise slopes (one of which, between the Cape of Good Hope and Rome, was badly thrown off by measurement error and came out negative) in favor of a least-absolute-deviations method, roughly half a century before Legendre's 1805 least-squares paper. Least absolute deviations tolerates such gross errors precisely because a single wild observation shifts the median fit by only one vote among $n$, unlike the least squares fit, which it can shift arbitrarily far.
 
@@ -479,7 +480,7 @@ d) As $\tau^2 \to \infty$ (a flat, uninformative prior), $\lambda = \sigma^2/\ta
 
 a) The OLS estimator minimizes the sum of absolute residuals.
 
-b) Adding more predictors to a regression always increases $R^2$.
+b) Adding more predictors to a regression never decreases $R^2$, where $R^2 = 1 - \sum_i (y_i-\hat y_i)^2/\sum_i (y_i-\bar y)^2$.
 
 c) If $R^2 = 0.9$, then the correlation between $y$ and $\hat{y}$ is 0.95.
 
@@ -504,13 +505,9 @@ e) **TRUE**. With $n$ observations and $p+1$ parameters (including intercept), t
 :::
 
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## House Data Analysis
@@ -649,12 +646,11 @@ cat("Tropicana\t\t",
 cat("\n\nSales by Featured and Brand:\n")
 salestable <- tapply(oj$sales, oj[, c("feat", "brand")], sum)
 print(round(prop.table(salestable, 2) * 100, 1))
-cat("\nConclusion: Premium brands (Minute Maid, Tropicana) are featured more often.\n")
-cat("Ads increase sales, making these brands appear less price-sensitive.\n")
-cat("Controlling for 'feat' reveals true price sensitivity.\n")
+cat("\nConclusion: Tropicana is featured least often (share of weeks 0.17 against 0.26 and 0.29).\n")
+cat("Without 'feat' each fit pools two regimes: every brand is less elastic in ordinary weeks than in featured weeks.\n")
 ```
 
-**Key Insight**: Advertising is confounded with brand. Premium brands advertise more, which makes them appear less price-sensitive. Once we control for advertising, all brands show similar (more elastic) price sensitivity.
+**Key Insight**: Without `feat`, the elasticity of a brand pools two regimes. Controlling for `feat`, each brand is less elastic in ordinary weeks (-2.77, -1.99 and -2.04 for Dominick's, Minute Maid and Tropicana) and more elastic in featured weeks (-3.24, -3.57 and -3.50).
 :::
 :::
 

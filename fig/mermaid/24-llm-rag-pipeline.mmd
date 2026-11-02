@@ -1,11 +1,10 @@
-%%{init: {'flowchart': {'rankSpacing': 30}}}%%
-flowchart TB
-  D[Documents] --> C[Chunk & Embed]
-  C --> V[(Vector DB)]
+%%{init: {'flowchart': {'rankSpacing': 20, 'nodeSpacing': 12}}}%%
+flowchart LR
+  D[Documents] --> C["Chunk,<br>embed"]
+  C --> V[(Vector<br>DB)]
   Q[Query] --> E[Embed]
   E --> V
-  V -->|top-k| R[Retrieved chunks]
-  R --> P[Prompt + Context]
+  V -->|top-k| P["Prompt"]
   Q --> P
   P --> L[LLM]
   L --> A[Answer]

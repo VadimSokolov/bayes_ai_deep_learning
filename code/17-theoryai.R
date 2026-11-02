@@ -20,13 +20,13 @@ shrink <- 1 - (k - 3) * sigma2_hat / sum((baseball$BattingAverage - mu_hat)^2)
 baseball <- baseball %>% mutate(JS = mu_hat + shrink * (BattingAverage - mu_hat))
 kable(baseball)
 
+# [fig-js-shrinkage]
 ggplot(baseball, aes(x = BattingAverage, y = JS)) +
   geom_point(alpha = 0.6) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
   labs(
     x = "Observed Batting Average",
-    y = "James-Stein Estimate",
-    title = "Empirical Bayes Shrinkage of Batting Averages"
+    y = "James-Stein Estimate"
   )
 
 mse_observed <- mean((baseball$BattingAverage - baseball$SeasonAverage)^2)
@@ -35,6 +35,7 @@ mse_js <- mean((baseball$JS - baseball$SeasonAverage)^2)
 cat(sprintf("MSE (Observed): %.6f\n", mse_observed))
 cat(sprintf("MSE (James-Stein): %.6f\n", mse_js))
 
+# [fig-js-slope]
 a <- matrix(rep(1:3, nrow(baseball)), 3, nrow(baseball))
 b <- matrix(c(baseball$BattingAverage, baseball$SeasonAverage, baseball$JS), 3, nrow(baseball), byrow = TRUE)
 
@@ -47,6 +48,7 @@ text(1, 0.14, "First 45\nat bats", cex = 0.5)
 text(2, 0.14, "Season\naverage", cex = 0.5)
 text(3, 0.14, "J-S\nestimator", cex = 0.5)
 
+# [fig-clemente]
 # Data source: https://www.baseball-almanac.com/players/hittinglogs.php?p=clemero01&y=1970
 cl <- read.csv("data/clemente.csv")
 x <- cumsum(cl$AB)
@@ -147,7 +149,7 @@ ggplot(plot_data, aes(x = Variable, y = value, fill = variable)) +
   labs(y = "Coefficient Value", fill = "Method") +
   scale_fill_grey(start = 0.15, end = 0.85, labels = c("True", "LASSO (min)", "LASSO (1se)"))
 
-# Calculate prediction errors
+# Calculate in-sample errors
 pred_min <- predict(lasso_fit, newx = X, s = lambda_min)
 pred_1se <- predict(lasso_fit, newx = X, s = lambda_1se)
 
@@ -270,7 +272,7 @@ library(knitr)
 mse_hs <- mean((beta_true - beta_hs)^2)
 mse_lasso <- mean((beta_true - beta_lasso)^2)
 
-# Calculate prediction mean squared errors
+# Calculate in-sample mean squared errors
 pred_hs <- X %*% beta_hs
 pred_lasso <- X %*% beta_lasso
 pmse_hs <- mean((y - pred_hs)^2)
@@ -280,7 +282,7 @@ pmse_lasso <- mean((y - pred_lasso)^2)
 results_table <- data.frame(
   Method = c("Horseshoe", "Lasso"),
   `Coefficient MSE` = c(round(mse_hs, 4), round(mse_lasso, 4)),
-  `Prediction MSE` = c(round(pmse_hs, 4), round(pmse_lasso, 4))
+  `Training MSE` = c(round(pmse_hs, 4), round(pmse_lasso, 4))
 )
 
 # [tbl-horseshoe-mse]
@@ -413,19 +415,12 @@ bg_posterior_mean <- function(y, sigma, theta, sigma_beta) {
   return(weight * y)
 }
 
-# Bernoulli-Laplace posterior mean (simplified approximation)
+# Bernoulli-Laplace posterior mean, by numerical integration
 bl_posterior_mean <- function(y, sigma, theta, b) {
-  # Simplified version - in practice this involves complex integrals
-  weight_gaussian <- (1 - theta) * dnorm(y, 0, sigma)
-  weight_laplace <- theta * (1 / (2 * b)) * exp(-abs(y) / b) * exp(sigma^2 / (2 * b^2)) *
-    (pnorm(-y / sigma - sigma / b) + pnorm(y / sigma - sigma / b))
-
-  total_weight <- weight_gaussian + weight_laplace
-  weight <- weight_laplace / total_weight
-
-  # Simplified shrinkage factor
-  shrinkage_factor <- y - sign(y) * pmax(0, abs(y) - sqrt(2) * sigma / b)
-  return(weight * shrinkage_factor + (1 - weight) * 0)
+  f <- function(u) dnorm(y, u, sigma) * exp(-abs(u) / b) / (2 * b)
+  m <- integrate(f, -Inf, Inf)$value
+  n <- integrate(function(u) u * f(u), -Inf, Inf)$value
+  theta * n / ((1 - theta) * dnorm(y, 0, sigma) + theta * m)
 }
 
 # Create data for plotting
@@ -457,7 +452,7 @@ p1 <- ggplot(plot_data_bg, aes(x = y, y = posterior_mean, color = sigma_beta_lab
   theme_minimal() +
   theme(legend.position = "bottom") +
   xlim(-5, 5) +
-  coord_cartesian(ylim = c(-3, 3))
+  coord_cartesian(ylim = c(-5, 5))
 
 # Bernoulli-Laplace plot
 b_lab <- c("0.5", "1", "2")
@@ -473,7 +468,7 @@ p2 <- ggplot(plot_data_bl, aes(x = y, y = posterior_mean, color = b_label, linet
   theme_minimal() +
   theme(legend.position = "bottom") +
   xlim(-5, 5) +
-  coord_cartesian(ylim = c(-3, 3))
+  coord_cartesian(ylim = c(-5, 5))
 
 grid.arrange(p1, p2, ncol = 2)
 

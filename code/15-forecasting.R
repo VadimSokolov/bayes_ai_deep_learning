@@ -2,7 +2,7 @@
 # Every R chunk of the chapter in book order, including the ones the book does not print. Chunks the book does not run are commented out.
 # Run from the book folder: Rscript code/15-forecasting.R. Data are read from the data folder. Figures go to the graphics device (Rplots.pdf under Rscript).
 # Data: data/AAPL.csv, data/GSPC.csv, data/timeseries/model12-sp500.RData, data/timeseries/model123.RData, data/timeseries/rec_data_20160613.csv, data/timeseries/tsmodel-nber.RData
-# Packages: bsts, fma, fpp2, ggplot2, gridExtra, knitr, xts
+# Packages: bsts, fma, fpp2, ggplot2, gridExtra, xts
 
 source("code/common.R")
 
@@ -113,7 +113,6 @@ CompareBstsModels(
 # [sp500]
 GSPC <- read.csv("data/GSPC.csv")
 GSPC <- xts(GSPC, order.by = as.Date(rownames(GSPC), "%Y-%m-%d"))
-knitr::kable(head(GSPC))
 plot(GSPC$GSPC.Adjusted, main = "")
 
 # [spmodel]

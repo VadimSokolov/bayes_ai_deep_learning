@@ -11,7 +11,7 @@ c) Using BPE-style subword tokenization, how might "jumping" be tokenized if "ju
 d) Why do GPT models use byte-pair encoding rather than word-level tokenization?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Whitespace tokenization:
 ```{r}
@@ -29,17 +29,17 @@ b) Limitations of whitespace tokenization:
 - Compound words and contractions handled poorly
 
 c) BPE-style subword tokenization:
-- "jumping" → ["jump", "ing"] or ["jump", "##ing"]
+- "jumping" $\rightarrow$ ["jump", "ing"]
 - If "jump" is frequent and "ing" is a common suffix
 - Allows sharing parameters between "jumping", "running", "walking"
 - The model can understand new words by combining known subwords
 
 d) Why GPT uses BPE:
-- **Open vocabulary**: Can represent any text (even new words, misspellings)
-- **Efficient**: Common words = 1 token; rare words = multiple subword tokens
-- **Smaller vocabulary**: ~50K tokens covers most text vs millions of words
-- **Cross-lingual sharing**: Subwords can be shared across languages
-- **Morphological awareness**: Learns meaningful units like "un-", "-ing", "-tion"
+- *Open vocabulary*: Can represent any text (even new words, misspellings)
+- *Efficient*: Common words = 1 token; rare words = multiple subword tokens
+- *Smaller vocabulary*: ~50K tokens covers most text vs millions of words
+- *Cross-language sharing*: Subwords can be shared across languages
+- *Morphological awareness*: Learns meaningful units like "un-", "-ing", "-tion"
 
 :::
 :::
@@ -55,12 +55,12 @@ Given pre-trained word vectors:
 - woman = [0.4, 0.8, 0.25, 0.8]
 
 a) Calculate the cosine similarity between "king" and "queen".
-b) Verify the famous analogy: king - man + woman $\approx$ queen
-c) What does this suggest about the embedding space?
+b) Check the analogy king - man + woman $\approx$ queen for these vectors.
+c) What would it suggest about an embedding space if such analogies held for learned vectors?
 d) What are limitations of static word embeddings like Word2Vec?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 king <- c(0.5, 0.8, 0.3, 0.2)
@@ -96,17 +96,17 @@ cat("Euclidean distance to queen:", round(dist_to_queen, 4), "\n")
 ```
 
 c) What this suggests:
-- The embedding space captures semantic relationships as vector directions
-- "Gender" is encoded as a consistent direction: queen - king ≈ woman - man
+- For these stipulated vectors the analogy holds exactly; in a learned space it holds only approximately and must be checked
+- "Gender" is encoded as a consistent direction: queen - king $\approx$ woman - man
 - Semantic analogies become vector arithmetic
-- The space has interpretable structure despite being learned automatically
+- Such structure would be a property worth checking in learned vectors, not a guarantee
 
 d) Limitations of static embeddings:
-- **One representation per word**: "bank" (river) = "bank" (financial) 
-- **Context-independent**: Can't handle polysemy/homonymy
-- **No sentence understanding**: Just bag of vectors
-- **Training data bias**: Captures stereotypes from training text
-- **Solutions**: Contextual embeddings (BERT, GPT) give different representations based on context
+- *One representation per word*: "bank" (river) = "bank" (financial) 
+- *Context-independent*: Can't handle polysemy/homonymy
+- *No sentence understanding*: Just bag of vectors
+- *Training data bias*: Captures stereotypes from training text
+- *Solutions*: Contextual embeddings (BERT, GPT) give different representations based on context
 
 :::
 :::
@@ -128,7 +128,7 @@ c) Compute the weighted sum of values.
 d) What does this attention mechanism "attend to"?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 q <- c(1, 0)
@@ -184,12 +184,12 @@ c) What is the purpose of positional encoding?
 d) Why is layer normalization used after each sub-layer?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Three components of the (self-)attention mechanism:
-- **Query (Q)**: What we're looking for (linear projection of input)
-- **Key (K)**: What we're matching against (linear projection)
-- **Value (V)**: What we retrieve if there's a match (linear projection)
+- *Query (Q)*: What we're looking for (linear projection of input)
+- *Key (K)*: What we're matching against (linear projection)
+- *Value (V)*: What we retrieve if there's a match (linear projection)
 - All three are computed from the same input in self-attention:
   $Q = XW_Q$, $K = XW_K$, $V = XW_V$
 
@@ -201,7 +201,7 @@ d_head <- d_model / n_heads
 cat("Dimension per head:", d_head, "\n")
 ```
 Each head works with 64-dimensional queries, keys, and values.
-Total outputs are concatenated: 8 × 64 = 512.
+Total outputs are concatenated: $8 \times 64 = 512$.
 
 c) Purpose of positional encoding:
 - Transformers process all positions in parallel (unlike RNNs)
@@ -211,9 +211,8 @@ c) Purpose of positional encoding:
 - Learned positional embeddings also work
 
 d) Layer normalization purpose:
-- **Stabilizes training**: Keeps activations in reasonable range
-- **Speeds up convergence**: Each layer sees normalized inputs
-- **Enables residual connections**: Helps gradient flow
+- *Stabilizes training*: Keeps activations in reasonable range
+- *Speeds up convergence*: Each layer sees normalized inputs
 - Applied after attention and after feed-forward:
   $\text{output} = \text{LayerNorm}(x + \text{SubLayer}(x))$
 
@@ -234,28 +233,28 @@ d) The softmax in attention ensures attention weights sum to 1.
 e) Transformers can handle variable-length sequences without modification.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
-a) **TRUE**. Self-attention allows each position to directly attend to every other position in a single operation. This is how Transformers capture long-range dependencies efficiently.
+a) *TRUE*. Self-attention allows each position to directly attend to every other position in a single operation. This is how Transformers capture long-range dependencies efficiently.
 
-b) **FALSE**. RNNs are actually slower for long sequences because:
+b) *FALSE*. RNNs are slower for long sequences in wall-clock time on parallel hardware because:
 - They must process tokens sequentially (can't parallelize)
 - Transformers compute all positions in parallel
-- Training RNNs takes O(n) sequential steps; Transformers take O(1)
+- Training RNNs takes $O(n)$ sequential steps; a Transformer takes $O(1)$ sequential steps per layer, though its total work is $O(n^2d_k)$ and generation is still sequential
 - This is a key advantage of the Transformer architecture
 
-c) **TRUE**. BERT (Bidirectional Encoder Representations from Transformers) is bidirectional:
+c) *TRUE*. BERT (Bidirectional Encoder Representations from Transformers) is bidirectional:
 - It can look at both left and right context simultaneously
 - This is different from GPT, which only sees left context (autoregressive)
 - BERT is trained with masked language modeling, not next-token prediction
 
-d) **TRUE**. Softmax outputs sum to 1:
+d) *TRUE*. Softmax outputs sum to 1:
 $$\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$
 This creates a probability distribution over positions, ensuring valid attention weights.
 
-e) **TRUE** (mostly). Transformers handle variable length via:
+e) *TRUE* in the sense that the architecture has no fixed length. Transformers handle variable length via:
 - Padding shorter sequences (with attention masks)
-- The architecture itself has no fixed sequence length
+- The attention computation itself has no fixed sequence length (learned position embeddings do fix one)
 - But: context window is limited (e.g., 2K, 8K, 128K tokens)
 - Very long sequences require special handling (sliding windows, sparse attention)
 
@@ -274,7 +273,7 @@ b) For the question "Who founded Apple?" over the passage "Apple was founded by 
 c) Compare the naive combination with the length-constrained joint search. Which one recovers "Steve Jobs", the answer that @sec-nlp's own example names? Why did the constraint matter?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Tagging each token:
 
@@ -318,13 +317,9 @@ c) Only the constrained joint search recovers "Steve Jobs", the answer @sec-nlp'
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-skipgram-negsampling}
 ## Skip-Gram with Negative Sampling
@@ -344,12 +339,12 @@ sentences = [s.split() for s in corpus]
 
 a) Build the vocabulary and, treating each three-word sentence as its own context window (every word is a context word for every other word in the same sentence), construct the list of (center, context) index pairs used for training. Report the vocabulary size and the number of training pairs.
 
-b) Implement skip-gram with negative sampling (@sec-nlp) from scratch: a center-word embedding matrix and a context-word embedding matrix, each with one $d=8$ dimensional row per vocabulary word, a sigmoid function, and the noise distribution $P_n(w) \propto f(w)^{3/4}$ built from the unigram counts $f(w)$. Run manual stochastic gradient descent for 400 epochs with $K=8$ negative samples per positive pair and a learning rate that decays linearly over training, printing the average per-pair loss every 100 epochs. Confirm the loss decreases.
+b) Implement skip-gram with negative sampling (@sec-nlp) from scratch: a center-word embedding matrix and a context-word embedding matrix, each with one $d=8$ dimensional row per vocabulary word, a sigmoid function, and the noise distribution $P_n(w) \propto f(w)^{3/4}$ built from the unigram counts $f(w)$. Run manual stochastic gradient descent for 400 epochs with $K=8$ negative samples per positive pair and a learning rate that decays linearly over training, printing the average per-pair loss every 100 epochs. Use `np.random.seed(26)`. Confirm the loss decreases.
 
 c) Using the trained center embeddings, compute the cosine similarity for the two within-theme pairs (king, queen) and (dog, cat), and for the four cross-theme pairs (king, dog), (king, cat), (queen, dog), (queen, cat). Does the model separate the two themes, even though it was never told they exist?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a)
 ```{python}
@@ -409,7 +404,7 @@ for epoch in range(n_epochs):
     if epoch % 100 == 0 or epoch == n_epochs - 1:
         print(f"epoch {epoch:3d}  loss {losses[-1]:.3f}")
 ```
-The average per-pair loss falls from 6.159 at initialization to 2.503 after 100 epochs and 2.345 after 400, most of the improvement happening early as the random initial embeddings quickly start separating real pairs from sampled noise. Each update pulls $\mathbf{u}_o$ and $\mathbf{v}_c$ together for an observed pair (`pos` toward 1) and pushes $\mathbf{v}_c$ away from the $K$ sampled negatives (`neg_score` toward 0), which is exactly the contrastive objective $\mathcal{L}_{\text{NS}} = \log \sigma(\mathbf{u}_o^\top \mathbf{v}_c) + \sum_{k=1}^K \E[w_k \sim P_n]{\log \sigma(-\mathbf{u}_{w_k}^\top \mathbf{v}_c)}$ from @sec-nlp.
+The average per-pair loss falls from 6.159 averaged over the first epoch to 2.503 after 100 epochs and 2.345 after 400, most of the improvement happening early as the random initial embeddings quickly start separating real pairs from sampled noise. Each update pulls $\mathbf{u}_o$ and $\mathbf{v}_c$ together for an observed pair (`pos` toward 1) and pushes $\mathbf{v}_c$ away from the $K$ sampled negatives (`neg_score` toward 0), which is exactly the contrastive objective $\mathcal{L}_{\text{NS}} = \log \sigma(\mathbf{u}_o^\top \mathbf{v}_c) + \sum_{k=1}^K \E[w_k \sim P_n]{\log \sigma(-\mathbf{u}_{w_k}^\top \mathbf{v}_c)}$ from @sec-nlp.
 
 c)
 ```{python}
@@ -454,7 +449,7 @@ with weighting $h(x) = (x/x_{\max})^{\alpha}$ for $x < x_{\max}$ and $1$ otherwi
 c) Using $\mathbf{v}_i + \mathbf{u}_i$ as word $i$'s embedding, compute the cosine similarities between (ice, solid), (steam, solid), (ice, gas), and (steam, gas). Does the trained geometry recover the ratio asymmetry: ice aligned with solid, steam aligned with gas?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a)
 ```{python}
@@ -551,7 +546,7 @@ b) Compute the scaled scores $QK^\top/\sqrt{d_k}$ and the attention weight matri
 c) For each token, report which other token it attends to most strongly. Does the attention pattern recover the fact that "dog" and "puppy" are related, and separately that "car" and "vehicle" are related, given that this was only implicit in $X$?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a)
 ```{python}
@@ -583,7 +578,7 @@ for i, t in enumerate(tokens):
     order = np.argsort(-weights[i])
     print(t, "->", [(tokens[j], round(weights[i, j], 3)) for j in order])
 ```
-"dog" puts 0.343 of its attention on itself and 0.319 on "puppy" (a combined 0.662), leaving only $0.169 + 0.169 = 0.338$ for "car" and "vehicle" together, and "puppy" attends the same way (0.334 on "dog", 0.313 on itself). "car" and "vehicle" show the identical pair of numbers in mirrored positions (0.343 and 0.319 on each other, 0.169 and 0.169 on "dog" and "puppy"), a direct consequence of how $X$ was built: swapping the animal and vehicle feature values between the two pairs produces swapped rows of $Q$ and $K$. No token attends more to a token from the other group than to one from its own, and this happens purely from geometry: the dot product between two animal-heavy rows (or two vehicle-heavy rows) is large, while the dot product between one of each is close to zero, exactly the mechanism scaled dot-product attention exploits.
+"dog" puts 0.343 of its attention on itself and 0.319 on "puppy" (a combined 0.662), leaving only $0.169 + 0.169 = 0.338$ for "car" and "vehicle" together, and "puppy" attends the same way (0.334 on "dog", 0.313 on itself). "car" repeats the row of "dog" and "vehicle" the row of "puppy", with the two groups swapped ("car": 0.343 on itself, 0.319 on "vehicle", 0.169 on each of "dog" and "puppy"; "vehicle": 0.334 on "car", 0.313 on itself, 0.177 on each), a direct consequence of how $X$ was built: swapping the animal and vehicle feature values between the two pairs produces swapped rows of $Q$ and $K$. No token attends more to a token from the other group than to one from its own, and this happens purely from geometry: the dot product between two animal-heavy rows (or two vehicle-heavy rows) is large, while the dot product between one of each is exactly zero here, exactly the mechanism scaled dot-product attention exploits.
 
 :::
 :::
@@ -591,7 +586,7 @@ for i, t in enumerate(tokens):
 ::: {#exr-bpe-from-scratch}
 ## Byte Pair Encoding from Scratch
 
-@sec-nlp introduces BPE on the word frequencies {"fast": 4, "faster": 3, "tall": 5, "taller": 4} and predicts that the first merges will be "t" + "a" $\rightarrow$ "ta", then "ta" + "l" $\rightarrow$ "tal". This exercise implements BPE and checks that prediction against real merge counts.
+@sec-nlp introduces BPE on the word frequencies {"fast": 4, "faster": 3, "tall": 5, "taller": 4} and suggests that the first merges might be "t" + "a" $\rightarrow$ "ta", then "ta" + "l" $\rightarrow$ "tal". This exercise implements BPE and checks that prediction against real merge counts.
 
 ```{python}
 from collections import defaultdict
@@ -608,7 +603,7 @@ b) Print `vocab` after the 8 merges. How many merges does it take before "fast" 
 c) Write `bpe_tokenize(word, merges)`, which applies the learned merges, in order, to a new word, and use it to tokenize the unseen words "fastest" and "tallest". Why does the stem survive as one token while the superlative suffix does not, and what does this predict for a word like "smartest" if training data only ever showed the comparative "smarter"?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a)
 ```{python}
@@ -704,7 +699,7 @@ b) Implement a simplified MLM loss. Give each vocabulary word and `[MASK]` a tra
 c) One selected position falls in the 10% "leave unchanged" branch: its input token is not altered, yet the loss is still computed there. Explain why BERT keeps these positions in the loss instead of scoring only positions where the input was actually replaced.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a)
 ```{python}
@@ -768,9 +763,9 @@ for epoch in range(400):
     if epoch % 100 == 0 or epoch == 399:
         print(f"epoch {epoch:3d}  MLM loss {total / len(selected):.4f}")
 ```
-The average loss falls from 2.4202 at initialization to 0.0006 after 400 epochs: averaging the surrounding embeddings gives the linear head enough signal to recover each masked identity from its context. With so few selected positions the model effectively memorizes the six (context, target) mappings, which is what MLM does at scale, only there the context is read by a deep Transformer rather than a plain average.
+The average loss falls from 2.4202 averaged over the first epoch to 0.0006 after 400 epochs: averaging the surrounding embeddings gives the linear head enough signal to recover each masked identity from its context. With so few selected positions the model effectively memorizes the six (context, target) mappings, which is what MLM does at scale, only there the context is read by a deep Transformer rather than a plain average.
 
-c) If the loss were computed only where the input was actually replaced (the `[MASK]` and random-word cases), the model would only ever be asked about tokens it cannot read directly, and it could settle for the shortcut "predict whatever token sits in this slot." Keeping the 10% unchanged positions in the loss forces a genuinely contextual prediction even when the true token is visible, so the representations cannot collapse to a copy operation. It also matches fine-tuning and inference, when no `[MASK]` tokens exist at all: every position then looks like the unchanged case, and the model must already predict from context rather than from the presence of a `[MASK]` marker. This is why @sec-nlp notes the 80/10/10 split "prevents the model from simply learning to copy tokens when they're not masked."
+c) If the loss were computed only where the input was actually replaced (the `[MASK]` and random-word cases), the model would never be scored on a position whose input token is the true word. Yet at fine-tuning and inference no `[MASK]` exists and every input token is the true word. Keeping the 10% unchanged positions in the loss biases the representation toward the actual observed word [@devlin2018bert]. Copying is correct at those positions, so it is not what stops a blind copy rule: that is the job of the random-word branch, since a visible token at a selected position may be wrong, and the model must use context to tell. This is why @sec-nlp keeps all three corruption types in the mixture.
 :::
 :::
 

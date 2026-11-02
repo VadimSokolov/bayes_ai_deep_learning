@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="700" height="550" xmlns="http://www.w3.org/2000/svg">
+<svg width="700" height="440" xmlns="http://www.w3.org/2000/svg">
     <defs>
         <style>
             .matrix-text { font-family: Arial, sans-serif; font-size: 16px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
@@ -12,7 +12,7 @@
     </defs>
     
     <!-- Background -->
-    <rect x="1.5" y="1.5" width="697" height="547" fill="#f8f9fa" stroke="#2c3e50" stroke-width="3" rx="12"/>
+    <rect x="1.5" y="1.5" width="697" height="437" fill="#f8f9fa" stroke="#2c3e50" stroke-width="3" rx="12"/>
     
     <!-- Column labels - Encoder sequence (Keys/Values) -->
     <text x="175" y="105" class="label-text" fill="#27ae60">The</text>
@@ -84,21 +84,4 @@
     
 
     
-    <!-- Legend and explanation -->
-    <rect x="50" y="450" width="600" height="85" fill="rgba(255,255,255,0.95)" stroke="#bdc3c7" stroke-width="2" rx="8"/>
-    
-    <text x="70" y="470" style="font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #2c3e50;">Cross-Attention Pattern Analysis:</text>
-    
-    <text x="70" y="490" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
-        • <tspan fill="#e74c3c" font-weight="bold">"Le"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"The"</tspan> (0.85) - determiner alignment across languages
-    </text>
-    
-    <text x="70" y="505" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
-        • <tspan fill="#e74c3c" font-weight="bold">"chat"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"cat"</tspan> (0.80) - direct semantic translation
-    </text>
-    
-    <text x="70" y="520" style="font-family: Arial, sans-serif; font-size: 13px; fill: #2c3e50;">
-        • <tspan fill="#e74c3c" font-weight="bold">"dort"</tspan> strongly attends to <tspan fill="#27ae60" font-weight="bold">"sleeps"</tspan> (0.75) - verb alignment for action concepts
-    </text>
-    
-</svg>
+    </svg>

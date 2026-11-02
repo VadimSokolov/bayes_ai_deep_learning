@@ -14,22 +14,8 @@ import matplotlib.pyplot as plt
 # Set random seed for reproducibility
 np.random.seed(42)
 # Functions
-def arctan_gt(x): 
-    return np.arctan(5*x)
-
-def cubic_gt(x): 
-    return poly(x, np.array([0, -1, 0, 1]), 3)
-
-def relu(x): 
-    return x*(x >= 0)
-
 def sin(x): 
     return np.sin(5*x)
-
-def Vand(x, d):
-    """Vandermonde matrix for pts x, to degree d"""
-    X = np.array([x**i for i in range(0, d+1)]).T
-    return X
 
 n = 20  # number of samples
 sigma = 0.3  # stdev of noise
@@ -66,7 +52,7 @@ def run(d, ax):
     ax.set_title('d=%d, MSE: Test=%.2f, Train=%.2f' % (d, mseos, mseois))
 
 # [fig-double-descent-grid]
-# Create 2x2 subplot grid (all functions and variables are now persistent!)
+# Create 2x2 subplot grid
 fig, axes = plt.subplots(2, 2, figsize=(5.5, 4.6))
 fig.suptitle('Double Descent Phenomenon: Polynomial Regression', fontsize=10)
 
@@ -84,7 +70,7 @@ plt.tight_layout()
 plt.show()
 
 # [fig-mse-curve]
-# Generate MSE data for different polynomial degrees (using persistent functions!)
+# Generate MSE data for different polynomial degrees
 nd = 51
 mse1 = np.zeros(nd)  # Test MSE
 mse2 = np.zeros(nd)  # Train MSE

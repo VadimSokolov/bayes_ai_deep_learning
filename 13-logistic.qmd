@@ -4,9 +4,9 @@
 
 Classification predicts categories rather than numbers. Does this patient have the disease or not? Is this email spam? Is that object in the camera feed a pedestrian, a vehicle, or a traffic sign? The output is discrete, often just 0 or 1 (binary classification), sometimes multiple classes. Self-driving cars classify objects in real-time from camera feeds; medical systems flag high-risk patients; fraud detection systems sort transactions into suspicious and legitimate.
 
-Given observed data $(x_i,y_i)_{i=1}^n$, where each $y_i$ is either 0 or 1, we start by assuming a binomial likelihood function for the response variable, defined as follows:
+Given observed data $(x_i,y_i)_{i=1}^n$, where each $y_i$ is either 0 or 1, we start by assuming a Bernoulli likelihood function for the response variable, defined as follows:
 $$
-P(y_i = 1\mid p_i) = p_i^{y_i} (1-p_i)^{1-y_i},
+P(y_i\mid p_i) = p_i^{y_i} (1-p_i)^{1-y_i},
 $$
 where $p_i$ is the function of the inputs $x_i$ and coefficients $\beta$ that gives us the probability of the response variable taking on a value of 1, given the input variables. A typical approach to calculate $p_i$ is to use the logistic function
 \begin{align*}
@@ -17,7 +17,7 @@ p_i  = & \sigma(f_{\beta}(x_i)) =  \frac{e^{f_{\beta}(x_i)}}{1+e^{f_{\beta}(x_i)
 where $\beta$ is a vector of parameters. The logistic function $\sigma(\cdot)$ maps any real number to the interval $(0, 1)$, interpreting the output as a probability.
 
 ## Model Fitting
-Then we fit the model using binomial log-likelihood minimization. It leads us to the maximum likelihood estimator for parameters $\beta$ (a.k.a *cross-entropy estimator*), defined as
+We fit the model by negative log-likelihood minimization. It leads us to the maximum likelihood estimator for parameters $\beta$ (a.k.a *cross-entropy estimator*), defined as
 $$
 \hat \beta = \arg\min_{\beta}\mathcal{L}(\beta),
 $$
@@ -41,7 +41,7 @@ Unlike the least squares estimator or the unconditional case, the system of equa
 $$
 \nabla \mathcal{L}(\beta) = 0
 $$
-is not linear and cannot be solved by inverting a matrix. However, there are efficient iterative numerical optimization algorithms that can be used to find the optimal solution. The most common one is the *BFGS* (Broyden-Fletcher-Goldfarb-Shanno) algorithm. It is a quasi-Newton method that's particularly well-suited for optimizing the cross-entropy loss function in logistic regression.
+is not linear and cannot be solved by inverting a matrix. However, there are efficient iterative numerical optimization algorithms that can be used to find the optimal solution. The most common one is Newton's method in the form of iteratively reweighted least squares, which `glm` in `R` uses. Quasi-Newton methods such as *BFGS* (Broyden-Fletcher-Goldfarb-Shanno) are a common alternative.
 
 When we have more than two classes $y \in \{1,\ldots,K\}$, we build $K-1$ models $f_{\beta_1}(x),\ldots, f_{\beta_{K-1}}(x)$, one for each of the first $K-1$ classes, while treating the $K$-th class as the reference class with $f_{\beta_K}(x) = 0$. We then use the softmax function to convert the outputs into probabilities:
 
@@ -63,7 +63,7 @@ The softmax function is a generalization of the logistic function to the case of
 
 The logistic function has a nice statistical interpretation. It is the CDF of the logistic distribution, which is a symmetric distribution with mean 0 and variance $\pi^2/3$, thus $p_i$ is simply a value of this CDF, evaluated at $\beta^\top x_i$.
 
-Further, Logistic regression models the log-odds (logit) of the probability as a linear function of the predictors, which aligns with the maximum likelihood estimation framework. Specifically, if we invert the logistic function,
+Logistic regression models the log-odds (logit) of the probability as a linear function of the predictors. Specifically, if we invert the logistic function,
 $$
 p_i  = \sigma(\beta^\top x_i) =  \frac{e^{\beta^\top x_i}}{1+e^{\beta^\top x_i}},
 $$
@@ -71,9 +71,9 @@ we get the log-odds
 $$
 \log\left(\frac{p_i}{1-p_i}\right) = \beta^\top x_i.
 $$
-Meaning that $\beta^\top x_i$ measures how the probability of $y_i = 1$ changes with respect to the change in $x_i$ on the log-odds scale. It allows us to interpret the model coefficients as the log-odds ratios of the response variable.
+Meaning that $\beta_j$ is the change in the log-odds of $y_i = 1$ for a one-unit change in the $j$-th input, holding the others fixed. It allows us to interpret the model coefficients as the log-odds ratios of the response variable.
 
-In some disciplines, such as econometrics, psychology, and natural sciences, a normal CDF is used instead of the logistic CDF. This is often done for historical reasons or because the normal CDF implies slightly different theoretical assumptions that may be more appropriate for specific datasets.
+In some disciplines, such as econometrics and psychology, a normal CDF is used instead of the logistic CDF. This is often done for historical reasons or because the normal CDF implies slightly different theoretical assumptions that may be more appropriate for specific datasets.
 
 In the case of the normal CDF, the model is called *probit*; it stands for probability unit, and the link function is called *probit link*. The probit model is defined as
 $$
@@ -82,10 +82,10 @@ $$
 where $\Phi(\cdot)$ is the normal CDF.
 
 
-The  term probit was coined in the 1930's by biologists studying the dosage-cure rate link. We can fit a probit model using `glm` function in `R`.
+The term probit was coined in the 1930s by biologists studying the dosage-cure rate link [@bliss1934method]. We can fit a probit model using `glm` function in `R`.
 ```{r}
 #| echo: true
-set.seed(92) # Kuzy
+set.seed(92)
 x <- seq(-3, 3, length.out = 100)
 y <- pnorm(x + rnorm(100)) > 0.5
 probitModel <- glm(y ~ x, family = binomial(link = "probit"))
@@ -107,7 +107,7 @@ Our prediction is the shaded area which is equal to 0.195.
 
 
 Outside fields like behavioral economics, the logistic function is generally preferred over the probit model due to the interpretability of log-odds and its natural extension to multi-class problems.
-The PDF of the logistic distribution is very similar to the normal PDF.
+After rescaling, the PDF of the logistic distribution is very similar to the normal PDF.
 ```{r}
 logitModel <- glm(y ~ x, family = binomial(link = "logit"))
 pred_logit <- predict(logitModel, list(x = x), type = "response")
@@ -123,7 +123,7 @@ The two fitted curves are almost identical, as the similarity of the two densiti
 
 ::: {#exm-nba}
 ## Example: NBA Point Spread
-We will use the NBA point spread data to illustrate the logistic regression. The data are available in the `NBAspread.csv` file. The data contain the point spread for each game in the NBA from 2013 to 2014 season. The data also contains the outcome of the game, whether the favorite won or not. The point spread is the number of points by which the favorite is expected to win the game and is predicted by the bookmakers. We simply want to see how well the point spread predicts the outcome of the game.
+We will use the NBA point spread data to illustrate the logistic regression. The data are available in the `NBAspread.csv` file. The data contain the point spread for 553 games of the NBA 2013 to 2014 season. The data also contains the outcome of the game, whether the favorite won or not. The point spread is the number of points by which the favorite is expected to win the game and is predicted by the bookmakers. We simply want to see how well the point spread predicts the outcome of the game.
 
 ```{r}
 NBA <- read.csv("data/NBAspread.csv")
@@ -193,17 +193,17 @@ Now let's calculate the number of correct predictions using threshold $\alpha = 
 #| echo: true
 table(NBA$favwin, as.integer(predict(nbareg, type = "response") > 0.5), dnn = c("Actual", "Predicted"))
 ```
-Our model gets `r 422/(131+422)` of the predictions correctly. This number is called *accuracy* of the model.
+The model gets `r round(422/(131+422), 3)` of the predictions correctly. This number is called *accuracy* of the model. Here it says little about the model: the model has no intercept and every spread is at least 1, so every fitted probability exceeds one half and the model predicts a win by the favorite in all 553 games. The accuracy is simply the share of favorites that won, which is the base rate of the discussion of imbalanced data below.
 
 
 ## Confusion Matrix
-We will analyse the tennis dataset to show what is the decision boundary for the logistic regression model. The decision boundary is the line that separates the two classes. It is defined as the line where the probability of the favorite winning is 0.5. Then we will use the confusion matrix to evaluate the performance of the model.
+We will analyze the tennis dataset to show what is the decision boundary for the logistic regression model. The decision boundary is the line that separates the two classes. It is defined as the line where the probability of player 1 winning is 0.5. Then we will use the confusion matrix to evaluate the performance of the model.
 
 ::: {#exm-tennis}
 ## Logistic Regression for Tennis Classification
 Data science plays a major role in tennis; you can learn about recent AI tools developed by IBM from this [Yahoo! Finance Article](https://finance.yahoo.com/video/ibm-serving-ai-technology-tennis-150742376.html).
 
-We will analyze the [Tennis Major Tournament Match Statistics Data Set](https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics) from the UCI ML repository. The dataset has one per each game from four major Tennis tournaments in 2013 (Australia Open, French Open, US Open, and Wimbledon).
+We will analyze the [Tennis Major Tournament Match Statistics Data Set](https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics) from the UCI ML repository. The dataset has one row per match from four major tennis tournaments in 2013 (Australian Open, French Open, US Open, and Wimbledon).
 
 Let's look at a few columns of the randomly selected five rows of the data
 ```{r}
@@ -224,7 +224,7 @@ plot(d$BPW.1 + rnorm(n), d$BPW.2 + rnorm(n),
 legend("bottomright", c("P1 won", "P2 won"), col = c(3, 2), pch = c(21, 24), pt.bg = "yellow", bty = "n")
 ```
 
-We can clearly see that the number of break points won is a clear predictor of the match outcome. This is obvious and follows from the rules; to win a match, a player must win break points. Now, we want to understand the impact of winning a break point on the overall match outcome. We do it by building a logistic regression model
+We can see that the number of break points won is a clear predictor of the match outcome. This is expected: the player who breaks serve more often usually wins the match. Now, we want to understand the impact of winning a break point on the overall match outcome. We do it by building a logistic regression model
 ```{r}
 #| echo: true
 which(is.na(d$BPW.1)) # there is one row with NA value for the BPW.1 value and we remove it
@@ -241,7 +241,7 @@ The predicted values are stored in the `fitted.values` field of the model object
 #| echo: true
 table(d$Result, as.integer(m$fitted.values > 0.5), dnn = c("Actual", "Predicted"))
 ```
-This table shows the number of correct and incorrect predictions for each class. The rows are the actual outcomes and the columns are the predicted outcomes. Since `table` orders the levels $0$ then $1$, the first row is the matches player 1 lost, so its first entry counts losses the model correctly predicted as losses. The second row is the matches player 1 won, and its second entry counts wins correctly predicted as wins. Thus, our model got (400+416)/942 = `r 100*(400+416)/942`% of the predictions correctly! The accuracy is the ratio of the number of correct predictions to the total number of predictions.
+This table shows the number of correct and incorrect predictions for each class. The rows are the actual outcomes and the columns are the predicted outcomes. Since `table` orders the levels $0$ then $1$, the first row is the matches player 1 lost, so its first entry counts losses the model correctly predicted as losses. The second row is the matches player 1 won, and its second entry counts wins correctly predicted as wins. Thus, our model got (400+416)/942 = `r round(100*(400+416)/942, 1)`% of the predictions correctly! The accuracy is the ratio of the number of correct predictions to the total number of predictions.
 
 This table is called *confusion matrix*. Formally, it is defined as
 
@@ -277,7 +277,7 @@ lines(x, y, lwd = 2, col = "red")
 ```
 
 
-There are a couple of observations. First, the effect of a break point on the game outcome is significant and symmetric; the effect of losing a break point is the same as the effect of winning one. We also can interpret the effect of winning a break point in the following way. We will keep BPW.2 = 0 and will calculate what happens to the probability of winning when BPW.1 changes from 0 to 1. The odds ratio for player 1 winning when BPW.1 = 0 is `exp(0)` which is 1, meaning that the probability that P1 wins is 1/2. Now when BPW.1 = 1, the odds ratio is
+There are a couple of observations. First, the effect of a break point on the match outcome is significant; the effect of losing a break point is about the same as the effect of winning one. We also can interpret the effect of winning a break point in the following way. We will keep BPW.2 = 0 and will calculate what happens to the probability of winning when BPW.1 changes from 0 to 1. The odds of player 1 winning when BPW.1 = 0 are `exp(0)`, which is 1, meaning that the probability that P1 wins is 1/2. Now when BPW.1 = 1, the odds are
 ```{r}
 #| echo: true
 exp(0.4019)
@@ -301,7 +301,7 @@ predict.glm(m, newdata = data.frame(BPW.1 = c(3), BPW.2 = c(0)), type = "respons
 ```
 The probability of winning goes from 50% to `r round(100 * predict.glm(m, newdata = data.frame(BPW.1 = 3, BPW.2 = 0), type = "response"))`%, a gain of `r round(100 * predict.glm(m, newdata = data.frame(BPW.1 = 3, BPW.2 = 0), type = "response")) - 50` percentage points.
 
-Tennis is arguably the sport in which men and women are treated equally. Both men's and women's matches are shown during prime-time on TV, and they both have the same prize money. However, one of the comments you hear often is that women's matches are "less predictable", meaning that an upset (when the favorite loses) is more likely to happen in a women's match compared to men's matches. We can test this statement by counting upsets, the matches in which the player favored by the model (fitted probability above one half) lost.
+Tennis is arguably the sport in which men and women are treated equally. Both men's and women's matches are shown during prime-time on TV, and they both have the same prize money. However, one of the comments you hear often is that women's matches are "less predictable", meaning that an upset (when the favorite loses) is more likely to happen in a women's match compared to men's matches. We can only look at this through the break points won during the match. We count upsets, the matches lost by the player whom the model favored (fitted probability above one half), that is, the player who won more break points (player 2 in the 42 ties).
 ```{r}
 #| echo: true
 d$upset <- (fitted(m) > 0.5) != (d$Result == 1)
@@ -315,16 +315,16 @@ Let's test whether the upset rates of men's and women's matches differ:
 pt <- prop.test(tab[, "TRUE"], rowSums(tab))
 pt
 ```
-The favorite lost `r tab["M", "TRUE"]` of `r sum(tab["M", ])` men's matches (`r sprintf("%.1f", 100 * tab["M", "TRUE"] / sum(tab["M", ]))`%) and `r tab["W", "TRUE"]` of `r sum(tab["W", ])` women's matches (`r sprintf("%.1f", 100 * tab["W", "TRUE"] / sum(tab["W", ]))`%). The difference is small and not statistically significant ($p$-value `r sprintf("%.2f", pt$p.value)`), so, by this measure, these data do not support the claim that women's matches are less predictable.
+The favorite lost `r tab["M", "TRUE"]` of `r sum(tab["M", ])` men's matches (`r sprintf("%.1f", 100 * tab["M", "TRUE"] / sum(tab["M", ]))`%) and `r tab["W", "TRUE"]` of `r sum(tab["W", ])` women's matches (`r sprintf("%.1f", 100 * tab["W", "TRUE"] / sum(tab["W", ]))`%). The difference is small and not statistically significant ($p$-value `r sprintf("%.2f", pt$p.value)`), so, by this measure, these data do not support the claim that women's matches are less predictable. The measure uses break points won during the match, not pre-match odds or rankings, and men's majors are best of five sets against three for women's, so a test of the claim itself needs pre-match information.
 :::
 
 ## ROC Curve and Confounding Variables
-Using default dataset, we will illustrate the concept of ROC curve and confounding variables.
+Using the Hong Kong horse racing data, we will illustrate the concept of ROC curve and confounding variables.
 
 ::: {#exm-HorseRacing}
 ## Horse Race Betting
 
-This example uses data from the Hong Kong Jockey Club, one of the world's largest horse racing operations (see the Benter case study for comprehensive analysis).
+This example uses data from the Hong Kong Jockey Club, one of the world's largest horse racing operations (see the [Benter case study](https://vsokolov.quarto.pub/benter) for comprehensive analysis).
 
 Studies of racetrack betting find a *favorite-longshot bias*: favorites win more often than the odds suggest, while longshots win less often [@thaler1988anomalies]. We check it for Hong Kong favorites with a logistic regression that predicts whether the favorite wins.
 
@@ -349,12 +349,6 @@ race_df <- df |>
     race_id, venue, field_size, date, public_prob, win, win_odds,
     jockey_win_rate, trainer_win_rate, draw_normalized, rating_diff
   )
-
-cat(sprintf(
-  "Dataset: %d races from %s to %s\n",
-  nrow(race_df), min(race_df$date), max(race_df$date)
-))
-cat(sprintf("Favorite win rate: %.1f%%\n", mean(race_df$win) * 100))
 ```
 
 The resulting data frame `race_df` has one row for the favorite of each of the `r nrow(race_df)` races, run from `r min(race_df$date)` to `r max(race_df$date)`; the favorite wins `r round(100 * mean(race_df$win), 1)`% of them.
@@ -456,7 +450,7 @@ legend("bottomright",
 )
 ```
 
-The ROC curve shows reasonable predictive power above the diagonal. The choice of threshold depends on the betting strategy: a lower threshold captures more true winners but also more false positives.
+The ROC curve lies above the diagonal, but only modestly: the area under it is about 0.62. The choice of threshold depends on the betting strategy: a lower threshold captures more true winners but also more false positives.
 
 Now let's examine multiple predictors. Hong Kong has two racetracks: Happy Valley (a tight urban track) and Sha Tin (a modern facility with longer straights). We might expect venue to affect favorite performance.
 
@@ -568,16 +562,6 @@ where $P(\text{win})$ is the base rate of winners in the training data. This cal
 #| label: betting-optimal-threshold
 #| results: hide
 real_return <- mean((race_df$win * race_df$win_odds - 1)[pred_bet > alpha[which.max(profit)]])
-if (any(profit > 0)) {
-  cat(sprintf(
-    "Profitable threshold range: %.2f to %.2f\n",
-    min(alpha[profit > 0]), max(alpha[profit > 0])
-  ))
-  cat(sprintf("Optimal threshold: %.2f\n", alpha[which.max(profit)]))
-  cat(sprintf("Maximum expected profit: $%.3f per race\n", max(profit)))
-} else {
-  cat("No threshold produces positive expected profit at these odds\n")
-}
 ```
 Expected profit is positive for thresholds between `r sprintf("%.2f", min(alpha[profit > 0]))` and `r sprintf("%.2f", max(alpha[profit > 0]))` and largest at `r sprintf("%.2f", alpha[which.max(profit)])`, where it equals `r sprintf("%.3f", max(profit))` dollars per race. Unlike academic classification problems where we might default to $\alpha = 0.5$, real-world applications require understanding the asymmetric costs of different types of errors.
 
@@ -588,24 +572,24 @@ The pay-off matrix pays every winning favorite \$2.50, but the favorites the rul
 
 ::: {#exm-LinkedIn}
 ## LinkedIn Study
-How to Become an Executive [@irwin2016how; @berger2016how]?
+How does one become an executive? See @irwin2016how and @berger2016how.
 
-Logistic regression was used to analyze the career paths of about $459{,}000$ LinkedIn members who worked at a [top 10 consultancy](http://www.vault.com/company-rankings/consulting/best-consulting-firms-prestige?sRankID=77) between 1990 and 2010 and became a VP, CXO, or partner at a company with at least 200 employees. About $64{,}000$ members reached this milestone, $\hat{p} = 0.1394$, conditional on making it into the database. The goals of the analysis were the following
+Logistic regression was used to analyze the career paths of about $459{,}000$ LinkedIn members who worked at a [top 10 consultancy](http://www.vault.com/company-rankings/consulting/best-consulting-firms-prestige?sRankID=77) between 1990 and 2010. About $64{,}000$ members became a VP, CXO, or partner at a company with at least 200 employees, $\hat{p} = 0.1394$, conditional on making it into the database. The goals of the analysis were the following
 
-1. Look at their profiles---educational background, gender, work
-    experience, and career transitions.
+1. Look at their profiles (educational background, gender, work
+    experience, and career transitions).
 2. Build a predictive model of the probability of becoming an executive
 3. Provide a tool for analysis of "what if" scenarios. For example, if
     you are to get a master's degree, how your job perspectives change
     because of that.
 
-Let's build a logistic regression model with $8$ key features (a.k.a.
+The study built a logistic regression model with $8$ key features (a.k.a.
 covariates):
 $$
 \log\left ( \frac{p}{1-p} \right ) = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_8x_8
 $$
 
-Here $p$ is the probability of "success"---meaning the person reaches VP/CXO/Partner seniority at a company with at least 200 employees. The features to predict the "success" probability are $x_i (i=1,2,\ldots,8)$
+Here $p$ is the probability of "success" (meaning the person reaches VP/CXO/Partner seniority at a company with at least 200 employees). The features to predict the "success" probability are $x_i (i=1,2,\ldots,8)$
 
 - $x_1$: Metro region: whether a member has worked in  one of the top 10 largest cities in the U.S. or globally.
 - $x_2$: Gender: Inferred from member names: 'male', or 'female'
@@ -616,7 +600,7 @@ Here $p$ is the probability of "success"---meaning the person reaches VP/CXO/Par
 - $x_7$: Industry sector count: \# different industries in which a member has worked  
 - $x_8$: Years of experience: \# years of work experience, including years in consulting, for a member.
 
-The following estimated $\hat\beta$s of features were obtained. With a sample size of 459,000 they are measured rather accurately.
+The following estimated $\hat\beta$s of features were obtained. With a sample size of 459,000 they are measured rather accurately. The coefficient 1.16 for graduate education type is that of the top U.S. MBA level.
 
 | Category | Feature | Coefficient ($\hat{\beta}$) |
 |----------|---------|------------------------------|
@@ -632,7 +616,7 @@ The following estimated $\hat\beta$s of features were obtained. With a sample si
 Here are three main findings
 
 1.  Working across job functions, like marketing or finance, is good. Each additional job function provides a boost that, on average, is equal to three years of work experience. Switching industries has a     slight negative impact. Learning curve? lost relationships?
-2.  MBAs are worth the investment. But pedigree matters. *Top five program equivalent to $13$ years of work experience!!!*
+2.  MBAs are worth the investment. But pedigree matters. *Top five program equivalent to $13$ years of work experience*.
 3.  Location matters. For example, NYC helps.
 
 We can also personalize the prediction for possible executives. For example, [Person A (p=6%)]{style="color: blue"}: Male in Tulsa, Oklahoma, Undergraduate degree, 1 job function for 3 companies in 3 industries, 15-year experience.
@@ -641,9 +625,7 @@ We can also personalize the prediction for possible executives. For example, [Pe
 
 [Person C (p=63%)]{style="color: blue"}: Female in New York City, Top undergraduate program, Top MBA program, 4 different job functions for 4 companies in 1 industry, 15-year experience.
 
-Let's re-design Person B.
-
-[Person B (p=15%)]{style="color: blue"}: Male in London, Undergraduate degree from top international school, Non-MBA Master, 2 different job functions for 2 companies in 2 industries, 15-year experience.
+Let's re-design Person B. Each change below is applied to the 15% baseline on its own, and the gain is in percentage points, not cumulative.
 
 1.  Work in one industry rather than two. Increase $3$%
 2.  Undergrad from top $10$ US program rather than top international
@@ -652,10 +634,11 @@ Let's re-design Person B.
 4.  Move from London to NYC. $4$%
 5.  Four job functions rather than two. $8$%. A $1.5$x effect.
 6.  Worked for $10$ more years. $15$%. A $2$X effect.
+7.  Got an MBA from a top $5$ U.S. program rather than a non-MBA Master. $21$%.
 
-Choices and Impact (Person B) are shown below in @fig-choice. When all these positive choices are combined, the probability skyrockets to 81%.
+Choices and Impact (Person B) are shown below in @fig-choice. When all these positive choices are combined, the probability reaches 81%. The figure is redrawn from the bar values of @berger2016how.
 
-![Choices and Impact (Person B).](fig/choice.png){width="70%" fig-align="center" #fig-choice}
+![Choices and Impact (Person B): probability of success after each change and after all of them combined.](fig/choice.png){width="85%" fig-align="center" #fig-choice}
 
 :::
 
@@ -670,11 +653,11 @@ The F1 score combines precision and recall into a single score, providing a bala
 $$
 F1 = 2\dfrac{\mathrm{precision} \times \mathrm{recall}}{\mathrm{precision} + \mathrm{recall}}
 $$
-where precision measures the proportion of true positives among predicted positives, and recall measures the proportion of true positives that were correctly identified.
+where precision measures the proportion of true positives among predicted positives, and recall measures the proportion of actual positives that were correctly identified.
 
 The precision-recall curve is particularly useful for imbalanced datasets, as it plots precision against recall at various thresholds, focusing on the performance of the positive class. Cohen's Kappa measures agreement between predicted and actual classifications while accounting for agreement by chance, making it more robust to class imbalance than accuracy.
 
-To address imbalanced data, several strategies can be employed. Data-level approaches include oversampling, where you synthetically generate more samples of the minority class using techniques like bootstrap sampling with replacement, SMOTE (Synthetic Minority Over-sampling Technique) which creates synthetic examples by interpolating between existing minority class samples, or generative models like GANs or variational autoencoders to create realistic synthetic data. Undersampling reduces the majority class samples, which is particularly effective when the dataset is large enough. Hybrid approaches combine both oversampling and undersampling techniques.
+To address imbalanced data, several strategies can be employed. Data-level approaches include oversampling, where you add samples of the minority class by resampling it with replacement, by SMOTE (Synthetic Minority Over-sampling Technique) [@chawla2002smote], which creates synthetic examples by interpolating between existing minority class samples, or generative models like GANs or variational autoencoders to create realistic synthetic data. Undersampling reduces the majority class samples, which is particularly effective when the dataset is large enough. Hybrid approaches combine both oversampling and undersampling techniques.
 
 Algorithm-level approaches include cost-sensitive learning, where you assign different misclassification costs to different classes, ensemble methods using techniques like bagging or boosting that can naturally handle imbalanced data, and threshold adjustment to modify the classification threshold to optimize for specific metrics like F1-score.
 
@@ -685,13 +668,13 @@ It is often beneficial to experiment with multiple techniques and evaluate their
 ## Kernel Trick
 While logistic regression is a powerful linear classifier, there are cases where the classes are not linearly separable in the original feature space. For example, one class might be encircled by another. In such situations, we need to extend our linear methods to handle non-linear decision boundaries.
 
-The kernel trick is a method of using a linear classifier to solve a non-linear problem. The idea is to map the data into a higher-dimensional space, where it becomes linearly separable. The kernel trick is to use a kernel function $K(x_i,x_j)$ to calculate the inner product of two vectors in the higher dimensional space without explicitly calculating the mapping $\phi(x_i)$ and $\phi(x_j)$. The kernel function is defined as $K(x_i,x_j) = \phi(x_i)^\top\phi(x_j)$. The most popular kernel functions are the polynomial kernel $K(x_i,x_j) = (x_i^\top x_j)^d$ and Gaussian kernel $K(x_i,x_j) = \exp(-\gamma||x_i-x_j||^2)$. The kernel trick is used in Support Vector Machines (SVM) and Gaussian Processes (GP). 
+The kernel trick is a method of using a linear classifier to solve a non-linear problem. The idea is to map the data into a higher-dimensional space, where it becomes linearly separable. The trick is to use a kernel function $K(x_i,x_j)$ to calculate the inner product of two vectors in the higher dimensional space without explicitly calculating the mapping $\phi(x_i)$ and $\phi(x_j)$. The kernel function is defined as $K(x_i,x_j) = \phi(x_i)^\top\phi(x_j)$. The most popular kernel functions are the polynomial kernel $K(x_i,x_j) = (x_i^\top x_j)^d$ and Gaussian kernel $K(x_i,x_j) = \exp(-\gamma\|x_i-x_j\|^2)$. The kernel trick is used in Support Vector Machines (SVM) [@boser1992training] and Gaussian Processes (GP). 
 
 ```{r}
 #| code-fold: true
 gencircledata <- function(numSamples, radius, noise) {
   d <- matrix(0, ncol = 3, nrow = numSamples) # matrix to store our generated data
-  # Generate positive points inside the circle.
+  # Generate points of class 0 inside the circle.
   for (i in 1:(numSamples / 2)) {
     r <- runif(1, 0, radius * 0.4)
     angle <- runif(1, 0, 2 * pi)
@@ -702,7 +685,7 @@ gencircledata <- function(numSamples, radius, noise) {
     d[i, ] <- c(0, x + noiseX, y + noiseY)
   }
 
-  # Generate negative points outside the circle.
+  # Generate points of class 1 outside the circle.
   for (i in (numSamples / 2 + 1):numSamples) {
     r <- runif(1, radius * 0.8, radius)
     angle <- runif(1, 0, 2 * pi)
@@ -719,6 +702,7 @@ gencircledata <- function(numSamples, radius, noise) {
 
 ```{r}
 #| label: fig-circle-data
+#| fig-cap: Simulated data, one class inside a circle and the other in a ring around it.
 #| fig-width: 3.2
 #| fig-height: 3
 set.seed(13) # Sundin
@@ -731,16 +715,16 @@ The data in @fig-circle-data are not linearly separable in two dimensions; howev
 $$
 \begin{aligned}
 \phi: R^{2} & \longrightarrow R^{3} \\
-\left(x_{1}, x_{2}\right) & \longmapsto\left(z_{1}, z_{2}, z_{3}\right)=\left(x_{1}^{2}, \sqrt{2} x_{1} x_{2}, x_{2}^{2}\right),
+\left(x_{1}, x_{2}\right) & \longmapsto\left(z_{1}, z_{2}, z_{3}\right)=\left(x_{1}^{2}, \sqrt{2} x_{1} x_{2}, x_{2}^{2}\right).
 \end{aligned}
 $$
-and attempt to linearly separate the transformed data, the decision boundaries become hyperplanes in $R^{3}$, expressed as $\omega^\top z + b = 0$. In terms of the original variables $x$, these boundaries take the form:
+If we linearly separate the transformed data, the decision boundaries become hyperplanes in $R^{3}$, expressed as $\omega^\top z + b = 0$. In terms of the original variables $x$, these boundaries take the form:
 $$
 \omega_{1} x_{1}^{2} + \omega_{2} \sqrt{2} x_{1} x_{2} + \omega_{3} x_{2}^{2} + b = 0,
 $$
 which corresponds to the equation of an ellipse centered at the origin when the quadratic form is positive definite and $b < 0$. This demonstrates that we can apply a linear algorithm to transformed data to achieve a non-linear decision boundary with minimal effort.
 
-Now, consider what the algorithm is actually doing. It relies solely on the Gram matrix $K$ of the data. Once $K$ is computed, the original data can be discarded:
+Now, consider what a kernel method such as a support vector machine or a Gaussian process is actually doing. Its training relies solely on the Gram matrix $K$ of the data, so once $K$ is computed, the original data can be discarded (a prediction at a new point needs $K(x_{\text{new}}, x_i)$ for the training points):
 $$
 \begin{aligned}
 K & = \left[\begin{array}{ccc}
@@ -777,7 +761,7 @@ $$
 
 Thus, instead of explicitly mapping the data via $\phi$ and then computing the inner product, we can compute it directly in one step, leaving the mapping $\phi$ implicit. In fact, we do not even need to know $\phi$ explicitly; all we require is the ability to compute the modified inner product. This modified inner product is called a kernel, denoted $K(x, y)$. The matrix $K$, which contains the kernel values for all pairs of data points, is also referred to as the kernel matrix.
 
-Since the kernel itself is the primary object of interest, rather than the mapping $\phi$, we aim to characterize kernels without explicitly relying on $\phi$. Mercer's Theorem provides the theoretical guarantee for this: it states that for any symmetric, positive-definite function $K(x, y)$, there exists a mapping $\phi$ such that $K(x, y) = \langle \phi(x), \phi(y) \rangle$. This ensures we can implicitly work in a high-dimensional space just by defining a valid kernel function.
+Since the kernel itself is the primary object of interest, rather than the mapping $\phi$, we aim to characterize kernels without explicitly relying on $\phi$. Mercer's Theorem provides the theoretical guarantee for this: it states that for any continuous, symmetric, positive semi-definite function $K(x, y)$ on a compact domain [@mercer1909functions], there exists a mapping $\phi$ into a possibly infinite-dimensional Hilbert space such that $K(x, y) = \langle \phi(x), \phi(y) \rangle$. This ensures we can implicitly work in a high-dimensional space just by defining a valid kernel function.
 
 Let's implement it
 
@@ -796,7 +780,6 @@ phi <- function(x1, x2) {
 #| fig-height: 3.6
 library("scatterplot3d")
 
-# Generate sample 2D data (you can replace this with your actual data)
 # Apply the transformation
 transformed_data <- phi(d[, 2], d[, 3])
 par(xpd = TRUE)
@@ -826,7 +809,7 @@ The link function encodes how predictors move the mean response. Common choices 
 | logit | Bernoulli/binomial | logistic regression for binary outcomes |
 | probit | Bernoulli/binomial | Normal-CDF alternative for binary data |
 | log | Poisson, Gamma | count data and positive-valued responses |
-| inverse | Gamma | positive continuous data (alternative parameterization) |
+| inverse | Gamma | positive continuous data (an alternative to the log link) |
 
 
 For count outcomes $Y_i \in \{0,1,2,\ldots\}$, a standard GLM is *Poisson regression*:
@@ -838,9 +821,9 @@ The log link ensures $\lambda_i>0$. Coefficients have a multiplicative interpret
 
 For continuous responses that are strictly positive and right-skewed (e.g., waiting times, costs), a common GLM choice is *Gamma regression*. One parameterization is
 $$
-Y_i \mid x_i \sim \mathrm{Gamma}(\text{shape},\text{rate}), \qquad \E{Y_i\mid x_i}=\mu_i, \qquad \log \mu_i = x_i^\top \beta,
+Y_i \mid x_i \sim \mathrm{Gamma}(\nu,\ \nu/\mu_i), \qquad \E{Y_i\mid x_i}=\mu_i, \qquad \log \mu_i = x_i^\top \beta,
 $$
-where the log link again enforces positivity of the mean. Alternatives include an inverse link, depending on the modeling context.
+where $\nu$ is the shape, the rate $\nu/\mu_i$ makes the mean $\mu_i$, and the log link again enforces positivity of the mean. Alternatives include an inverse link, depending on the modeling context.
 
 ### Deviance and Model Comparison
 
@@ -873,9 +856,9 @@ The specific formula changes with the exponential family distribution, but the i
 
 ## Bayesian Logistic Regression with the Polya-Gamma Distribution {#sec-bayes-logistic}
 
-To perform Bayesian inference for logistic regression, we often need to sample from the posterior distribution of the coefficients $\beta$. Conceptually this follows the same updating pattern as in @sec-bl: posterior $\propto$ likelihood $\times$ prior. It also connects to the likelihood-to-loss framing in @sec-pattern: the same likelihood that defines the posterior also defines an optimization objective through its negative log. However, the logistic likelihood does not have a conjugate prior, making direct sampling difficult. A powerful modern approach uses data augmentation with Polya-Gamma variables to make the sampling exact and efficient.
+To perform Bayesian inference for logistic regression, we often need to sample from the posterior distribution of the coefficients $\beta$. Conceptually this follows the same updating pattern as in @sec-bl: posterior $\propto$ likelihood $\times$ prior. It also connects to the likelihood-to-loss framing in @sec-pattern: the same likelihood that defines the posterior also defines an optimization objective through its negative log. However, a Gaussian prior is not conjugate to the logistic likelihood, making direct sampling difficult. A powerful modern approach uses data augmentation with Polya-Gamma variables to make Gibbs sampling simple and efficient.
 
-The Polya-Gamma distribution, denoted as PG(b,c), is carefully constructed as a subset of infinite convolutions of gamma distributions (essentially, a weighted sum of an infinite number of independent Gamma variables) [@polson2013bayesian]. A random variable X follows a Polya-Gamma distribution with parameters $b > 0$ and $c \in \mathbb{R}$ if:
+The Polya-Gamma distribution, denoted PG($b$,$c$), belongs to the infinite convolutions of gamma distributions (essentially, a weighted sum of an infinite number of independent Gamma variables) [@polson2013bayesian]. A random variable $X$ follows a Polya-Gamma distribution with parameters $b > 0$ and $c \in \mathbb{R}$ if:
 
 $$
 X \stackrel{d}{=} \frac{1}{2\pi^2} \sum_{k=1}^{\infty} \frac{g_k}{(k-1/2)^2 + c^2/(4\pi^2)},
@@ -898,25 +881,24 @@ where the expectation is taken with respect to PG(b,0)
 
 4. *Known Moments*: All finite moments are available in closed form, with the expectation given by:
 
-$$\E{\omega} = \frac{b}{2c}\tanh(c/2) = \frac{b}{2c}\frac{e^c-1}{1+e^c}.$$
+$$\E{\omega} = \frac{b}{2c}\tanh(c/2) = \frac{b}{2c}\frac{e^c-1}{1+e^c},$$
 
-::: {.callout-tip}
-## Computational Advantage
-The known moments and convolution properties make the Polya-Gamma distribution computationally tractable and theoretically well-behaved.
-:::
+with the limit $b/4$ at $c = 0$.
 
 ### The Data-Augmentation Strategy
 
 The core of the Polya-Gamma methodology rests on a fundamental integral identity that represents binomial likelihoods as mixtures of Gaussians [@polson2013bayesian]. The key theorem states:
 
-::: {#res-polya-gamma-identity .theorem}
-*Theorem 1*: For $b > 0$ and $a \in \mathbb{R}$, the following integral identity holds:
+::: {#thm-polya-gamma-identity}
+## Polya-Gamma integral identity
+
+For $b > 0$ and $a \in \mathbb{R}$, the following integral identity holds:
 
 $$\frac{(e^\psi)^a}{(1+e^\psi)^b} = 2^{-b}e^{\kappa\psi} \int_0^{\infty} e^{-\omega\psi^2/2} p(\omega) d\omega$$
 
-where $\kappa = a - b/2$, and $p(\omega)$ is the density of $\omega \sim \text{PG}(b,0)$[@polson2013bayesian].
+where $\kappa = a - b/2$, and $p(\omega)$ is the density of $\omega \sim \text{PG}(b,0)$.
 
-Moreover, the conditional distribution $p(\omega \mid \psi)$ is also in the Polya-Gamma class: $(\omega \mid \psi) \sim \text{PG}(b,\psi)$[@polson2013bayesian].
+Moreover, the conditional distribution $p(\omega \mid \psi)$ is also in the Polya-Gamma class: $(\omega \mid \psi) \sim \text{PG}(b,\psi)$.
 :::
 
 ::: {#res-polya-gamma-gibbs}
@@ -934,7 +916,7 @@ This integral identity leads directly to a simple two-step Gibbs sampler for Bay
 
 This approach requires only Gaussian draws for the main parameters and Polya-Gamma draws for a single layer of latent variables, making it significantly simpler than previous methods [@polson2013bayesian].
 
-![Hierarchical structure of Polya-Gamma Data Augmentation.](fig/mermaid/13-logistic-polya-gamma.png){width=65% fig-alt="Graph of the Polya-Gamma data augmentation model: the coefficients and the data X give the linear predictor, which feeds both the Polya-Gamma auxiliary variable and the observed outcomes, and the auxiliary variable also feeds the outcomes."}
+![Hierarchical structure of Polya-Gamma Data Augmentation.](fig/mermaid/13-logistic-polya-gamma.png){width=95% fig-alt="Graph of the Polya-Gamma data augmentation model: the coefficients and the data X give the linear predictor, which feeds both the Polya-Gamma auxiliary variable and the observed outcomes."}
 
 
 The practical success of the Polya-Gamma method depends on efficient simulation of Polya-Gamma random variables [@polson2013bayesian]. The authors developed a sophisticated accept-reject sampler based on the alternating-series method of Devroye [@devroye1986nonuniform]. For the fundamental PG(1,c) case, the sampler uses exponential and inverse-Gaussian draws as proposals, achieving an acceptance probability uniformly bounded below at 0.99919. This high acceptance rate requires no tuning for optimal performance. The acceptance criterion is evaluated using iterative partial sums, making the algorithm both efficient and robust.
@@ -952,42 +934,18 @@ The function below alternates the two Gibbs steps above, drawing the auxiliary v
 bayesian_logit_pg <- function(y, X, n_iter = 5000, burn_in = 1000) {
   n <- length(y)
   p <- ncol(X)
-  # Prior specification (weakly informative)
   beta_prior_mean <- rep(0, p)
-  beta_prior_prec <- diag(0.01, p) # Precision matrix
-
-  # Storage for samples
+  beta_prior_prec <- diag(0.01, p)
   beta_samples <- matrix(0, n_iter, p)
-  omega_samples <- matrix(0, n_iter, n)
-
-  # Initialize
   beta <- rep(0, p)
-
   for (iter in 1:n_iter) {
-    # Step 1: Sample omega (auxiliary variables)
-    psi <- X %*% beta
-    omega <- rpg(n, h = 1, z = psi)
-
-    # Step 2: Sample beta (regression coefficients)
-    # Posterior covariance and mean
+    omega <- rpg(n, h = 1, z = X %*% beta)
     V_omega <- solve(t(X) %*% diag(omega) %*% X + beta_prior_prec)
-    kappa <- y - 0.5
-    m_omega <- V_omega %*% (t(X) %*% kappa + beta_prior_prec %*% beta_prior_mean)
-
-    # Sample from multivariate normal
+    m_omega <- V_omega %*% (t(X) %*% (y - 0.5) + beta_prior_prec %*% beta_prior_mean)
     beta <- mvrnorm(1, m_omega, V_omega)
-
-    # Store samples
     beta_samples[iter, ] <- beta
-    omega_samples[iter, ] <- omega
   }
-
-  # Return samples after burn-in
-  list(
-    beta = beta_samples[(burn_in + 1):n_iter, ],
-    omega = omega_samples[(burn_in + 1):n_iter, ],
-    n_samples = n_iter - burn_in
-  )
+  beta_samples[(burn_in + 1):n_iter, , drop = FALSE]
 }
 ```
 
@@ -1011,12 +969,12 @@ y <- rbinom(n, 1, probs)
 results <- bayesian_logit_pg(y, X, n_iter = 3000, burn_in = 500)
 
 # Posterior summaries
-posterior_means <- colMeans(results$beta)
-posterior_sds <- apply(results$beta, 2, sd)
+posterior_means <- colMeans(results)
+posterior_sds <- apply(results, 2, sd)
 # Visualize posterior distributions
 par(mfrow = c(1, 3))
 for (j in 1:3) {
-  hist(results$beta[, j],
+  hist(results[, j],
     breaks = 30, main = "", xlab = bquote(beta[.(j - 1)]),
     col = "lightblue", border = "white", cex.axis = 0.75, cex.lab = 1.05
   )
@@ -1044,9 +1002,9 @@ The implementation uses Polya-Gamma augmentation to efficiently sample from the 
 
 ![Posterior distributions for horse racing logistic regression coefficients. The solid line is the posterior mean and the dotted lines bound the 95% credible interval; the maximum likelihood estimate (dashed) almost coincides with the posterior mean and is hidden behind the solid line. The Bayesian posteriors capture uncertainty around these point estimates.](fig/bayesian-betting-plot.png){#fig-bayesian-betting}
 
-The posterior distributions (@fig-bayesian-betting) reveal important insights for betting strategy. @tbl-bayesian-betting-summary shows the posterior summaries compared to maximum likelihood estimates:
+The posterior distributions (@fig-bayesian-betting) are summarized below. @tbl-bayesian-betting-summary shows the posterior summaries compared to maximum likelihood estimates:
 
-| Parameter | Posterior Mean | Posterior SD | 95% CI Lower | 95% CI Upper | MLE |
+| Parameter | Mean | SD | 95% CI Lower | 95% CI Upper | MLE |
 |-----------|---------------|--------------|--------------|--------------|-----|
 | Intercept | -0.884 | 0.029 | -0.941 | -0.827 | -0.884 |
 | Public Prob (scaled) | 0.425 | 0.029 | 0.367 | 0.482 | 0.425 |
@@ -1054,26 +1012,26 @@ The posterior distributions (@fig-bayesian-betting) reveal important insights fo
 
 : Bayesian posterior summaries for horse racing logistic regression. {#tbl-bayesian-betting-summary}
 
-The Bayesian analysis confirms our findings: the public probability is a strong positive predictor of favorite success (posterior mean = 0.425, 95% CI: [0.367, 0.482]). The field size effect is weakly positive but uncertain, with the 95% credible interval spanning from $-0.025$ to $0.090$, and a 13.4% posterior probability that this effect is negative. This uncertainty is valuable for betting applications: we can propagate the posterior distribution through the Kelly criterion to obtain a *distribution* of optimal bet sizes rather than a single point estimate, leading to more robust position sizing.
+The Bayesian analysis agrees with the maximum likelihood fit: the public probability is a strong positive predictor of favorite success (posterior mean = 0.425, 95% CI: [0.367, 0.482]). The field size effect is weakly positive but uncertain, with the 95% credible interval spanning from $-0.025$ to $0.090$, and a 13.4% posterior probability that this effect is negative.
 :::
 ### Theoretical Guarantees
 
-The Polya-Gamma Gibbs sampler enjoys strong theoretical properties that distinguish it from many other MCMC approaches [@polson2013bayesian]. Perhaps most importantly, @choi2013polya proved that the sampler is *uniformly ergodic*, a property that guarantees geometric convergence to the stationary distribution regardless of the starting point. This uniform ergodicity result ensures that central limit theorems hold for Monte Carlo averages computed from the sampler output, enabling valid inference and standard error calculations for posterior quantities of interest.
+The Polya-Gamma Gibbs sampler enjoys strong theoretical properties that distinguish it from many other MCMC approaches [@polson2013bayesian]. @choi2013polya proved that the sampler is *uniformly ergodic*, a property that guarantees geometric convergence to the stationary distribution regardless of the starting point. This uniform ergodicity result ensures that central limit theorems hold for Monte Carlo averages computed from the sampler output, enabling valid inference and standard error calculations for posterior quantities of interest.
 
-The property of requiring no tuning parameters represents a significant practical advantage. Traditional Metropolis-Hastings algorithms demand careful calibration of proposal distributions, a task that typically requires pilot runs, domain expertise, and iterative adjustment [@roberts2001optimal]. Poorly tuned proposals can lead to slow mixing or even apparent convergence to incorrect distributions, and diagnosing such failures often proves difficult. The Polya-Gamma sampler sidesteps these concerns entirely: each conditional distribution in the Gibbs sampling scheme is fully specified by the model, leaving no algorithmic parameters for the practitioner to adjust.
+The property of requiring no tuning parameters is a practical advantage. Traditional Metropolis-Hastings algorithms demand careful calibration of proposal distributions, a task that typically requires pilot runs, domain expertise, and iterative adjustment [@roberts2001optimal]. Poorly tuned proposals can lead to slow mixing or even apparent convergence to incorrect distributions, and diagnosing such failures often proves difficult. The Polya-Gamma sampler sidesteps these concerns entirely: each conditional distribution in the Gibbs sampling scheme is fully specified by the model, leaving no algorithmic parameters for the practitioner to adjust.
 
-Equally important is the property of exact sampling from the target posterior distribution. Many popular alternatives to MCMC, such as variational inference or Laplace approximations, sacrifice exactness for computational speed, producing samples from an approximating distribution rather than the true posterior. While such approximations work well in many settings, they can introduce systematic biases that are difficult to quantify, particularly in hierarchical models where the posterior may exhibit complex dependencies. The Polya-Gamma Gibbs sampler, by contrast, produces draws from the exact posterior distribution. Combined with the ergodicity guarantee, this means that averages of the sampled values converge to true posterior expectations as the number of iterations increases, providing asymptotically exact inference without the approximation errors inherent in alternative methods
+Equally important, the sampler targets the exact posterior distribution. Many popular alternatives to MCMC, such as variational inference or Laplace approximations, sacrifice exactness for computational speed, producing samples from an approximating distribution rather than the true posterior. While such approximations work well in many settings, they can introduce systematic biases that are difficult to quantify, particularly in hierarchical models where the posterior may exhibit complex dependencies. The Polya-Gamma Gibbs sampler, by contrast, has the exact posterior distribution as its stationary distribution. Combined with the ergodicity guarantee, this means that averages of the sampled values converge to true posterior expectations as the number of iterations increases, providing asymptotically exact inference without the approximation errors inherent in alternative methods.
 
 ::: {.callout-warning}
 ## Important Note
-The theoretical guarantees hold under standard regularity conditions, and the method requires proper prior specification for optimal performance.
+The uniform ergodicity result assumes a proper Gaussian prior on $\beta$ [@choi2013polya].
 :::
 
-The Polya-Gamma methodology extends naturally to negative binomial regression through direct application of the same data-augmentation scheme. For multinomial logistic models, the approach can be extended through partial difference of random utility models [@fruhwirth-schnatter2010data; @polson2013bayesian]. The framework also allows seamless incorporation of random effects structures in mixed effects models, and provides efficient inference for spatial count data models. @windle2013efficient showed application to dynamic binary time series models through state-space formulations.
+The Polya-Gamma methodology extends naturally to negative binomial regression through direct application of the same data-augmentation scheme. For multinomial logistic models, the approach can be extended through partial differences of random utility models [@fruhwirth-schnatter2010data; @polson2013bayesian]. The framework also allows random effects structures in mixed effects models. @windle2013efficient showed application to dynamic binary time series models through state-space formulations.
 
-Recent developments have expanded the methodology's applicability. @wenzel2018scalable applied it to Gaussian process classification that relies on scalable variational approaches using Polya-Gamma augmentation. @ye2023calibration demonstrated integration with neural network architectures by adding a Gaussian process layer with Pólya-Gamma augmentation to deep neural retrieval models for improved calibration and uncertainty estimation.
+Recent developments have expanded the methodology's applicability. @wenzel2018scalable combined Polya-Gamma augmentation with scalable variational inference for Gaussian process classification. @ye2023calibration demonstrated integration with neural network architectures by adding a Gaussian process layer with Polya-Gamma augmentation to deep neural retrieval models for improved calibration and uncertainty estimation.
 
-As computational demands continue to grow and models become increasingly complex, the Polya-Gamma methodology's advantages become even more pronounced, and it is now a standard tool of Bayesian logistic regression (see @tiao2019polyagamma for a primer).
+The Polya-Gamma method is now a standard tool of Bayesian logistic regression (see @tiao2019polyagamma for a primer).
 
 ## Exercises {.unnumbered}
 

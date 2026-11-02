@@ -4,7 +4,7 @@
 ::: {#exr-}
 ## Convolution Operation
 
-For a 5×5 input image and a 3×3 kernel, compute the convolution.
+For a 5×5 input image and a 3×3 kernel, compute the convolution, without flipping the kernel, as deep learning libraries do.
 
 Input:
 ```
@@ -28,12 +28,12 @@ c) What type of feature does this kernel detect?
 d) How would you modify the convolution to preserve the input size?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 a) Output size formula: $\frac{n - k + 2p}{s} + 1$
 - $n = 5$ (input size), $k = 3$ (kernel size), $p = 0$ (padding), $s = 1$ (stride)
 - Output size = $(5 - 3 + 0)/1 + 1 = 3$
-- So: **3×3 output**
+- So: 3×3 output
 
 b) Top-left output:
 ```{r}
@@ -53,7 +53,7 @@ print(patch * kernel)
 cat("\nSum (output value):", output_11, "\n")
 ```
 
-c) This kernel is a **vertical edge detector** (Sobel-like):
+c) This kernel is a vertical edge detector (Prewitt-like):
 - Left column has +1 (detects left side)
 - Right column has -1 (detects right side)
 - High response where brightness changes from left to right
@@ -100,10 +100,9 @@ For a 4×4 feature map:
 a) Apply 2×2 max pooling with stride 2. What is the output?
 b) Apply 2×2 average pooling with stride 2. What is the output?
 c) Why is pooling useful in CNNs?
-d) What is global average pooling and when is it used?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 ```{r}
 feature_map <- matrix(c(1, 3, 2, 4,
@@ -141,17 +140,10 @@ print(avg_pool)
 ```
 
 c) Why pooling is useful:
-- **Dimensionality reduction**: Reduces spatial size, fewer parameters in subsequent layers
-- **Translation invariance**: Small shifts in input don't change pooled output much
-- **Computation efficiency**: Smaller feature maps = faster processing
-- **Feature selection**: Max pooling keeps strongest activations; average pooling provides smoothing
-
-d) Global Average Pooling (GAP):
-- Averages each feature map to a single value
-- If feature map is $H \times W \times C$, output is $1 \times 1 \times C$
-- Used at end of CNNs instead of fully connected layers
-- Reduces parameters dramatically, helps prevent overfitting
-- Example: a fully connected head with 4096 units contributes millions of parameters, whereas GAP adds none, since it only averages each channel
+- Dimensionality reduction: Reduces spatial size, fewer parameters in subsequent layers
+- Reduced sensitivity to shifts: small shifts in input often leave the pooled output unchanged
+- Computation efficiency: Smaller feature maps = faster processing
+- Feature selection: Max pooling keeps strongest activations; average pooling provides smoothing
 
 :::
 :::
@@ -167,14 +159,14 @@ c) Write the architecture for a simple CNN with 2 conv layers and 1 FC layer.
 d) Calculate the total number of parameters in your architecture.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 a) First conv layer parameters:
 - Input: 3 channels (RGB)
 - Output: 32 filters
 - Kernel: 3×3
 - Parameters = (kernel_h × kernel_w × input_channels + 1) × output_filters
-- = (3 × 3 × 3 + 1) × 32 = 28 × 32 = **896 parameters**
+- = (3 × 3 × 3 + 1) × 32 = 28 × 32 = 896 parameters
 
 ```{r}
 params_conv1 <- (3 * 3 * 3 + 1) * 32
@@ -226,46 +218,32 @@ cat("Total:", total, "parameters\n")
 ::: {#exr-}
 ## True/False: CNNs
 
-a) A 5×5 convolution can be replaced by two 3×3 convolutions with fewer parameters.
+a) The receptive field of a 5×5 convolution can be matched by two 3×3 convolutions with fewer parameters.
 
 b) Max pooling is differentiable everywhere.
 
 c) In a CNN, the number of parameters in a conv layer depends on the input image size.
 
-d) Data augmentation (flipping, rotating images) helps CNNs learn more robust features.
-
-e) Modern CNNs use fully connected layers after every conv layer.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
-a) **TRUE**. Assume $C$ input and output channels throughout, so both layers map $C \to C$ channels:
+a) TRUE. Assume $C$ input and output channels throughout, so both layers map $C \to C$ channels:
 - 5×5 conv: 5×5×C×C = 25C² parameters (plus bias)
 - Two 3×3 convs: 3×3×C×C + 3×3×C×C = 9C² + 9C² = 18C² parameters
 - Same receptive field (5×5), fewer parameters (18C² < 25C²)
 - This is why modern CNN designs favor stacking small 3×3 convs instead of using a single larger kernel
 
-b) **FALSE**. Max pooling is not differentiable at the boundary where the maximum switches. However:
+b) FALSE. Max pooling is not differentiable at the boundary where the maximum switches. However:
 - In practice, we use subgradients (gradient = 1 for max element, 0 for others)
 - This works well for backpropagation
 
-c) **FALSE**. Conv layer parameters depend on:
+c) FALSE. Conv layer parameters depend on:
 - Kernel size (h × w)
 - Number of input channels (C_in)
 - Number of output channels (C_out)
 - = h × w × C_in × C_out + C_out (bias)
 - The spatial input size (H × W) does NOT affect parameter count!
-
-d) **TRUE**. Data augmentation:
-- Creates variations of training images (flips, rotations, crops, color jitter)
-- Forces network to learn features invariant to these transformations
-- Effectively increases training data
-- Standard first step for image classification
-
-e) **FALSE**. Modern CNNs typically minimize FC layers:
-- Early CNN designs relied on large FC layers, which held most of the parameters
-- Many modern designs use Global Average Pooling followed by a single FC layer, instead of stacking dense layers
-- FC layers are parameter-heavy and prone to overfitting
 
 :::
 :::
@@ -284,7 +262,7 @@ c) Generalize part (b): show that $L=3$ stacked $3\times 3$ layers matches the r
 d) Beyond the parameter count, the stacked design inserts an extra nonlinearity (e.g., ReLU) after every layer instead of just one. Why does this matter, and why do modern CNN architectures generally favor stacks of small kernels over single large ones?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 a) Look backward from one fixed output unit through the stack. After a single $3\times 3$ layer, that unit depends on a $3\times 3$ patch of the input, so $\text{RF}(1)=3$. Now stack a second $3\times 3$ layer on top: its output unit combines three adjacent positions of the first layer's output, and because that layer has stride 1, those three positions have receptive fields staggered by exactly one pixel from each other. Their union reaches one pixel further left and one pixel further right than a single window, so $\text{RF}(2) = \text{RF}(1) + 2 = 5$. Every additional $3\times 3$ layer repeats this argument, adding two pixels each time:
 $$
@@ -327,18 +305,14 @@ cat("Ratio:", round(three_3x3 / one_7x7, 3), "\n")
 ```
 Three stacked $3\times 3$ layers use $3\times(3\times 3\times C^2)=27C^2$ parameters, versus $7\times 7\times C^2=49C^2$ for one $7\times 7$ layer, about 45% fewer, again for matching receptive fields.
 
-d) Each stacked $3\times 3$ layer contributes its own ReLU, so the $L$-layer stack composes $L$ nonlinear transformations where the single large-kernel layer composes only one. A deeper composition of nonlinearities can represent sharper, more complex decision boundaries than one linear filter followed by a single nonlinearity, for the same receptive field. Fewer parameters, cheaper computation, and more nonlinearity for a given receptive field: this combination is the design principle behind VGGNet (Simonyan and Zisserman, 2014), which replaced the large convolutions used in earlier architectures such as AlexNet with stacks of $3\times 3$ convolutions throughout, and stacking small kernels remains standard practice in CNN design today.
+d) Each stacked $3\times 3$ layer contributes its own ReLU, so the $L$-layer stack composes $L$ nonlinear transformations where the single large-kernel layer composes only one. A deeper composition of nonlinearities can represent sharper, more complex decision boundaries than one linear filter followed by a single nonlinearity, for the same receptive field. Fewer parameters, cheaper computation, and more nonlinearity for a given receptive field: this combination is the design principle behind VGGNet [@simonyan2014very], which replaced the large convolutions used in earlier architectures such as AlexNet with stacks of $3\times 3$ convolutions throughout, and stacking small kernels remains standard practice in CNN design today.
 
 :::
-:::
-
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
 :::
 
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-conv2d-scratch}
 ## 2D Convolution from Scratch
@@ -368,10 +342,10 @@ a) Write a function `conv2d(image, kernel)` that slides the kernel over the imag
 
 b) Apply `conv2d` to `image` using `sobel_x`. Where is the response largest, and why is this the behavior you would expect from a vertical edge detector? Verify your output against `scipy.signal.correlate2d(image, sobel_x, mode="valid")`. Then compare with `scipy.signal.convolve2d(image, sobel_x, mode="valid")`, which rotates the kernel 180 degrees before sliding it, the textbook definition of convolution. Do the two scipy results agree here, and what does that say about `sobel_x`?
 
-c) The kernel above has 9 weights plus 1 bias, reused at all 16 output positions. How many parameters would a fully connected layer need to map all 36 input pixels to the same 16 outputs? What does this comparison illustrate about parameter sharing in convolutional layers?
+c) The kernel above has 9 weights, and a convolutional layer adds 1 bias, reused at all 16 output positions. How many parameters would a fully connected layer need to map all 36 input pixels to the same 16 outputs? What does this comparison illustrate about parameter sharing in convolutional layers?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 ```{python}
 def conv2d(image, kernel):
@@ -418,7 +392,6 @@ The convolutional filter uses 10 parameters regardless of image size, since the 
 
 ```{python}
 import numpy as np
-np.random.seed(22)
 
 x = np.array([
     [0., 1., 9., 0., 2., 0.],
@@ -433,7 +406,7 @@ b) Build `x_shift` by shifting `x` one pixel to the right (fill the new first co
 c) The two large activations in `x`, the values 9 and 2, sit at columns 2 and 4. Using the part (b) comparison, explain why max pooling reproduces both of them exactly after the shift while average pooling does not, and relate this to why max pooling, rather than average pooling, is usually credited with giving CNNs a degree of translation invariance.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
 ```{python}
 def pool2d(x, reducer, size=2, stride=2):
@@ -485,7 +458,7 @@ c) The value 9 starts at column 2, the left edge of the window spanning columns 
 ::: {#exr-cnn-mnist-pytorch}
 ## Training and Shrinking a CNN on MNIST in PyTorch
 
-@sec-cnn trains a PyTorch convolutional network on 8,000 MNIST images and reports 93% test accuracy, against 77% for the fully connected network. This exercise reproduces that pipeline, then shrinks the convolutional channels and measures what the shrinking costs. Use the same data and split as the chapter: load the MNIST test files with the chapter's `parse_images` and `parse_labels`, then reuse `numpy.random.RandomState(0)` to build `traini` (the first 8,000 shuffled indices) and `testi` (the remaining 2,000). The chapter's training code calls `torch.manual_seed(0)` before building the model; do the same before building each model here, so that your numbers are reproducible.
+@sec-cnn trains a PyTorch convolutional network on 8,000 MNIST images and reports 94% held-out accuracy, against 77% for the fully connected network. This exercise runs that pipeline for 5 epochs rather than 10, then shrinks the convolutional channels and measures what the shrinking costs. Use the same data and split as the chapter: load the MNIST test files with the chapter's `parse_images` and `parse_labels`, then reuse `numpy.random.RandomState(0)` to build `traini` (the first 8,000 shuffled indices) and `testi` (the remaining 2,000). The chapter's training code calls `torch.manual_seed(0)` before building the model; do the same before building each model here, so that your numbers are reproducible.
 
 ```{python}
 #| eval: false
@@ -519,18 +492,18 @@ num_train = len(traini)
 num_batches = (num_train + batch_size - 1) // batch_size
 ```
 
-a) Implement the chapter's `Net`: `conv1` mapping 1 to 32 channels and `conv2` mapping 32 to 64 channels (both 3×3 valid convolutions, each followed by ReLU), then a single 2×2 max pool, a flatten to 9216 features, `fc1` mapping 9216 to 128 (with ReLU), and `fc2` mapping 128 to 10 with a log-softmax output. Train for 5 epochs at batch size 128, minimizing `F.nll_loss` with `torch.optim.Adadelta` at `lr=0.1`. Print the training loss at the end of each epoch and report the final test accuracy on `testi`.
+a) Implement the chapter's `Net`: `conv1` mapping 1 to 32 channels and `conv2` mapping 32 to 64 channels (both 3×3 valid convolutions, each followed by ReLU), then a single 2×2 max pool, a flatten to 9216 features, `fc1` mapping 9216 to 128 (with ReLU), and `fc2` mapping 128 to 10 with a log-softmax output. Train for 5 epochs at batch size 128, minimizing `F.nll_loss` with `torch.optim.Adadelta` at `lr=0.1`. Print the training loss at the end of each epoch and report the final held-out accuracy on `testi`.
 
-b) Build a smaller network identical to `Net` except that `conv1` outputs 16 channels and `conv2` outputs 32, so the flattened size becomes 32×12×12 = 4608 and `fc1` maps 4608 to 128. Train it with the same data split, batch size, epoch count, and optimizer settings. Report its loss trajectory and final test accuracy.
+b) Build a smaller network identical to `Net` except that `conv1` outputs 16 channels and `conv2` outputs 32, so the flattened size becomes 32×12×12 = 4608 and `fc1` maps 4608 to 128. Train it with the same data split, batch size, epoch count, and optimizer settings. Report its loss trajectory and final held-out accuracy.
 
 c) For both networks, compute the total parameter count with `sum(p.numel() for p in model.parameters())` and the count for `fc1` alone. What fraction of each network's parameters sits in `fc1`? By roughly what factor did halving the channel counts reduce the total?
 
-d) Compare the two networks' accuracies and parameter counts, to each other and to the chapter's 77% fully connected baseline. Does halving the channels cost much accuracy? Using your answer to (c), explain why shrinking the convolutional channels cuts the total parameter count by roughly the same factor even though the convolutional layers themselves hold under 2% of the parameters, and connect this to @exr-receptive-field's point about where a CNN's real parameter cost lives.
+d) Compare the two networks' accuracies and parameter counts, to each other and to the chapter's 77% fully connected baseline. Does halving the channels cost much accuracy? Using your answer to (c), explain why shrinking the convolutional channels cuts the total parameter count by roughly the same factor even though the convolutional layers themselves hold under 2% of the parameters.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+Solution:
 
-We share one training-and-evaluation helper across both networks. It reproduces the chapter's minibatch loop and Adadelta optimizer, using a fixed `RandomState(1)` for the batch order so the two runs are directly comparable.
+We share one training-and-evaluation helper across both networks. It follows the chapter's minibatch loop and Adadelta optimizer, but reshuffles every epoch, using a fixed `RandomState(1)` for the batch order so the two runs are directly comparable.
 
 ```{python}
 #| eval: false
@@ -555,7 +528,7 @@ def train_and_eval(model):
         td = torch.from_numpy(x[testi]/np.float32(255.))[:, None, :, :]
         pred = model(td).argmax(dim=1)
     acc = 100.*pred.eq(torch.from_numpy(y[testi])).sum().item()/len(testi)
-    print(f"Test accuracy: {acc:.1f}%")
+    print(f"Held-out accuracy: {acc:.1f}%")
     return acc
 ```
 
@@ -583,7 +556,7 @@ net = Net(32, 64)
 train_and_eval(net)
 ```
 
-The five per-epoch losses print as 0.483, 0.322, 0.236, 0.301, 0.129 and the final test accuracy is 91.6%. (The printed value is the last minibatch's loss in each epoch, as in the chapter's own `train`, so it is noisy and need not fall monotonically; the epoch-3 uptick is ordinary minibatch variance.) This is in line with the chapter's reported 93%: with only 8,000 training images and a handful of epochs, a point or two of variation across runs and platforms is expected, so an exact match is neither required nor meaningful.
+The five per-epoch losses print as 0.483, 0.322, 0.236, 0.301, 0.129 and the final held-out accuracy is 91.6%. (The printed value is the last minibatch's loss in each epoch, as in the chapter's own `train`, so it is noisy and need not fall monotonically; the epoch-3 uptick is ordinary minibatch variance.) This is below the chapter's figure because training stops at 5 epochs rather than 10: the same helper reaches 94.4% at 10 epochs.
 
 b) The smaller network is just `Net(16, 32)`, trained by the identical helper.
 
@@ -594,7 +567,7 @@ net_small = Net(16, 32)
 train_and_eval(net_small)
 ```
 
-Its losses print as 0.628, 0.385, 0.259, 0.329, 0.130 and its final test accuracy is 91.8%, essentially the same as the full network and still far above the fully connected baseline.
+Its losses print as 0.628, 0.385, 0.259, 0.329, 0.130 and its final held-out accuracy is 91.8%, essentially the same as the full network and still far above the fully connected baseline.
 
 c)
 ```{python}
@@ -617,7 +590,7 @@ The counts break down as follows (each conv layer holds $(3\times 3\times C_\tex
 
 So `fc1` alone is 1,179,776/1,199,882 = 98.3% of `Net` and 589,952/596,042 = 99.0% of `NetSmall`. The total drops from about 1.20 million to about 0.60 million, a reduction by a factor of 1,199,882/596,042 ≈ 2.0.
 
-d) Halving both channel counts costs essentially no test accuracy here (91.6% versus 91.8%, a difference well within run-to-run noise), yet it removes half the parameters, and both networks sit far above the 77% fully connected baseline. The reason a near-factor-of-2 cut in the total follows from shrinking channels, even though `conv1` and `conv2` together are under 2% of the parameters, is that `fc1` dominates the budget and its size is set by the convolutional output: `fc1`'s input width equals (conv2's channel count) times 12 times 12, so halving conv2 from 64 to 32 channels halves `fc1`'s input width and therefore roughly halves `fc1` itself (589,952 versus 1,179,776), which is almost the entire network. This is the flip side of @exr-receptive-field: there, convolutional weight sharing let a stack of small kernels enlarge the receptive field for very few parameters; here that same weight sharing keeps the convolutional budget tiny whichever channel counts we pick, so for this architecture the dense classifier head, not the convolutions, is where the parameters, and any real savings from shrinking, actually live.
+d) Halving both channel counts costs essentially no held-out accuracy here (91.6% versus 91.8%, a difference well within run-to-run noise), yet it removes half the parameters, and both networks sit far above the 77% fully connected baseline. The reason a near-factor-of-2 cut in the total follows from shrinking channels, even though `conv1` and `conv2` together are under 2% of the parameters, is that `fc1` dominates the budget and its size is set by the convolutional output: `fc1`'s input width equals (conv2's channel count) times 12 times 12, so halving conv2 from 64 to 32 channels halves `fc1`'s input width and therefore roughly halves `fc1` itself (589,952 versus 1,179,776), which is almost the entire network. This is the flip side of @exr-receptive-field: there, convolutional weight sharing let a stack of small kernels enlarge the receptive field for very few parameters; here that same weight sharing keeps the convolutional budget tiny whichever channel counts we pick, so for this architecture the dense classifier head, not the convolutions, is where the parameters, and any real savings from shrinking, actually live.
 
 :::
 :::

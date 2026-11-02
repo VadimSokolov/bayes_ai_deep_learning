@@ -51,9 +51,9 @@ Exactly one of the $k$ events occurs, so this is the net gain in every possible 
 
 (ii) If $\sum_i P(A_i) < 1$, the factor is positive, so $G>0$ requires $S>0$: buy equal stakes on every outcome. This is the mirror-image case, illustrated earlier in the chapter with two events summing to $0.9$.
 
-(iii) If $\sum_i P(A_i) = 1$, then $G = S \times 0 = 0$ for every choice of $S$, so the equal-stake construction cannot produce a riskless profit in either direction. This is finite additivity: $\sum_i P(A_i)=1$ is necessary for coherence, since by (i) and (ii) any other value is exploitable, and, combined with the determinant argument of the [Appendix](#sec-dutch-book) covering arbitrary, unequal stakes, sufficient as well.
+(iii) If $\sum_i P(A_i) = 1$, then $G = S \times 0 = 0$ for every choice of $S$, so the equal-stake construction cannot produce a riskless profit in either direction. This is finite additivity: $\sum_i P(A_i)=1$ is necessary for coherence, since by (i) and (ii) any other value is exploitable, and, as the solution to part (d) shows, sufficient as well.
 
-a) With prices $0.50, 0.35, 0.15$, the sum is $\sum_i P(A_i) = 1.00$. By part (c), $G = S(1-1) = 0$ for every stake $S$, so selling or buying equal exposure across the three horses now breaks even in every possible world: this construction yields no arbitrage. A full proof that no combination of stakes, equal or not, can produce a Dutch book once $\sum_i P(A_i)=1$ and each $P(A_i)\in[0,1]$ follows the same determinant argument used in the [Appendix](#sec-dutch-book) for two events and their complement.
+a) With prices $0.50, 0.35, 0.15$, the sum is $\sum_i P(A_i) = 1.00$. By part (c), $G = S(1-1) = 0$ for every stake $S$, so selling or buying equal exposure across the three horses now breaks even in every possible world: this construction yields no arbitrage. No combination of stakes can produce a Dutch book once $\sum_i P(A_i)=1$ and each $P(A_i)\ge 0$: the gain in world $i$ is $G_i = S_i - \sum_j P(A_j) S_j$, and $\sum_i P(A_i) G_i = 0$, so the gains cannot all be positive.
 :::
 :::
 
@@ -99,7 +99,7 @@ print(d1b1)
 # The ratio is 
 d1b3/d1b1
 ```
-Person with high balance has 63% chance of being in default, while a person with low balance has 0.7% chance of being in default, 90-times less likely!
+Person with high balance has 64% chance of being in default, while a person with low balance has 0.7% chance of being in default, 90-times less likely!
 :::
 :::
 
@@ -142,7 +142,7 @@ e)
 dd = data.frame(son=as.double(d["farm",]/sum(d["farm",])),father=as.double(d[,"farm"]/sum(d[,"farm"])))
 barplot(height = t(as.matrix(dd)),beside=TRUE,legend=TRUE, col = c("lightblue", "coral"))
 ```
-The bar chart allows us to visualize the marginal distributions of occupations of fathers and sons. The striking feature of this chart is that in the sons, the proportion of farmers has greatly decreased and the proportion of professionals has increased. From Part d, we see that of the sons who are farmers, 78% had fathers who are farmers. On the other hand, Part c shows that only 16% of the fathers who farmed produced sons who farmed. This is higher than the 2.3% of sons in the general population who became farmers, showing that sons of farmers went into farming at a rate higher than the general population of the study. However, most of the sons of farmers went into another profession. There was a great deal of movement out of farming and very little movement into farming from the fathers' to the sons' generation.
+The bar chart shows the son's occupation given a farmer father and the father's occupation given a farmer son. The striking feature is the decline of farming in the marginal distributions: $0.110$ of the fathers and $0.023$ of the sons are farmers, while professionals rise from $0.235$ to $0.352$. From Part d, we see that of the sons who are farmers, 78% had fathers who are farmers. On the other hand, Part c shows that only 16% of the fathers who farmed produced sons who farmed. This is higher than the 2.3% of sons in the general population who became farmers, showing that sons of farmers went into farming at a rate higher than the general population of the study. However, most of the sons of farmers went into another profession. There was a great deal of movement out of farming and very little movement into farming from the fathers' to the sons' generation.
 
 
 To determine the validity of inference outside the sample, we would need to know more about how the study was designed. We do not know how the sample was selected or what steps were taken to ensure it was representative of the population being studied. We also are not given the sample size, so we don't know the accuracy of our probability estimates. The paper from which the table was taken, cited in the problem, provides more detail on the study.
@@ -178,7 +178,7 @@ a) See Table:
        $4$ to $6$   0.12+0.32=0.44
           $>6$      0.04+0.14=0.18
 
-a) No, the marginal distribution of hours given you are a teenager or adult are not the same:
+a) No, the conditional distribution of hours given you are a teenager or adult are not the same:
 
 | Hours      |   Teenager                           | Adult                                | 
 |----------- | ------------------------------------ | -----------------------------------  | 
@@ -219,7 +219,7 @@ a) Are drinking and watching TV independent?
 a) $P(X > 2 ) = 0.26$.
 a) $P(X>Y) = 0.42$
 a) $P( Y \mid X=3 )$ are given by $( 1/13 , 2/13 , 8/13 , 2/13 )$.
-a) $P( X \mid Y=0 )$ are given by $( 7/22 , 7/22 , 3/11 , 1/11 )$ and so $E(X\mid Y=0) = 25/22 = 1.13$
+a) $P( X \mid Y=0 )$ are given by $( 7/22 , 7/22 , 3/11 , 1/11 )$ and so $E(X\mid Y=0) = 25/22 = 1.14$
 a) No. $P( X = 2 \text{ and } Y=2 )= 0.14 \neq 0.43 \times 0.30 = P(X=2 ) P(Y=2)$
 :::
 :::
@@ -344,8 +344,7 @@ they visit the store frequently or not
     Frequent          0.10           0.50     0.17
    Infrequent         0.03           0.05     0.15
 
-a) What is the probability that a customer who never buys generics
-    visits the store?
+a) What is the probability that a customer never buys generics?
 a) What is the probability that a customer often purchases generic?
 a) Are buying generics and visiting the store independent decisions?
 a) What is the conditional distribution of purchasing generics given
@@ -373,14 +372,14 @@ become interested in determining the likelihood of one of their listings
 being sold within a certain number of days. An analysis of recent
 company sales of 800 homes produced the following table:
 
-   Days Listed until Sold   Under 20   31-90   Over 90   Total
+   Days Listed until Sold   Under 30   31-90   Over 90   Total
   ------------------------ ---------- ------- --------- -------
         Under \$50K            50       40       10       100
         \$50-\$100K            20       150      80       250
         \$100-\$150K           20       280      100      400
         Over \$ 150K           10       30       10       50
 
-a) Estimate the probability that a home listed for over 90 days before being sold
+a) Estimate the probability that a home is listed for over 90 days before being sold
 a) Estimate the probability that the initial asking price is under \$50K.
 a) What is the probability of both of the above happening? Are these two events independent?
 a) Assuming that a contract has just been signed to list a home that has an initial asking price of less than \$100K, what is the probability that the home will take Cooper Realty more than 90 days to sell?
@@ -392,7 +391,7 @@ Let $A$ be the event that it takes more than 90 days to sell. Let $B$  denote th
 
 a) $P(A) = ( 10 + 80 + 100 + 10)/800 = 200/800 = 0.25$
 a) $P(B) = 100/800 = 0.125$
-a) $P( A \text{ and } B ) = 10/800 = 0.0125$
+a) $P( A \text{ and } B ) = 10/800 = 0.0125 \neq P(A)P(B) = 0.25 \times 0.125 = 0.03125$, so the events are not independent.
 a) First, $P( < \$100K ) = 350/800 = 0.4375$. Secondly, 
 $$
 P( A \mid < \$100K ) = P( < \$100K \mid A ) P(A)/ P( < \$100K) = (90/200)\times(200/800)/0.4375 = 0.2571
@@ -509,7 +508,7 @@ Calculate each term:
 
 So,
 $$
-E \approx \$2.08 + \$0.19 = \$2.27
+E \approx \$2.083 + \$0.194 \approx \$2.28
 $$
 
 d) **Mega Millions odds**
@@ -652,7 +651,6 @@ After Facebook's earnings announcement, we have the following distribution of re
 
 a) Ahead of the earnings announcement, what is the probability that Facebook stock will have a return greater than $5$%?
 a) Do you get the same answer for the probability that it drops by at least $5$%?
-a) Use simulation to provide empirical answers with a sample of size N = 10,000, check and see how close you get to the theoretical answers you've found to the questions posed above. Provide histograms of the distributions you simulate.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -753,9 +751,6 @@ The Downhill Manufacturing company produces snowboards. The average life of thei
 
 a) What's the probability of a snowboard being defective?
 a) In a shipment of $120$ snowboards, what is the probability that the number of defective boards is greater than $10$?
-a) Use simulation to provide empirical answers with a sample of size N = 10,000, check and see how close you get to the theoretical answers you've found to the questions posed above. Provide histograms of the distributions you simulate.
-
-You can use R and simulation with `rbinom`, `rnorm` as an alternative
 
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -819,7 +814,7 @@ pnorm(1) - pnorm(-1)
 ```
 China's observed frequency ($56$%) is well below this theoretical value, while the S&P $500$'s ($74$%) is somewhat above it.
 
-a) Neither market matches the normal model exactly, but the mismatch is far more dramatic for China: a smaller share of days cluster within one standard deviation of the mean, and (as Black Monday shows) extreme moves occur much more often than a Gaussian model predicts. This is the signature of a fat-tailed (leptokurtic) return distribution. The $-8.5$% crash, essentially "impossible" under the fitted normal model ($p\approx 0.0005$), is a symptom of this fat-tailed behavior rather than evidence that the mean and volatility were mis-estimated. The S&P $500$'s $74$%, being closer to (if still somewhat above) the $68.3$% benchmark, indicates its daily returns are comparatively better approximated by a normal distribution, though still not perfectly so.
+a) Neither market matches the normal model exactly, but the mismatch is far more dramatic for China. Fat tails alone would put more than $68.3$% of days within one standard deviation, as for the S&P $500$'s $74$%. China's $56$% together with a crash far out in the tail points to a volatility that is not constant over time, so that a single standard deviation fits poorly. The $-8.5$% crash, essentially "impossible" under the fitted normal model ($p\approx 0.0005$), is a symptom of this behavior rather than evidence that the mean and volatility were mis-estimated. The S&P $500$'s $74$% is closer to the $68.3$% benchmark (by $5.7$ points against $12.3$), so its daily returns are comparatively better approximated by a normal distribution, though still not perfectly so.
 :::
 :::
 
@@ -1047,15 +1042,14 @@ $$
 WTP=0.2\times20+0.5\times40+0.3\times80-40=48-40=8
 $$
 
-Therefore, once should be willing to pay $\$8$ million for this information.
+Therefore, one should be willing to pay $\$8$ million for this information.
 
 :::
 :::
 
 ::: {#exr-}
 ## Google Survey
-Visitors to your website are asked to answer a single survey [Google
-website](http://www.google.com) question before they get access to the
+Visitors to your website are asked to answer a single survey question before they get access to the
 content on the page. Among all of the users, there are two categories
 
 a) Random Clicker (RC)
@@ -1064,11 +1058,11 @@ a) Truthful Clicker (TC)
 
 There are two possible answers to the survey: yes and no.
 
-Random clickers would click either one with equal probability. You are also giving the information that the expected fraction of random clickers is $0.3$.
+Random clickers would click either one with equal probability. You are also given the information that the expected fraction of random clickers is $0.3$.
 
 After a trial period, you get the following survey results. $65$% said Yes and $35$% said No.
 
-How many people who are truthful clickers answered yes?
+What fraction of truthful clickers answered yes?
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**: 
@@ -1123,9 +1117,9 @@ a) False. $Var(X-Y) = Var(X) + Var(Y)$
 a) False. Using the plug in rule, the standard deviation of $X + Y$ is the square root of the sum of the variances of $X$ and $Y$
 a) False. $s_X \geq Var(X)$ if the $Var (X ) \leq 1$
 a) False. Using the formula relating covariance and correlation, namely $Cov( X, Y ) = r s_X s_Y$ gives $Cov ( X,Y) = - 0.81 \times 20 \times 25 = - 405.$
-a) False. For example, $100, 101, 102$ has mean $101$ and variance $0.333$,but $100, 101$ has mean $100.5$ and variance $0.5$
+a) False. For example, $0, 10, 10$ has mean $6.67$ and variance $33.3$, but $0, 10$ has mean $5$ and variance $50$
 a) False. First, $Var(X+Y)=Var(X)+Var(Y)$ (as $Cov(X,Y)=0)$ and so $Var(X+Y)=2 Var(X)$. Secondly $Var(2X) = 4 Var(X)$
-a) True. For example, consider the portfolio $P=  0.5 X + 0.5 Y$. This has expected return $\mu_P = 0.5\times 5 + 0.5 \times 0.10 = 7.5 \%$. As the correlation is zero, its variance is given by $\sigma_P^2 =0.5^2 \times 0.0025 + 0.5^2  0.0036 = 0.001525 < Var(X)$
+a) True. For example, consider the portfolio $P=  0.5 X + 0.5 Y$. This has expected return $\mu_P = 0.5\times 5 + 0.5 \times 10 = 7.5 \%$. As the correlation is zero, its variance is given by $\sigma_P^2 =0.5^2 \times 0.0025 + 0.5^2  0.0036 = 0.001525 < Var(X)$
 
 
 :::
@@ -1150,7 +1144,7 @@ a) False. The expected waiting time until you hit the jackpot is 100 times, but 
 a) True. The expected value of the sample does equal the true value
 a) True. The plug-in rule states that $E(aX+bY)=aE(X)+bE(Y)$. Plug in $A=1$ and $B =-2$. Hence $E(X-2Y)=E(X)+E(-2Y)=E(X)-2E(Y)$
 a) True. $E(spend \$5k) = 0.5\cdot\$80000 - 5000 = 35000$. $E(spend \$10k) = 0.6\cdot 80000 - 10000 = 38000$
-a) False. By the plug-in rule, this relation holds irrespective of whether X and Y are.
+a) False. By the plug-in rule, this relation holds irrespective of whether X and Y are independent.
 
 :::
 :::
@@ -1239,7 +1233,7 @@ a) False. By the properties of Poisson distribution,$$E(X+Y) = E(X) + E(Y) = 2+3
 a) True. Here $S\sim Pois(2.5)$. We need $P(S \geq 2) = 1 - P(S \leq 1) = 1 - 0.2873 = 0.7127.$ In R we have `ppois(1,2.5) = 0.28729`
 a) True. P(#Goal > 0) = 1-P(#Goal = 0) = `1-ppois(0,2.2)`=0.89.
 a) False. Assuming each scoring's ability is independent, we have that:$$\begin{aligned}Pr(Arsenal=0) &=& \frac{(2.2)^0 e^{-2.2}}{0!} = e^{-2.2} \\Pr(Liverpool=0) &=& \frac{(1.6)^0 e^{-1.6}}{0!} = e^{-1.6} \\\longrightarrow\quad Pr(Arsenal=0\;and\; Liverpool=0) &=& e^{-2.2}\times e^{-1.6} = e^{-3.8}\end{aligned}$$The odds are: $O = (1-e^{-3.8})/e^{-3.8}$ or $43.7$ to $1$.
-a) False, `dpois(0,2) = 0.135` $= e^{-2}$ so that $P(hit>1)= 1 - P(hit=0)=0.865$
+a) False, `dpois(0,2) = 0.135` $= e^{-2}$ so that $P(hit\ge 1)= 1 - P(hit=0)=0.865$
 a) False. We have that :$$E[g]=2\quad\Rightarrow\quad g\sim Pois(\lambda=2)$$ So, we find the chance that they score two or fewer goals is:$$P(g\le2)=0.6767.$$ In `R: ppois(2,2)=0.67667`
 
 :::
@@ -1288,11 +1282,11 @@ a) True. We have $P( X < 14 ) = P \left ( \frac{ X - 16 }{2} <  \frac{ 14 - 16 }
 a) False. Required probability is $0.5 - P( Z < -1 ) = 0.3413$
 a) False. $P(X>25)= 1 - P( Z < 2.16) = 0.0154$
 a) True. Using normal approximation, $n=50, p=0.2$, have $X \sim N ( 10 , 8 )$
-a) False. $n=500$, $\hat{p} \sim N \left ( p , \frac{p(1-p)}{n} \right )$ and $H_0 : p = 0.3$ versus $H_1 : p \neq 0.3$. Yields a $99$% confidence interval of $(0.1835 , 0.4165 )$. Sample proportion doesn't lie in confidence interval so the data do not support their claim. Or could use a $Z$-test
+a) False. $n=500$, $\hat{p} \sim N \left ( p , \frac{p(1-p)}{n} \right )$ and $H_0 : p = 0.3$ versus $H_1 : p \neq 0.3$. Yields a $99$% confidence interval of $(0.247 , 0.353 )$. Sample proportion doesn't lie in confidence interval so the data do not support their claim. Or could use a $Z$-test
 a) True. In a normal distribution, 2.5% of the population is more than 1.96 standard deviations below the mean, and 2.5% is more than 1.96 standard deviations above the mean. Hence 5% of the distribution is more than1.96 standard deviations from the mean
 a) False. $z_{70}=\frac{70-60}{15}=0.67$ and 1-F($z_{70}$) = 0.25. Hence, about 25% of people spend more than \$70 per visit.
 a) False. For $n \geq 40$, we can approximate a Binomial distribution $Bin(n,p)$ with a normal $N ( np , np (1-p))$. In this case, we get $np = 4$ and variance $40 \times 0.1 \times 0.9 = 3.6$ or a standard deviation of $1.90$
-a) False. The standardized $Z$-score is given by $Z= (1-3)/3 = -0.667$.  $P(X> 1) = P(Z> -0.667) = P(Z < 0.667) = 0.7486$
+a) False. The standardized $Z$-score is given by $Z= (1-3)/3 = -0.667$.  $P(X> 1) = P(Z> -0.667) = P(Z < 0.667) = 0.7476$
 ```{r}
 pnorm(0.667) # 0.7476139
 ```
@@ -1615,13 +1609,9 @@ Because we can write the joint distribution of $(W,Z)$ as the product of two mar
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-inverse-cdf-sampling}
 ## Sampling via the Inverse CDF Method
@@ -1835,7 +1825,7 @@ portfolio_mean_1 = 0.5 * mean(VUG) + 0.5 * mean(VTV)
 portfolio_var_1 = 0.5^2 * var(VUG) + 0.5^2 * var(VTV) + 2 * 0.5 * 0.5 * cov(VUG, VTV)
 portfolio_sd_1 = sqrt(portfolio_var_1)
 ```
-You may say VUG or VTV best suits you, as long as you give an explanation such as you are risk aversion or not. Now we consider mean and variance of VUG - VTV,
+You may say VUG or VTV best suits you, as long as you give an explanation such as whether you are risk averse or not. Now we consider mean and variance of VUG - VTV,
 
 ```{r}
 mean_1 = mean(VUG) - mean(VTV)
@@ -1849,7 +1839,7 @@ pnorm(0, mean_1, sd = sd_1)
 ```
 
 However, we care about the probability that VUG beats VTV, that is
-$P(VUG > VTV) = P(VUG - VTV > 0) 
+$P(VUG > VTV) = P(VUG - VTV > 0)$.
 ```{r}
 pnorm(0, mean_1, sd = sd_1, lower.tail = FALSE)
 ```
@@ -1867,7 +1857,7 @@ For the Superbowl data.
 
 a) Plot the spread and outcome variables. Calculate means, standard deviations, covariances, correlations.
 a) What is the mean and the standard deviation of the winning margin (outcome)?
-a) Use a `boxplot` to compare the favorites' score versus the underdog.
+a) Use a `boxplot` to compare the spread with the outcome.
 a) Do these data look normally distributed?
 
 For the Derby data.
@@ -1894,7 +1884,7 @@ attach(superbowl)
 # plot Spread vs Outcome
 plot(Spread,Outcome,main="Spread v.s. Outcome")
 # add a 45 degree line to compare
-abline(1,1)
+abline(0,1)
 
 # Covariance, Correlation, alpha, beta
 x <- Spread
@@ -1937,7 +1927,7 @@ lines(seq(-10,30,0.01),dnorm(seq(-10,30,0.01),mean(Spread),sd(Spread)))
 ## Kentucky Derby
 ######################
 
-mydata2 <- read.csv("data/Kentucky_Derby_2014.csv",header=T)
+mydata2 <- read.csv("data/derby2016.csv",header=T)
 
 # attach the dataset 
 attach(mydata2)
@@ -2006,7 +1996,7 @@ sd(ret)
 hist(ret,breaks=50,main="BRK-A daily returns")
 
 # plots to show serial correlation in 1st and 2nd moments
-# to save the plot,click "Export" ans "save as image"
+# to save the plot,click "Export" and "save as image"
 
 acf(ret,lag.max=10,main="serial correlation in 1st moment")
 acf(ret^2,lag.max=10,main="serial correlation in 2nd moment")
@@ -2059,7 +2049,7 @@ abline(v = 270, col = "red", lwd = 2)
 ::: {#exr-}
 ## Russian Parliament Election Fraud
 
-On September 28, 2016 United Russia party won a super majority of seats, which will allow them to change the Constitution without any votes of other parties. Throughout the day, there were reports of voting fraud, including video purporting to show officials stuffing ballot boxes. Additionally, results in many regions demonstrate that United Russia on many poll stations got anomalously closed results, for example, 62.2% in more than hundred poll stations in Saratov Region.
+On September 18, 2016 United Russia party won a super majority of seats, which will allow them to change the Constitution without any votes of other parties. Throughout the day, there were reports of voting fraud, including video purporting to show officials stuffing ballot boxes. Additionally, results in many regions demonstrate that United Russia on many poll stations got anomalously close results, for example, 62.2% in more than hundred poll stations in Saratov Region.
 
 Using the assumption that United Russia's range in Saratov was \[57.5%, 67.5%\] and results for each poll station are rounded to one decimal point (when measure in percent), calculate probability that in 100 poll stations out of 1800 in Saratov Region the majority party got exactly 62.2%.
 
@@ -2130,7 +2120,7 @@ hist(AAPL, col="red", breaks=50); hist(GOOG, col="green", breaks=50)
 summary(AAPL); summary(GOOG)
 ```
 
-From the box plots, we can see many extreme observations out of 1.5     IQR (inter-quarter-range) of the lower and upper quartiles, which     are confirmed by the high kurtosis values.  We can also see their heavy tails in the histograms. GOOG is positive skew (mean much higher than median) and AAPL is not "significantly" skew (mean close to median).
+From the box plots, we can see many extreme observations out of 1.5     IQR (interquartile range) of the lower and upper quartiles, which point to heavy tails, also seen in the histograms. For both stocks the mean and median are close and neither is noticeably skewed.
 
 :::
 :::
@@ -2188,6 +2178,7 @@ daily$Pleasant <- with(daily,
 
 # Annual summary
 annual <- daily %>%
+  filter(Year >= 2008) %>%
   group_by(Year) %>%
   summarize(PleasantDays = sum(Pleasant, na.rm = TRUE), .groups = 'drop')
 
@@ -2213,7 +2204,7 @@ ggplot(monthly, aes(x = Month, y = AvgPleasant)) +
   theme_minimal()
 ```
 
-**Key Findings**: The DCA area experiences approximately 90--100 pleasant outdoor days per year (~25--28%). Peak months are May, September, and October. The metric shows moderate year-to-year variability (SD ≈ 10-15 days).
+Key findings: the DCA area experiences approximately 48 pleasant outdoor days per year (about 13%). Peak months are July, August, and September. The metric shows moderate year-to-year variability (SD about 6 days).
 :::
 :::
 

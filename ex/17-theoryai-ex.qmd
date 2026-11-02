@@ -176,7 +176,7 @@ e) In the normal means problem, the MLE is admissible for $p = 2$.
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) True. The zero-centered (original) JS estimator shrinks toward zero. The positive-part JS estimator and generalized versions (e.g., the grand-mean-centered estimator in the Computing exercises) can shrink toward other targets.
+a) True. The zero-centered (original) JS estimator shrinks toward zero. Generalized versions (e.g., the grand-mean-centered estimator in the Computing exercises) can shrink toward other targets.
 
 b) False. Ridge regression shrinks coefficients toward zero but never reaches exactly zero. Only Lasso ($\ell_1$ penalty) produces exact zeros.
 
@@ -372,13 +372,9 @@ d) For $\beta_j \gg \lambda>0$ (WLOG positive), $\prob{z_j>\lambda}\to1$ as $\be
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Baseball Batting Averages

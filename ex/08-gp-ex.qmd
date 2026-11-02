@@ -8,7 +8,7 @@ For the squared exponential kernel $k(x, x') = \sigma^2 \exp\left(-\frac{(x-x')^
 
 a) What happens to the GP when $\ell \to 0$?
 b) What happens when $\ell \to \infty$?
-c) If you double the length scale, by what factor does the "effective range" of correlation increase?
+c) If you double the length scale, by what factor does the "effective range" (the distance at which the correlation falls to $e^{-1}$) increase?
 d) A meteorologist uses a GP to model temperature as a function of location. She finds $\ell = 50$ km. Interpret this value.
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -41,20 +41,20 @@ a) A Gaussian Process defines a probability distribution over functions.
 
 b) For a GP, any finite collection of function values has a joint Gaussian distribution.
 
-c) The posterior variance of a GP at a test point depends on the observed function values $y$.
+c) With the kernel hyperparameters held fixed, the posterior variance of a GP at a test point depends on the observed function values $y$.
 
 d) The squared exponential kernel produces smooth (infinitely differentiable) sample functions.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) **TRUE**. A GP is a distribution over functions such that any finite collection of function values is jointly Gaussian.
+a) TRUE. A GP is a distribution over functions such that any finite collection of function values is jointly Gaussian.
 
-b) **TRUE**. This is essentially the definition of a Gaussian Process.
+b) TRUE. This is essentially the definition of a Gaussian Process.
 
-c) **FALSE**. The posterior variance depends only on the locations of observations $X$ and test points $X_*$, not on the observed values $y$. The posterior mean depends on $y$, but variance is determined by the geometry of the input space.
+c) FALSE. With fixed hyperparameters the posterior variance depends only on the locations of observations $X$ and test points $X_*$, not on the observed values $y$. The posterior mean depends on $y$, but variance is determined by the geometry of the input space.
 
-d) **TRUE**. The squared exponential kernel is infinitely differentiable, and this smoothness property transfers to the sample functions.
+d) TRUE. The squared exponential kernel is infinitely differentiable, and this smoothness property transfers to the sample functions.
 
 :::
 :::
@@ -71,8 +71,8 @@ Consider a noiseless GP with mean function $m(x) = 0$ and squared exponential ke
 
 a) Build the $2\times 2$ training covariance matrix $\mathbf{K}$ by evaluating the kernel at $x = 0, 1$.
 b) Invert $\mathbf{K}$ by hand, using the explicit $2\times2$ inverse formula $\begin{pmatrix} a & b \\ b & d\end{pmatrix}^{-1} = \frac{1}{ad-b^2}\begin{pmatrix} d & -b \\ -b & a \end{pmatrix}$.
-c) Using @eq-mupost and @eq-Spost, compute the posterior mean $\mu_*$ and variance $\Sigma_*$ at the test point $x_* = 0.5$.
-d) Without redoing the arithmetic, explain why $\mu_*$ must lie strictly between $y_1 = 1$ and $y_2 = 2$, and why $\Sigma_*$ must be strictly less than $\sigma^2 = 1$.
+c) Using @eq-mupost and @eq-Spost, compute the posterior mean $\mu_{\mathrm{post}}$ and variance $\Sigma_{\mathrm{post}}$ at the test point $x_* = 0.5$.
+d) Without redoing the arithmetic, explain why $\Sigma_{\mathrm{post}}$ must be strictly less than $\sigma^2 = 1$.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -92,15 +92,15 @@ $$
 \mathbf{K}^{-1}\mathbf y = \begin{pmatrix} 1.5820 & -0.9595 \\ -0.9595 & 1.5820 \end{pmatrix}\begin{pmatrix}1\\2\end{pmatrix} \approx \begin{pmatrix} -0.337 \\ 2.204\end{pmatrix},
 $$
 $$
-\mu_* = \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf y \approx 0.8825(-0.337) + 0.8825(2.204) = 0.8825 \times 1.867 \approx 1.648.
+\mu_{\mathrm{post}} = \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf y \approx 0.8825(-0.337) + 0.8825(2.204) = 0.8825 \times 1.867 \approx 1.648.
 $$
 Similarly $\mathbf{K}^{-1}\mathbf{K}_* \approx (0.549, 0.549)^\top$, so
 $$
-\Sigma_* = K_{**} - \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf{K}_* \approx 1 - 2(0.8825)(0.549) \approx 0.030.
+\Sigma_{\mathrm{post}} = K_{**} - \mathbf{K}_*^\top \mathbf{K}^{-1}\mathbf{K}_* \approx 1 - 2(0.8825)(0.549) \approx 0.031.
 $$
-So $\mu_* \approx 1.648$ and $\Sigma_* \approx 0.030$ (standard deviation $\approx 0.174$); a numerical check with `solve()` in R confirms $\mu_* = 1.6480$ and $\Sigma_* = 0.0305$, matching the hand calculation up to rounding.
+So $\mu_{\mathrm{post}} \approx 1.648$ and $\Sigma_{\mathrm{post}} \approx 0.031$ (standard deviation $\approx 0.175$); a numerical check with `solve()` in R confirms $\mu_{\mathrm{post}} = 1.6480$ and $\Sigma_{\mathrm{post}} = 0.0305$, matching the hand calculation up to rounding.
 
-d) Because $x_*$ is equidistant from both training inputs, the squared exponential kernel assigns them equal correlation with the test point, so, as the computation in part (c) confirms, the two training points enter $\mu_*$ with equal, positive coefficients. A prediction built from positive weights on $y_1$ and $y_2$ that treats them symmetrically is pulled into the range spanned by the data rather than extrapolating beyond it, so $\mu_*$ falls between 1 and 2. For the variance, @eq-Spost subtracts the nonnegative term $\mathbf{K}_*^\top\mathbf{K}^{-1}\mathbf{K}_*$ from the prior variance $K_{**}=\sigma^2$; whenever at least one training point has nonzero correlation with $x_*$ (here, correlation $\approx 0.88$, far from zero), that term is strictly positive, so $\Sigma_*$ is strictly less than $\sigma^2$. This illustrates the Bayesian principle stated after @eq-Spost: observing data can only reduce uncertainty, never increase it, at a point correlated with the observations.
+d) Because $x_*$ is equidistant from both training inputs, the squared exponential kernel assigns them equal correlation with the test point, so the two training points enter $\mu_{\mathrm{post}}$ with equal coefficients (0.549 each, as part (c) shows). For the variance, @eq-Spost subtracts the nonnegative term $\mathbf{K}_*^\top\mathbf{K}^{-1}\mathbf{K}_*$ from the prior variance $K_{**}=\sigma^2$; whenever at least one training point has nonzero correlation with $x_*$ (here, correlation $\approx 0.88$, far from zero), that term is strictly positive, so $\Sigma_{\mathrm{post}}$ is strictly less than $\sigma^2$. This illustrates the Bayesian principle stated after @eq-Spost: observing data can only reduce uncertainty, never increase it, at a point correlated with the observations.
 
 :::
 :::
@@ -112,7 +112,7 @@ Consider a GP with zero mean and kernel $k(\cdot,\cdot)$, observed with i.i.d. n
 
 a) Using @eq-mupost and @eq-Spost as a template, argue that the noisy-GP posterior mean at a test point $x_*$ is
 $$
-\mu_* = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y.
+\mu_{\mathrm{post}} = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y.
 $$
 b) Kernel ridge regression fits $f(x) = \sum_{i=1}^n \alpha_i k(x,x_i)$ by minimizing the penalized least-squares objective
 $$
@@ -125,7 +125,7 @@ d) The two methods produce the same point prediction under that correspondence. 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) With additive noise, $\Cov{\mathbf y,\mathbf y} = \Cov{f(\mathbf X)+\boldsymbol\epsilon,\ f(\mathbf X)+\boldsymbol\epsilon} = \mathbf K + \sigma_n^2\mathbf I$, since $\boldsymbol\epsilon$ has covariance $\sigma_n^2\mathbf I$ and is independent of $f$, while $\Cov{\mathbf y,\mathbf y_*} = \Cov{f(\mathbf X),f(\mathbf X_*)} = \mathbf K_*$ is unchanged, since the test function values are noiseless. Substituting $\mathbf K + \sigma_n^2\mathbf I$ for $\mathbf K$ in @eq-mupost then gives $\mu_* = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y$, and correspondingly @eq-Spost gives $\Sigma_* = \mathbf{K}_{**} - \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{K}_*$.
+a) With additive noise, $\Cov{\mathbf y,\mathbf y} = \Cov{f(\mathbf X)+\boldsymbol\epsilon,\ f(\mathbf X)+\boldsymbol\epsilon} = \mathbf K + \sigma_n^2\mathbf I$, since $\boldsymbol\epsilon$ has covariance $\sigma_n^2\mathbf I$ and is independent of $f$, while $\Cov{\mathbf y,\mathbf y_*} = \Cov{f(\mathbf X),f(\mathbf X_*)} = \mathbf K_*$ is unchanged, since the test function values are noiseless. Substituting $\mathbf K + \sigma_n^2\mathbf I$ for $\mathbf K$ in @eq-mupost then gives $\mu_{\mathrm{post}} = \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf y$, and correspondingly @eq-Spost gives $\Sigma_{\mathrm{post}} = \mathbf{K}_{**} - \mathbf{K}_*^\top(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{K}_*$.
 
 b) Since $f(x_j) = \sum_i \alpha_i k(x_j,x_i) = (\mathbf K \boldsymbol\alpha)_j$ and $\|f\|^2_{\mathcal H} = \boldsymbol\alpha^\top \mathbf K \boldsymbol\alpha$ by the reproducing property,
 $$
@@ -140,9 +140,9 @@ $$
 \hat{\boldsymbol\alpha} = (\mathbf K + \lambda \mathbf I)^{-1}\mathbf y.
 $$
 
-c) The fitted function at $x_*$ is $\hat f(x_*) = \sum_i \hat\alpha_i k(x_*,x_i) = \mathbf{K}_*^\top \hat{\boldsymbol\alpha} = \mathbf{K}_*^\top(\mathbf K + \lambda \mathbf I)^{-1}\mathbf y$, which is identical to the GP posterior mean $\mu_*$ from part (a) whenever $\lambda = \sigma_n^2$.
+c) The fitted function at $x_*$ is $\hat f(x_*) = \sum_i \hat\alpha_i k(x_*,x_i) = \mathbf{K}_*^\top \hat{\boldsymbol\alpha} = \mathbf{K}_*^\top(\mathbf K + \lambda \mathbf I)^{-1}\mathbf y$, which is identical to the GP posterior mean $\mu_{\mathrm{post}}$ from part (a) whenever $\lambda = \sigma_n^2$.
 
-d) The point predictions coincide, but the GP additionally returns $\Sigma_*$, a calibrated posterior variance at every test point, and it supplies a principled way to choose the kernel hyperparameters and the noise level $\sigma_n^2$ by maximizing the marginal likelihood, as in the chapter's MLE example, whereas ridge regression treats $\lambda$ purely as a tuning constant, ordinarily chosen by cross-validation, with no accompanying uncertainty statement.
+d) The point predictions coincide, but the GP additionally returns $\Sigma_{\mathrm{post}}$, a posterior variance at every test point, and it supplies a principled way to choose the kernel hyperparameters and the noise level $\sigma_n^2$ by maximizing the marginal likelihood, as in the chapter's MLE example, whereas ridge regression treats $\lambda$ purely as a tuning constant, ordinarily chosen by cross-validation, with no accompanying uncertainty statement.
 
 :::
 :::
@@ -150,7 +150,7 @@ d) The point predictions coincide, but the GP additionally returns $\Sigma_*$, a
 ::: {#exr-gp-loglik-gradient}
 ## Gradient of the GP Log-Likelihood and a Closed Form for the Signal Variance
 
-The chapter states the gradient of the GP log marginal likelihood (in the collapsible "Mathematical Details: Gradient Derivation" box) but leaves the derivation to the reader. Fill it in, then use it to obtain a closed form for the signal variance. Work throughout with the noiseless log marginal likelihood
+The chapter states the gradient of the GP log marginal likelihood (in the box "Mathematical Details: Gradient Derivation") but leaves the derivation to the reader. Fill it in, then use it to obtain a closed form for the signal variance. Work throughout with the noiseless log marginal likelihood
 $$
 \mathcal{L}(\theta) = \log p(\mathbf y \mid \mathbf X, \theta) = -\frac{1}{2}\log|\mathbf K| - \frac{1}{2}\mathbf y^\top \mathbf K^{-1}\mathbf y - \frac{n}{2}\log 2\pi,
 $$
@@ -168,7 +168,7 @@ $$
 \frac{\partial \mathcal{L}}{\partial \theta} = \frac{1}{2}\mathrm{tr}\left[\left(\boldsymbol\alpha\boldsymbol\alpha^\top - \mathbf K^{-1}\right)\frac{\partial \mathbf K}{\partial \theta}\right].
 $$
 
-b) Positive hyperparameters are usually optimized in an unconstrained space by taking logarithms, as the computing exercise on the held-out motorcycle data does for its three hyperparameters. Take $\sigma = e^{u}$ and optimize over $u = \log\sigma$. Using the chain rule together with the chapter identity $\partial \mathbf K/\partial\sigma = (2/\sigma)\mathbf K$, show that $\partial \mathbf K/\partial u = 2\mathbf K$ (the explicit dependence on $\sigma$ cancels), and hence that
+b) Positive hyperparameters are usually optimized in an unconstrained space by taking logarithms. Take $\sigma = e^{u}$ and optimize over $u = \log\sigma$. Using the chain rule together with the chapter identity $\partial \mathbf K/\partial\sigma = (2/\sigma)\mathbf K$, show that $\partial \mathbf K/\partial u = 2\mathbf K$ (the explicit dependence on $\sigma$ cancels), and hence that
 $$
 \frac{\partial \mathcal{L}}{\partial u} = \mathbf y^\top \mathbf K^{-1}\mathbf y - n.
 $$
@@ -232,13 +232,9 @@ Since $\hat\sigma \approx 1.427 > 1$, the maximizer lies above the value $\sigma
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## GP Prior Sampling
@@ -318,6 +314,7 @@ Larger signal variance = functions have larger vertical amplitude.
 ## GP Posterior Prediction
 
 You observe the following data points:
+
 | x | y |
 |---|---|
 | 0 | 1.0 |
@@ -326,7 +323,7 @@ You observe the following data points:
 
 Assume a GP prior with $m(x) = 0$, squared exponential kernel with $\sigma^2 = 1$, $\ell = 1$, and observation noise $\sigma_n^2 = 0.1$. Because real observations include noise, this exercise uses the noisy-GP posterior obtained from @eq-mupost and @eq-Spost by replacing $\mathbf{K}$ with $\mathbf{K} + \sigma_n^2\mathbf{I}$ wherever it appears, equivalent to observing $y_i = f(x_i) + \epsilon_i$ with $\epsilon_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(0,\sigma_n^2)$.
 
-a) Write the posterior mean formula $\mu_*$ for predictions at new points.
+a) Write the posterior mean formula $\mu_{\mathrm{post}}$ for predictions at new points.
 b) Calculate the posterior mean and variance at $x_* = 1$.
 c) Calculate the posterior mean and variance at $x_* = 3$.
 d) Plot the posterior mean and 95% credible interval for $x \in [0, 5]$.
@@ -336,10 +333,10 @@ d) Plot the posterior mean and 95% credible interval for $x \in [0, 5]$.
 
 a) The GP posterior formulas are:
 $$
-\mu_* = K_*^T (K + \sigma_n^2 I)^{-1} y
+\mu_{\mathrm{post}} = K_*^T (K + \sigma_n^2 I)^{-1} y
 $$
 $$
-\Sigma_* = K_{**} - K_*^T (K + \sigma_n^2 I)^{-1} K_*
+\Sigma_{\mathrm{post}} = K_{**} - K_*^T (K + \sigma_n^2 I)^{-1} K_*
 $$
 
 where $K$ is covariance of training points, $K_*$ is cross-covariance, $K_{**}$ is prior covariance at test points.
@@ -409,7 +406,7 @@ Using the data from the GP Posterior Prediction exercise above ($X = (0, 2, 4)$,
 $$
 \log p(y \mid X, \theta) = -\frac{1}{2}y^T K^{-1} y - \frac{1}{2}\log|K| - \frac{n}{2}\log(2\pi)
 $$
-where $\theta = (\sigma^2, \ell)$ are the kernel hyperparameters. This uses the noiseless log marginal likelihood matching @eq-mupost and @eq-Spost as derived in the chapter, which generalizes to the noisy-GP posterior of the previous exercise by replacing $\mathbf{K}$ with $\mathbf{K}+\sigma_n^2\mathbf{I}$ throughout and extending $\theta$ to $(\sigma^2,\ell,\sigma_n^2)$.
+where $\theta = (\sigma^2, \ell)$ are the kernel hyperparameters. This uses the noiseless log marginal likelihood matching @eq-mupost and @eq-Spost, which generalizes to the noisy-GP posterior of the previous exercise by replacing $\mathbf{K}$ with $\mathbf{K}+\sigma_n^2\mathbf{I}$ throughout and extending $\theta$ to $(\sigma^2,\ell,\sigma_n^2)$.
 
 a) Calculate the log marginal likelihood for $(\sigma^2 = 1, \ell = 1)$.
 b) Calculate it for $(\sigma^2 = 1, \ell = 0.5)$.
@@ -451,9 +448,9 @@ cat("\nBetter hyperparameters:", ifelse(lml_1[1] > lml_05[1], "ell=1", "ell=0.5"
 ```
 
 d) Interpretation of terms:
-- **$-\frac{1}{2}y^T K^{-1} y$** (Data fit): How well the model explains the data. Smaller residuals = larger (less negative) value.
-- **$-\frac{1}{2}\log|K|$** (Complexity penalty): Penalizes overly flexible models. Larger $K$ determinant = more negative value.
-- **$-\frac{n}{2}\log(2\pi)$** (Normalization): Constant that doesn't affect optimization.
+- $-\frac{1}{2}y^T K^{-1} y$ (Data fit): How well the model explains the data. Smaller residuals = larger (less negative) value.
+- $-\frac{1}{2}\log|K|$ (Complexity penalty): Penalizes overly flexible models. Larger $K$ determinant = more negative value.
+- $-\frac{n}{2}\log(2\pi)$ (Normalization): Constant that doesn't affect optimization.
 
 This implements Occam's razor: the marginal likelihood balances data fit against model complexity.
 
@@ -517,7 +514,7 @@ cat("Mean # local extrema, Matern:", extrema(F_m), "\n")
 
 Running this gives an average roughness of $0.735$ for the squared-exponential paths versus $1.163$ for the Matern-5/2 paths (about 58% higher), and an average of $5.4$ local extrema per squared-exponential path versus $11.2$ for Matern-5/2 (about twice as many).
 
-d) The Matern-5/2 kernel produces rougher paths: both the sum-of-squared-increments statistic and the extrema count are substantially larger for Matern-5/2 than for the squared exponential kernel. This matches the theory. The squared exponential kernel is infinitely mean-square differentiable, so its sample paths are extremely smooth, while the Matern-5/2 kernel is only twice mean-square differentiable, allowing visibly rougher local behavior even though both kernels share the same length scale and signal variance.
+d) The Matern-5/2 kernel produces rougher paths: both the sum-of-squared-increments statistic and the extrema count are substantially larger for Matern-5/2 than for the squared exponential kernel. On a fixed grid, the increment statistic is governed by the curvature of the kernel at zero: the Matern-5/2 kernel has $-k''(0)=5/(3\ell^2)$ against $1/\ell^2$ for the squared exponential kernel, a ratio of $5/3$, so its increments are larger at the same length scale and signal variance. The difference is not one of differentiability, since both statistics go to zero as the grid is refined. The extrema count is larger for the same reason.
 
 :::
 :::
@@ -529,7 +526,7 @@ The chapter's motorcycle accident example (@exm-gp) fits a GP to the full `MASS:
 
 a) Load `MASS::mcycle` and remove all observations with `times` in $(25, 30]$; call the remaining data the training set and the removed points the held-out test set.
 b) Using a squared exponential kernel, estimate the signal variance $\sigma^2$, length scale $\ell$, and noise variance $\sigma_n^2$ by maximizing the log marginal likelihood on the training set only, following the same MLE approach as @exm-gp-sim but now including $\sigma_n^2$ as in the noisy-GP posterior of @exr-gp-kernel-ridge (replace $\mathbf{K}$ with $\mathbf{K}+\sigma_n^2\mathbf{I}$ in @eq-mupost and @eq-Spost). It is numerically convenient to standardize `accel` (subtract the training mean, divide by the training standard deviation) before fitting, and to transform predictions back to the original scale afterward.
-c) Predict the posterior mean and standard deviation at the held-out times, and plot them (mean $\pm$ 2 standard deviations) against the true held-out observations.
+c) Predict the posterior mean and predictive standard deviation (including the observation noise) at the held-out times, and plot them (mean $\pm$ 2 standard deviations) against the true held-out observations.
 d) Compare the root-mean-squared prediction error of the GP on the held-out points to that of a cubic polynomial regression fit on the same training data.
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -568,11 +565,11 @@ Ks  <- se_kernel(train$times, test$times, sigma2, ell)
 Kss <- se_kernel(test$times, test$times, sigma2, ell)
 
 mu    <- (t(Ks) %*% Ki %*% ytr) * ys + ym
-sd_gp <- sqrt(pmax(diag(Kss - t(Ks) %*% Ki %*% Ks), 0)) * ys
+sd_gp <- sqrt(pmax(diag(Kss - t(Ks) %*% Ki %*% Ks), 0) + sigma_n2) * ys
 ```
 
 ```{r}
-#| fig-cap: GP fit on the motorcycle data with a held-out gap. Gray points are training data, red points are the held-out test data, and the blue band is the GP mean $\pm$ 2 standard deviations.
+#| fig-cap: GP fit on the motorcycle data with a held-out gap. Gray points are training data, red points are the held-out test data, and the blue band is the GP mean $\pm$ 2 predictive standard deviations, including the observation noise.
 plot(train$times, train$accel, pch = 20, col = "gray40",
      xlab = "time (ms)", ylab = "acceleration (g)", xlim = range(mcycle$times))
 polygon(c(test$times, rev(test$times)), c(mu + 2 * sd_gp, rev(mu - 2 * sd_gp)),
@@ -589,7 +586,7 @@ cat("GP RMSE:", round(rmse_gp, 2), "\n")
 cat("Cubic polynomial RMSE:", round(rmse_poly, 2), "\n")
 ```
 
-With `n_train = 116` and `n_test = 17`, maximizing the marginal likelihood gives, on the standardized scale, $\sigma^2 \approx 0.85$, $\ell \approx 5.13$, $\sigma_n^2 \approx 0.18$. The GP achieves an RMSE of about $29.8$ on the held-out gap, versus about $39.5$ for the cubic polynomial fit on the same training data, a roughly 25% reduction in error. The GP's advantage comes from letting the posterior standard deviation widen exactly where the training data thin out around the gap, rather than forcing a single global polynomial shape through both the fast-changing region before the gap and the recovery afterward.
+With `n_train = 116` and `n_test = 17`, maximizing the marginal likelihood gives, on the standardized scale, $\sigma^2 \approx 0.85$, $\ell \approx 5.13$, $\sigma_n^2 \approx 0.18$. The GP achieves an RMSE of about $29.8$ on the held-out gap, versus about $39.5$ for the cubic polynomial fit on the same training data, a roughly 25% reduction in error. The GP's advantage comes from its local fit, rather than forcing a single global polynomial shape through both the fast-changing region before the gap and the recovery afterward.
 
 :::
 :::

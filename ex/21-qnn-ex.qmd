@@ -1,7 +1,7 @@
 
 ### Pen-and-Pencil {.unnumbered}
 
-::: {#exr-}
+::: {#exr-check-loss-quantiles}
 ## Check Loss and Quantiles
 
 The check loss (pinball loss) is defined as:
@@ -23,8 +23,8 @@ a) For $\tau = 0.5$:
 In both cases, $\rho_{0.5}(u) = 0.5|u|$. Minimizing $\sum_i |y_i - q|$ yields the median.
 
 b) For $\tau = 0.25$:
-- Slope for $u > 0$: $\tau = 0.25$ (penalizes overestimation less)
-- Slope for $u < 0$: $|\tau - 1| = 0.75$ (penalizes underestimation more)
+- Slope for $u > 0$: $\tau = 0.25$ (penalizes underestimation less)
+- Slope for $u < 0$: $|\tau - 1| = 0.75$ (penalizes overestimation more)
 
 The asymmetry pushes the minimizer toward the lower tail (25th percentile).
 
@@ -43,7 +43,7 @@ Setting to zero: $F(q_\tau) = \tau$, so $q_\tau = F^{-1}(\tau)$, which is the $\
 ::: {#exr-}
 ## Quantile Representation of Expectations
 
-The quantile representation theorem states that for any random variable $X$ with quantile function $F^{-1}$:
+The quantile representation theorem states that for any integrable random variable $X$ with quantile function $F^{-1}$:
 $$
 \E{X} = \int_0^1 F^{-1}(\tau) d\tau
 $$
@@ -103,11 +103,11 @@ c) Two approaches:
 
 (i) *Soft penalty*: Add a crossing penalty to the loss:
 $$
-L_{\text{total}} = \sum_{k} \rho_{\tau_k}(y - f_{\tau_k}(x)) + \lambda \sum_{k} \max(0, f_{\tau_k}(x) - f_{\tau_{k+1}}(x))^2
+L_{\text{total}} = \sum_{k} \rho_{\tau_k}(y - f_{\tau_k}(x)) + \lambda \sum_{k=1}^{K-1} \max(0, f_{\tau_k}(x) - f_{\tau_{k+1}}(x))^2
 $$
 This penalizes violations but does not eliminate them.
 
-(ii) *Monotonic architecture*: Parameterize the quantile function as $f_{\tau}(x) = f_{\tau_{\min}}(x) + \sum_{k} g_k(x, \tau)$ where each $g_k \geq 0$ (e.g., using softplus activations). This enforces monotonicity in $\tau$ by construction.
+(ii) *Monotonic architecture*: Parameterize the quantile function as $f_{\tau}(x) = f_{\tau_{\min}}(x) + \sum_{k} g_k(x, \tau)$ where each $g_k \geq 0$ is non-decreasing in $\tau$ (e.g., softplus outputs with non-negative weights on $\tau$). This enforces monotonicity in $\tau$ by construction.
 :::
 :::
 
@@ -128,7 +128,7 @@ c) Compute $W_1(U, V)$ in closed form for $U \sim \text{Unif}(0, 1)$ and $V \sim
 
 d) Using `qnorm`, `qexp`, and `integrate()` in R, verify $W_1(N(0,1), \text{Exp}(1)) \approx 1$ and explain why this equals $|\E{U} - \E{V}|$ exactly. Then compute $W_1(N(0,1), \text{Unif}(-\sqrt3, \sqrt3))$; these two distributions have equal means (both 0) and equal variances (both 1), yet you should find $W_1 > 0$.
 
-e) Using (b) and the fact from Exercise 1(c) that $q_\tau = \arg\min_q \E{\rho_\tau(U - q)}$, explain in two or three sentences why training a quantile network to match $F_U^{-1}(\tau)$ pointwise in $\tau$ minimizes $W_1$ between the fitted and true distributions, and why this makes Wasserstein-based training [@arjovsky2017wasserstein] stable even when the two distributions have non-overlapping support, unlike KL- or JS-divergence objectives.
+e) Using (b) and the fact from @exr-check-loss-quantiles (c) that $q_\tau = \arg\min_q \E{\rho_\tau(U - q)}$, explain in two or three sentences why matching $F_U^{-1}(\tau)$ pointwise in $\tau$ drives $W_1$ between the fitted and true distributions to zero, and why $W_1$ [@arjovsky2017wasserstein], unlike KL- or JS-divergence, stays finite and informative when the two distributions have non-overlapping support.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -166,7 +166,7 @@ integrate(function(p) abs(qnorm(p) - (-s3 + 2 * s3 * p)), 0, 1)$value  # 0.1543
 
 The integral gives $W_1(N(0,1), \text{Exp}(1)) = 1.000$. The exponential quantile function $-\log(1 - \tau)$ exceeds the normal quantile $\Phi^{-1}(\tau)$ at every $\tau$ (the exponential stochastically dominates the normal; the minimum gap over $\tau$ is $0.66 > 0$), so $|F_U^{-1} - F_V^{-1}| = F_V^{-1} - F_U^{-1}$ never changes sign and integrates to $\E{V} - \E{U} = 1 - 0 = 1$. Whenever two quantile functions do not cross, $W_1$ collapses to $|\E{U} - \E{V}|$. For $N(0,1)$ versus $\text{Unif}(-\sqrt3, \sqrt3)$ (both mean 0, both variance 1) the quantile functions do cross, and the integral gives $W_1 = 0.1543 > 0$. Matching only the first two moments (as a mean/variance or MSE criterion would) misses genuine shape differences that the check loss, integrated over $\tau$, detects.
 
-e) By Exercise 1(c), each $\tau$-slice of the check loss is minimized exactly at $F_U^{-1}(\tau)$, so training a network $f(\tau)$ to minimize $\int_0^1 \E{\rho_\tau(U - f(\tau))} \, d\tau$ drives $f(\tau) \to F_U^{-1}(\tau)$ and hence, by parts (a) and (b), minimizes $\int_0^1 |f(\tau) - F_U^{-1}(\tau)| \, d\tau = W_1(\text{fit}, \text{true})$. Because $W_1$ integrates a difference of quantiles rather than a density ratio, it stays finite and gradient-informative even when the fitted and target distributions have disjoint support, precisely the regime (early GAN training, or a badly mismatched proposal versus target) where KL- or JS-divergence objectives saturate or become infinite [@arjovsky2017wasserstein].
+e) By @exr-check-loss-quantiles (c), each $\tau$-slice of the check loss is minimized exactly at $F_U^{-1}(\tau)$, so training a network $f(\tau)$ to minimize $\int_0^1 \E{\rho_\tau(U - f(\tau))} \, d\tau$ drives $f(\tau) \to F_U^{-1}(\tau)$ (at the population level, for a family that can represent $F_U^{-1}$) and hence, by parts (a) and (b), minimizes $\int_0^1 |f(\tau) - F_U^{-1}(\tau)| \, d\tau = W_1(\text{fit}, \text{true})$. Because $W_1$ integrates a difference of quantiles rather than a density ratio, it stays finite and informative even when the fitted and target distributions have disjoint support, precisely the regime (early GAN training, or a badly mismatched proposal versus target) where KL- or JS-divergence objectives saturate or become infinite [@arjovsky2017wasserstein].
 :::
 :::
 
@@ -175,7 +175,7 @@ e) By Exercise 1(c), each $\tau$-slice of the check loss is minimized exactly at
 
 @sec-qnn-bayes-quantiles shows that Bayesian updating can be written entirely as a composition of quantile functions. The Normal-Normal Model and Wang Distortion example (@exm-qnn-wang) works this out in closed form: for prior $\theta \sim N(\mu,\alpha^2)$ and data $y_1,\ldots,y_n \mid \theta \sim N(\theta,\sigma^2)$, the posterior and prior survival functions are related by
 $$
-1 - \Phi(\theta;\mu_*,\sigma_*) = g\big(1-\Phi(\theta;\mu,\alpha)\big), \qquad g(p) = \Phi(\lambda_1 \Phi^{-1}(p) + \lambda),
+1 - \Phi(\theta;\mu_*,\sigma_*^2) = g\big(1-\Phi(\theta;\mu,\alpha^2)\big), \qquad g(p) = \Phi(\lambda_1 \Phi^{-1}(p) + \lambda),
 $$
 with $\lambda_1 = \alpha/\sigma_*$, $\lambda = \alpha\lambda_1(n\bar y - n\mu)/t$, and $t = \sigma^2 + n\alpha^2$.
 
@@ -183,8 +183,8 @@ Use the chapter's own parameters: prior $\theta \sim N(0,5)$ (so $\mu = 0$, $\al
 
 a) Compute $t$, the posterior mean $\mu_*$, and the posterior variance $\sigma_*^2$ using $\mu_* = (\sigma^2\mu + n\alpha^2\bar y)/t$ and $\sigma_*^2 = \alpha^2\sigma^2/t$.
 b) Compute the distortion parameters $\lambda_1$ and $\lambda$.
-c) Verify the distortion identity numerically at $p = 0.05$ and $p = 0.10$. For each $p$, find $\theta_p$ solving $1-\Phi(\theta_p;\mu,\alpha) = p$ (i.e., $\theta_p = \mu + \alpha\Phi^{-1}(1-p)$), then check that $1-\Phi(\theta_p;\mu_*,\sigma_*)$ agrees with $g(p) = \Phi(\lambda_1\Phi^{-1}(p)+\lambda)$.
-d) The general quantile Bayes' rule states $Q_{\theta \mid Y=y}(u) = Q_\theta(s)$ where $s = Q_{F(\theta) \mid Y=y}(u)$. In a sentence or two, explain why the Wang distortion $g$ is exactly this composition specialized to the normal-normal case, and why a quantile neural network is needed to represent it once conjugacy is lost.
+c) Verify the distortion identity numerically at $p = 0.05$ and $p = 0.10$. For each $p$, find $\theta_p$ solving $1-\Phi(\theta_p;\mu,\alpha^2) = p$ (i.e., $\theta_p = \mu + \alpha\Phi^{-1}(1-p)$), then check that $1-\Phi(\theta_p;\mu_*,\sigma_*^2)$ agrees with $g(p) = \Phi(\lambda_1\Phi^{-1}(p)+\lambda)$.
+d) The general quantile Bayes' rule states $Q_{\theta \mid Y=y}(u) = Q_\theta(s)$ where $s = Q_{F(\theta) \mid Y=y}(u)$. In a sentence or two, explain why the Wang distortion $g$ is exactly this composition specialized to the normal-normal case, and why a quantile neural network can still represent it once conjugacy is lost.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -205,26 +205,26 @@ $$
 \lambda = \frac{\alpha\lambda_1(n\bar y-n\mu)}{t} = \frac{2.236(7.141)(300-0)}{510} = 9.393
 $$
 
-c) For $p=0.05$: $\Phi^{-1}(0.95) = 1.645$, so $\theta_{0.05} = 0+2.236(1.645) = 3.678$. Under the posterior, $z = (3.678-2.941)/0.313 = 2.353$, so $1-\Phi(3.678;\mu_*,\sigma_*) = 1-\Phi(2.353) = 0.0093$. And $g(0.05) = \Phi(7.141(-1.645)+9.393) = \Phi(-2.353) = 0.0093$. The two agree.
+c) For $p=0.05$: $\Phi^{-1}(0.95) = 1.645$, so $\theta_{0.05} = 0+2.236(1.645) = 3.678$. Under the posterior, $z = (3.678-2.941)/0.313 = 2.353$, so $1-\Phi(3.678;\mu_*,\sigma_*^2) = 1-\Phi(2.353) = 0.0093$. And $g(0.05) = \Phi(7.141(-1.645)+9.393) = \Phi(-2.353) = 0.0093$. The two agree.
 
 For $p=0.10$: $\Phi^{-1}(0.90) = 1.282$, so $\theta_{0.10} = 2.236(1.282) = 2.866$. Then $z = (2.866-2.941)/0.313 = -0.241$, so $1-\Phi(-0.241) = 0.595$. And $g(0.10) = \Phi(7.141(-1.282)+9.393) = \Phi(0.241) = 0.595$. Again the two agree.
 
-d) The general rule says the posterior quantile at level $u$ equals the prior quantile function evaluated at a transformed level $s$, where $s$ is obtained by pushing $u$ through the conditional distribution of $F(\theta)$ given the data. In the normal-normal model, $\theta$ is normally distributed under both the prior and the posterior, and any two normal representations of the same quantity are related by an affine map of their standardized ($z$-score) coordinates; composing that affine map with $\Phi$ and $\Phi^{-1}$ produces the closed-form $g$ above. Outside conjugate families this transformation has no closed form: it must be learned from simulated $(\theta^{(i)}, y^{(i)})$ pairs, which is exactly the role a quantile neural network plays in @sec-qnn-generative and @sec-qnn-meu.
+d) The general rule says the posterior quantile at level $u$ equals the prior quantile function evaluated at a transformed level $s$, where $s$ is obtained by pushing $u$ through the conditional distribution of $F(\theta)$ given the data. In the normal-normal model, $\theta$ is normally distributed under both the prior and the posterior, and any two normal representations of the same quantity are related by an affine map of their standardized ($z$-score) coordinates; composing that affine map with $\Phi$ and $\Phi^{-1}$ produces the closed-form $g$ above. Outside conjugate families this transformation has no closed form: it can be learned from simulated $(\theta^{(i)}, y^{(i)})$ pairs, which is exactly the role a quantile neural network plays in @sec-qnn-generative and @sec-qnn-meu.
 :::
 :::
 
 ::: {#exr-newsvendor-fractile}
 ## The Newsvendor Problem and the Critical Fractile
 
-@sec-qnn-forecasting frames inventory decisions as a choice of which demand quantile to target: the optimal target $F^{-1}_{D\mid x}(c_u/(c_u+c_o))$, which is $P_{50}$ only for equal unit costs, and for products where stockouts are far more costly than excess inventory, "the optimal policy may target $P_{70}$ or $P_{80}$," while low-margin perishable goods should "target $P_{30}$ or $P_{40}$." This exercise derives that rule directly from the check-loss identity of Exercise 1 (Check Loss and Quantiles).
+@sec-qnn-forecasting frames inventory decisions as a choice of which demand quantile to target: the optimal target $F^{-1}_{D\mid x}(c_u/(c_u+c_o))$, which is $P_{50}$ only for equal unit costs, and for products where stockouts are far more costly than excess inventory, "the optimal policy may target $P_{70}$ or $P_{80}$," while low-margin perishable goods should "target $P_{30}$ or $P_{40}$." This exercise derives that rule directly from the check-loss identity of @exr-check-loss-quantiles.
 
 A retailer chooses an order quantity $q$ before observing demand $D$. Understocking ($D>q$) costs $c_u$ per unit of unmet demand (lost margin and goodwill); overstocking ($D<q$) costs $c_o$ per unit of unsold inventory (markdown, holding, disposal). The expected cost of ordering $q$ units is
 $$
 C(q) = \E{c_u(D-q)^+ + c_o(q-D)^+}, \qquad x^+ \defeq \max(x,0).
 $$
 
-a) Show that $C(q) = (c_u+c_o)\,\E{\rho_\tau(D-q)}$ for $\tau = c_u/(c_u+c_o)$, where $\rho_\tau$ is the check loss of Exercise 1. (Split into the cases $D \geq q$ and $D < q$, and match coefficients using $\rho_\tau(u) = \tau u$ for $u \geq 0$ and $\rho_\tau(u) = (\tau-1)u$ for $u<0$.)
-b) Using Exercise 1(c) ($q_\tau = \arg\min_q \E{\rho_\tau(Y-q)}$ is the $\tau$-th quantile of $Y$), conclude that the cost-minimizing order quantity is the *critical fractile* $q^\star = F_D^{-1}(\tau)$ with $\tau = c_u/(c_u+c_o)$.
+a) Show that $C(q) = (c_u+c_o)\,\E{\rho_\tau(D-q)}$ for $\tau = c_u/(c_u+c_o)$, where $\rho_\tau$ is the check loss of @exr-check-loss-quantiles. (Split into the cases $D \geq q$ and $D < q$, and match coefficients using $\rho_\tau(u) = \tau u$ for $u \geq 0$ and $\rho_\tau(u) = (\tau-1)u$ for $u<0$.)
+b) Using @exr-check-loss-quantiles (c) ($q_\tau = \arg\min_q \E{\rho_\tau(Y-q)}$ is the $\tau$-th quantile of $Y$), conclude that the cost-minimizing order quantity is the *critical fractile* $q^\star = F_D^{-1}(\tau)$ with $\tau = c_u/(c_u+c_o)$.
 c) A high-margin electronics item with a long replenishment lead time has $c_u = \$40$ per unit (lost sale plus goodwill) and $c_o = \$10$ per unit (markdown to clear excess). Compute $\tau$ and check that it falls in the chapter's suggested $P_{70}$-$P_{80}$ range.
 d) A perishable, low-margin grocery item has $c_u = \$3$ and $c_o = \$7$. Compute $\tau$ and check that it falls in the chapter's suggested $P_{30}$-$P_{40}$ range.
 e) If demand for each item is $D \sim N(500,100^2)$ units, find the optimal order quantity $q^\star$ for both products.
@@ -238,7 +238,7 @@ If $D < q$: $c_u(D-q)^++c_o(q-D)^+ = c_o(q-D)$, and $\rho_\tau(D-q) = (\tau-1)(D
 
 Both cases give the same condition, $\tau = c_u/(c_u+c_o)$, so $C(q) = \E{c_u(D-q)^++c_o(q-D)^+} = (c_u+c_o)\E{\rho_\tau(D-q)}$.
 
-b) Since $c_u+c_o>0$ is a fixed positive constant, minimizing $C(q)$ over $q$ is the same problem as minimizing $\E{\rho_\tau(D-q)}$ over $q$. By Exercise 1(c), this minimizer is the $\tau$-th quantile of $D$, so $q^\star = F_D^{-1}(\tau)$ with $\tau = c_u/(c_u+c_o)$.
+b) Since $c_u+c_o>0$ is a fixed positive constant, minimizing $C(q)$ over $q$ is the same problem as minimizing $\E{\rho_\tau(D-q)}$ over $q$. By @exr-check-loss-quantiles (c), this minimizer is the $\tau$-th quantile of $D$, so $q^\star = F_D^{-1}(\tau)$ with $\tau = c_u/(c_u+c_o)$.
 
 c) $\tau = 40/(40+10) = 0.8 = P_{80}$, at the top of the chapter's $P_{70}$-$P_{80}$ range: when a lost sale is four times as costly as a markdown, the retailer should stock generously.
 
@@ -270,19 +270,15 @@ b) False. Quantile regression is distribution-free: it minimizes the check loss 
 
 c) True. The quantile function is the generalized inverse of the CDF, and the CDF uniquely determines the distribution. Given $F^{-1}$, we can recover $F$ (and vice versa).
 
-d) True. The noise outsourcing theorem states that for any joint distribution $(Y, \Theta)$ in a standard probability space, there exists $\tau \sim U(0,1)$ independent of $Y$ and a measurable function $H$ such that $(Y, \Theta) \stackrel{a.s.}{=} (Y, H(Y, \tau))$, that is, $\theta = H(y, \tau)$ as stated. The chapter's stronger conditional form, $\Theta \mid Y \stackrel{a.s.}{=} H(S(Y), \tau)$, additionally requires a sufficient statistic $S(Y)$ to exist; taking $S(Y) = Y$ recovers the base form used here. This is the theoretical foundation for quantile neural networks.
+d) True. The noise outsourcing theorem states that for any joint distribution $(Y, \Theta)$ in a standard probability space, there exists $\tau \sim U(0,1)$ independent of $Y$ and a measurable function $H$ such that $(Y, \Theta) \stackrel{a.s.}{=} (Y, H(Y, \tau))$, that is, $\theta = H(y, \tau)$ as stated. The chapter's form $(Y,\Theta) \stackrel{a.s.}{=} (Y,H(S(Y), \tau))$ additionally requires $Y$ and $\Theta$ to be conditionally independent given $S(Y)$; taking $S(Y) = Y$ recovers the base form used here.
 
-e) True. The $\ell_1$ penalty on second differences $\sum_t |\Delta^2 f_t|$ acts as a Laplace prior on the curvature. It produces piecewise linear functions (linear between changepoints), analogous to how Lasso produces piecewise constant coefficient paths.
+e) True. The $\ell_1$ penalty on second differences $\sum_t |\Delta^2 f_t|$ acts as a Laplace prior on the curvature. It produces piecewise linear functions (linear between changepoints), analogous to how the Lasso sets coefficients exactly to zero.
 :::
-:::
-
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
 :::
 
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Quantile Regression on mtcars
@@ -344,7 +340,7 @@ cat("Widest gap at displacement:", round(disp_grid[which.max(gap)]), "\n")
 cat("Gap width:", round(max(gap), 1), "mpg\n")
 ```
 
-The narrowing gap at higher displacement indicates that fuel efficiency becomes more predictable (less variable) for larger engines, while smaller engines have more heterogeneous efficiency.
+The narrowing gap at higher displacement indicates that fuel efficiency becomes less variable for the larger engines of these 32 cars, while smaller engines have more heterogeneous efficiency. On the log-log scale of the chapter the gap widens instead, so the scale matters.
 :::
 :::
 
@@ -379,13 +375,9 @@ true_q50 <- sin(x_grid)
 true_q95 <- sin(x_grid) + sigma_grid * qnorm(0.95)
 
 # c) Fit quantile regression
-check_loss <- function(u, tau) u * (tau - (u < 0))
-
 fit_qr <- function(x, y, tau, degree = 4) {
   X <- cbind(1, poly(x, degree, raw = TRUE))
-  objective <- function(beta) sum(check_loss(y - X %*% beta, tau))
-  init <- rep(0, ncol(X))
-  optim(init, objective, method = "BFGS")$par
+  as.numeric(quantreg::rq.fit(X, y, tau = tau)$coefficients)
 }
 
 taus <- c(0.05, 0.5, 0.95)
@@ -415,6 +407,8 @@ frac_below <- mean(y < pred_05)
 cat("Fraction below 5th percentile:", round(frac_below, 3), "\n")
 cat("Expected: 0.05\n")
 ```
+
+With seed 42 the fractions below the estimated 5th, 50th and 95th percentile curves are $0.050$, $0.506$ and $0.954$, close to nominal. The solution uses `quantreg::rq.fit`, the linear programming algorithm, because `optim` with BFGS can stop far from the minimum of this non-smooth objective, most visibly at the extreme levels.
 :::
 :::
 
@@ -429,7 +423,7 @@ the $k = 2$ (piecewise-linear) case, but simply fixes $\lambda = 2$. Like any pe
 
 a) With `set.seed(1)`, simulate $n = 150$ points $x_i \sim U(0, 10)$ from a piecewise-linear mean with a single kink, $f_{\text{true}}(x) = 0.5x$ for $x < 5$ and $f_{\text{true}}(x) = 2.5 + 3(x - 5)$ for $x \ge 5$, with $y_i = f_{\text{true}}(x_i) + \varepsilon_i$, $\varepsilon_i \sim N(0, 0.5^2)$.
 
-b) Building the second-difference operator as a matrix `D2()` with rows $(1, -2, 1)$ and using `optim()` with `L-BFGS-B`, fit the $k = 2$ trend filter at $\tau = 0.5$ for $\lambda \in \{0.01, 0.1, 1, 3, 10, 30, 100\}$. Plot the fitted curves for three representative $\lambda$ against the data and $f_{\text{true}}$.
+b) Building the second-difference operator as a matrix `D2()` with rows $(1, -2, 1)$ and solving the quantile regression linear program of the chapter with `quantreg::rq.fit`, fit the $k = 2$ trend filter at $\tau = 0.5$ for $\lambda \in \{0.01, 0.1, 1, 3, 10, 30, 100\}$. Plot the fitted curves for three representative $\lambda$ against the data and $f_{\text{true}}$.
 
 c) Using 5-fold cross-validation (with `set.seed(2)` for the folds), fit on 4/5 of the points and evaluate the out-of-fold average check loss $\rho_{0.5}$ on the held-out points, predicting each held-out $x$ by linear interpolation (`approx`) of the fitted $f_i$. Report the CV score for each $\lambda$ and the selected $\hat\lambda$.
 
@@ -461,10 +455,11 @@ D2 <- function(m) {
 fit_tf <- function(xx, yy, lambda, tau) {
   ord <- order(xx); xs <- xx[ord]; ys <- yy[ord]
   D <- D2(length(ys))
-  obj <- function(f) sum(check_loss(ys - f, tau)) + lambda * sum(abs(D %*% f))
-  f0 <- predict(lm(ys ~ xs))
-  list(x = xs, f = optim(f0, obj, method = "L-BFGS-B",
-                         control = list(maxit = 400))$par)
+  m <- length(ys)
+  # rho_tau(z) + rho_tau(-z) = |z|: each penalty term is a pseudo-observation at 0
+  f <- quantreg::rq.fit(rbind(diag(m), lambda * D, -lambda * D),
+                        c(ys, rep(0, 2 * (m - 2))), tau = tau)$coefficients
+  list(x = xs, f = as.numeric(f))
 }
 
 lambdas <- c(0.01, 0.1, 1, 3, 10, 30, 100)
@@ -496,11 +491,11 @@ for (tau in c(0.1, 0.5, 0.9)) {
 }
 ```
 
-At $\tau = 0.5$ the 5-fold CV check loss is $0.252$ at $\lambda = 0.01$, is essentially flat ($0.252$) at $\lambda = 0.1$, dips to its minimum $0.230$ at $\lambda = 1$, then climbs sharply to $0.771$, $0.787$, and $0.793$ at $\lambda = 10, 30, 100$, roughly a $3.4\times$ increase. The curve is U-shaped in $\log\lambda$ with an interior minimum, so $\hat\lambda = 1$.
+At $\tau = 0.5$ the 5-fold CV check loss is $0.2521$ at $\lambda = 0.01$ and $0.1$ (the penalty is too weak to matter and the fit follows the noise), falls to $0.2318$ at $\lambda = 1$ and to its minimum $0.2299$ at $\lambda = 3$, and rises slowly to $0.2307$, $0.2336$ and $0.2363$ at $\lambda = 10, 30, 100$. The curve is U-shaped in $\log\lambda$ with a shallow interior minimum, so $\hat\lambda = 3$.
 
-d) The same $\hat\lambda = 1$ minimizes the CV loss at $\tau = 0.1$ (min $0.110$) and $\tau = 0.9$ (min $0.129$), so the CV-selected smoothing does not differ across quantile levels in this example. The extreme-quantile curves are even more sharply U-shaped: at $\tau = 0.1$, for instance, the CV loss runs $0.250, 0.164, 0.110, 0.132, 0.712, \ldots$ across the $\lambda$ grid, because with fewer residuals informative about the lower tail the penalty matters more.
+d) No single $\lambda$ is best at all three levels. At $\tau = 0.1$ the CV loss runs $0.2522, 0.1624, 0.0847, 0.0854, 0.0958, 0.0948, 0.1148$ across the grid and selects $\hat\lambda = 1$ (minimum $0.0847$). At $\tau = 0.9$ it runs $0.2521, 0.1689, 0.1193, 0.1096, 0.1101, 0.1174, 0.1422$ and selects $\hat\lambda = 3$ (minimum $0.1096$). The minima are flat, so the selected values are close.
 
-e) For small $\lambda$ the second-difference penalty is nearly inactive, so $f$ bends to track individual noisy $y_i$; the fit overfits, and the out-of-fold loss is dominated by variance (the modest $0.25$ plateau). For large $\lambda$ the penalty forces $\Delta^2 f \to 0$, that is, a single straight line, which cannot bend at the kink $x = 5$; the fit is badly biased there, and the out-of-fold loss jumps by roughly $3\times$ once $\lambda \ge 10$. Cross-validated check loss trades these off and selects the interior $\hat\lambda = 1$, exactly as a ridge or lasso penalty is tuned, filling the gap left by the chapter's demo, which simply asserts $\lambda = 2$.
+e) For small $\lambda$ the second-difference penalty is nearly inactive, so $f$ bends to track individual noisy $y_i$ (148 changes of slope at $\lambda = 0.1$); the out-of-fold loss is dominated by variance. As $\lambda$ grows the number of changes of slope falls (24 at $\lambda = 1$, 4 at $\lambda = 30$) and the loss falls with it. For large $\lambda$ the fit is smoothed, but it does not become a straight line even at $\lambda = 100$, where two changes of slope remain: the penalty is on second differences in index units, and a kink of slope change $2.5$ across a spacing of about $0.07$ costs only about $0.17\lambda$ in penalty, which is small next to the check loss saved by bending. The loss therefore rises only slightly at large $\lambda$. Cross-validated check loss trades these off, exactly as a ridge or lasso penalty is tuned, filling the gap left by the chapter's demo, which simply fixes $\lambda = 2$.
 :::
 :::
 
@@ -605,14 +600,14 @@ cat(sprintf("MAE@0.37  implicit = %.4f,  explicit(interp) = %.4f\n",
 
 d) The shared cosine embedding has $8 \times 6 + 6 = 54$ parameters, the shared feature network $\psi$ has $1 \times 6 + 6 = 12$, and the readout $(w, b)$ has $6 + 1 = 7$, for an implicit total of $73$, independent of how many distinct $\tau$ appear during training. Each explicit network carries its own $\psi_k$ ($12$) and readout ($7$), $19$ apiece, so the nine together use $9 \times 19 = 171$ parameters, about $2.3$ times as many.
 
-e) Running this code (`set.seed(7)` for the data and implicit initialization, `set.seed(11)` for the explicit initializations, `L-BFGS-B` for 300 iterations), the implicit network's prediction at $\tau = 0.37$ has mean absolute error $0.081$ against the analytic quantile across $x \in \{-0.9, -0.7, \ldots, 0.9\}$, while the interpolated explicit prediction has error $0.078$: essentially tied. The implicit network is not more accurate here, so the raw error is not the point. What matters is that the implicit network is defined at every $\tau \in (0, 1)$ by construction (it simply evaluates $\phi(0.37)$), using about $2.3$ times fewer parameters, whereas the explicit approach has no parameter representing $\tau$ at all and can answer at an untrained level only through an ad hoc interpolation between neighboring fits. This is the smooth interpolation and parameter efficiency that motivate the cosine embedding, though this run shows no accuracy gain.
+e) Running this code (`set.seed(7)` for the data and implicit initialization, `set.seed(11)` for the explicit initializations, `L-BFGS-B` for 300 iterations), the implicit network's prediction at $\tau = 0.37$ has mean absolute error $0.081$ against the analytic quantile across $x \in \{-0.9, -0.7, \ldots, 0.9\}$, while the interpolated explicit prediction has error $0.078$: essentially tied. The implicit network is not more accurate here, so the raw error is not the point. What matters is that the implicit network is defined at every $\tau \in (0, 1)$ by construction (it simply evaluates $\phi(0.37)$), using fewer than half the parameters, whereas the explicit approach has no parameter representing $\tau$ at all and can answer at an untrained level only through an ad hoc interpolation between neighboring fits. This is the smooth interpolation and parameter efficiency that motivate the cosine embedding, though this run shows no accuracy gain.
 :::
 :::
 
 ::: {#exr-portfolio-kelly-qnn}
 ## Portfolio Optimization via Quantile Neural Networks: Verifying the Kelly Criterion
 
-@sec-qnn-portfolio finds the optimal portfolio weight $\omega$ without ever specifying a closed-form expected-utility function: (1) simulate the log-return $W$ given $\omega$, (2) transform it into a utility $Z=U(W)$, (3) estimate the quantile function $F^{-1}_{Z_\omega}$, and (4) integrate over $\tau$ to obtain $\E{Z_\omega}$, then maximize over $\omega$. Because the chapter's example uses CARA utility and normally distributed payoffs $W$, a closed-form fractional-Kelly solution is also available, which makes the algorithm self-checking: implemented correctly, it should recover the closed-form optimum.
+@sec-qnn-portfolio finds the optimal portfolio weight $\omega$ without ever specifying a closed-form expected-utility function: (1) simulate the payoff $W$ given $\omega$, (2) transform it into a utility $Z=U(W)$, (3) estimate the quantile function $F^{-1}_{Z_\omega}$, and (4) integrate over $\tau$ to obtain $\E{Z_\omega}$, then maximize over $\omega$. Because the chapter's example uses CARA utility and normally distributed payoffs $W$, a closed-form fractional-Kelly solution is also available, which makes the algorithm self-checking: implemented correctly, it should recover the closed-form optimum.
 
 Use the chapter's own numbers: $r_f = 0.05$, $\mu=0.1$, $\sigma=0.25$, $\gamma=2$, so that $U(W)=-e^{-\gamma W}$ and $W(\omega) = (1-\omega)r_f+\omega R$ with $R \sim N(\mu,\sigma^2)$.
 
@@ -656,7 +651,7 @@ Running this code (`set.seed(2024)`, $N=200{,}000$ draws per $\omega$, grid step
 $$
 \omega^\star = \frac{\mu-r_f}{\sigma^2\gamma} = \frac{0.10-0.05}{0.25^2(2)} = 0.40.
 $$
-(With a different seed the grid search may land one step away, e.g., $\hat\omega^\star=0.39$ or $0.41$, ordinary Monte Carlo variability that shrinks as $N$ grows.) The quantile-integral estimate of $\E{Z_\omega}$ also tracks the closed-form expected utility $U(\omega) = -\exp\{-\gamma[(1-\omega)r_f+\omega\mu] + \tfrac12\gamma^2\omega^2\sigma^2\}$ closely at every $\omega$, for example $-0.8867$ (quantile integral) versus $-0.8869$ (closed form) at $\omega=0.4$, confirming that the check-loss and quantile machinery recovers not just the optimum but the whole expected-utility curve.
+(With a different seed the grid search may land one step away, e.g., $\hat\omega^\star=0.39$ or $0.41$, ordinary Monte Carlo variability that shrinks as $N$ grows.) The quantile-integral estimate of $\E{Z_\omega}$ also tracks the closed-form expected utility $U(\omega) = -\exp\{-\gamma[(1-\omega)r_f+\omega\mu] + \tfrac12\gamma^2\omega^2\sigma^2\}$ closely at every $\omega$, for example $-0.8867$ (quantile integral) versus $-0.8869$ (closed form) at $\omega=0.4$, confirming that quantile integration recovers not just the optimum but the whole expected-utility curve.
 
 e) With independent draws at each $\omega$, the Monte Carlo error in $\widehat{\E{Z_\omega}}$ is uncorrelated across grid points, so the estimated curve is jagged and its argmax can land far from the true optimum even for large $N$. Reusing the same standard-normal shocks $z^{(i)}$ at every $\omega$ makes $W(\omega)$, and hence $\widehat{\E{Z_\omega}}$, a smooth function of $\omega$ for each realization of $z$, since only the deterministic map from $z$ to $W$ changes with $\omega$. The Monte Carlo error becomes a smooth, shared perturbation of the whole curve rather than independent noise at each grid point, so the location of its maximum is far more stable, exactly what a reliable grid search needs.
 :::

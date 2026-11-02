@@ -11,7 +11,7 @@ c) What are the values of $\sigma(0)$, $\sigma(2)$, and $\sigma(-2)$?
 d) At what value of $z$ is $\sigma'(z)$ maximized?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Proof:
 $$
@@ -61,10 +61,10 @@ $$
 a) For a customer with 5 hours monthly usage on a month-to-month contract, calculate the probability of churning.
 b) Calculate the odds ratio for switching from month-to-month to annual contract.
 c) How much would usage need to increase to double the odds of churning?
-d) Plot the probability of churning as a function of usage for both contract types.
+d) Sketch the probability of churning as a function of usage for both contract types.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) Probability calculation:
 ```{r}
@@ -120,7 +120,7 @@ c) If missing a fraud costs \$500 and a false alarm costs \$10, which metric sho
 d) What threshold adjustment would increase recall at the expense of precision?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 TP <- 85
@@ -157,7 +157,7 @@ cat("Current cost: $", cost_current, "\n")
 # A weighted F1 or custom cost function would be better
 ```
 
-Since missing fraud costs 50× more than false alarms, you should optimize for **recall** (minimizing FN), accepting more false alarms.
+Since missing fraud costs 50× more than false alarms, you should optimize for *recall* (minimizing FN), accepting more false alarms.
 
 d) To increase recall:
 - Lower the classification threshold (e.g., from 0.5 to 0.3)
@@ -181,28 +181,24 @@ d) If a logistic regression model gives P(Y=1) = 0.7 for an observation, changin
 e) The odds ratio for a predictor is always positive.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
-a) **FALSE**. Coefficients represent the change in **log-odds**, not probability. The relationship between coefficients and probability is nonlinear (S-shaped).
+a) *FALSE*. Coefficients represent the change in *log-odds*, not probability. The relationship between coefficients and probability is nonlinear (S-shaped).
 
-b) **TRUE**. The decision boundary is where $P(Y=1) = 0.5$, i.e., where $\beta_0 + \beta_1 x_1 + \cdots = 0$: a hyperplane in the space of variables that the model combines linearly. When that space is a nonlinear transform of the original inputs (polynomial features, or the kernel trick's implicit feature map), the same linear boundary can look nonlinear back in the original input space.
+b) *TRUE*. The decision boundary is where $P(Y=1) = 0.5$, i.e., where $\beta_0 + \beta_1 x_1 + \cdots = 0$: a hyperplane in the space of variables that the model combines linearly. When that space is a nonlinear transform of the original inputs (polynomial features, or the kernel trick's implicit feature map), the same linear boundary can look nonlinear back in the original input space.
 
-c) **TRUE** (but problematic). With perfectly separable data, the MLE doesn't exist: coefficients go to $\pm\infty$. Regularization is needed to prevent this.
+c) *TRUE* (but problematic). With perfectly separable data, the MLE doesn't exist: coefficients go to $\pm\infty$. Regularization is needed to prevent this.
 
-d) **TRUE**. The probability is a property of the model. The threshold only affects the **classification decision**, not the predicted probability.
+d) *TRUE*. The probability is a property of the model. The threshold only affects the *classification decision*, not the predicted probability.
 
-e) **TRUE**. The odds ratio is $e^\beta$, and $e^x > 0$ for all $x$. However, the odds ratio can be less than 1 (meaning decreased odds) if $\beta < 0$.
+e) *TRUE*. The odds ratio is $e^\beta$, and $e^x > 0$ for all $x$. However, the odds ratio can be less than 1 (meaning decreased odds) if $\beta < 0$.
 
 :::
-:::
-
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
 :::
 
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## ROC Curve
@@ -228,7 +224,7 @@ c) Sketch the ROC curve and estimate the AUC.
 d) What does an AUC of 0.5 represent?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 true_labels <- c(1, 1, 0, 1, 0, 1, 0, 0, 1, 0)  # 1=positive, 0=negative
@@ -302,7 +298,7 @@ c) Which product is most likely to be chosen?
 d) What loyalty score makes A and C equally likely (holding price_diff = 2)?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 # Given values
@@ -359,7 +355,7 @@ e) Interpret the ROC curve. Why do we choose a cut-off that is sensitive but not
 f) Refit the model from (a) with a probit link (`family = binomial(link = "probit")`) in place of the logit link. Compare the estimated coefficients and the fitted default probabilities to the logit model. Do the substantive conclusions change?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 library(boot)
@@ -375,7 +371,8 @@ log_model <- glm(Default ~ duration + amount + installment + age + history,
                  family = binomial, data = credit)
 
 # b) Cross-validation for logistic regression
-cv_error <- cv.glm(credit, log_model, K = 10)$delta[1]
+set.seed(1)
+cv_error <- cv.glm(credit, log_model, cost = function(y, p) mean(abs(y - p) > 0.5), K = 10)$delta[1]
 cat("Logistic regression 10-fold CV error:", round(cv_error, 4), "\n")
 
 # c) Optimal cutoff derivation
@@ -453,7 +450,7 @@ c) Perform out-of-sample validation: randomly hold out 1,000 observations, train
 d) Calculate the out-of-sample deviance and R² (compare to null model deviance).
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 email <- read.csv("data/spam.csv")
@@ -502,7 +499,7 @@ cat("Null deviance:", round(D0, 1), "\n")
 cat("OOS R² (pseudo):", round(1 - D/D0, 3), "\n")
 ```
 
-**Key Finding**: The model achieves an OOS R² around 0.6-0.7, indicating strong predictive power. Words like "free", "money", and "!" indicate spam, while personal names indicate legitimate email.
+*Key Finding*: The model achieves an OOS R² around 0.6-0.7, indicating strong predictive power. Words like "free", "money", and "!" indicate spam, while personal names indicate legitimate email.
 :::
 :::
 
@@ -518,7 +515,7 @@ c) Interpret the odds ratio for `BATHS`.
 d) Compute in-sample classification accuracy at a 0.5 cutoff.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 homes <- read.csv("data/homes2004.csv")
@@ -543,7 +540,7 @@ accuracy <- mean(pred_class == homes$gt20dwn)
 cat("In-sample accuracy at 0.5 cutoff:", round(accuracy, 4), "\n")
 ```
 
-**Key Finding**: Each additional bathroom is associated with about 42% higher odds of a 20%-or-more down payment, and the model correctly classifies about 70% of buyers in-sample.
+*Key Finding*: Each additional bathroom is associated with about 42% higher odds of a 20%-or-more down payment, and the model correctly classifies about 70% of buyers in-sample. Since 69% of the buyers made a down payment below 20%, this is only slightly better than predicting that for every buyer.
 :::
 :::
 
@@ -557,10 +554,10 @@ a) Load the data with `read.csv("data/circle.csv")` and scatter-plot `x2` agains
 b) Fit `glm(label ~ x1 + x2, family = binomial, data = d)`. Report in-sample accuracy at a 0.5 cutoff and explain, in terms of the linear boundary $\beta_0 + \beta_1 x_1 + \beta_2 x_2 = 0$, why raw logistic regression cannot beat chance here.
 c) Construct the transformed features $z_1 = x_1^2$, $z_2 = \sqrt{2}\,x_1 x_2$, $z_3 = x_2^2$ from the Kernel Trick section and fit `glm(label ~ z1 + z2 + z3, family = binomial, data = d)`. Report the new accuracy. R prints a warning about fitted probabilities of 0 or 1; explain what this says about separability in $z$-space and connect it to the True/False exercise item on perfectly separable data.
 d) Draw two rows with `set.seed(1); idx <- sample(1:200, 2)`. Compute the inner product $z_i^\top z_j$ from the part-(c) features and, separately, the polynomial-kernel value $(x_i^\top x_j)^2$ from the raw features. Confirm they agree, verifying $K(x,y) = (x^\top y)^2 = \langle \phi(x), \phi(y)\rangle$ for this $\phi$.
-e) Using the fitted coefficients from (c), write the boundary $\omega_1 x_1^2 + \omega_2 \sqrt{2}\,x_1 x_2 + \omega_3 x_2^2 = 0$ back in the original $(x_1, x_2)$ plane and argue that it traces a near-circular ellipse around the origin, matching how the data were generated.
+e) Using the fitted coefficients from (c), write the boundary $\omega_1 x_1^2 + \omega_2 \sqrt{2}\,x_1 x_2 + \omega_3 x_2^2 + \beta_0 = 0$ back in the original $(x_1, x_2)$ plane and argue that it traces a near-circular ellipse around the origin, matching how the data were generated.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) The label-0 points form a disk near the origin while the label-1 points form a ring around them. No straight line can wrap around the inner disk, so the classes are not linearly separable.
 ```{r}
@@ -628,7 +625,7 @@ c) Compare the two nested models with `anova(reduced, full, test = "Chisq")`. Re
 d) Compute the dispersion statistic $\sum_i r_i^2/(n-p)$ from the Pearson residuals (`residuals(full, type = "pearson")`) of the full model. Is there evidence of overdispersion, and what does this imply about the standard errors and the $p$-value reported in (c)?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 data(warpbreaks)
@@ -672,7 +669,7 @@ c) Fit the reduced model `amount ~ duration + installment + age`, dropping `hist
 d) Fit the log-linear OLS model `lm(log(amount) ~ duration + installment + age + history)`. Compare its coefficients to the Gamma GLM's, and compare fitted values on the original scale (exponentiate the OLS fitted values). Are the two practically equivalent here? What is conceptually different between modeling $\E{Y \mid x}$ directly through a Gamma GLM with a log link and modeling $\E{\log Y \mid x}$ with OLS?
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 a) The distribution is right-skewed, so the mean sits well above the median.
 ```{r}
@@ -714,7 +711,7 @@ round(rbind(gamma = coef(full), ols = coef(ols)), 4)
 cat("correlation of original-scale fitted values:",
     round(cor(fitted(full), exp(fitted(ols))), 4), "\n")
 ```
-The coefficients are numerically close (duration 0.042 for the Gamma GLM versus 0.043 for OLS), and the fitted values on the original scale correlate above 0.999. They match because the dispersion is modest. Conceptually, though, the two models target different quantities: the Gamma GLM with a log link sets $\log \E{Y \mid x} = x^\top\beta$, modeling $\E{Y \mid x}$ directly, whereas log-linear OLS sets $\E{\log Y \mid x} = x^\top\beta$. By Jensen's inequality $\E{\log Y \mid x} \le \log \E{Y \mid x}$, so naively exponentiating OLS fitted values understates $\E{Y \mid x}$ in general, unless a bias correction such as Duan's smearing estimator is applied.
+The coefficients are numerically close (duration 0.042 for the Gamma GLM versus 0.043 for OLS), and the fitted values on the original scale correlate above 0.999. The two sets of estimates agree closely here. Conceptually, though, the two models target different quantities: the Gamma GLM with a log link sets $\log \E{Y \mid x} = x^\top\beta$, modeling $\E{Y \mid x}$ directly, whereas log-linear OLS sets $\E{\log Y \mid x} = x^\top\beta$. By Jensen's inequality $\E{\log Y \mid x} \le \log \E{Y \mid x}$, so naively exponentiating OLS fitted values understates $\E{Y \mid x}$ in general, unless a bias correction such as Duan's smearing estimator is applied.
 :::
 :::
 
@@ -722,15 +719,15 @@ The coefficients are numerically close (duration 0.042 for the Gamma GLM versus 
 ::: {#exr-polya-gamma-nba}
 ## Polya-Gamma Gibbs Sampler for the NBA Spread Model
 
-@sec-bayes-logistic derives a Gibbs sampler for Bayesian logistic regression using Polya-Gamma data augmentation and implements it in the function `bayesian_logit_pg()`. Here we reuse that exact sampler on the NBA point-spread data from @exm-nba, where the frequentist fit was $\hat\beta = 0.156$ for the no-intercept model $\mathrm{logit}(P(\text{favwin}=1)) = \beta \cdot \text{spread}$.
+@sec-bayes-logistic states a Gibbs sampler for Bayesian logistic regression using Polya-Gamma data augmentation and implements it in the function `bayesian_logit_pg()`. Here we reuse that sampler on the NBA point-spread data from @exm-nba, where the frequentist fit was $\hat\beta = 0.156$ for the no-intercept model $\mathrm{logit}(P(\text{favwin}=1)) = \beta \cdot \text{spread}$.
 
-a) Load `NBAspread.csv` and reuse the chapter's `bayesian_logit_pg()` function (reproduced below) to sample from the posterior of $\beta$ for the model `favwin ~ spread - 1`. Run `n_iter = 3000` iterations with a `burn_in` of 500, and set a seed.
+a) Load `NBAspread.csv` and reuse the chapter's `bayesian_logit_pg()` function to sample from the posterior of $\beta$ for the model `favwin ~ spread - 1`. Run `n_iter = 3000` iterations with a `burn_in` of 500, and set a seed.
 b) Report the posterior mean, posterior standard deviation, and a 95% credible interval for $\beta$.
 c) Fit the same model by maximum likelihood with `glm(favwin ~ spread - 1, family = binomial, data = NBA)`. Compare the MLE and its standard error to the posterior mean and standard deviation from (b). Should these agree closely, and why?
 d) Plot a histogram of the posterior draws of $\beta$, marking the posterior mean and the MLE.
 
 ::: {.content-hidden unless-meta="showsln"}
-**Solution**:
+*Solution*:
 
 ```{r}
 library(BayesLogit)

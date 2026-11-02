@@ -1,0 +1,9 @@
+graph TB
+    A["1000 women"] --> B["10 with cancer"]
+    A --> H["990 healthy"]
+    B --> TP["8 positive"]
+    B --> FN["2 negative"]
+    H --> FP["99 positive"]
+    H --> TN["891 negative"]
+    TP --> P["107 positive tests,<br/>8 with cancer"]
+    FP --> P

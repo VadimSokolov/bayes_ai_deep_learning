@@ -131,13 +131,13 @@ d) How would you use OOB error to avoid overfitting?
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) **Bagging** (Bootstrap Aggregating):
+a) Bagging (Bootstrap Aggregating):
 - Draw bootstrap samples (with replacement) of size n from training data
 - Each tree is trained on a different bootstrap sample
 - Predictions are aggregated (majority vote for classification, average for regression)
 - This reduces variance by averaging over many diverse trees
 
-b) **mtry = 5** means:
+b) mtry = 5 means:
 - At each split, only 5 randomly selected features are considered (not all 20)
 - This decorrelates the trees (they don't all split on the same strong predictor)
 - Reduces variance further compared to regular bagging
@@ -160,7 +160,6 @@ d) Using OOB error:
 - Compare OOB predictions to true labels to get OOB error
 - This is essentially free cross-validation (no need for separate validation set)
 - Monitor OOB error as you add trees, it should stabilize
-- If OOB error is much lower than test error, consider more trees or tuning
 
 :::
 :::
@@ -183,7 +182,7 @@ d) How would you select $\alpha$ in practice?
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) **Select the tree with 5 terminal nodes** because:
+a) Select the tree with 5 terminal nodes because:
 - It has the lowest test error (0.11)
 - The full tree is overfitting (high gap between train and test error)
 - The 3-node tree is underfitting (high training error)
@@ -247,10 +246,10 @@ d) If Tenure and Monthly Charges are correlated (r = 0.6), how might this affect
 **Solution**:
 
 a) Interpretation:
-- **Tenure** (0.25): Most important predictor; splits on tenure provide the largest reduction in Gini impurity on average
-- **Monthly Charges** (0.22): Second most important
-- **Payment Method** (0.08): Least important; contributes little to prediction accuracy
-- These are relative importance values that typically sum to 1 or are normalized
+- Tenure (0.25): Most important predictor; splits on tenure provide the largest reduction in Gini impurity on average
+- Monthly Charges (0.22): Second most important
+- Payment Method (0.08): Least important; contributes little to prediction accuracy
+- These are relative importance values, to be compared with each other
 
 b) Bias for categorical variables with many levels:
 - Variables with more categories/levels have more potential split points
@@ -258,7 +257,7 @@ b) Bias for categorical variables with many levels:
 - A variable with 10 categories may appear more important than a binary variable even if the binary variable is truly more predictive
 - Solution: Use permutation importance instead
 
-c) **Permutation importance**:
+c) Permutation importance:
 1. Compute baseline model accuracy on OOB/test data
 2. For each feature: randomly permute its values (breaking the feature-target relationship)
 3. Compute accuracy with permuted feature
@@ -277,7 +276,7 @@ d) Effect of correlation:
 ::: {#exr-}
 ## Gradient Boosting
 
-Compare Random Forest and Gradient Boosting:
+Answer the following questions about Gradient Boosting:
 
 a) Explain how boosting builds trees sequentially, fitting residuals.
 b) If a Gradient Boosting model with 100 trees has training error 0.02 and test error 0.15, what might be wrong?
@@ -298,7 +297,7 @@ a) Boosting algorithm:
 Each tree corrects the errors of the ensemble so far.
 
 b) With train error = 0.02, test error = 0.15:
-- The model is **overfitting** (large gap between train and test)
+- The model is overfitting (large gap between train and test)
 - Possible solutions:
   - Reduce number of trees
   - Decrease learning rate (smaller $\lambda$; compensate with more trees or early stopping)
@@ -314,7 +313,7 @@ c) Learning rate (shrinkage) $\lambda$:
 - Trade-off: slower training, but better generalization
 
 d) Model comparison:
-- **Model B (500 trees, $\lambda = 0.02$)** should generalize better
+- Model B (500 trees, $\lambda = 0.02$) should generalize better
 - More trees with smaller steps allows finer tuning
 - $50 \times 0.2 = 10$ and $500 \times 0.02 = 10$ give similar "total learning"
 - But smaller steps with more iterations provides regularization
@@ -369,13 +368,9 @@ e) **FALSE**. OOB error and CV error estimate the same quantity (expected test e
 :::
 
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## California Housing: Model Comparison
@@ -401,8 +396,10 @@ CAhousing$AveBedrms <- CAhousing$totalBedrooms / CAhousing$households
 CAhousing$AveRooms <- CAhousing$totalRooms / CAhousing$households
 CAhousing$AveOccupancy <- CAhousing$population / CAhousing$households
 logMedVal <- log(CAhousing$medianHouseValue)
-CAhousing <- CAhousing[, -c(4, 5, 9)]  # Remove totals and medval
+CAhousing <- CAhousing[, -c(4, 5, 9)]  # Remove the room and bedroom totals and medianHouseValue (population and households stay)
 CAhousing$logMedVal <- logMedVal
+
+set.seed(1)
 
 # a) LASSO with interactions
 XXca <- model.matrix(logMedVal ~ .^2, data = CAhousing)[, -1]
@@ -454,7 +451,7 @@ cat("\nMean MSE:\n")
 print(round(colMeans(MSE), 4))
 ```
 
-**Key Finding**: Random Forest typically achieves the lowest MSE, followed by LASSO, then CART. The most important predictors are median income, location (lat/long), and occupancy rates.
+Key Finding: Random Forest achieves the lowest MSE, followed by CART. The mean MSE of LASSO is dominated by a few extreme predictions from the interaction terms. The most important predictors are median income, location (lat/long), and occupancy rates.
 :::
 :::
 
@@ -468,7 +465,7 @@ Use the `Boston` housing data (`medv` as the response, all other columns as pred
 a) Fit a boosted model with `gbm` (`distribution = "gaussian"`, `interaction.depth = 3`) at two learning rates: $\lambda=0.2$ grown out to 1,000 trees, and $\lambda=0.02$ grown out to 3,000 trees. For each fit, compute the training and test MSE every 10 trees using `predict.gbm()` with a vector of `n.trees` values.
 b) Plot training and test MSE against the number of trees for each learning rate. At what number of trees does the $\lambda=0.2$ model's test error stop improving? Does it get worse after that, and by how much?
 c) Repeat the question in (b) for $\lambda=0.02$. Does it overfit as quickly as the $\lambda=0.2$ model? Which of the two reaches the lower minimum test MSE, and how many trees does it take to get there?
-d) Refit with `cv.folds = 5` and use `gbm.perf(..., method = "cv")` to select the number of trees automatically. How does the cross-validated choice compare to the manual holdout choice in (c)?
+d) Refit the $\lambda=0.02$ model with `cv.folds = 5` and up to 3,000 trees, and use `gbm.perf(..., method = "cv")` to select the number of trees automatically. How does the cross-validated choice compare to the manual holdout choice in (c)?
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
@@ -492,10 +489,14 @@ fit_curve <- function(lr, ntree) {
 fast <- fit_curve(lr = 0.2,  ntree = 1000)  # large steps, few trees
 slow <- fit_curve(lr = 0.02, ntree = 3000)  # small steps, many trees
 
-plot(fast$trees, fast$train, type = "l", col = "steelblue",
-     xlab = "number of trees", ylab = "MSE", main = "lambda = 0.2")
-lines(fast$trees, fast$test, col = "firebrick")
-legend("topright", c("train", "test"), col = c("steelblue", "firebrick"), lty = 1, bty = "n")
+par(mfrow = c(1, 2))
+for (m in list(list(fast, "lambda = 0.2"), list(slow, "lambda = 0.02"))) {
+  plot(m[[1]]$trees, m[[1]]$train, type = "l", col = "steelblue",
+       ylim = range(c(m[[1]]$train, m[[1]]$test)),
+       xlab = "number of trees", ylab = "MSE", main = m[[2]])
+  lines(m[[1]]$trees, m[[1]]$test, col = "firebrick")
+  legend("topright", c("train", "test"), col = c("steelblue", "firebrick"), lty = 1, bty = "n")
+}
 
 cat("lambda=0.20: best n.trees =", fast$trees[which.min(fast$test)],
     ", min test MSE =", round(min(fast$test), 3),
@@ -510,14 +511,15 @@ b) The $\lambda=0.2$ model reaches its lowest test MSE (6.735) at 90 trees. Past
 c) The $\lambda=0.02$ model needs far more trees, about 1460, to reach its own minimum test MSE of 6.246, slightly lower than the fast learner's best. It also overfits much more gently: pushed to 3000 trees, twice its optimum, test MSE only creeps up to 6.437, a fraction of the degradation seen with large steps. Many small steps reach a better solution and are far more forgiving of running past the optimal stopping point than a few large steps, echoing the "total learning is similar, but the path matters" intuition from the paper exercise.
 
 ```{r}
-cvfit <- gbm(medv ~ ., data = tr, distribution = "gaussian", n.trees = 1000,
-             interaction.depth = 3, shrinkage = 0.05, cv.folds = 5, verbose = FALSE)
+set.seed(14)
+cvfit <- gbm(medv ~ ., data = tr, distribution = "gaussian", n.trees = 3000,
+             interaction.depth = 3, shrinkage = 0.02, cv.folds = 5, verbose = FALSE)
 best_cv <- gbm.perf(cvfit, method = "cv", plot.it = FALSE)
-cat("CV-selected n.trees (lambda=0.05):", best_cv, ", test MSE:",
+cat("CV-selected n.trees (lambda=0.02):", best_cv, ", test MSE:",
     round(mean((predict(cvfit, te, n.trees = best_cv) - te$medv)^2), 3), "\n")
 ```
 
-d) Cross-validation at $\lambda=0.05$ selects 990 trees, with a test MSE of 6.572 that falls between the two manual fits. Cross-validation locates a reasonable stopping point automatically, without needing a held-out test set to eyeball a curve, though here it lands a bit above the best achievable MSE because $\lambda=0.05$ is itself a compromise between the two extremes tried in (b)-(c).
+d) Cross-validation at $\lambda=0.02$ selects 1448 trees, close to the 1460 found with the holdout in (c), with a test MSE of 6.398. This is a little above the holdout minimum of 6.246, which was found by looking at the test set and is therefore optimistic. Cross-validation locates a reasonable stopping point automatically, without needing a held-out test set to eyeball a curve.
 
 :::
 :::
@@ -525,7 +527,7 @@ d) Cross-validation at $\lambda=0.05$ selects 990 trees, with a test MSE of 6.57
 ::: {#exr-bart-causal-sim}
 ## BART for Causal Inference: A Simulation with a Known Answer
 
-@sec-bart-causal used BART to recover the effect of the NSW job training program from the confounded Lalonde data, where the true effect is unknown outside of the experimental benchmark. Here you build a simulation where the confounding is by design and the true effect is known, so you can check directly whether BART recovers it and whether the naive comparison is biased.
+@sec-bart-causal used BART to recover the effect of the NSW job training program from the confounded LaLonde data, where the true effect is unknown outside of the experimental benchmark. Here you build a simulation where the confounding is by design and the true effect is known, so you can check directly whether BART recovers it and whether the naive comparison is biased.
 
 a) Simulate $n=1000$ units with covariates $x_1, x_2 \overset{\text{i.i.d.}}{\sim} N(0,1)$. Assign treatment via $Z_i \sim \text{Bernoulli}(\pi(x_i))$ with $\mathrm{logit}\,\pi(x_i) = 0.8x_{1i} - 0.6x_{2i}$, and generate the outcome as
 $$
@@ -570,11 +572,11 @@ if (requireNamespace("bartCause", quietly = TRUE)) {
 
 This solution uses `bartCause::bartc()`, which is backed by `dbarts`; `dbarts::bart2()` or `BART::wbart()` would give an equivalent fit if `bartCause` were unavailable.
 
-b) The naive estimate is 0.943, far below the true $\tau=2$. Units with high $x_1$ and low $x_2$ are more likely to be treated, and those are exactly the covariate values that the baseline surface $1+x_1^2+2x_2-x_1x_2$ makes low: the mean untreated potential outcome is 1.544 for the treated group versus 2.497 for the controls, a gap of about $-0.95$ that has nothing to do with the treatment. The naive comparison adds the true effect to this negative selection gap, $2 - 0.95 \approx 1.05$, close to the 0.943 actually observed. Treated units would have looked worse off even with no treatment at all.
+b) The naive estimate is 0.943, far below the true $\tau=2$. Units with low $x_2$ are more likely to be treated, and $2x_2$ is the only term of the baseline surface $1+x_1^2+2x_2-x_1x_2$ that differs between the arms on average: the mean untreated potential outcome (including noise) is 1.489 for the treated group versus 2.546 for the controls, a gap of about $-1.06$ that has nothing to do with the treatment. The naive comparison adds the true effect to this negative selection gap, $2 - 1.06 \approx 0.94$, which is the 0.943 observed. Treated units would have looked worse off even with no treatment at all.
 
 c) BART gives an ATE of 1.875 with a 95% credible interval of (1.7, 2.05), which contains the true $\tau=2$ and is far closer to it than the naive estimate. Adjusting for $x_1,x_2$ removes essentially all of the selection bias identified in (b).
 
-d) Ignorability holds by construction: $Y$ was generated as a function of $x_1,x_2,Z$ only, so no third variable confounds treatment and outcome once we condition on $x_1,x_2$. That certainty is a privilege of simulation. In real observational data ignorability is untestable; an unmeasured confounder can never be ruled out. The true propensity $\pi(x_i)$ ranges from 0.023 to 0.942, bounded away from the 0/1 boundary, so positivity holds too, though the lower tail is close enough to zero that treated units are sparse in that region of covariate space. Making the assignment rule more extreme, for example replacing the coefficients $0.8,-0.6$ with $5,-4$, or using a deterministic rule like $Z=1$ whenever $x_1>0$, would push $\pi(x)$ toward 0 or 1 in parts of the covariate space and leave no comparable units of the other arm there. BART would then have to extrapolate the outcome surface into regions with no data from one treatment arm, and the ATE estimate would become sensitive to the tree prior rather than the data, the same regularization-induced confounding risk discussed in @sec-bart-causal.
+d) Ignorability holds by construction: $Y$ was generated as a function of $x_1,x_2,Z$ only, so no third variable confounds treatment and outcome once we condition on $x_1,x_2$. That certainty is a privilege of simulation. In real observational data ignorability is untestable; an unmeasured confounder can never be ruled out. The true propensity $\pi(x_i)$ ranges from 0.023 to 0.942, bounded away from the 0/1 boundary, so positivity holds too, though the lower tail is close enough to zero that treated units are sparse in that region of covariate space. Making the assignment rule more extreme, for example replacing the coefficients $0.8,-0.6$ with $5,-4$, or using a deterministic rule like $Z=1$ whenever $x_1>0$, would push $\pi(x)$ toward 0 or 1 in parts of the covariate space and leave no comparable units of the other arm there. BART would then have to extrapolate the outcome surface into regions with no data from one treatment arm, and the ATE estimate would become sensitive to the tree prior rather than the data, an extrapolation risk of the kind that the positivity assumption of @sec-bart-causal rules out.
 
 :::
 :::

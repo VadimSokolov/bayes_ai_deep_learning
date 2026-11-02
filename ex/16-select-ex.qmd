@@ -4,17 +4,17 @@
 ::: {#exr-}
 ## BIC Derivation
 
-The Bayesian Information Criterion approximates the log marginal likelihood $\log p(\mathcal{D} \mid M)$ using the Laplace approximation.
+The Bayesian Information Criterion approximates the log marginal likelihood $\log p(D \mid M)$ using the Laplace approximation.
 
-a) Starting from the marginal likelihood $p(\mathcal{D} \mid M) = \int p(\mathcal{D} \mid \theta, M) p(\theta \mid M) d\theta$, apply a second-order Taylor expansion of the log-posterior $\log p(\mathcal{D} \mid \theta, M) + \log p(\theta \mid M)$ around the MAP estimate $\hat{\theta}$, using $\nabla\big[\log p(\mathcal{D} \mid \hat\theta, M) + \log p(\hat\theta \mid M)\big] = 0$, which holds because $\hat\theta$ is the mode of the posterior (not of the likelihood alone). Show that the integral becomes:
+a) Starting from the marginal likelihood $p(D \mid M) = \int p(D \mid \theta, M) p(\theta \mid M) d\theta$, apply a second-order Taylor expansion of the log-posterior $\log p(D \mid \theta, M) + \log p(\theta \mid M)$ around the MAP estimate $\hat{\theta}$, using $\nabla\big[\log p(D \mid \hat\theta, M) + \log p(\hat\theta \mid M)\big] = 0$, which holds because $\hat\theta$ is the mode of the posterior (not of the likelihood alone). Show that the integral becomes:
 $$
-p(\mathcal{D} \mid M) \approx p(\mathcal{D} \mid \hat{\theta}, M) \cdot p(\hat{\theta} \mid M) \cdot (2\pi)^{k/2} \lvert H \rvert^{-1/2}
+p(D \mid M) \approx p(D \mid \hat{\theta}, M) \cdot p(\hat{\theta} \mid M) \cdot (2\pi)^{k/2} \lvert H \rvert^{-1/2}
 $$
 where $H$ is the negative Hessian of the log-posterior at $\hat\theta$ and $k = \dim(\theta)$.
 
 b) Show that for large $n$, the $\log \lvert H \rvert$ term is approximately $k \log n$, yielding the BIC:
 $$
-\text{BIC} = \log p(\mathcal{D} \mid \hat{\theta}, M) - \frac{k}{2} \log n
+\text{BIC} = \log p(D \mid \hat{\theta}, M) - \frac{k}{2} \log n
 $$
 
 c) Explain why BIC penalizes complex models more heavily than AIC (which uses $k$ instead of $\frac{k}{2}\log n$).
@@ -22,23 +22,23 @@ c) Explain why BIC penalizes complex models more heavily than AIC (which uses $k
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) Let $\ell(\theta) = \log p(\mathcal{D} \mid \theta, M) + \log p(\theta \mid M)$ denote the (unnormalized) log-posterior, so $p(\mathcal{D} \mid M) = \int e^{\ell(\theta)} d\theta$. Since $\hat\theta$ is the MAP estimate, it maximizes the posterior and hence $\ell$, so $\nabla \ell(\hat{\theta}) = 0$. Taylor expand $\ell(\theta)$ around $\hat{\theta}$, dropping the vanishing first-order term:
+a) Let $\ell(\theta) = \log p(D \mid \theta, M) + \log p(\theta \mid M)$ denote the (unnormalized) log-posterior, so $p(D \mid M) = \int e^{\ell(\theta)} d\theta$. Since $\hat\theta$ is the MAP estimate, it maximizes the posterior and hence $\ell$, so $\nabla \ell(\hat{\theta}) = 0$. Taylor expand $\ell(\theta)$ around $\hat{\theta}$, dropping the vanishing first-order term:
 $$
-\ell(\theta) \approx \ell(\hat{\theta}) - \frac{1}{2}(\theta - \hat{\theta})^T H (\theta - \hat{\theta})
+\ell(\theta) \approx \ell(\hat{\theta}) - \frac{1}{2}(\theta - \hat{\theta})^\top H (\theta - \hat{\theta})
 $$
-where $H = -\nabla^2 \ell(\hat{\theta})$ is the negative Hessian of the log-posterior (positive definite at the maximum). Substituting and using $e^{\ell(\hat\theta)} = p(\mathcal{D} \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M)$:
+where $H = -\nabla^2 \ell(\hat{\theta})$ is the negative Hessian of the log-posterior (positive definite at the maximum). Substituting and using $e^{\ell(\hat\theta)} = p(D \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M)$:
 $$
-p(\mathcal{D} \mid M) \approx p(\mathcal{D} \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M) \int \exp\left(-\frac{1}{2}(\theta - \hat{\theta})^T H (\theta - \hat{\theta})\right) d\theta
+p(D \mid M) \approx p(D \mid \hat{\theta}, M)\, p(\hat{\theta} \mid M) \int \exp\left(-\frac{1}{2}(\theta - \hat{\theta})^\top H (\theta - \hat{\theta})\right) d\theta
 $$
 The integral is a multivariate Gaussian with covariance $H^{-1}$, evaluating to $(2\pi)^{k/2} |H|^{-1/2}$.
 
 b) For i.i.d. data, $H \approx n \cdot I(\hat{\theta})$ where $I(\hat{\theta})$ is the per-observation Fisher information. Therefore $\log |H| \approx k \log n + \log |I(\hat{\theta})|$, and for large $n$ the $k \log n$ term dominates. Taking the log of the result in (a):
 $$
-\log p(\mathcal{D} \mid M) \approx \log p(\mathcal{D} \mid \hat{\theta}, M) + \log p(\hat{\theta} \mid M) + \frac{k}{2}\log(2\pi) - \frac{1}{2}\log|H|
+\log p(D \mid M) \approx \log p(D \mid \hat{\theta}, M) + \log p(\hat{\theta} \mid M) + \frac{k}{2}\log(2\pi) - \frac{1}{2}\log|H|
 $$
 The prior term $\log p(\hat{\theta} \mid M)$ and the constant $\frac{k}{2}\log(2\pi)$ do not grow with $n$, so for large $n$ they are dominated by $\frac{1}{2}\log|H| \approx \frac{k}{2}\log n$. Dropping the $O(1)$ terms gives:
 $$
-\log p(\mathcal{D} \mid M) \approx \log p(\mathcal{D} \mid \hat{\theta}, M) - \frac{k}{2} \log n
+\log p(D \mid M) \approx \log p(D \mid \hat{\theta}, M) - \frac{k}{2} \log n
 $$
 
 c) BIC's penalty $\frac{k}{2}\log n$ grows with sample size, while AIC's penalty $k$ is fixed. For $n > e^2 \approx 7.4$, BIC penalizes each additional parameter more than AIC. This means BIC selects simpler models, especially with large datasets. BIC is consistent (selects the true model asymptotically), while AIC tends to overfit.
@@ -56,22 +56,22 @@ You observe 10 rolls of a die: {3, 5, 2, 6, 1, 4, 6, 3, 5, 2}. Consider three mo
 
 Assume equal prior probabilities: $P(M_1) = P(M_2) = P(M_3) = 1/3$.
 
-a) Compute $P(\mathcal{D} \mid M_1)$.
-b) Compute $P(\mathcal{D} \mid M_2)$.
-c) Compute $P(\mathcal{D} \mid M_3)$ by marginalizing over $K$. (Note: any $K < 6$ gives zero likelihood since we observed a 6.)
-d) Compute the posterior model probabilities $P(M_i \mid \mathcal{D})$.
+a) Compute $P(D \mid M_1)$.
+b) Compute $P(D \mid M_2)$.
+c) Compute $P(D \mid M_3)$ by marginalizing over $K$. (Note: any $K < 6$ gives zero likelihood since we observed a 6.)
+d) Compute the posterior model probabilities $P(M_i \mid D)$.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
 a) Under $M_1$, each outcome has probability $1/6$:
 $$
-P(\mathcal{D} \mid M_1) = (1/6)^{10} = 1/6^{10} \approx 1.654 \times 10^{-8}
+P(D \mid M_1) = (1/6)^{10} = 1/6^{10} \approx 1.654 \times 10^{-8}
 $$
 
 b) Under $M_2$, $P(k) = k/21$. The observed values are {3,5,2,6,1,4,6,3,5,2}:
 $$
-P(\mathcal{D} \mid M_2) = \frac{3 \cdot 5 \cdot 2 \cdot 6 \cdot 1 \cdot 4 \cdot 6 \cdot 3 \cdot 5 \cdot 2}{21^{10}}
+P(D \mid M_2) = \frac{3 \cdot 5 \cdot 2 \cdot 6 \cdot 1 \cdot 4 \cdot 6 \cdot 3 \cdot 5 \cdot 2}{21^{10}}
 $$
 
 ```{r}
@@ -87,9 +87,9 @@ cat("P(D|M2):", p_M2, "\n")
 
 c) Under $M_3$, we marginalize over $K \in \{4,...,9\}$:
 $$
-P(\mathcal{D} \mid M_3) = \sum_{K=4}^{9} P(\mathcal{D} \mid K) P(K)
+P(D \mid M_3) = \sum_{K=4}^{9} P(D \mid K) P(K)
 $$
-For $K < 6$: $P(\mathcal{D} \mid K) = 0$ since we observed 6. For $K \geq 6$:
+For $K < 6$: $P(D \mid K) = 0$ since we observed 6. For $K \geq 6$:
 
 ```{r}
 #| eval: false
@@ -112,16 +112,17 @@ cat("P(M1|D):", round(posteriors[1], 4), "\n")
 cat("P(M2|D):", round(posteriors[2], 4), "\n")
 cat("P(M3|D):", round(posteriors[3], 4), "\n")
 ```
+The likelihoods are $1.654\times 10^{-8}$, $7.77\times 10^{-9}$ and $3.55\times 10^{-9}$, and the posterior probabilities are 0.594, 0.279 and 0.127.
 :::
 :::
 
 ::: {#exr-}
 ## Occam's Razor in Model Selection
 
-Explain why the Bayesian marginal likelihood $p(\mathcal{D} \mid M) = \int p(\mathcal{D} \mid \theta) p(\theta \mid M) d\theta$ automatically implements Occam's razor.
+Explain why the Bayesian marginal likelihood $p(D \mid M) = \int p(D \mid \theta) p(\theta \mid M) d\theta$ automatically implements Occam's razor.
 
-a) A complex model $M_C$ with many parameters can fit a wide range of datasets, while a simple model $M_S$ fits only a narrow range. Draw a schematic showing how $p(\mathcal{D} \mid M)$ is distributed over the space of possible datasets for each model.
-b) Since $\int p(\mathcal{D} \mid M) d\mathcal{D} = 1$ for both models, what does the normalization constraint imply about the maximum value of $p(\mathcal{D} \mid M)$ for each?
+a) A complex model $M_C$ with many parameters can fit a wide range of datasets, while a simple model $M_S$ fits only a narrow range. Draw a schematic showing how $p(D \mid M)$ is distributed over the space of possible datasets for each model.
+b) Since $\int p(D \mid M) dD = 1$ for both models, what does the normalization constraint imply about the maximum value of $p(D \mid M)$ for each?
 c) For a dataset that both models fit well, which model will have higher marginal likelihood? Why?
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -148,8 +149,6 @@ d) A calibrated model is one whose predicted probabilities match the observed fr
 
 e) BIC is consistent, meaning it selects the true model as $n \to \infty$, while AIC is not.
 
-f) Leave-one-out cross-validation typically has higher variance than 5-fold cross-validation.
-
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
@@ -162,18 +161,12 @@ c) True. Each point on the ROC curve corresponds to a different threshold. A per
 d) True. This is the definition of calibration. A calibration plot (reliability diagram) checks this by binning predictions and comparing average predicted probability to the observed fraction of positives.
 
 e) True. BIC selects the true model with probability 1 as $n \to \infty$ (assuming the true model is in the candidate set). AIC tends to select overly complex models asymptotically.
-
-f) True. LOO-CV uses $n-1$ training points per fold, so the training sets are nearly identical, producing highly correlated estimates. This correlation increases the variance of the average. 5-fold CV has less overlap between folds, reducing correlation and variance.
 :::
-:::
-
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
 :::
 
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Bias-Variance Tradeoff: Polynomial Regression
@@ -247,7 +240,7 @@ cat("Optimal degree (averaged):", which.min(avg_mse), "\n")
 ::: {#exr-poly-residual-diagnostics}
 ## Residual Diagnostics for Polynomial Regression
 
-@exm-qqplot used Q-Q plots and residual/scatter plots to check whether a model's assumed error distribution is reasonable. The prediction interval stated at the top of this chapter,
+@exm-qqplot used Q-Q plots to check whether a model's assumed error distribution is reasonable. The prediction interval stated in the diagnostics section of this chapter,
 $$
 \hat{y} \pm t_{n-2,\,1-\alpha/2}\, s\sqrt{1+\frac{1}{n}+\frac{(x-\bar{x})^2}{\sum_{i=1}^n(x_i-\bar{x})^2}},
 $$
@@ -269,8 +262,6 @@ a) Fitting `lm(medv ~ poly(lstat, d), ...)` for the three degrees:
 ```{r}
 #| echo: true
 data(Boston, package = "MASS")
-set.seed(16)
-
 degrees <- c(1, 5, 12)
 fits <- lapply(degrees, function(d) lm(medv ~ poly(lstat, d), data = Boston))
 r2     <- sapply(fits, function(f) summary(f)$r.squared)
@@ -409,7 +400,7 @@ legend("topright", c("5-fold", "10-fold"), col = c("blue", "red"), pch = 16)
 Use `wine.csv` containing 6,497 wines with 11 chemical properties, color (red/white), and quality ratings.
 
 a) Scale the 11 chemical features and perform k-means clustering with K=2. What do the clusters correspond to?
-b) Use AIC/BIC to choose K. Try K=1 to 50 and plot the information criteria.
+b) Use AIC/BIC to choose K. Try K=2 to 50 and plot the information criteria.
 c) With your chosen K, examine cluster quality distributions. Do clusters help identify high-quality wines?
 d) Compare: regressing quality on cluster membership vs. regressing on raw features. Which gives better OOS R²?
 
@@ -482,7 +473,7 @@ cat("Cluster regression:", round(max(1 - reg_clust$cvm / reg_clust$cvm[1]), 3), 
 cat("Raw feature regression:", round(max(1 - reg_raw$cvm / reg_raw$cvm[1]), 3), "\n")
 ```
 
-**Key Finding**: Raw feature regression outperforms cluster-based regression because quality is not a major source of variation: the main variation is red vs white. Clustering helps when variation aligns with cluster structure.
+Key finding: Raw feature regression outperforms cluster-based regression because quality is not a major source of variation: the main variation is red vs white. Clustering helps when variation aligns with cluster structure.
 :::
 :::
 

@@ -22,24 +22,24 @@ One of the most famous early applications involved the plague of 1665--1666 in t
 
 The initial population was $N=261$, and by the end of the outbreak, 83 individuals remained susceptible (never infected). This simple dataset illustrates a fundamental challenge in time series forecasting: understanding the *mechanism* driving the dynamics.
 
-The rector of Eyam, William Mompesson, kept detailed records of the outbreak and organized the village quarantine that prevented the plague from spreading to neighboring communities. Mompesson's wife Catherine died during the epidemic. The missing record on Oct 3 reflects the chaos of the outbreak's peak. Mompesson meticulously recorded infection counts, pioneering data collection practices nearly two centuries before Florence Nightingale.
+The rector of Eyam, William Mompesson, organized the village quarantine that prevented the plague from spreading to neighboring communities. Mompesson's wife Catherine died during the epidemic.
 
-Time series data appear across business, science, healthcare, and engineering. Unlike regression datasets, time series observations are not exchangeable---their order carries information. The modeling replacement for i.i.d. is typically conditional independence or state-space structure, but Bayesian updating logic remains the same as in @sec-bl.
+Time series data appear across business, science, healthcare, and engineering. Unlike regression datasets, time series observations are not exchangeable: their order carries information. The modeling replacement for i.i.d. is typically conditional independence or state-space structure, but Bayesian updating logic remains the same as in @sec-bl.
 
 This chapter describes the `bsts` software package, which fits sophisticated time series models with just a few lines of R code. The BSTS (Bayesian Structural Time Series) section is adapted from Steven Scott's blog post: ["Fitting Bayesian structural time series with the bsts R package"](https://www.unofficialgoogledatascience.com/2017/07/fitting-bayesian-structural-time-series.html).
 
-### Epidemic Forecasting: A Motivating Example
+## Epidemic Forecasting: A Motivating Example
 
 The Eyam example highlights several themes central to this chapter:
 
 1. *Self-reinforcing dynamics*: Disease spread accelerates with more infectants, creating nonlinear feedback loops
-2. *State-space structure*: The compartments ($S, E, I, R$) represent latent states that evolve according to known dynamics
-3. *Parameter uncertainty*: Even with detailed data, parameters like $\beta$ and $\gamma$ must be estimated
-4. *Retrospective vs. prospective*: The Eyam analysis was performed in hindsight with complete data; real-time forecasting during an outbreak is considerably more challenging
+2. *State-space structure*: The numbers of susceptible and infected individuals are states that evolve over time, and the counts we record are only a view of them
+3. *Parameter uncertainty*: Even with detailed data, the rates at which the disease spreads and individuals recover must be estimated
+4. *Retrospective vs. prospective*: The Eyam table was assembled in hindsight with complete data; real-time forecasting during an outbreak is considerably more challenging
 
-Modern epidemic forecasting combines SEIR-type models with Bayesian methods to quantify uncertainty. While epidemic models differ from the business and economic time series we'll focus on in this chapter, they share the fundamental state-space structure that makes Bayesian structural time series models so powerful.
+Modern epidemic forecasting combines compartmental models with Bayesian methods to quantify uncertainty. While epidemic models differ from the business and economic time series we'll focus on in this chapter, they share the fundamental state-space structure that makes Bayesian structural time series models so powerful.
 
-### The `bsts` Package
+## The `bsts` Package
 
 The `bsts` package for R fits Bayesian structural time series models (also called state space models, Kalman filter models, or dynamic linear models). Available on CRAN via `install.packages("bsts")`, it is similar to Prophet but more customizable.
 
@@ -73,7 +73,10 @@ Here $\alpha_t=\mu_t$, and $Z_t$, $T_t$, and $R_t$ all collapse to the scalar va
 
 ```{r, echo=F, results='hide', message=F,warning=F}
 #| label: fig-randomwalk
-#| fig-cap: "Apple Adjusted Closing Price."
+#| fig-cap: "Apple price and a simulated random walk: which is which?"
+#| fig-subcap:
+#|   - "Series A"
+#|   - "Series B"
 #| layout-ncol: 2
 #| fig-width: 2.6
 #| fig-height: 2
@@ -93,7 +96,7 @@ plot(p, xlab = "Trading day", ylab = "AAPL Price", type = "l", lwd = 2, col = "b
 plot(rw, type = "l", xlab = "Trading day", ylab = "AAPL Price", lwd = 2, col = "red")
 ```
 
-In the example above, one of the plots shows the price of Apple stock from 2021-01-01 to 2022-12-31. The other plot is a sequence generated from a random walk model fitted to the Apple price data. Can you spot which one is which?
+In the example above, one of the plots shows the price of Apple stock from 2021-01-01 to 2022-12-31. The other plot is a sequence generated from a random walk with the drift of the Apple price, one tenth of its daily volatility and a floor at its lowest price. Can you spot which one is which?
 
 Structural time series models are useful because they are flexible and modular. The analyst chooses the structure of $\alpha_t$ based on things like whether short- or long-term predictions are more important, whether the data contain seasonal effects, and whether and how regressors are to be included. Many of these models are standard and can be fit using a variety of tools, such as the `StructTS` function distributed with base R or one of several R packages for fitting these models (with the `dlm` package (@petris2010package, @campagnoli2009dynamic) deserving special mention). The `bsts` package handles all the standard cases, but it also includes several useful extensions, described in the next few sections through a series of examples. Each example includes a mathematical description of the model and example `bsts` code showing how to work with the model using the `bsts` software. To keep things short, details about prior assumptions are largely avoided.
 
@@ -167,7 +170,7 @@ model1$state.specification[[2]]$name <- dimnames(model1$state.contributions)[[2]
 plot(model1, ylab = "Claims (standardized)")
 plot(model1, "components", ylab = "Contribution")
 ```
-The @fig-claims-1 above shows the posterior distribution of the model state. Circles are actual data points. The @fig-claims-2 shows the individual state components. The plot looks fuzzy because it is showing the marginal posterior distribution at each time point.
+@fig-claims-1 above shows the posterior distribution of the model state. Circles are actual data points. @fig-claims-2 shows the individual state components. The plot looks fuzzy because it is showing the marginal posterior distribution at each time point.
 
 
 The default plot method plots the posterior distribution of the conditional mean $Z_t^\top\alpha_t$ given the full data $y=y_1,\ldots,y_T$. Other plot methods can be accessed by passing a string to the plot function. For example, to see the contributions of the individual state components, pass the string "components" as a second argument, as shown above. You can get a list of all available plots by passing the string `help` as the second argument.
@@ -229,7 +232,7 @@ par(op)
 
 The search terms "unemployment office" and "Idaho unemployment" show up with probability close to one in both models. Increasing the expected model size from 1 (the default) to 5 gives noticeable probability to other terms, such as "New Jersey unemployment" and "filing unemployment" (about 0.4 and 0.3), but none of them is included with high probability.
 
-Those probabilities are calculated from the histogram of the samples of each $\beta$ calculated by the estimation algorithm (MCMC)
+Those probabilities are the share of MCMC draws in which each $\beta$ is nonzero.
 
 ```{r}
 #| label: fig-bstshist
@@ -255,7 +258,7 @@ As part of the model fitting process, the algorithm generates the one-step-ahead
 
 The one-step prediction errors are a useful diagnostic for comparing several `bsts` models that have been fit to the same data. They are used to implement the function `CompareBstsModels`, which is called as shown below.
 
-```{r compareRUE, echo=-1}
+```{r compareRUE, echo=-(1:2)}
 #| fig-height: 3.5
 #| fig-cap: "Comparison of Errors for the three models."
 # bsts::CompareBstsModels with shorter axis titles, a gap between the two panels and an unboxed legend in the lower right
@@ -289,7 +292,7 @@ The bottom panel shows the original series. The top panel shows the cumulative t
 
 ::: {#exm-LongTermForecasting}
 ## Long-term Forecasting
-A common question about `bsts` is "which trend model should I use?" To answer that question, it helps to know a bit about the different models that the `bsts` software package provides, and what each model implies.
+A common question about structural models is "which trend model should I use?" To answer that question, it helps to know a bit about the different models that the `bsts` software package provides, and what each model implies.
 In the local level model, the state evolves according to a random walk:
 $$
 \mu_{t+1}=\mu_t+\eta_t.
@@ -319,7 +322,6 @@ The $D$ parameter is the long-run slope of the trend component, to which $\delta
 #| fig-height: 3
 GSPC <- read.csv("data/GSPC.csv")
 GSPC <- xts(GSPC, order.by = as.Date(rownames(GSPC), "%Y-%m-%d"))
-knitr::kable(head(GSPC))
 plot(GSPC$GSPC.Adjusted, main = "")
 ```
 
@@ -356,7 +358,7 @@ Not only are the forecast expectations from the two models different, but the fo
 
 ::: {#exm-Recession}
 ## Recession Modeling Using Non-Gaussian Data
-Although we have largely skipped details about how the `bsts` software fits models, the Gaussian error assumptions in the observation and transition equations are important for the model fitting process. Part of that process involves running data through the Kalman filter, which assumes Gaussian errors in both the state and transition equations. In many settings where Gaussian errors are obviously inappropriate, such as for binary or small count data, one can introduce latent variables that give the model a conditionally Gaussian representation. Well known "data augmentation" methods exist for probit regression (@albert1993bayesian) and models with student-T errors (@geweke1993bayesian). Somewhat more complex methods exist for logistic regression (@fruhwirth-schnatter2007auxiliary, @held2006bayesian, @gramacy2012simulationbased) and Poisson regression (@fruhwirth-schnatter2008improved). Additional methods exist for quantile regression (@benoit2012binary), support vector machines (@polson2011data), and multinomial logit regression (@fruhwirth-schnatter2010data). These are not currently provided by the `bsts` package, but they might be added in the future.
+Although we have largely skipped details about how the `bsts` software fits models, the Gaussian error assumptions in the observation and transition equations are important for the model fitting process. Part of that process involves running data through the Kalman filter, which assumes Gaussian errors in both the observation and transition equations. In many settings where Gaussian errors are obviously inappropriate, such as for binary or small count data, one can introduce latent variables that give the model a conditionally Gaussian representation. Well known "data augmentation" methods exist for probit regression (@albert1993bayesian) and models with student-T errors (@geweke1993bayesian). Somewhat more complex methods exist for logistic regression (@fruhwirth-schnatter2007auxiliary, @held2006bayesian, @gramacy2012simulationbased) and Poisson regression (@fruhwirth-schnatter2008improved). Additional methods exist for quantile regression (@benoit2012binary), support vector machines (@polson2011data), and multinomial logit regression (@fruhwirth-schnatter2010data). These are not currently provided by the `bsts` package, but they might be added in the future.
 
 To see how non-Gaussian errors can be useful, consider the analysis done by @berge2016which, who used Bayesian model averaging (BMA) to investigate which of several economic indicators would best predict the presence or absence of a recession. We will focus on their nowcasting example, which models the probability of a recession at the same time point as the predictor variables. @berge2016which also analyzed the data with the predictors at several lags.
 
@@ -372,21 +374,23 @@ plot(rec, type = "l", col = "blue", ylab = "Recession")
 
 The BMA done by @berge2016which is essentially the same as fitting a logistic regression under a spike-and-slab prior with the prior inclusion probability of each predictor set to 1/2. That analysis can be run using the BoomSpikeSlab R package (@scott2022boomspikeslab), which is similar to `bsts`, but with only a regression component and no time series.
 
-The logistic regression model is highly predictive, but it ignores serial dependence in the data. To capture serial dependence, consider the following dynamic logistic regression model with a local level trend model.
+The logistic regression model ignores serial dependence in the data. To capture serial dependence, consider the following dynamic logistic regression model with a local level trend model.
 \begin{align*}
 \mathrm{logit}(p_t)= &  \mu_t+\beta^\top x_t\\
 \mu_{t+1}= &            \mu_t+\eta_t
 \end{align*}
-Here  $p_t$  is the probability of a recession at time $t$, and $x_t$ is the set of economic indicators used by @berge2016which in their analysis. The variables are listed in the table below
+Here  $p_t$  is the probability of a recession at time $t$, and $x_t$ is the set of economic indicators used by @berge2016which in their analysis. The indicators are listed in the table below.
 
 
 | Variable                          | Definition/notes                       | Transformation    |
 |-----------------------------------|----------------------------------------|-------------------|
 | *Financial Variables*             |                                        |                   |
 | Slope of yield curve              | 10-year Treasury less 3-month yield    |                   |
+| Level of yield curve              |                                        |                   |
 | Curvature of yield curve          | 2 x 2-year minus 3-month and 10-year   |                   |
 | GZ index                          | Gilchrist and Zakrajsek (AER, 2012)    |                   |
 | TED spread                        | 3-month ED less 3-month Treasury yield |                   |
+| Aaa corporate spread              | Aaa less 10-year Treasury yield        |                   |
 | BBB corporate spread              | BBB less 10-year Treasury yield        |                   |
 | S&P 500, 1-month return           |                                        | 1-month log diff. |
 | S&P 500, 3-month return           |                                        | 3-month log diff. |
@@ -400,7 +404,7 @@ Here  $p_t$  is the probability of a recession at time $t$, and $x_t$ is the set
 | Nonfarm payroll employment        |                                        | 3-month log diff. |
 | Initial claims                    | 4-week moving average                  | 3-month log diff. |
 | Weekly hours, manufacturing       |                                        | 3-month log diff. |
-| Purchasing managers index         |                                        | 3-month log dif   |
+| Purchasing managers index         |                                        | 3-month log diff. |
 
 
 
@@ -494,9 +498,9 @@ Structural time series models and `bsts` provide interpretable, probabilistic fo
 ### Modern Era Forecasting
 A recent post by the Amazon Science group @amazon2021history describes the evolution of the time series algorithms used for forecasting from 2007 to 2021.
 
-![](fig/amazon.jpeg){width=60% fig-align="center"}
+![The evolution of Amazon's forecasting algorithms, after @amazon2021history.](fig/amazon.jpeg){width=60% fig-align="center"}
 
-They went from standard textbook time series forecasting methods to make predictions to the quantile-based transformer models. The main problem of the traditional TS models is that they assume stationarity. A stationary time series is one whose properties do not depend on the time at which the series is observed. For example, a white noise series is stationary - it does not matter when you observe it; it should look much the same at any point in time.
+They went from standard textbook time series forecasting methods to make predictions to the quantile-based transformer models. Traditional TS models work best for stationary series, or for series made stationary once trend and seasonality are removed. A stationary time series is one whose properties do not depend on the time at which the series is observed. For example, a white noise series is stationary - it does not matter when you observe it; it should look much the same at any point in time.
 
 ```{r whitenoise}
 #| fig-width: 3.3
@@ -507,7 +511,7 @@ set.seed(97) # McDavid
 yt <- rnorm(100)
 plot(yt, type = "l", xlab = "Time", ylab = expression(y[t]))
 ```
-In other words, all the coefficients of a time series model do not change over time. We know how to deal with trends and seasonality quite well. Thus, those types of non-stationary are not an issue. Below some of the example of time series data. Although most of those are not stationary, we can model them using traditional techniques (@hyndman2021forecasting).
+We know how to deal with trends and seasonality quite well. Thus, those types of non-stationarity are not an issue. Below are some examples of time series data. Although most of those are not stationary, we can model them using traditional techniques (@hyndman2021forecasting).
 
 ```{r, echo=FALSE, warning=FALSE,message=F,echo=F}
 #| label: fig-stationary
@@ -536,13 +540,13 @@ Amazon used a sequence of "patches" to hack the model and to make it produce use
 ## Quantile Regression Forests
 Most estimators during prediction return $\E{Y \mid X}$, which can be interpreted as the answer to the question, what is the expected value of your output given the input?
 
-Quantile methods return $y$ at $q$ for which $F(Y=y \mid X)=q$ where $q$ is the percentile and $y$ is the quantile. One quick use-case where this is useful is when there are a number of outliers which can influence the conditional mean. It is sometimes important to obtain estimates at different percentiles (when grading on a curve is done for instance.)
+Quantile methods return the $y$ for which $F(y \mid X)=P(Y \le y \mid X)=q$, where $q$ is the probability level and $y$ the corresponding quantile. One quick use-case where this is useful is when there are a number of outliers which can influence the conditional mean. It is sometimes important to obtain estimates at different percentiles (when grading on a curve is done for instance.)
 
 Note, Bayesian models return the entire distribution of $P(Y \mid X)$.
 
 It is fairly straightforward to extend a standard decision tree to provide predictions at percentiles. When a decision tree is fit, the trick is to store not only the sufficient statistics of the target at the leaf node, such as the mean and variance, but also all the target values in the leaf node. At prediction, these are used to compute empirical quantile estimates.
 
-The same approach can be extended to Random Forests, giving the quantile regression forests of @meinshausen2006quantile. To estimate $F(Y=y \mid x)=q$ each target value in training $y$s is given a weight. Formally, the weight given to $y_j$ while estimating the quantile is
+The same approach can be extended to Random Forests, giving the quantile regression forests of @meinshausen2006quantile. To estimate the $y$ with $F(y \mid x)=q$ each target value in training $y$s is given a weight. Formally, the weight given to $y_j$ while estimating the quantile is
 $$
 \frac{1}{T} \sum_{t=1}^{T} \frac{\mathbb{1}(x_j \in L_t(x))}{\sum_{i=1}^N \mathbb{1}(x_i \in L_t(x))},
 $$
@@ -550,7 +554,7 @@ where $L_t(x)$ denotes the leaf of tree $t$ that $x$ falls into.
 
 Informally, what it means that for a new unknown sample, we first find the leaf that it falls into at each tree. Then for each $(X, y)$ in the training data, a weight is given to $y$ at each tree in the following manner.
 
-1. If it is in the same leaf as the new sample, then the weight is the fraction of samples in the same leaf.
+1. If it is in the same leaf as the new sample, then the weight is one over the number of training samples in that leaf.
 1. If not, then the weight is zero.
 
 These weights for each y are summed up across all trees and averaged. Now, since we have an array of target values and an array of weights corresponding to these target values, we can use this to measure empirical quantile estimates.
@@ -558,9 +562,9 @@ These weights for each y are summed up across all trees and averaged. Now, since
 
 Motivated by the success of gradient boosting models for predicting Walmart sales (@kaggle2020m5), @januschowski2022forecasting tries to explain why tree-based methods were so widely used for forecasting.  
 
-![@januschowski2022forecasting](fig/tree.jpg){#fig-tree fig-align="center"}
+![Predictive distribution of a quantile forest, from the training values in the leaves that $x$ reaches in each tree. Reproduced from @januschowski2022forecasting.](fig/tree.jpg){#fig-tree fig-align="center"}
 
-The @fig-tree illustrates the mechanics of Quantile Regression Forests. For a given input $x$, the forest identifies the leaf node it falls into across all trees in the ensemble (Roots 1 to $T$). Each leaf contains a subset of target values from the training data. By aggregating these observations across the entire forest, the model constructs a full empirical distribution $\hat{p}(y \mid x)$, enabling the calculation of quantiles and capturing the uncertainty of the prediction.
+@fig-tree illustrates the mechanics of Quantile Regression Forests. For a given input $x$, the forest identifies the leaf node it falls into across all trees in the ensemble (Roots 1 to $T$). Each leaf contains a subset of target values from the training data. By aggregating these observations across the entire forest, the model constructs a full empirical distribution $\hat{p}(y \mid x)$, enabling the calculation of quantiles and capturing the uncertainty of the prediction.
 
 
 ## Deep Learning for Time Series: Temporal Fusion Transformers
@@ -568,6 +572,7 @@ The @fig-tree illustrates the mechanics of Quantile Regression Forests. For a gi
 While Random Forests and Gradient Boosting Machines are powerful for tabular regression, deep learning architectures designed specifically for time series have gained significant traction. A prominent example, introduced by @lim2021temporal, is the *Temporal Fusion Transformer (TFT)*.
 
 TFT combines the strengths of several model components:
+
 1.  *Gating mechanisms* (GRN) to skip over unused components, allowing the model to adapt its depth.
 2.  *Variable selection networks* to select relevant input variables at each time step.
 3.  *Static covariate encoders* to integrate context (like location or store ID) that doesn't change over time.
@@ -600,7 +605,7 @@ We use the `pytorch-forecasting` library to train a *Temporal Fusion Transformer
     *   *Translation Invariance*: The most critical step was *removing* the global time index (`time_idx`) from the inputs. Without this, the model memorized the global trend of the training set and extrapolated it erroneously into the future.
 2.  *Ensembling*: To reduce the inherent variance of the neural network weights, we had to train an ensemble of 3 independent models and average their predictions.
 
-Despite this "tedious" process, the TFT demonstrated *flexibility*. Unlike `bsts`, where we explicitly defined "Local Linear Trend" and "Seasonal" components, the TFT eventually learned these patterns entirely from the data structure, without us specifying the mathematical form of the trend.
+Despite this "tedious" process, the TFT demonstrated *flexibility*. Unlike `bsts`, where we explicitly defined "Local Linear Trend" and "Seasonal" components, the TFT eventually learned the trend without us specifying its mathematical form, with the seasonal pattern resting on the week-of-year feature.
 
 ```python
 # Python: Fit TFT (Ensemble of 3 models)
@@ -610,7 +615,6 @@ tft = TemporalFusionTransformer.from_dataset(
     learning_rate=0.015,
     hidden_size=64,
     attention_head_size=4,
-    time_varying_known_reals=[], # No global time index
     loss=QuantileLoss([0.05, 0.5, 0.95])
 )
 trainer.fit(tft, train_dataloaders=train_dataloader)
@@ -630,13 +634,13 @@ Comparing the two forecasts reveals a fundamental difference in "honesty":
 *   *BSTS (The Sensible Benchmark)*: The BSTS forecast (the wide band) is highly sensible. The predictive mean tracks the actual data closely throughout the horizon. More importantly, the *95% Credible Interval naturally expands* as the forecast moves further into the future. This is a desirable, "honest" feature of the structural model: it admits that uncertainty accumulates over time.
 *   *TFT (The Overconfident Learner)*: The TFT forecast (the narrow band), while capturing the rhythm of the seasonality, exhibits *undesirable overconfidence*. Its prediction intervals are surprisingly narrow and do not expand over time, implying it is equally confident about next week as it is about next year. Furthermore, for many periods, the actual observed data fall outside the TFT's 90% interval, suggesting the model is underestimating the true noise in the system.
 
-This comparison serves as a reminder: while Deep Learning offers immense flexibility and power for complex patterns, structural Bayesian models often provide more reliable, well-calibrated, and "sane" defaults for decision-making in standard business forecasting contexts.
+This comparison serves as a reminder: while Deep Learning offers immense flexibility and power for complex patterns, structural Bayesian models can provide more reliable and "sane" defaults for decision-making in standard business forecasting contexts.
 
 ## Conclusion
 
 This chapter focused on *Structural Time Series* models via `bsts` because they offer a practical balance for scientific and business applications:
 
-1.  *Interpretability*: BSTS decomposes time series into understandable components—trends, seasonality, and regressor effects—allowing analysts to explain *why* a forecast takes a particular value.
+1.  *Interpretability*: BSTS decomposes time series into understandable components (trends, seasonality, and regressor effects), allowing analysts to explain *why* a forecast takes a particular value.
 2.  *Uncertainty Quantification*: The Bayesian framework provides credible intervals, not just point forecasts.
 3.  *Flexibility*: Priors like spike-and-slab enable robust variable selection even with noisy data or many predictors.
 
@@ -645,7 +649,7 @@ When pure predictive accuracy on massive datasets with complex non-linear intera
 ## Advanced Theory: Under the Hood
 
 ::: {.callout-tip}
-*Optional Section*: This section delves into the mathematical machinery driving the models. Readers focused primarily on application can skip ahead to the Conclusion or the "Beyond State-Space Models" section.
+*Optional Section*: This section delves into the mathematical machinery driving the models. Readers focused primarily on application can skip ahead to the exercises.
 :::
 
 ::: {.callout-note}
@@ -662,13 +666,13 @@ The letter $G$ is the one to watch: in the derivation it multiplies the previous
 
 The models we have discussed in the `bsts` framework are all special cases of the *linear Gaussian state space model* (also known as the Dynamic Linear Model). While `bsts` provides a convenient high-level interface to fit these models using MCMC, understanding the underlying machinery provides deeper insight into how these forecasts are generated and updated as new data arrive.
 
-The core algorithm for exact inference in linear Gaussian systems is the *Kalman Filter*. Originally developed for control engineering, it is the mathematical engine that computes the posterior distribution of the latent state $\alpha_t$ (or $x_t$ in general notation) given the data up to time $t$. The recursive nature of the Kalman Filter---updating the state estimate with each new observation---is what allows structural time series models to adapt dynamically to changing trends and seasonal patterns.
+The core algorithm for exact inference in linear Gaussian systems is the *Kalman Filter*. Originally developed for control engineering, it is the mathematical engine that computes the posterior distribution of the latent state $\alpha_t$ (or $x_t$ in general notation) given the data up to time $t$. The recursive nature of the Kalman Filter (updating the state estimate with each new observation) is what allows structural time series models to adapt dynamically to changing trends and seasonal patterns.
 
 
 The classic filtering and prediction algorithms for linear and Gaussian systems are described in @kalman1960new and @kalman1961new.
-Early work on discrete recursions for hidden Markov models is in @baum1970maximization, who use an EM-type algorithm; @viterbi1967error, who provides a modal state filter estimate; and recursions developed in @lindgren1978markov. While these can be used to evaluate the marginal likelihood for the parameters, they are computationally too intensive to solve the filtering and learning, @lindgren1978markov. @scott2002bayesian provides a review of FFBS algorithms for discrete HMMs.
+Early work on discrete recursions for hidden Markov models is in @baum1970maximization, who use an EM-type algorithm; @viterbi1967error, who provides a modal state filter estimate; and recursions developed in @lindgren1978markov. While these can be used to evaluate the marginal likelihood for the parameters, they are computationally too intensive to solve the filtering and learning problems. @scott2002bayesian provides a review of FFBS algorithms for discrete HMMs.
 
-Markov chain Monte Carlo (MCMC) algorithms for parameter learning in nonlinear non-Gaussian state space models were developed by @carlin1992monte. For linear and Gaussian systems, @carter1994gibbs introduced the filter forward and backwards sample (FFBS) algorithm, which efficiently draws the entire block of hidden states. For handling multinomial logit models, @scott2002bayesian and @fruhwirth-schnatter2008improved developed mixture of normals approximation methods. Additionally, @west1997bayesian proposed conditionally conjugate priors that allow parameters to be marginalized out of the updating equations, leading to more efficient inference procedures.
+Markov chain Monte Carlo (MCMC) algorithms for parameter learning in nonlinear non-Gaussian state space models were developed by @carlin1992monte. For linear and Gaussian systems, @carter1994gibbs and @fruhwirth-schnatter1994data introduced the forward filtering, backward sampling (FFBS) algorithm, which efficiently draws the entire block of hidden states. For handling multinomial logit models, @fruhwirth-schnatter2010data and @fruhwirth-schnatter2008improved developed mixture of normals approximation methods. Additionally, @west1997bayesian proposed conditionally conjugate priors that allow parameters to be marginalized out of the updating equations, leading to more efficient inference procedures.
 
 ### Kalman Filtering
 The Normal/ Normal Bayesian learning model provides the basis for shrinkage estimation of multiple means and the basis of the Kalman filter for dynamically tracking a path of an object.
@@ -686,7 +690,7 @@ p\left(  x_{t+1} \mid y^{t+1}\right)  =\frac{p\left(  y_{t+1} \mid x_{t+1}\right
 p\left(  x_{t+1} \mid y^{t}\right)  }{p\left(  y_{t+1} \mid y^{t}\right)  }\propto
 p\left(  y_{t+1} \mid x_{t+1}\right)  p\left(  x_{t+1} \mid y^{t}\right)  \text{.}%
 $$
-and the likelihood function, $p\left( y_{t+1} \mid x_{t+1}\right)$. The predictive distribution summarizes all of the information about $x_{t+1}$ based on lagged observations. The likelihood function summarizes the new information in $y_{t+1}$ about $x_{t+1}$.
+The two terms are the predictive distribution, $p\left( x_{t+1} \mid y^{t}\right)$, and the likelihood function, $p\left( y_{t+1} \mid x_{t+1}\right)$. The predictive distribution summarizes all of the information about $x_{t+1}$ based on lagged observations. The likelihood function summarizes the new information in $y_{t+1}$ about $x_{t+1}$.
 
 
 The Kalman filter relies on an inductive argument: assume that $p\left( x_{t} \mid y^{t}\right) \sim\mathcal{N}\left( \mu_{t},\sigma_{t}^{2}\right)$ and then verify that $p\left( x_{t+1} \mid y^{t+1}\right) \sim\mathcal{N}\left( \mu_{t+1},\sigma_{t+1}^{2}\right)$ with analytical expressions for the hyperparameters. To verify, note that since $p\left(x_{t} \mid y^{t}\right) \sim\mathcal{N}\left( \mu_{t},\sigma_{t}^{2}\right)$, $x_{t}=\mu_{t}+\sigma_{t}\eta_{t}$ for some standard normal $\eta_{t}$. Substituting into the state evolution, the predictive is $x_{t+1} \mid y^{t}\sim\mathcal{N}\left( \mu_{t},\sigma_{t}^{2}+\sigma_{x}^{2}\right)$. Since $p\left( y_{t+1} \mid x_{t+1}\right) \sim\mathcal{N}\left(x_{t+1},\sigma^{2}\right)$, the posterior is 
@@ -725,7 +729,7 @@ There are a number of distributions of interest
 \begin{align*}
 \text{Filtering}  &  :p\left(  x_{t} \mid y^{t}\right)  \text{ }t=1,...,T\\
 \text{Forecasting}  &  :p\left(  x_{t+1} \mid y^{t}\right)  \text{ } t=1,...,T\\
-\text{Smoothing}  &  :p\left(  x_{t} \mid y^{t+1}\right)  \text{ }t=1,...,T \\
+\text{Smoothing}  &  :p\left(  x_{t} \mid y^{T}\right)  \text{ }t=1,...,T \\
 \text{Prediction}  &  :p\left(  y_{t+1} \mid y^{t}\right)  \text{ }t=1,...,T
 \end{align*}
 For known parameters with linearity and Gaussianity, we have the following
@@ -742,7 +746,7 @@ where $(\mu_{t+1\mid t+1},\Sigma_{t+1\mid t+1})$ are related to $(\mu_{t\mid t}%
 $$
 p(x_{t} \mid y^{t})\sim\mathcal{N}\left(  \mu_{t\mid t},\Sigma_{t\mid t}\right) \; \Rightarrow \; x_{t}=\mu_{t\mid t}+\Sigma_{t\mid t}^{\frac{1}{2}}\widehat{\varepsilon}_{t}%
 $$
-where $\widehat{\varepsilon}_{t} \sim \mathcal{N}(0,1)$. Before we derive the filtering recursions and characterize the state filtering distribution we first find the forecasting distribution. The predictive or forecast distribution is defined as follows.
+where $\widehat{\varepsilon}_{t} \sim \mathcal{N}(0,I)$. Before we derive the filtering recursions and characterize the state filtering distribution we first find the forecasting distribution. The predictive or forecast distribution is defined as follows.
 
 *Predictive Distribution, $p( x_{t+1} \mid y^{t} )$.*
 
@@ -817,7 +821,7 @@ $$
 \Sigma_{t+1\mid t}^{-1} \right)  \tilde{x}_{t+1} - 2 \tilde{x}_{t+1}^\top\left(  F_{t+1}^\top\left(\Sigma_{t+1}^{y}\right)^{-1} e_{t+1} \right)  + e_{t+1}^\top\left(\Sigma_{t+1}^{y}\right)^{-1} e_{t+1}
 $$
 The exponent is then a quadratic form, implying that
-the vector $\tilde{x}_{t+1}^\top$ is normal distributed with the appropriate mean
+the vector $\tilde{x}_{t+1}$ is normally distributed with the appropriate mean
 and variance-covariance matrix. The definitions are given by
 $$
 \Sigma_{t+1\mid t+1} F_{t+1}^\top\left(\Sigma_{t+1}^{y}\right)^{-1} e_{t+1} \; \; \mathrm{and} \; \;
@@ -851,7 +855,7 @@ The moments for the next filtering distribution are given by the classic recursi
 \right) \\
 \Sigma_{t+1\mid t+1}  &  =\left(  I-K_{t+1}F_{t+1}\right)  \Sigma_{t+1\mid t}\text{.}%
 \end{align*}
-There are two other distributions to compute: the data predictive $p( y_{t+1} \mid y^t )$ and the state smoothing distribution $p( x_t \mid y^{t+1} )$. These are derived as follows.
+There are two other distributions to compute: the data predictive $p( y_{t+1} \mid y^t )$ and the one-step state smoothing distribution $p( x_t \mid y^{t+1} )$. These are derived as follows.
 
 The data predictive $p(y_{t+1} \mid y^t)$ is determined from the observation equation and the state
 predictive distribution as follows
@@ -865,7 +869,7 @@ $$
 p( y_{t+1} \mid y^{t}) \sim\mathcal{N}\left(  F_{t+1}\mu_{t+1\mid t},F_{t+1}%
 \Sigma_{t+1\mid t} F_{t+1}^\top+\Sigma_{t+1}^{y} \right)  \text{.}%
 $$
-The state smoothing distribution $p(x_t \mid y^{t+1} )$ is determined from  the joint distribution, $p( x_{t} , x_{t+1} \mid y^{t} )$
+The one-step state smoothing distribution $p(x_t \mid y^{t+1} )$ is determined from  the joint distribution, $p( x_{t} , x_{t+1} \mid y^{t} )$
 as follows. First, factorise this joint distribution as
 $$
 p( x_{t+1} , x_{t} \mid y^{t} ) = p( x_{t+1} \mid x_{t} ) p( x_{t} \mid y^{t} )
@@ -875,14 +879,14 @@ $$
 p(x_{t+1}, x_{t} \mid y^{t+1}) = \frac{p\left(  y_{t+1} \mid x_{t+1}\right)
 p(x_{t+1} \mid x_{t})p(x_{t} \mid y^{t})}{p(y_{t+1} \mid y^{t})}%
 $$
-Now, we can view the system as having two observations on $x_{t+1}$, namely
+Now, we can view the system as having two observations on $x_{t}$, namely
 \begin{align*}
 x_{t+1} &  =G_{t+1}x_{t}+\left(\Sigma_{t+1}^{x}\right)^{\frac{1}{2}}\epsilon_{t+1}^{x}\\
 x_{t} &  =\mu_{t\mid t}+\Sigma_{t\mid t}^{\frac{1}{2}}\hat{\epsilon}_{t}%
 \end{align*}
 where the errors $\epsilon_{t+1}^{x},\hat{\epsilon}_{t}$ are independent. 
 
-This leads to a joint posterior with an exponent that is proportional to 
+This leads to a joint distribution $p(x_{t+1}, x_t \mid y^t)$ with an exponent that is proportional to 
 $$
 (x_{t+1}-G_{t+1}x_{t})^\top\left(  \Sigma
 _{t+1}^{x}\right)  ^{-1}(x_{t+1}-G_{t+1}x_{t})+ (x_{t}-\mu
@@ -926,7 +930,7 @@ K_{t} &= A \Sigma_t G^\top(G \Sigma_t G^\top+ R)^{-1}\\
 \Sigma_{t+1} &= A \Sigma_t A^\top - K_{t} G \Sigma_t A^\top + Q
 \end{aligned}
 $$
-Kalman filter performs a multivariate normal-normal update using $N(A \hat{x}_t,A \Sigma_t A^\top)$ as prior and $N(y_t, G \Sigma_t G^\top+ R)$ as likelihood. The posterior distribution is $N(\hat{x}_{t+1}, \Sigma_{t+1})$. Matrix $K_{t}$ is called the Kalman gain and provides a weight on the residual between observed and prior $y_t - G \hat{x}_t$ in the update. 
+The Kalman filter performs a multivariate normal-normal update with prior $N(\hat{x}_t,\Sigma_t)$ and likelihood $y_t \mid x_t \sim N(G x_t, R)$, then propagates the posterior through the transition equation. The resulting predictive distribution of $x_{t+1}$ is $N(\hat{x}_{t+1}, \Sigma_{t+1})$. Matrix $K_{t}$ is called the Kalman gain and provides a weight on the residual between observed and prior $y_t - G \hat{x}_t$ in the update. 
 
 Assume our robot starts at $\hat x_0 = (0.2,-0.2)$ (x-y Cartesian coordinates) and initial covariance is 
 $$
@@ -958,7 +962,7 @@ contour(x1, x2, z, add = TRUE, drawlabels = FALSE)
 points(0.2, -0.2, pch = 19)
 text(-0.65, 0.65, labels = expression(hat(x)), cex = 0.8)
 ``` 
-Now I get readings from GPS $y_0 = (2.4, -1.9)$ and I know from the manufacturer that the GPS has a covariance matrix of $R = 0.5\Sigma_0$. We assume the measurement matrix $G$ to be the identity matrix, thus
+Now we get readings from GPS $y_0 = (2.4, -1.9)$ and we know from the manufacturer that the GPS has a covariance matrix of $R = 0.5\Sigma_0$. We assume the measurement matrix $G$ to be the identity matrix, thus
 $$
 y_t = Gx_t + \nu_t = x_t + \nu, \quad \nu \sim N(0, R).
 $$
@@ -992,7 +996,7 @@ $$
 (A^{-1} + B^{-1})^{-1} & = A - A (A + B)^{-1}A = A (A + B)^{-1} B
 \end{aligned}
 $$
-I can write the above as:
+We can write the above as:
 $$
 \begin{aligned}
 \hat{x}_f & = (\Sigma - \Sigma (\Sigma + R)^{-1}\Sigma)(\Sigma^{-1} \hat{x} + R^{-1}y)\\
@@ -1007,7 +1011,7 @@ $$
 \right]
 \end{aligned}
 $$
-In the more general case when $G$  is not the identity matrix I have
+In the more general case when $G$  is not the identity matrix we have
 $$
 \begin{aligned}
 \hat{x}_f & = \hat{x} + \Sigma G^\top(G \Sigma G^\top+ R)^{-1} (y - G \hat{x})\\
@@ -1045,7 +1049,7 @@ points(2.4, -1.9, pch = 19, col = lb)
 text(3.1, -2.6, labels = "y", col = lb, cex = 0.8)
 ```
 
-Now I assume my robot moves according to the following model
+Now we assume our robot moves according to the following model
 $$
 x_t = A x_{t-1} + w_t, \quad w_t \sim N(0, Q)
 $$
@@ -1104,12 +1108,12 @@ text(3.1, -2.6, labels = "y", col = lb, cex = 0.8)
 *Forward filtering and Backwards Sampling*
 
 The Kalman filtering recursions lead to a fully recursive algorithm for characterizing $p( x \mid y)$ known as FFBS (Forward filtering and Backwards
-Sampling). This provides the counterpart to the Baum-Welch algorithm  developed earlier for HMMs. The details are as follows. The first step is to factorize the joint posterior distribution of the states via 
+Sampling). This provides the counterpart to the forward-backward recursions for HMMs in the next section. The details are as follows. The first step is to factorize the joint posterior distribution of the states via 
 \begin{align*}
 p\left(  x \mid y^{T}\right)   &  =p\left(  x_{T} \mid y^{T}\right)  \prod_{t=1}%
 ^{T-1}p\left(  x_{t} \mid x_{t+1},...,x_{T},y^{T}\right)  \\
 &  =p\left(  x_{T} \mid y^{T}\right)  \prod_{t=1}^{T-1}p\left(  x_{t} \mid x_{t+1}%
-,y^{t}\right) \label{ffbs-1}
+,y^{t}\right)
 \end{align*}
 where we have used the fact that $p\left(  x_{t} \mid x_{t+1},...,x_{T},y^{T}\right)  =p\left(  x_{t} \mid x_{t+1},y^{t}\right)$ by the Markov property. Conditioning on $x_{t+1}$ removes two things at once: the later states $x_{t+2},\ldots,x_{T}$, and the later observations $y_{t+1},\ldots,y_{T}$, since in a state space model each $y_{s}$ for $s>t$ depends on the past only through $x_{t+1}$. This is why the conditioning set collapses from $y^{T}$ all the way down to $y^{t}$, which is what makes the backward pass usable: every ingredient is already available from the forward filter. 
 
@@ -1143,7 +1147,7 @@ as computed above. Then we can sequentially sample from this distribution.
 
 
 ### HMM: Hidden Markov Models
-The algorithms described in this section were originally developed by @baum1970maximization and @viterbi1967error. Baum developed original trading algorithms for Renaissance Technology which later became a multi-billion-dollar hedge fund. The algorithms are also known as the Baum-Welch and Viterbi algorithms, respectively. They are used to estimate the parameters of a Hidden Markov Model (HMM) from a sequence of observations. The HMM is a statistical model that describes a system that is assumed to be a Markov process with unobserved (hidden) states. These algorithms are now widely used in many applications, including speech recognition, bioinformatics, and finance.
+The forward and backward recursions of this section go back to @baum1970maximization, and the related decoding algorithm to @viterbi1967error. Baum developed original trading algorithms for Renaissance Technologies which later became a multi-billion-dollar hedge fund. The algorithms are also known as the Baum-Welch and Viterbi algorithms, respectively. Baum-Welch estimates the parameters of a Hidden Markov Model (HMM) from a sequence of observations. The HMM is a statistical model that describes a system that is assumed to be a Markov process with unobserved (hidden) states. These algorithms are now widely used in many applications, including speech recognition, bioinformatics, and finance.
 
 Viterbi, on the other hand, was one of the founders of what is now known as Qualcomm, a multi-billion-dollar semiconductor and telecommunications equipment company. Viterbi's algorithm is used to find the most likely sequence of hidden states in a Hidden Markov Model (HMM) given a sequence of observations.
 
@@ -1187,7 +1191,7 @@ $$
 
 This shows how to compute today's filtering distribution given the likelihood. The advantage of this is that it only requires matrix multiplication.
 
-#### Backward-sampling
+#### Backward smoothing
 
 The result of the forward-filtering is the final observation $p_{ij}^{T,T}$. Like in the previous section, we can then filter in reverse to compute $p_{ij}^{t,T}$, which is required for the MCMC algorithm. We have that
 
@@ -1207,7 +1211,7 @@ $$
 p\left( x_{t-1} = i \mid x_{t} = j, \theta, y^{T}\right) \propto p\left( x_{t-1} = i \mid x_{t} = j, \theta , y^{t}\right)
 $$
 
-because conditional time $t$ information, the past transition is independent of the future. This is the discrete-state version of the FFBS algorithm.
+because conditional on time $t$ information, the past transition is independent of the future. Sampling from these probabilities instead gives the discrete-state version of the FFBS algorithm.
 
 #### Smoothing: Forwards and Backwards
 
@@ -1267,7 +1271,7 @@ $$
 p_t(s) = \sum_{r}p_{trs}
 $$
 
-sets up the next step in the recursion. The recursion is initialized by replacing $p$ with $p^0$ in equation @eq-fwd.
+sets up the next step in the recursion. The recursion is initialized by replacing $p_{t-1}$ with $\pi_0$ in equation @eq-fwd.
 
 The observed data log-likelihood can be computed as
 
@@ -1286,7 +1290,7 @@ $$
 Begin with the factorization
 
 $$
-\label{eq:bkwd} p(x \mid y) = p(x_T \mid y^T) \prod_{t=1}^{T-1} p(x_{t} \mid x_{t+1}^T, y).
+p(x \mid y) = p(x_T \mid y^T) \prod_{t=1}^{T-1} p(x_{t} \mid x_{t+1}^T, y).
 $$
 
 Then notice that, given $x_{t+1}$, $x_t$ is conditionally independent of $y_{t+1}^T$ and all later $x$'s. Thus
@@ -1295,7 +1299,7 @@ $$
 p(x_t \mid x_{t+1}, y) = P(x_t = r \mid x_{t+1} = s, y^{t+1}) \propto p_{t+1rs}
 $$
 
-Therefore, if one samples $(x_{t-1}, x_t)$ from the discrete bivariate distribution given by $P_t$ and then repeatedly samples $x_t$ from a multinomial distribution proportional to column $x_{t+1}$ of $P_{t+1}$ then $x=(x_1, \ldots , x_T)$ is a draw from $p(x \mid y)$.
+Therefore, if one samples $(x_{T-1}, x_T)$ from the discrete bivariate distribution given by $P_T$ and then repeatedly samples $x_t$ from a multinomial distribution proportional to column $x_{t+1}$ of $P_{t+1}$ then $x=(x_1, \ldots , x_T)$ is a draw from $p(x \mid y)$.
 
 
 ### Mixture Kalman Filter
@@ -1317,7 +1321,7 @@ $$
 
 Here we assume that the i.i.d. auxiliary state variable shocks $\lambda_t \sim p( \lambda_t )$.
 
-First we marginalize over the state variable $x_t$. Then we can track the sufficient statistics of the filtering distribution of $x_t$ dynamically in time, namely $\left ( \mu_{t\mid t} , \Sigma_{t\mid t} \right )$, just the Kalman filter moments, in the conditionally Gaussian and discrete cases @lindgren1978markov. Then we re-sample $( \mu_{t\mid t} , \Sigma_{t\mid t} , \theta )^{(i)}$ particles.
+First we marginalize over the state variable $x_t$. Then we can track the sufficient statistics of the filtering distribution of $x_t$ dynamically in time, namely $\left ( \mu_{t\mid t} , \Sigma_{t\mid t} \right )$, just the Kalman filter moments, in the conditionally Gaussian and discrete cases @lindgren1978markov.
 
 ### Regime Switching Models
 
@@ -1348,19 +1352,19 @@ $$
 p_{ij}=P\left(  x_{t}=j \mid x_{t-1}=i\right)
 $$
 
-and we assume, a priori, that the transition functions are time and state invariant. The joint likelihood is given by
+and we assume, a priori, that the transition functions are time invariant. The joint likelihood is given by
 
 $$
 p\left(  y \mid x,\theta\right)  = \prod_{t=1}^{T} p\left(  y_{t} \mid y_{t-1}%
-,x_{t-1},\theta\right)$$
+,x_{t},\theta\right)$$
 
-where $p\left(  y_{t} \mid y_{t-1},x_{t-1},\theta\right)  =N\left(  \mu\left(
-\theta_{x_{t-1}},y_{t-1}\right)  ,\sigma^{2}\left(  \theta_{x_{t-1}}%
+where $p\left(  y_{t} \mid y_{t-1},x_{t},\theta\right)  =N\left(  \mu\left(
+\theta_{x_{t}},y_{t-1}\right)  ,\sigma^{2}\left(  \theta_{x_{t}}%
 ,y_{t-1}\right)  \right)$.
 
 Clifford-Hammersley implies that the complete conditionals are given by $p\left(  \theta \mid x ,P , y \right)$,
 $p\left(  P \mid x , \theta, y \right)$, and
-$p\left(  x \mid P ,\theta, y \right)$. Conditional on the states and the transition probabilities, updating the parameters is straightforward. Conditional on the states, the transition matrix has a Dirichlet distribution, and updating this is also straightforward. To update the states use FFBS.
+$p\left(  x \mid P ,\theta, y \right)$. Conditional on the states and the transition probabilities, updating the parameters is straightforward. Conditional on the states and under independent Dirichlet priors on its rows, each row of the transition matrix has a Dirichlet distribution, and updating this is also straightforward. To update the states use FFBS.
 
 An important component of regime switching models is the prior distribution. Regime switching models (and most mixture models) are not formally identified. For example, in all regime switching models, there is a labeling problem: there is no unique way to identify the states. A common approach to overcome this identification issue is to order the parameters.
 
@@ -1371,9 +1375,9 @@ An important component of regime switching models is the prior distribution. Reg
 $$
 y_t \mid \theta_{k} \sim    \left\{
 \begin{array}[c]{l}
-p( y \mid \theta_{1} ) \; \; \; \; \; \; \mathrm{for} \; \; 1 \leq i \leq\tau \\
+p( y \mid \theta_{1} ) \; \; \; \; \; \; \mathrm{for} \; \; 1 \leq t \leq\tau \\
 p( y \mid \theta_{2} ) \; \; \; \; \; \; \mathrm{for} \; \; \tau+1 \leq
-i \leq T
+t \leq T
 \end{array}  \right\}$$
 
 This can be rewritten as a state space model
@@ -1397,7 +1401,7 @@ $$
 p( \tau_k = t \mid y ) = p( x_t = k, x_{t+1} = k + 1 \mid y )
 $$
 
-The alternative is single-state updating conditional on $\tau$ which is slow for finding the multiple-changeponts.
+The alternative is single-state updating conditional on $\tau$ which is slow for finding the multiple change points.
 
 ## Particle Learning for General Mixture Models
 
@@ -1421,10 +1425,10 @@ A general mixture model can be described by three components: a likelihood, a tr
 
 This structure can be expressed in a state-space form:
 
-\begin{align}
+\begin{align*}
 y_{t+1} &= f(k_{t+1}, \theta) \\
 k_{t+1} &= g(k^t, \theta)
-\end{align}
+\end{align*}
 
 where the first equation is the observation model and the second describes the evolution of the latent allocation states.
 
@@ -1472,7 +1476,7 @@ If $t$ observations have been allocated to $m_t$ mixture components, the posteri
 
 We will implement Particle Learning (PL) for a finite mixture of Poisson distributions based on the example from @carvalho2010particlea. This example follows Algorithm 1 for finite mixture models from Section 2.1 of the paper.
 
-We generate data from a mixture of two Poisson distributions ($\lambda_1=2$ with weight 0.7, $\lambda_2$=10 with weight 0.3).
+We generate data from a mixture of two Poisson distributions ($\lambda_1=2$ with weight 0.7, $\lambda_2=10$ with weight 0.3).
 ```{r}
 #| echo: true
 set.seed(8) # Ovi
@@ -1483,7 +1487,6 @@ y <- ifelse(true_z == 1, rpois(n_obs, 2), rpois(n_obs, 10))
 ```
 
 ```{r}
-#| code-fold: true
 # Relative frequencies of the counts in each mixture component and in the mixture
 k <- 0:23
 freq <- function(v) tabulate(v + 1, nbins = length(k)) / length(v)
@@ -1512,7 +1515,6 @@ The key features of this implementation are the use of the Poisson-Gamma posteri
 ```{r}
 #| label: pl-mixture-code
 #| eval: false
-#| code-fold: true
 # Model parameters
 m <- 2 # Number of components
 alpha <- c(1, 1) # Gamma prior shape parameters
@@ -1637,7 +1639,7 @@ ggplot(posterior_df, aes(x = Observation)) +
 cached_fig("15-forecasting/fig-pl-mixture")
 ```
 
-@fig-pl-mixture-1 shows the posterior means of the rates $\lambda$ against the true values (2 and 10), and @fig-pl-mixture-2 the posterior means of the mixture weights against the true weights (0.7 and 0.3). The two components have the same prior, so the data do not fix their labels, and here the labels are swapped relative to the simulation: component 1 ends near 9.8 with weight near 0.32 and component 2 near 2.2 with weight near 0.68. With the labels matched, the estimates end close to what the simulated sample shows: the sample means of the two groups are 2.0 and 10.0, and their shares of the 500 observations are 0.69 and 0.31. The paths settle after about 450 observations. Particle degeneracy is mitigated by resampling the particles at every observation, here with multinomial resampling.
+@fig-pl-mixture-1 shows the posterior means of the rates $\lambda$ against the true values (2 and 10), and @fig-pl-mixture-2 the posterior means of the mixture weights against the true weights (0.7 and 0.3). The two components have the same prior, so the data do not fix their labels, and here the labels are swapped relative to the simulation: component 1 ends near 9.8 with weight near 0.32 and component 2 near 2.2 with weight near 0.68. With the labels matched, the estimates end close to what the simulated sample shows: the sample means of the two groups are 2.0 and 10.0, and their shares of the 500 observations are 0.69 and 0.31. The paths settle after about 450 observations. At the end of the run only 67 distinct states remain among the 1000 particles, the price of multinomial resampling at every observation.
 
 *Advantages of PL for Mixtures:*
 

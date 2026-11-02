@@ -10,17 +10,15 @@ source("code/common.R")
 # [fig-risk-aversion]
 w <- seq(0.2, 2, length.out = 500)
 gamma <- 2
-# Plot this data frame
 df <- data.frame(
   w = w,
   logu = log(w),
-  kelly = (w^(1 - gamma) - 1) / (1 - gamma)
+  powu = (w^(1 - gamma) - 1) / (1 - gamma)
 )
 ulab <- expression("log utility", "power utility" ~ (gamma == 2))
-# 3. Plot use different y-scales for
 ggplot(df, aes(x = w)) +
-  geom_line(aes(y = logu, color = "log utility", linetype = "log utility"), size = 1.3) +
-  geom_line(aes(y = kelly, color = "power utility (gamma=2)", linetype = "power utility (gamma=2)"), size = 1.3) +
+  geom_line(aes(y = logu, color = "log utility", linetype = "log utility"), linewidth = 1.3) +
+  geom_line(aes(y = powu, color = "power utility (gamma=2)", linetype = "power utility (gamma=2)"), linewidth = 1.3) +
   geom_vline(xintercept = c(0.5, 1, 1.5), linetype = "dashed", color = "black") +
   scale_color_manual(values = c("log utility" = "blue", "power utility (gamma=2)" = "red"), labels = ulab) +
   scale_linetype_manual(values = c("log utility" = "solid", "power utility (gamma=2)" = "dotdash"), labels = ulab) +

@@ -4,7 +4,7 @@
 # Data: data/img-filter.tsv, data/img-x.tsv, data/t10k-images-idx3-ubyte.gz, data/t10k-labels-idx1-ubyte.gz
 # Packages: array, gzip, jax, matplotlib, numpy, struct, torch
 
-# ---- Key Concepts ----------------------------------------------------------
+# ---- A Worked Example ------------------------------------------------------
 
 # [fig-conv1d]
 import matplotlib.pyplot as plt
@@ -196,7 +196,7 @@ print(f'Right-Diagonal: {zrd}')
 #     test_acc = accuracy(params, (test_images, test_labels))
 #     log[:,epoch] = [train_acc,test_acc,]
 # print(f"Training set accuracy {train_acc}")
-# print(f"Test set accuracy {test_acc}")
+# print(f"Held-out set accuracy {test_acc}")
 
 # plt.plot(range(num_epochs),log[0,:]);
 # plt.plot(range(num_epochs),log[1,:]);
@@ -207,16 +207,12 @@ print(f'Right-Diagonal: {zrd}')
 # import torch
 # import torch.nn as nn
 # from torch.nn import functional as F
-# x = parse_images("data/t10k-images-idx3-ubyte.gz")
-# y = parse_labels("data/t10k-labels-idx1-ubyte.gz")
 # class Net(nn.Module):
 #     def __init__(self):
 #         super(Net, self).__init__()
-
-#         self.conv1 = nn.Conv2d(1, 32, 3, 1)  # 1 input channel (grayscale), 32 output channels, 3x3 kernel
-#         self.conv2 = nn.Conv2d(32, 64, 3, 1)  # 32 input channels, 64 output channels
-#         # Note: PyTorch defaults to valid padding (no padding). 
-#         # After conv1 (28->26), conv2 (26->24), pool (24->12): 64 channels × 12 × 12 = 9216
+#         self.conv1 = nn.Conv2d(1, 32, 3, 1)
+#         self.conv2 = nn.Conv2d(32, 64, 3, 1)
+#         # 64 channels × 12 × 12 = 9216 after pooling
 #         self.fc1 = nn.Linear(9216, 128)
 #         self.fc2 = nn.Linear(128, 10)
 #     def forward(self, x):
@@ -238,7 +234,7 @@ print(f'Right-Diagonal: {zrd}')
 #     perm = rng.permutation(num_train)
 #     while True:
 #         for i in range(num_batches):
-#             # index into traini so we train on the same split as the FC network (no test leakage)
+#             # index into traini so we train on the same split as the FC network (held-out images excluded)
 #             batch_idx = traini[perm[i * batch_size:(i + 1) * batch_size]]
 #             yield torch.from_numpy(x[batch_idx,:,:]/ np.float32(255.))[:, None, :, :], torch.from_numpy(y[batch_idx])
 
@@ -271,7 +267,7 @@ print(f'Right-Diagonal: {zrd}')
 #     pred = output.argmax(dim=1)
 #     correct = pred.eq(test_targets).sum().item()
 #     accuracy = 100. * correct / len(testi)
-#     print(f"CNN Test Accuracy: {accuracy:.1f}%")
+#     print(f"CNN held-out accuracy: {accuracy:.1f}%")
 
 # ---- 2D Convolution from Scratch -------------------------------------------
 
@@ -295,7 +291,6 @@ sobel_x = np.array([
 # ---- Max and Average Pooling from Scratch ----------------------------------
 
 import numpy as np
-np.random.seed(22)
 
 x = np.array([
     [0., 1., 9., 0., 2., 0.],

@@ -73,7 +73,7 @@ For the 2-2-1 network from the Neural Network Forward Pass exercise (Ch18), comp
 
 Given: $x = (1, 2)^T$, true label $y = 1$, learning rate $\eta = 0.1$
 
-Recall the forward-pass results:
+Recall the forward-pass results, with output weights $W_2 = (0.6, 0.8)$ and bias $b_2 = 0.5$:
 
 - $z^{(1)} = (0, 0.9)^T$, $a^{(1)} = (0, 0.9)^T$
 - $z^{(2)} = 1.22$, $\hat{y} = 0.772$
@@ -138,7 +138,7 @@ Consider the quadratic objective
 $$
 f(x) = \frac{1}{2} x^\top A x - b^\top x, \qquad x \in \mathbb{R}^d,
 $$
-where $A$ is a symmetric positive definite $d \times d$ matrix and $b \in \mathbb{R}^d$. This chapter's Second-Order Methods section poses the motivating question directly: Newton's method uses curvature information to take more efficient steps than gradient descent, so why does deep learning rely on first-order methods instead?
+where $A$ is a symmetric positive definite $d \times d$ matrix and $b \in \mathbb{R}^d$. Newton's method uses curvature information to take more efficient steps than gradient descent, so why does deep learning rely on first-order methods instead, as the Second-Order Methods section of this chapter explains?
 
 a) Derive the gradient $\nabla f(x)$ and the Hessian $\nabla^2 f(x)$.
 b) Write the gradient descent update with fixed step size $\alpha$, and the Newton update $x^{t+1} = x^t - \{\nabla^2 f(x^t)\}^{-1} \nabla f(x^t)$, both specialized to this $f$.
@@ -175,7 +175,7 @@ $$
 0 < \alpha < \frac{2}{\lambda_{\max}(A)}.
 $$
 
-e) For a model with $d$ parameters, the Hessian has $d^2$ entries, so storing it in double precision costs $8d^2$ bytes, while the gradient has only $d$ entries and costs $8d$ bytes. At $d = 10^5$ parameters (a small network by modern standards), the Hessian alone needs 80 GB, more memory than a typical workstation has, while the gradient needs under 1 MB; at $d=10^7$ the gap widens to 800,000 GB versus 80 MB. Solving the Newton system $A \Delta = \nabla f(x^t)$ by a direct method (Cholesky or LU factorization) costs $O(d^3)$ floating-point operations, whereas backpropagation computes $\nabla f(x^t)$ in $O(d)$ time, proportional to a single forward pass, regardless of how many outputs the model has. Since the Hessian changes at every iterate for a non-quadratic objective, this $O(d^3)$ cost recurs at *every* step (it cannot be paid once and reused, the way it can for our quadratic toy example where $A$ is constant), which is exactly why second-order methods do not scale to deep learning.
+e) For a model with $d$ parameters, the Hessian has $d^2$ entries, so storing it in double precision costs $8d^2$ bytes, while the gradient has only $d$ entries and costs $8d$ bytes. At $d = 10^5$ parameters (a small network by modern standards), the Hessian alone needs 80 GB, more memory than a typical workstation has, while the gradient needs under 1 MB; at $d=10^7$ the gap widens to 800,000 GB versus 80 MB. Solving the Newton system $A \Delta = \nabla f(x^t)$ by a direct method (Cholesky or LU factorization) costs $O(d^3)$ floating-point operations, whereas backpropagation computes $\nabla f(x^t)$ in $O(d)$ time, proportional to a single forward pass, because the loss is a scalar. Since the Hessian changes at every iterate for a non-quadratic objective, this $O(d^3)$ cost recurs at *every* step (it cannot be paid once and reused, the way it can for our quadratic toy example where $A$ is constant), which is exactly why second-order methods do not scale to deep learning.
 
 f) Numeric illustration. First, confirm the one-step Newton convergence:
 
@@ -241,7 +241,7 @@ b) Classify the schedules $a_n = c$ (constant, $p = 0$), $a_n = c/\sqrt{n}$ ($p 
 
 c) In Python, verify the classification numerically by computing the partial sums $\sum_{n=1}^{N} a_n$ and $\sum_{n=1}^{N} a_n^2$ (with $c = 1$) up to $N = 10^6$ for the five schedules. Confirm that the divergent sums keep growing with $N$ while the convergent ones have essentially reached their limits.
 
-d) Simulate the scalar recursion with $M(\theta) = \theta$, target $\alpha = 5$, i.i.d. noise $\epsilon_n \sim N(0, \sigma^2 = 4)$, and $\theta_0 = 0$, that is $\theta_{n+1} = \theta_n - a_n(\theta_n + \epsilon_n - \alpha)$, over $5000$ replications and $500$ steps. For $a_n = 1/n$ (both conditions hold) plot $n\cdot\widehat{\E{(\theta_n - \alpha)^2}}$ against $n$ and confirm it is flat near $\sigma^2$, the $O(1/n)$ rate quoted in the chapter. For the constant step $a_n = 0.1$ plot $\widehat{\E{(\theta_n - \alpha)^2}}$ (without the factor $n$) and show it plateaus at a strictly positive value. Connect each behaviour to the condition it satisfies or fails.
+d) Simulate the scalar recursion with $M(\theta) = \theta$, target $\alpha = 5$, i.i.d. noise $\epsilon_n \sim N(0, \sigma^2 = 4)$, and $\theta_0 = 0$, that is $\theta_n = \theta_{n-1} - a_n(\theta_{n-1} + \epsilon_n - \alpha)$, over $5000$ replications and $500$ steps. For $a_n = 1/n$ (both conditions hold) plot $n\cdot\widehat{\E{(\theta_n - \alpha)^2}}$ against $n$ and confirm it is flat near $\sigma^2$, the $O(1/n)$ rate quoted in the chapter. For the constant step $a_n = 0.1$ plot $\widehat{\E{(\theta_n - \alpha)^2}}$ (without the factor $n$) and show it plateaus at a strictly positive value. Connect each behaviour to the condition it satisfies or fails.
 
 e) The stall predicted for a too-fast schedule ($p > 1$) needs a problem whose gradient stays bounded. On $f(\theta) = |\theta - 5|$, whose subgradient $\operatorname{sign}(\theta - 5)$ has magnitude $1$, the total distance travelled from $\theta_0$ is at most $\sum_n a_n$. Run subgradient descent from $\theta_0 = 0$ with the summable schedule $a_n = 1/n^2$ and with the divergent schedule $a_n = 1/n$, and show numerically that the first stalls short of the target while the second reaches it. Relate this to the first Robbins-Monro condition.
 
@@ -373,22 +373,22 @@ e) Neural network loss functions are typically convex.
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
-a) **FALSE**. While too-small learning rates do slow convergence, they can also affect solution quality:
+a) FALSE. While too-small learning rates do slow convergence, they can also affect solution quality:
 - May get stuck in suboptimal local minima
 - Numerical precision issues with very small updates
 - May not explore the loss surface enough before training stops
 
-b) **TRUE**. With batch size = full dataset, the mini-batch gradient equals the full gradient: $\nabla L = \frac{1}{n}\sum_{i=1}^n \nabla L_i$. This is exactly gradient descent.
+b) TRUE. With batch size = full dataset, the mini-batch gradient equals the full gradient: $\nabla L = \frac{1}{n}\sum_{i=1}^n \nabla L_i$. This is exactly gradient descent.
 
-c) **TRUE**. Adam maintains per-parameter estimates of first moment ($m$) and second moment ($v$). The effective learning rate for parameter $j$ is $\eta / (\sqrt{v_j} + \epsilon)$, which differs across parameters.
+c) TRUE. Adam maintains per-parameter estimates of first moment ($m$) and second moment ($v$). The effective learning rate for parameter $j$ is $\eta / (\sqrt{v_j} + \epsilon)$, which differs across parameters.
 
-d) **FALSE**. Momentum can hurt when:
+d) FALSE. Momentum can hurt when:
 - The optimum is reached and momentum causes overshooting
 - In highly stochastic settings, accumulated momentum may point in wrong direction
 - With very high momentum ($\beta \approx 1$), it can cause oscillation
 - Near the optimum, momentum can prevent settling
 
-e) **FALSE**. Neural network loss functions are highly non-convex:
+e) FALSE. Neural network loss functions are highly non-convex:
 - Many local minima and saddle points
 - The loss surface is complex, especially in high dimensions
 - This is why optimization for NNs is challenging and requires careful hyperparameter tuning
@@ -397,13 +397,9 @@ e) **FALSE**. Neural network loss functions are highly non-convex:
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-}
 ## Learning Rate Selection
@@ -461,7 +457,7 @@ for (t in 1:5) {
 }
 ```
 
-With $\eta = 1$: The algorithm diverges. The learning rate is too large, causing oscillations that grow exponentially.
+With $\eta = 1$: The algorithm diverges. The learning rate is too large, causing oscillations that grow without bound.
 
 d) Simple line search (backtracking):
 ```{r}
@@ -587,10 +583,10 @@ legend("bottomright", c("Full GD", "Mini-batch SGD", "True theta"),
 ```
 
 d) Why SGD can find better solutions:
-- **Noise as regularization**: The stochastic noise helps escape sharp local minima
-- **Implicit bias**: SGD tends to find flatter minima which generalize better
-- **Escaping saddle points**: Noise helps break symmetry and escape saddle points faster
-- **Better generalization**: Empirically, SGD solutions often have lower test error than full-batch GD
+- *Noise as regularization*: The stochastic noise helps escape sharp local minima
+- *Implicit bias*: SGD tends to find flatter minima which generalize better
+- *Escaping saddle points*: Noise helps break symmetry and escape saddle points faster
+- *Better generalization*: Empirically, SGD solutions often have lower test error than full-batch GD
 
 :::
 :::
@@ -617,10 +613,10 @@ d) Describe Nesterov momentum and its advantage.
 **Solution**:
 
 a) Intuition for momentum:
-- **Acceleration in consistent directions**: If gradients point the same way repeatedly, velocity builds up, allowing faster progress
-- **Damping in oscillating directions**: If gradients alternate signs, momentum averages them out, reducing oscillations
-- **Like a ball rolling downhill**: Gains speed on slopes, smooths out bumps
-- **Helps with ill-conditioned problems**: Where gradients vary widely across dimensions
+- *Acceleration in consistent directions*: If gradients point the same way repeatedly, velocity builds up, allowing faster progress
+- *Damping in oscillating directions*: If gradients alternate signs, momentum averages them out, reducing oscillations
+- *Like a ball rolling downhill*: Gains speed on slopes, smooths out bumps
+- *Helps with ill-conditioned problems*: Where gradients vary widely across dimensions
 
 b) Comparison:
 ```{r}
@@ -722,8 +718,8 @@ d) When might you prefer SGD with momentum over Adam?
 **Solution**:
 
 a) What $m_t$ and $c_t$ track:
-- **$m_t$**: Exponential moving average of gradients (first moment). This is like momentum, tracks the direction of recent gradients.
-- **$c_t$**: Exponential moving average of squared gradients (second moment). Estimates the variance/scale of gradients. Used to normalize the learning rate per parameter.
+- *$m_t$*: Exponential moving average of gradients (first moment). This is like momentum, tracks the direction of recent gradients.
+- *$c_t$*: Exponential moving average of squared gradients (second moment). Estimates the variance/scale of gradients. Used to normalize the learning rate per parameter.
 
 b) Bias correction:
 - At initialization, $m_0 = 0$ and $c_0 = 0$
@@ -778,11 +774,11 @@ legend("topright", c("Adam", "Vanilla SGD"), col = c("red", "blue"), lwd = 2)
 ```
 
 d) When to prefer SGD with momentum over Adam:
-- **Better generalization**: SGD often finds solutions that generalize better to test data
-- **Large-scale supervised learning**: For image classification, SGD + momentum is often preferred
-- **Computational efficiency**: SGD is simpler and faster per iteration
-- **Final fine-tuning**: Start with Adam (fast initial progress), switch to SGD (better final solution)
-- **When overfitting is a concern**: Adam can overfit faster due to adaptive per-parameter learning rates
+- *Better generalization*: SGD often finds solutions that generalize better to test data
+- *Large-scale supervised learning*: For image classification, SGD + momentum is often preferred
+- *Computational efficiency*: SGD is simpler and faster per iteration
+- *Final fine-tuning*: Start with Adam (fast initial progress), switch to SGD (better final solution)
+- *When overfitting is a concern*: Adam can overfit faster due to adaptive per-parameter learning rates
 
 :::
 :::
@@ -807,7 +803,7 @@ $$
 $$
 c) Show that maximizing $Q(\theta,\theta^{(g)}) = \sum_{i=1}^n \big[\gamma_i^{(g)}(\log\pi + \log N(y_i;\mu_1,\sigma_1^2)) + (1-\gamma_i^{(g)})(\log(1-\pi) + \log N(y_i;\mu_2,\sigma_2^2))\big]$ over $\theta$ gives the M-step as responsibility-weighted means, variances, and mixing proportion.
 d) Implement the E-step and M-step in R, iterate until convergence, and track the observed-data log-likelihood $\ell(\theta^{(g)})$ at every iteration.
-e) Plot $\ell(\theta^{(g)})$ against iteration $g$ and confirm it increases monotonically, as guaranteed by the majorization argument in this chapter.
+e) Plot $\ell(\theta^{(g)})$ against iteration $g$ and confirm it increases monotonically, as guaranteed by the minorization argument in this chapter.
 f) Compare the recovered $(\hat\pi,\hat\mu_1,\hat\mu_2,\hat\sigma_1,\hat\sigma_2)$ to the true values.
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -892,7 +888,7 @@ cat("Log-likelihood is non-decreasing at every iteration:", all(diff(ll) >= -1e-
 cat("Log-likelihood at iterations 1, 2, 5, 10, 50:", round(ll[c(1,2,5,10,50)], 2), "\n")
 ```
 
-The log-likelihood rises from about $-1213$ at the first iteration to about $-1134$ and then stays flat, exactly the monotone, converging behavior guaranteed by the majorization argument in this chapter (each M-step increases $Q$, and $Q$ majorizes $\ell$, so $\ell$ can never decrease).
+The log-likelihood rises from about $-1213$ at the first iteration to about $-1134$ and then stays flat, exactly the monotone, converging behavior guaranteed by the minorization argument in this chapter (each M-step increases $Q$, and $Q$ plus a term free of $\theta$ minorizes $\ell$, so $\ell$ can never decrease).
 
 f) Recovered parameters versus truth:
 ```{r}

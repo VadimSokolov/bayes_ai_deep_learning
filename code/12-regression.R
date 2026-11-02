@@ -46,7 +46,7 @@ plot(Year, Keynes, pch = 20, col = 34, cex = 3, type = "l", lwd = 3)
 mean(Keynes)
 
 # [fig-keynes-plot]
-plot(Market, Keynes, xlab = "Market Return", ylab = "Keynes Excess Return", col = 20, bg = "lightblue", pch = 21, cex = 0.8)
+plot(Market, Keynes, xlab = "Market Return", ylab = "Keynes Return", col = 20, bg = "lightblue", pch = 21, cex = 0.8)
 model <- lm(Keynes ~ Market)
 abline(model, lwd = 3)
 
@@ -107,17 +107,12 @@ for (i in 1:n) {
   beta[i, ] <- coef(l)
 }
 
-ind <- 2
+fit <- lm(price ~ livingArea, data = d)
 # Plot the results
 plot(beta[, 1], beta[, 2], col = "blue", xlab = "Intercept", ylab = "Slope", bg = "lightblue", cex = 0.8)
-abline(h = coef(l)[2], lwd = 3, col = "red")
-abline(v = coef(l)[1], lwd = 3, col = "red")
-X <- cbind(1, d$livingArea)
-# Calculate the variance of the coefficients
-var <- sigma(l)^2 * solve(t(X) %*% X)
-varb <- var[ind, ind] / 0.63
-hist(beta[, ind], col = "lightblue", xlab = "Slope", main = "", freq = F)
-bt <- seq(80, 140, 0.1)
+abline(h = coef(fit)[2], lwd = 3, col = "red")
+abline(v = coef(fit)[1], lwd = 3, col = "red")
+hist(beta[, 2], col = "lightblue", xlab = "Slope", main = "", freq = F)
 
 # ---- Google vs S&P 500 -----------------------------------------------------
 
@@ -154,9 +149,9 @@ getSymbols(Symbols = "AAPL", from = "2000-01-01", to = "2023-12-31", auto.assign
 plot(AAPL$AAPL.Adjusted, type = "l", col = "blue", xlab = "", ylab = "Price", grid.col = NA, main = "")
 
 # [fig-compound]
-T <- 1:100
+ns <- 1:100
 r <- 1
-plot(T, (1 + r / T)^T, type = "l", col = "blue", ylab = "Future Value")
+plot(ns, (1 + r / ns)^ns, type = "l", col = "blue", ylab = "Future Value")
 abline(h = exp(r), col = "red", lwd = 3)
 
 # ---- World's Smartest Mammal -----------------------------------------------
@@ -188,10 +183,10 @@ abline(h = 0, col = "red", lwd = 3)
 plot(log(Brain), model$fitted.values, pch = 21, bg = "lightblue", xlab = "True log y", ylab = "Fitted log y")
 abline(a = 0, b = 1, col = "red", lwd = 3)
 
-# [mammals4]
+# [tbl-mammals-outliers]
 # res = rstudent(model)
 res <- model$residuals / sd(model$residuals)
-outliers <- order(res, decreasing = T)[1:10]
+outliers <- order(res, decreasing = TRUE)[1:10]
 cbind(mammals[outliers, ],
   Std.Res = res[outliers], Residual = model$residuals[outliers],
   Fit = exp(model$fitted.values[outliers])
@@ -205,12 +200,10 @@ abs(model$fitted.values[11] - log(6.4)) / sd(model$residuals)
 newfood <- read.csv("data/newfood.csv")
 attach(newfood)
 names(newfood)
-# knitr::kable()
 head(newfood)
 # correlation matrix
 cm <- cor(cbind(sales, price, adv, locat, income, svol))
 cm[upper.tri(cm, diag = TRUE)] <- NA
-# knitr::kable(as.table(round(cm, 3)))
 as.table(round(cm, 3)) %>% knitr::kable()
 
 # [abtable]
@@ -308,7 +301,6 @@ ojreg %>%
   knitr::kable(digits = 2)
 
 # [oj-box]
-doj <- oj %>% filter(brand == "dominicks")
 boxplot(price ~ feat,
   data = oj[oj$brand == "dominicks", ], col = c(2, 3),
   main = "Dominick's", xlab = "Featured", ylab = "Price ($)", names = c("No", "Yes")

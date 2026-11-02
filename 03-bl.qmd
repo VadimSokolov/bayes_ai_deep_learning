@@ -11,7 +11,7 @@ $$
 
 The main tasks in statistical inference include estimation, hypothesis testing, and prediction. *Estimation* involves using the observed sample to infer the value of the unknown parameter $\theta$, either by providing a single best guess (denoted as $\hat{\theta}$) or by constructing an interval $[a, b]$ that is likely to contain the true value of $\theta$ with a specified probability. *Hypothesis testing* focuses on evaluating specific claims or hypotheses about the value of $\theta$; for instance, we might be interested in determining whether $\theta$ is equal to a particular value $\theta_0$. *Prediction*, on the other hand, is concerned with forecasting the value of a future observation $y_{n+1}$ based on the data already observed, $y_1, \ldots, y_n$ via a model $p(y_{n+1} \mid y_1, \ldots, y_n)$.
 
-In this section, we present a general framework for statistical inference, known as Bayesian inference, which is based on the use of probability distributions to represent uncertainty and make inferences about unknown parameters. We will use Bayes' rule to update our beliefs about the parameters of a model based on new evidence or data. Bayesian inference provides a principled approach to statistical modeling and decision-making.
+In this chapter, we present a general framework for statistical inference, known as Bayesian inference, which is based on the use of probability distributions to represent uncertainty and make inferences about unknown parameters. We will use Bayes' rule to update our beliefs about the parameters of a model based on new evidence or data. Bayesian inference provides a principled approach to statistical modeling and decision-making.
 
 Bayesian analysis always starts with specifying the two main components of the model:  
 
@@ -34,9 +34,9 @@ $$
 p(y)  = \int p(y \mid  \theta)p( \theta)d \theta
 $$
 
-Nice feature of the Bayes approach is that you can use the posterior distribution obtained from one round of observation as the prior distribution for the next round when more data become available. This process can be iteratively repeated as new evidence is acquired. It makes sequential learning possible.
+A nice feature of the Bayes approach is that you can use the posterior distribution obtained from one round of observation as the prior distribution for the next round when more data become available. This process can be iteratively repeated as new evidence is acquired. It makes sequential learning possible.
 
-The downstream tasks then use the posterior distribution. For example, if we want to predict the value of a future observation $y_{n+1}$ based on the data already observed, $y_1, \ldots, y_n$ via a model $p(y_{n+1} \mid y_1, \ldots, y_n, \theta)$, we can use the posterior distribution to calculate the expected value of $y_{n+1}$ as
+The downstream tasks then use the posterior distribution. For example, if we want to predict the value of a future observation $y_{n+1}$ based on the data already observed, $y_1, \ldots, y_n$ via a model $p(y_{n+1} \mid y_1, \ldots, y_n, \theta)$, we can use the posterior distribution to calculate the predictive distribution of $y_{n+1}$ as
 $$
 p(y_{n+1} \mid y_1, \ldots, y_n) = \int p(y_{n+1} \mid y_1, \ldots, y_n, \theta)p(\theta \mid y_1, \ldots, y_n)d \theta.
 $$
@@ -83,7 +83,7 @@ which means that observing $y_{1}=1$ does not affect the probability that $y_{2}
 $$
 P\left(  y_{501}=1\right)  =P\left(  y_{501}=1\mid {\textstyle\sum\nolimits_{t=1}^{500}}y_{t}=1\right)  =P\left(  y_{501}=1\mid {\textstyle\sum\nolimits_{t=1}^{500}}y_{t}=499\right).
 $$
-It is hard to imagine that anyone would believe this--nearly every observer would state that the second probability is near zero and the third probability is near 1, as the first 500 tosses contain a lot of information. Thus, the tosses are not independent.
+It is hard to imagine that anyone would believe this: nearly every observer would state that the second probability is near zero and the third probability is near 1, as the first 500 tosses contain a lot of information. Thus, the tosses are not independent.
 
 To see the resolution of this apparent paradox, introduce a parameter, $\theta$, which is the probability that a thumb tack toss is heads. If $\theta$ were known, then it is true that, conditional on the value of this parameter, the tosses are independent and
 $$
@@ -102,11 +102,11 @@ $$
 Notice that the right-hand-side does not depend on the order of the data, and the joint distribution of the data is the same for all potential orderings. This is a natural assumption about the symmetry of the data, and is called *exchangeability*. The Bayesian approach makes no assumptions about the order in which the data may arrive, and each observation has the same marginal distribution, $P\left( y_{i}=1\right) =P\left(y_{j}=1\right)$ for any $i$ and $j$.
 
 
-Thus, we replace the independence assumption with a weaker and more natural assumption of exchangeability: a collection of random variables, $y_{1}, \ldots ,y_{T}$, is exchangeable if the distribution of $y_{1}, \ldots ,y_{T}$ is the same as the distribution of any permutation $y_{\pi_{1}}, \ldots ,y_{\pi_{T}}$, where $\pi=\left( \pi_{1}, \ldots ,\pi_{T}\right)$ is a permutation of the integers $1$ to $T$. Independent events are always exchangeable, but the converse is not true. Notice the differences between the assumptions in the Bayesian and frequentist approach: the Bayesian makes assumptions over potentially realized data, and there is no need to invent the construct of a fixed but unknown parameter, since exchangeability makes no reference to parameters.
+Thus, we replace the independence assumption with a weaker and more natural assumption of exchangeability: a collection of random variables, $y_{1}, \ldots ,y_{T}$, is exchangeable if the distribution of $y_{1}, \ldots ,y_{T}$ is the same as the distribution of any permutation $y_{\pi_{1}}, \ldots ,y_{\pi_{T}}$, where $\pi=\left( \pi_{1}, \ldots ,\pi_{T}\right)$ is a permutation of the integers $1$ to $T$. Independent and identically distributed random variables are always exchangeable, but the converse is not true. Notice the differences between the assumptions in the Bayesian and frequentist approach: the Bayesian makes assumptions over potentially realized data, and there is no need to invent the construct of a fixed but unknown parameter, since exchangeability makes no reference to parameters.
 
-In the case of the tack throwing experiment, exchangeability states that the ordering of heads and tails does not matter. Thus, if the experiment of 8 tosses generated 4 heads, it does not matter if the ordering was $\left(1,0,1,0,1,0,1,0\right)$ or $\left( 0,1,1,0,1,0,0,1\right)$. This is a natural assumption about the symmetry of the tack tosses, capturing the idea that the information in any toss or sequence of tosses is the same as any other--the idea of a truly random sample. Exchangeability is a property that applies prior to viewing the data. After observation, data are no longer random variables, but realizations of random variables.
+In the case of the tack throwing experiment, exchangeability states that the ordering of heads and tails does not matter. Thus, if the experiment of 8 tosses generated 4 heads, it does not matter if the ordering was $\left(1,0,1,0,1,0,1,0\right)$ or $\left( 0,1,1,0,1,0,0,1\right)$. This is a natural assumption about the symmetry of the tack tosses, capturing the idea that the information in any toss or sequence of tosses is the same as any other, the idea of a truly random sample. Exchangeability is a property that applies prior to viewing the data. After observation, data are no longer random variables, but realizations of random variables.
 
-Bruno de Finetti [-@definetti1937foresight] introduced the notion of exchangeability, and then asked a simple question: "What do exchangeable sequences of random variables look like?" The answer to this question is given in the famous de Finetti's theorem, which also *defines* models, parameters, and provides important linkages between frequentist and classical statistics.
+Bruno de Finetti [-@definetti1937foresight] introduced the notion of exchangeability, and then asked a simple question: "What do exchangeable sequences of random variables look like?" The answer to this question is given in the famous de Finetti's theorem, which also *defines* models, parameters, and provides important linkages between subjectivist and frequentist statistics.
 
 ### de Finetti's Representation Theorem
 
@@ -125,7 +125,7 @@ P(\theta)=\lim_{n\rightarrow\infty}\text{Prob}\left[  \frac{1}{n}\sum_{t=1}^{n}Y
 $$
 If the distribution function or measure admits a density with respect to Lebesgue measure, then $dP(\theta)=p\left( \theta\right) d\theta$.
 
-@heath1976finettis provide a general version and simple proof. For general spaces $\mathcal{Y}$, we have
+@heath1976finettis give a simple proof of the 0-1 case, and @hewitt1955symmetric prove the general version. For general spaces $\mathcal{Y}$, we have
 $$
 P(Y_1 \le y_1, \ldots, Y_n \le y_n) = \int_{\mathcal{F}} \prod_{i=1}^{n} F(y_i) \, \mu(dF)
 $$
@@ -144,13 +144,13 @@ where $\Theta$ is the parameter space.
 -   Parameters are random variables. The limit $\theta=\underset {n\rightarrow\infty}{\lim}n^{-1}\sum_{i=1}^{n}y_{i}$ exists but is a random variable. This can be contrasted with the strong law of large numbers that requires independence and implies that $n^{-1}\sum_{i=1}^{n}y_{i}$ converges almost surely to a fixed value, $\theta_{0}$. From this, one can interpret a parameter $\theta$ as a limit of observables and justifies the frequentist interpretation of $\theta$ as a limiting frequency of 1's.
 -   The distribution $P\left( \theta\right)$ or density $p\left(\theta\right)$ can be interpreted as beliefs about the limiting frequency $\theta$ prior to viewing the data. After viewing the data, beliefs are updated via Bayes' rule resulting in the posterior distribution, $p(\theta \mid y_{1},\ldots,y_{n})$.
 
-Since the likelihood function is fixed in this case, any distribution of observed data can be generated by varying the prior distribution.
+Since the likelihood function is fixed in this case, any exchangeable distribution of observed data can be generated by varying the prior distribution.
 
 The main implication of de Finetti's theorem is a complete justification for Bayesian practice of treating the parameters as random variables and specifying a likelihood and parameter distribution. Stated differently, a "model" consists of both a likelihood and a prior distribution over the parameters. Thus, parameters as random variables and priors are a necessity for statistical inference, and not some extraneous component motivated by philosophical concerns.
 
 More general versions of de Finetti's theorem are available. A general version is as follows. If $\left\{ Y_{i}\right\} _{i\geq1}$, $Y_{i}\in\mathbb{R}$, is a sequence of infinitely exchangeable random variables, then there exists a probability measure $P$ on the space of all distribution functions, such that
 $$
-p(Y_{1}\le y_{1},\ldots,Y_{n}\le y_{n})=\int\prod_{i=1}^{n}F\left(  y_{i}\right)
+P(Y_{1}\le y_{1},\ldots,Y_{n}\le y_{n})=\int\prod_{i=1}^{n}F\left(  y_{i}\right)
 P(dF)
 $$
 with mixing measure
@@ -159,24 +159,24 @@ P\left(  F\right)  =\underset{n\rightarrow\infty}{\lim}P(F_{n}),
 $$
 where $F_{n}$ is the empirical distribution of the data. At this level of generality, the distribution function is infinite-dimensional. In practice, additional subjective assumptions are needed that usually restrict the distribution function to finite-dimensional spaces, which implies that the distribution function is indexed by a parameter vector $\theta$:
 $$
-p(Y_{1}\le y_{1},\ldots,Y_{n}\le y_{n})=\int\prod_{i=1}^{n}p\left(  Y_{i} \mid \theta\right)
+P(Y_{1}\le y_{1},\ldots,Y_{n}\le y_{n})=\int\prod_{i=1}^{n}F\left(  y_{i} \mid \theta\right)
 dP\left(  \theta\right).
 $$
 To operationalize this result, the researcher needs to choose the likelihood function and the prior distribution of the parameters.
 
-### Posterior Empirical CDF
+### Predictive Distributions and Model Uncertainty
 
-Let $m = \{ f_\theta ( y ) : y \in \mathcal{Y} \}$ be a model. When necessary we index the parameters in model $m$, as $\theta_m$.
-Let $y = ( y_1 , \ldots , y_n )$ be a vector of signals. The conditional likelihood, under $m$, is given by $f_\theta(y) =  \prod_{i=1}^n f_\theta ( y_i )$. We also allow for the possibility that the 
+Let $m = \{ f_\theta ( y ) : \theta \in \Theta \}$ be a model. When necessary we index the parameters in model $m$, as $\theta_m$.
+Let $y = ( y_1 , \ldots , y_n )$ be a vector of observations. The conditional likelihood, under $m$, is given by $f_\theta(y) =  \prod_{i=1}^n f_\theta ( y_i )$. We also allow for the possibility that the 
 data are generated from a model $f$ that does not belong to the family of models $f_\theta$.  
 
 Given a prior measure, $\Pi ( d F )$, over $\mathcal{F}$ the set of distributions, we can calculate the predictive density
 $$
-f_n  ( y_{n+1} | y_1 , \ldots , y_n ) = \int f (y) \Pi_n ( d F ) \; \text{where}\; \Pi_n ( d f ) = \frac{ \prod_{i=1}^n f( y_i ) \Pi( d f ) }{  \int  \prod_{i=1}^n f( y_i ) \Pi( d f ) }
+f_n  ( y_{n+1} \mid y_1 , \ldots , y_n ) = \int f (y_{n+1}) \Pi_n ( d f ) \; \text{where}\; \Pi_n ( d f ) = \frac{ \prod_{i=1}^n f( y_i ) \Pi( d f ) }{  \int  \prod_{i=1}^n f( y_i ) \Pi( d f ) }
 $$
 Under the family, $f_\theta$, we can calculate the parameter posterior as
 $$
-p( \theta \mid y ) =  \frac{ \prod_{i=1}^n f_\theta ( y_i ) p(\theta)  d \theta }{  m(y) } \;  \text{where}\; m(y) = \int f_\theta (y) p( \theta ) d \theta 
+p( \theta \mid y ) =  \frac{ \prod_{i=1}^n f_\theta ( y_i ) p(\theta) }{  m(y) } \;  \text{where}\; m(y) = \int f_\theta (y) p( \theta ) d \theta 
 $$
 Here $p(\theta)$ is a prior distribution over parameters and $m(y)$ is the marginal distribution of the data implied by the model.
 
@@ -190,7 +190,9 @@ d\mathcal{M},
 in the case of a continuum of models. Thus, under the mild assumption of exchangeability, it is *as if* the $y_{i}$'s are generated from $p\left( y_{i} \mid \theta,\mathcal{M}\right)$, conditional on the random variables $\theta$ and $\mathcal{M}$, where $p\left( \theta \mid \mathcal{M}\right)$ are the beliefs over $\theta$ in model $\mathcal{M}$, and $p\left(\mathcal{M}\right)$ are the beliefs over model specifications.
 
 
-Subjective probability is a more general definition of probability than the frequentist definition, as it can be used for all types of events, both repeatable and unrepeatable events. A subjectivist has no issues discussing the probability of an election result, even though the underlying conditions has not been observed before. As @ramsey1926truth frames it, probability is simply one's willingness to bet on an event with a counterparty.
+### Subjective Probability and Betting
+
+Subjective probability is a more general definition of probability than the frequentist definition, as it can be used for all types of events, both repeatable and unrepeatable events. A subjectivist has no issues discussing the probability of an election result, even though the underlying conditions have not been observed before. As @ramsey1926truth frames it, probability is simply one's willingness to bet on an event with a counterparty.
 
 The event does not even have to be uncertain in nature. For example, the probability of me having coins in my pocket will depend on who is asked to make the assessment.  I, knowing the contents of my pocket, will say the probability is 0. However, if you are asked to make the assessment, you will say the probability is 1/2, as you do not know the contents of my pocket. This is a classic example of subjectivist probability.
 
@@ -200,9 +202,9 @@ The main difficulty in operationalizing subjective probability is the process of
 
 Consider eliciting someone's probability distribution over the number of people in Antarctica. We could start by asking: "Would you accept a bet that pays \$100 if the number is below 5,000, and you pay \$50 if it's above 5,000?" If they accept, this suggests they believe $P(\text{population} < 5000) > 1/3$. We then adjust the threshold and payoffs systematically. For instance, we might ask about betting on the population being below 2,000, or below 1,000, gradually narrowing down probability mass at different intervals.
 
-For continuous quantities, we can elicit a full distribution through a sequence of binary bets about quantiles. By asking someone to specify values $q_{0.25}, q_{0.5}, q_{0.75}$ such that they are indifferent between bets paying equal amounts if the true value falls below or above each threshold, we construct their 25th, 50th, and 75th percentiles. This process, known as probability elicitation, transforms abstract beliefs into concrete probability distributions by observing revealed preferences through betting behavior.
+For continuous quantities, we can elicit a full distribution through a sequence of binary bets about quantiles. By asking someone to specify values $q_{0.25}, q_{0.5}, q_{0.75}$ such that they are indifferent between a bet paying $1-p$ if the true value falls below $q_p$ and a bet paying $p$ if it falls above, for $p = 0.25, 0.5, 0.75$, we construct their 25th, 50th, and 75th percentiles. This process, known as probability elicitation, transforms abstract beliefs into concrete probability distributions by observing revealed preferences through betting behavior.
 
-The betting framework provides two key advantages. First, it forces coherence: if someone states inconsistent probabilities (such as $P(A) + P(\neg A) \neq 1$), an adversary could construct a Dutch book—a set of bets that guarantees a loss regardless of the outcome. The threat of sure loss incentivizes rational probability assignments. Second, betting naturally handles non-repeatable events. We can elicit probabilities about tomorrow's Supreme Court decision or next quarter's GDP growth, neither of which has a frequentist interpretation.
+The betting framework provides two key advantages. First, it forces coherence: if someone states inconsistent probabilities (such as $P(A) + P(\neg A) \neq 1$), an adversary could construct a Dutch book, a set of bets that guarantees a loss regardless of the outcome. The threat of sure loss incentivizes rational probability assignments. Second, betting naturally handles non-repeatable events. We can elicit probabilities about tomorrow's Supreme Court decision or next quarter's GDP growth, neither of which has a frequentist interpretation.
 
 Instead of using repetitive experiments, subjective probabilities can be measured using betting odds, which have been used for centuries to gauge the uncertainty over an event. The probability attributed to winning a coin toss is revealed by the type of odds one would accept to bet. Notice the difference between the frequentist and Bayesian approach. Instead of defining the probabilities via an infinite repeated experiment, the Bayesian approach elicits probabilities from an individual's observed behavior.
 
@@ -235,7 +237,7 @@ theta <- seq(0, 1, by = 0.1)
 prior <- c(0, 0.024, 0.077, 0.132, 0.173, 0.188, 0.173, 0.132, 0.077, 0.024, 0)
 ```
 
-We put most of the mass on the fair assumption ($\theta = 0.5$) and zero mass on the extreme values $\theta = 0$ and $\theta = 1$. Our mass is exponentially decaying as we move away from 0.5. This is a reasonable assumption, since we are not sure about the fairness of the coin. Now, we can use Bayes' rule to update our prior belief. The posterior distribution, shown in @fig-coinposterior (middle panel), then combines the likelihood and the prior distribution.
+We put the largest mass on the fair assumption ($\theta = 0.5$) and zero mass on the extreme values $\theta = 0$ and $\theta = 1$. Our mass decays as we move away from 0.5. This is a reasonable assumption, since we are not sure about the fairness of the coin. Now, we can use Bayes' rule to update our prior belief. The posterior distribution, shown in @fig-coinposterior (middle panel), then combines the likelihood and the prior distribution.
 $$
 p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{p(y)}.
 $$
@@ -267,6 +269,7 @@ likelihood <- function(theta, n, Y) {
 }
 posterior <- likelihood(theta, 10, 3) * prior
 posterior <- posterior / sum(posterior) # normalize
+pred10 <- sum(theta * posterior)
 barplot(posterior, names.arg = theta, xlab = expression(theta), ylab = "posterior", ylim = c(0, 0.4), col = "lightblue")
 
 posterior <- likelihood(theta, 100, 30) * prior
@@ -274,14 +277,14 @@ posterior <- posterior / sum(posterior) # normalize
 barplot(posterior, names.arg = theta, xlab = expression(theta), ylab = "posterior", ylim = c(0, 1), col = "lightblue")
 ```
 
-If you are to keep collecting more observations and say observe a sequence of 100 flips and 30 of them were tails, then the posterior distribution will be more concentrated around the value of $\theta = 0.3$, as shown in @fig-coinposterior (right panel).
+If you are to keep collecting more observations and say observe a sequence of 100 flips and 30 of them were tails, then the posterior distribution will be more concentrated around the value of $\theta = 0.3$, as shown in @fig-coinposterior (right panel). For the first 10 flips, the Bayes answer to our question is the posterior mean, $\sum_\theta \theta\, p(\theta \mid y) = `r round(pred10, 3)`$, against $0.3$ by frequency.
 
 This demonstrates that for large sample sizes, the frequentist approach and the Bayesian approach agree. 
 :::
 
 ## Beta-Binomial Model {#sec-betabinomial}
 
-The *Beta-Binomial Bayesian model* is a statistical model that is used when we are interested in learning about a proportion or probability of success, denoted by $p$. This model is used, for example, when dealing with binary data in A/B testing.
+The *Beta-Binomial Bayesian model* is a statistical model that is used when we are interested in learning about a proportion or probability of success, denoted by $\theta$. This model is used, for example, when dealing with binary data in A/B testing.
 
 In the Beta-Binomial model, we assume that the observed data are generated from a Binomial distribution with parameter $\theta$ and $m$ trials. The probability of success $\theta$ in each of $m$ Bernoulli trials is not fixed but randomly drawn from a Beta distribution. Thus, the model is given by
 $$
@@ -380,7 +383,7 @@ Y = \sum_{i=1}^n y_i,
 $$
 where $y_i \mid \theta \sim Bernoulli(\theta)$.
 
-Here the count of successful outcome $Y$ acts as a *sufficient statistic* for the parameter $\theta$. This means that the posterior distribution depends on the data only through the sufficient statistic $Y$. This is a very useful property and is a consequence of the conjugacy of the Beta prior and Binomial likelihood.
+Here the count of successful outcome $Y$ acts as a *sufficient statistic* for the parameter $\theta$. This means that the posterior distribution depends on the data only through the sufficient statistic $Y$. This is a very useful property of the Binomial likelihood, and it holds for any prior.
 
 In the general case where each observation follows a Binomial distribution with $m$ trials, i.e., $y_i \mid \theta \sim Binomial(m,\theta)$, the total number of successes is
 $$
@@ -397,12 +400,12 @@ $$
 \E{\theta\mid Y}  =\frac{\alpha_{n}}{\alpha_{n}+\beta_{n}} \;\text{ and }\; \Var{
 \theta\mid Y}  =\frac{\alpha_{n}\beta_{n}}{\left(  \alpha_{n}+\beta_{n}\right)  ^{2}\left(   \alpha_{n}+\beta_{n}+1\right)  }\text{,}
 $$
-where $\alpha_{n} = \alpha + Y$ and $\beta_{n} = \beta + n - Y$.
+where $\alpha_{n} = \alpha + Y$ and $\beta_{n} = \beta + nm - Y$.
 
 ::: {#exm-swan}
 ## Black Swans
 
-A related problem is the Black Swan inference problem. Suppose that after $n$ trials, where $n$ is large, you have only seen successes and that you assess the probability of the next trial being a success as $(T+1)/(T+2)$, that is, almost certain. This is a model of observing White Swans and having never seen a Black Swan. @taleb2007black makes it sound as if the rules of probability are not rich enough to be able to handle Black Swan events. There is a related class of problems in finance known as *Peso problems* where countries decide to devalue their currencies, and there is little prior evidence from recent history that such an event is going to happen.
+A related problem is the Black Swan inference problem. Suppose that after $T$ trials, where $T$ is large, you have only seen successes and that you assess the probability of the next trial being a success as $(T+1)/(T+2)$, that is, almost certain. This is a model of observing White Swans and having never seen a Black Swan. @taleb2007black makes it sound as if the rules of probability are not rich enough to be able to handle Black Swan events. There is a related class of problems in finance known as *Peso problems* where countries decide to devalue their currencies, and there is little prior evidence from recent history that such an event is going to happen.
 
 To obtain such a probability assessment, we use a Binomial/Beta conjugate Bayes updating model. The key point is that it can also explain that there is still a large probability of a Black Swan event to happen *sometime* in the future. An independence model has difficulty doing this.
 
@@ -489,9 +492,9 @@ $$
 p(w\mid D) = \prod_{a=1}^K Beta(w_a\mid \alpha + n_{a,1},\beta + n_{a,0})	
 $$
 
-This setup allows us to perform sequential design of experiments. The simplest version of it is called Thompson sampling [@thompson1933likelihood]. After observing $n$ patients, we draw a single sample $\tilde w$ from the posterior and then maximize the resulting surrogate 
+Here $n_{a,1}$ and $n_{a,0}$ count the successes and failures of drug $a$ in $D$. This setup allows us to perform sequential design of experiments. The simplest version of it is called Thompson sampling [@thompson1933likelihood]. After observing $n$ patients, we draw a single sample $\tilde w$ from the posterior and then maximize the resulting surrogate 
 $$
-a_{n+1} = \arg\max_{a} f_{\tilde w}(a), ~~~ \tilde{w} \sim p(w\mid D)
+a_{n+1} = \arg\max_{a} \tilde w_a, ~~~ \tilde{w} \sim p(w\mid D)
 $$
 :::
 
@@ -500,18 +503,17 @@ $$
 
 The batter-pitcher match-up is a fundamental element of a baseball game. There are detailed baseball records that are examined regularly by fans and professionals. These data provide a good illustration of Bayesian hierarchical methods. There is a great deal of prior information concerning the overall ability of a player. However, we only see a small amount of data about a particular batter-pitcher match-up. Given the relatively small sample size, to determine our optimal estimator, we build a hierarchical model taking into account the within pitcher variation.
 
-Let's analyze the variability in Jeter's $2006$ season. Let $p_{i}$ denote Jeter's ability against pitcher $i$ and assume that $p_{i}$ varies across the population of pitchers according to a particular probability distribution $(p_{i} \mid \alpha,\beta)\sim Be(\alpha,\beta)$. To account for extra-binomial variation, we use a hierarchical model for the observed number of hits $y_{i}$ of the form
+Let's analyze the variability in Jeter's record against individual pitchers through the $2006$ season. Let $p_{i}$ denote Jeter's ability against pitcher $i$ and assume that $p_{i}$ varies across the population of pitchers according to a particular probability distribution $(p_{i} \mid \alpha,\beta)\sim Be(\alpha,\beta)$. To account for extra-binomial variation, we use a hierarchical model for the observed number of hits $y_{i}$ of the form
 $$
 (y_{i} \mid p_{i})\sim Bin(T_{i},p_{i})\;\;\mathrm{with}\;\;p_{i}\sim
 Be(\alpha,\beta)
 $$
 where $T_{i}$ is the number of at-bats against pitcher $i$. A priori we have a prior mean given by $\E{p_{i}}=\alpha/(\alpha+\beta)=\bar{p}$. The extra heterogeneity leads to a prior variance $\Var{p_{i}}=\bar{p}(1-\bar{p})\phi$ where $\phi=(\alpha+\beta+1)^{-1}$. Hence $\phi$ measures how concentrated the beta distribution is around its mean, $\phi=0$ means highly concentrated and $\phi=1$ means widely dispersed.
-<!-- where $T_{i}$ is the number of at-bats against pitcher $i$. A priori we have a prior mean given by $E(p_{i})=\alpha/(\alpha+\beta)=\bar{p}_{i}$. The extra heterogeneity leads to a prior variance $Var(p_{i})=\bar{p}_{i}(1-\bar{p}_{i})\phi$ where $\phi=(\alpha+\beta+1)^{-1}$. Hence $\phi$ measures how concentrated the beta distribution is around its mean, $\phi=0$ means highly concentrated and $\phi=1$ means widely dispersed. -->
 
-This model assumes that each player $i$ has a true ability $p_{i}$ that is drawn from a common distribution. The model is hierarchical in the sense that the parameters $\alpha$ and $\beta$ are estimated from the data. The model is also a shrinkage model in the sense that the estimates of $p_{i}$ are shrunk towards the overall mean $\bar{p}_{i}$. In reality, we don't know that each $p_i$ exists. We also don't know if it follows a Binomial distribution with the Beta prior. We are making a model assumption. However, the model is a good approximation to the data and is a good way to estimate the parameters.
+This model assumes that the batter has a true ability $p_{i}$ against each pitcher $i$, drawn from a common distribution. The model is hierarchical: the abilities $p_{i}$ share a common distribution whose parameters $\alpha$ and $\beta$ are estimated from the data. The model is also a shrinkage model in the sense that the estimates of $p_{i}$ are shrunk towards the overall mean $\bar{p}$. In reality, we don't know that each $p_i$ exists. We also don't know if it follows a Binomial distribution with the Beta prior. We are making a model assumption. However, the model is a good approximation to the data and is a good way to estimate the parameters.
 
 
-@stern2007inference estimates the parameter $\hat{\phi} = 0.002$ for Derek Jeter, showing that his ability varies a bit but not very much across the population of pitchers. The effect of the shrinkage is not surprising. The extremes are shrunk the most, with the highest degree of shrinkage occurring for the match-ups that have the smallest sample sizes. The amount of shrinkage is related to the large amount of prior information concerning Jeter's overall batting average. Overall Jeter's performance is extremely consistent across pitchers, as seen from his estimates. Jeter had a season $.308$ average. We see that his Bayes estimates vary from $.311$ to $.327$ and that he is very consistent. If all players had a similar record, then the assumption of a constant batting average would make sense.
+@stern2007inference estimates the parameter $\hat{\phi} = 0.002$ for Derek Jeter, showing that his ability varies a bit but not very much across the population of pitchers. The effect of the shrinkage is not surprising. The extremes are shrunk the most, with the highest degree of shrinkage occurring for the match-ups that have the smallest sample sizes. The amount of shrinkage is related to the large amount of prior information concerning Jeter's overall batting average. Overall Jeter's performance is extremely consistent across pitchers, as seen from his estimates. Jeter had a $.316$ average over these at-bats. We see that his Bayes estimates vary from $.311$ to $.326$ and that he is very consistent. If all players had a similar record, then the assumption of a constant batting average would make sense.
 
 | Pitcher      | At-bats | Hits | ObsAvg | EstAvg | 95% Int       |
 | ------------ | ------- | ---- | ------ | ------ | ------------- |
@@ -522,7 +524,7 @@ This model assumes that each player $i$ has a true ability $p_{i}$ that is drawn
 | D. Cone      | 8       | 4    | .500   | .320   | (.218, .381)  |
 | R. Lopez     | 45      | 21   | .467   | .326   | (.291, .401)  |
 | K. Escobar   | 39      | 16   | .410   | .322   | (.281, .386)  |
-| J. Wettland  | 5       | 2    | .400   | .318   | (.275, .375)  |
+| J. Wetteland  | 5       | 2    | .400   | .318   | (.275, .375)  |
 | T. Wakefield | 81      | 26   | .321   | .318   | (.279, .364)  |
 | P. Martinez  | 83      | 21   | .253   | .312   | (.254, .347)  |
 | K. Benson    | 8       | 2    | .250   | .317   | (.264, .368)  |
@@ -534,18 +536,18 @@ This model assumes that each player $i$ has a true ability $p_{i}$ that is drawn
 | J. Julio     | 13      | 0    | .000   | .312   | (.243, .350 ) |
 | Total        | 6530    | 2061 | .316   |        |               |
 
-Some major league managers believe strongly in the importance of such data (Tony La Russa, *Three days in August*). One interesting example is the following. On Aug 29, 2006, Kenny Lofton (career $.299$ average, and current $.308$ average for $2006$ season) was facing the pitcher Milton (current record $1$ for $19$). He was *rested* and replaced by a $.273$ hitter. Is putting in a weaker player really a better bet? Was this just an over-reaction to bad luck in the Lofton-Milton match-up? Statistically, from Lofton's record against Milton we have $P\left( \leq 1\;\mathrm{hit\;in}\ 19\;\mathrm{attempts} \mid p=0.3\right) =0.01$ an unlikely $1$-in-$100$ event. However, we have not taken into account the multiplicity of different batter-pitcher match-ups. We know that Lofton's batting percentage will vary across different pitchers, it's just a question of how much? A hierarchical analysis of Lofton's variability gave a $\phi=0.008$---four times larger than Jeter's $\phi=0.002$. Lofton has batting estimates that vary from $.265$ to $.340$, with the lowest being against Milton. Hence, the optimal estimate for a pitch against Milton is $.265<.275$ and resting Lofton against Milton is justified by this analysis.
+Some major league managers believe strongly in the importance of such data (Buzz Bissinger's *Three Nights in August*, on Tony La Russa). One interesting example is the following. On Aug 29, 2006, Kenny Lofton (career $.299$ average, and current $.308$ average for $2006$ season) was facing the pitcher Milton (current record $1$ for $19$). He was *rested* and replaced by a $.273$ hitter. Is putting in a weaker player really a better bet? Was this just an over-reaction to bad luck in the Lofton-Milton match-up? Statistically, from Lofton's record against Milton we have $P\left( \leq 1\;\mathrm{hit\;in}\ 19\;\mathrm{attempts} \mid p=0.3\right) =0.01$ an unlikely $1$-in-$100$ event. However, we have not taken into account the multiplicity of different batter-pitcher match-ups. We know that Lofton's batting percentage will vary across different pitchers, it's just a question of how much? A hierarchical analysis of Lofton's variability gave a $\phi=0.008$, four times larger than Jeter's $\phi=0.002$. Lofton has batting estimates that vary from $.265$ to $.340$, with the lowest being against Milton. Hence, the optimal estimate for a pitch against Milton is $.265<.273$ and resting Lofton against Milton is justified by this analysis.
 :::
 
 ## Poisson Model for Count Data
 
 The Poisson distribution is obtained as a result of the Binomial when $p$ is small and $n$ is large. In applications, the Poisson models count data. Suppose we want to model the arrival rate of users to one of our stores. Let $\lambda = np$, which is fixed and take the limit as $n \rightarrow \infty$. There is a relationship between $p(x)$ and $p(x+1)$ given by
 $$
-\dfrac{p(x+1)}{p(x)}= \dfrac{\left(\dfrac{n}{x+1}\right)p^{x+1}(1-p)^{n-x-1}}{\left(\dfrac{n}{x}\right)p^{x}(1-p)^{n-x}} \approx \dfrac{np}{x+1}
+\dfrac{p(x+1)}{p(x)}= \dfrac{\binom{n}{x+1}p^{x+1}(1-p)^{n-x-1}}{\binom{n}{x}p^{x}(1-p)^{n-x}} \approx \dfrac{np}{x+1}
 $$
 If we approximate $p(x+1)\approx \lambda p(x)/(x+1)$ with $\lambda=np$, then we obtain the Poisson pdf given by $p(x) = p(0)\lambda^x/x!$. To ensure that $\sum_{x=0}^\infty p(x) = 1$, we set
 $$
-f(0) = \dfrac{1}{\sum_{x=0}^{\infty}\lambda^x/x!} = e^{-\lambda}.
+p(0) = \dfrac{1}{\sum_{x=0}^{\infty}\lambda^x/x!} = e^{-\lambda}.
 $$
 The above equality follows from the power series property of the exponent function
 $$
@@ -700,12 +702,12 @@ df[df$home_team_name == "Hull" & df$away_team_name == "Manchester United", ] %>%
   knitr::kable()
 ```
 
-The model can be improved by calculating different averages for home and away games. For example, Hull does much better at home games compared to away games. Further, we can include the characteristics of the opponent team to account for interactions between attack strength (number of scored) and defense weakness of the opponent. Now we modify our value of expected goals for each of the teams by calculating
+The model can be improved by calculating different averages for home and away games. For example, Hull does much better at home games compared to away games. Further, we can include the characteristics of the opponent team to account for interactions between attack strength (number of goals scored) and defense weakness of the opponent. Now we modify our value of expected goals for each of the teams by calculating
 $$
 \hat \lambda = \lambda \times  \text{Defense weakness}
 $$
 
-Let's model the MU at Hull game. The average away goals for MU $28/19 = `r 28/19`$, and the defense weakness of Hull is $35/19 = `r 35/19`$; thus the adjusted expected number of goals to be scored by MU is `r 28/19*35/19`. Similarly, the adjusted number of goals Hull is expected to score is $28/19 \times 17/19 = `r 28/19*17/19`$
+Let's model the MU at Hull game. The average away goals for MU $28/19 = `r round(28/19, 2)`$, and the defense weakness of Hull is $35/19 = `r round(35/19, 2)`$; thus the adjusted expected number of goals to be scored by MU is `r round(28/19*35/19, 2)`. Similarly, the adjusted number of goals Hull is expected to score is $28/19 \times 17/19 = `r round(28/19*17/19, 2)`$
 
 As a result of the simulation, we obtain the following count matrix of possible outcomes, shown in @fig-sim-mu-hull.
 
@@ -743,22 +745,22 @@ sum(x > y)
 
 <!--   Hull City        0.65        49   41   10   0    0    0 -->
 
-A model is only as good as its predictions. Let's see how well our model predicted the outcome of the MU vs Hull game. The actual outcome was 0-1 (MU at Hull). The model predicted that most likely MU would score 1-2 (16 games out of 100). In our simulation 0-1 was the third most probable outcome (8 games out of 100). Man U wins `r sum(x>y)` games out of 100; we should bet when odds ratio is below `r sum(x>y)` to 100.
+A model is only as good as its predictions. Let's see how well our model predicted the outcome of the MU vs Hull game. The actual outcome was 0-1 (MU at Hull). The model predicted that most likely MU would score 1-2 (16 games out of 100). In our simulation 0-1 came up in only 3 games out of 100. Man U wins `r sum(x>y)` games out of 100; we should bet on a Man U win when the market's implied win probability is below `r sum(x>y)/100`.
 
 ## Poisson-Gamma: Learning about an Intensity
 
 Consider a continuous-time stochastic process, $\left\{ N_{t}\right\} _{t\geq0}$, with $N_{0}=0$, counting the number of events that have occurred up to time $t$. The process is constant between event times, and jumps by one at event times: $\Delta N_{t}=N_{t}-N_{t-}=1,$ where $N_{t-}$ is the limit from the left. The probability of an event over the next short time interval, $\Delta t$ is $\lambda\Delta t$, and $N_{t}$ is called a Poisson process because
 $$
 P\left[  N_{t}=k\right]  =\frac{e^{-\lambda t}\left(  \lambda
-t\right)  ^{k}}{k!}\text{ for }k=1,\ldots
+t\right)  ^{k}}{k!}\text{ for }k=0,1,\ldots
 $$
 which is the Poisson distribution; thus $N_{t}\sim Poi\left(\lambda t\right)$. A more general version of the Poisson process is a Cox process, or doubly stochastic point process.
 
-Here, there is additional conditioning information in the form of state variables, $\left\{X_{t}\right\}_{t>0}$. The process now has two sources of randomness, one associated with the discontinuous jumps and another in the form of random state variables, $\left\{X_{t}\right\}_{t>0}$, that drive the intensity of the process. The intensity of the Cox process is $\lambda_{t}=\int_{0}^{t}\lambda\left( X_{s}\right) ds$, which is formally defined as
+Here, there is additional conditioning information in the form of state variables, $\left\{X_{t}\right\}_{t>0}$. The process now has two sources of randomness, one associated with the discontinuous jumps and another in the form of random state variables, $\left\{X_{t}\right\}_{t>0}$, that drive the intensity of the process. The intensity of the Cox process is $\lambda\left( X_{t}\right)$, with cumulative intensity $\int_{0}^{t}\lambda\left( X_{u}\right) du$, and the process is defined by
 $$
 P\left[  N_{t}-N_{s}=k \mid \left\{  X_{u}\right\}  _{s\leq u\leq
-t}\right]  =\frac{\left(  \int_{s}^{t}\lambda\left(  X_{s}\right)  ds\right)
-^{k}\exp\left(  -\int_{s}^{t}\lambda\left(  X_{s}\right)  ds\right)}{k!}, ~ \forall k
+t}\right]  =\frac{\left(  \int_{s}^{t}\lambda\left(  X_{u}\right)  du\right)
+^{k}\exp\left(  -\int_{s}^{t}\lambda\left(  X_{u}\right)  du\right)}{k!}, ~ \forall k
 $$
 Cox processes are very useful extensions to Poisson processes and are the basic building blocks of reduced form models of defaultable bonds.
 
@@ -798,14 +800,14 @@ In all cases, the solid line shows the cumulative event count $N_t$, the thick d
 #| label: fig-poiss
 #| fig-cap: "Sensitivity of Gamma Prior for Poisson Process."
 #| fig-subcap:
-#|   - "High-activity: a = 4, A = 1;  4 events/year,  Substantial prior uncertainty"
-#|   - "Posterior: Starts high, gradually decreases toward true value"
-#|   - "Diffuse: a = 1, A = 1;  1 event/year,  Minimal prior information"
-#|   - "Posterior: Data dominates inference relatively quickly"
-#|   - "Low-activity: a = 1, A = 5;  0.2 events/year,  Rare events expected"
-#|   - "Posterior: The low prior count dominates the posterior"
-#|   - "Dogmatic: a = 30, A = 10;  3 events/year,  Strong prior beliefs"
-#|   - "Posterior: Updates slowly, resistant to contradictory evidence"
+#|   - "High activity: a = 4, A = 1"
+#|   - "Posterior"
+#|   - "Diffuse: a = 1, A = 1"
+#|   - "Posterior"
+#|   - "Low activity: a = 1, A = 5"
+#|   - "Posterior"
+#|   - "Dogmatic: a = 30, A = 10"
+#|   - "Posterior"
 #| layout-ncol: 2
 #| layout-nrow: 4
 #| fig-width: 2.6
@@ -834,7 +836,7 @@ plotgamma(a = 1, A = 5, N)
 plotgamma(a = 30, A = 10, N)
 ```
 
-Poisson event models are often embedded as portion of more complicated model to capture rare events such as stock market crashes, volatility surges, currency revaluations, or defaults. In these cases, prior distributions are often important--even essential--since it is common to build models with events that could, but have not yet occurred. These events are often called 'Peso' events. For example, in the case of modeling corporate defaults, a researcher wants to allow for a jump to default. This requires positing a prior distribution that places non-zero probability on an event occurring. Classical statistical methods have difficulties dealing with these situations since the MLE of the jump probability is zero until the first event occurs.
+Poisson event models are often embedded as a portion of a more complicated model to capture rare events such as stock market crashes, volatility surges, currency revaluations, or defaults. In these cases, prior distributions are often important, even essential, since it is common to build models with events that could, but have not yet occurred. These events are often called 'Peso' events. For example, in the case of modeling corporate defaults, a researcher wants to allow for a jump to default. This requires positing a prior distribution that places non-zero probability on an event occurring. Classical statistical methods have difficulties dealing with these situations since the MLE of the jump probability is zero until the first event occurs.
 
 ## Exponential-Gamma Model
 
@@ -871,6 +873,8 @@ $$
 This model is widely used in reliability engineering (failure rates) and survival analysis, where the rate of events is uncertain and varies across populations.
 
 
+## Normal Distribution
+
 The Normal or Gaussian distribution is central to probability and statistical inference. Suppose that we are trying to predict tomorrow's return on the S&P500. There's a number of questions that come to mind
 
 1.  What is the random variable of interest?
@@ -881,9 +885,7 @@ The Normal or Gaussian distribution is central to probability and statistical in
 
 Returns are continuous (as opposed to discrete) random variables. Hence a normal distribution would be appropriate - but on what scale? We will see that on the log-scale a Normal distribution provides a good approximation.
 
-The most widely used model for a continuous random variable is the normal distribution. Standard normal random variable $Z$ has the following properties
-
-The standard Normal has mean $0$ and has a variance $1$, and is written as
+The most widely used model for a continuous random variable is the normal distribution. The standard Normal has mean $0$ and has a variance $1$, and is written as
 $$
 Z \sim N(0,1)
 $$
@@ -905,7 +907,7 @@ The probability model is written $X \sim N(\mu,\sigma^2)$, where $\mu$ is the me
 $$
 Z =\frac{X-\mu}{\sigma} \sim N(0,1).
 $$
-For a Normal distribution, we know that $X \in [\mu-1.96\sigma,\mu+1.96\sigma]$ with probability 95%. This is a specific property of the Normal curve (the "Empirical Rule"). For *any* distribution, regardless of shape, we can use *Chebyshev's Inequality* to bound the probability mass. It states that at least $100(1-1/k^2)$% of values lie within $k$ standard deviations of the mean:
+For a Normal distribution, we know that $X \in [\mu-1.96\sigma,\mu+1.96\sigma]$ with probability 95%. This is a specific property of the Normal curve (the "Empirical Rule"). For *any* distribution with finite variance, regardless of shape, we can use *Chebyshev's Inequality* to bound the probability mass. It states that at least $100(1-1/k^2)$% of values lie within $k$ standard deviations of the mean:
 
 1.  At least 75% probability lies within $2\sigma$ ($k=2$).
 
@@ -917,11 +919,11 @@ While the Normal distribution guarantees 95% within $2\sigma$, Chebyshev guarant
 
 ::: {#exm-googlestock}
 ## Google Stock 2019
-Consider observations of daily log-returns of a Google stock for 2019 Daily log-return on day $t$ is calculated by taking a logarithm of the ratio of the price at close of day $t$ and at close of day $t-1$ 
+Consider observations of daily log-returns of a Google stock for 2019. Daily log-return on day $t$ is calculated by taking a logarithm of the ratio of the price at close of day $t$ and at close of day $t-1$ 
 $$ 
   y_t = \log\left(\dfrac{P_t}{P_{t-1}}\right)
 $$ 
-For example on January 3 of 2017, the open price is 778.81 and the close price was 786.140; then the log-return is $\log(786.140/778.81) =  0.0094$. It was empirically observed that log-returns follow a Normal distribution. This observation is a basis for Black-Scholes model with is used to evaluate future returns of a stock.  
+For example, on January 3 of 2017 the close was 786.14 and the previous close was 771.82; then the log-return is $\log(786.14/771.82) = 0.0184$. The Normal distribution is a first approximation for log-returns, and it is the basis of the Black-Scholes model, which prices options [@blackscholes1973pricing]. The data show heavier tails than the Normal, as we see below.  
 
 ```{r} 
 #| echo: true
@@ -941,7 +943,7 @@ $$
 R \sim N(\bar x, s^2).
 $$
 
-Say we are interested in investing into Google and would like to calculated the expected return of our investment as well as the risk associated with this investment. We assume that the behavior of the returns in the future will be the same as in 2019. 
+Say we are interested in investing into Google and would like to calculate the expected return of our investment as well as the risk associated with this investment. We assume that the behavior of the returns in the future will be the same as in 2019. 
 
 ```{r normal-fit}
 #| fig-cap: Histogram and fitted normal curve for the Google stock daily return data.
@@ -963,19 +965,6 @@ I can predict the risk of losing 3% or more in one day using my model is  1.93%.
 #| echo: true
 pnorm(log(1 - 0.03), rbar, sqrt(s2)) * 100
 ```
-```{r} 
-sp <- read.csv("data/SPMonthly.csv")$Adj.Close
-n <- length(sp)
-spret <- sp[602:n] / sp[601:(n - 1)] - 1 # Calculate returns, February 1978 to September 1987
-```
-```{r}
-#| results: hide
-mean(spret)
-sd(spret)
-```
-
-The monthly returns of the S&P500 from February 1978 to September 1987 have sample mean `r round(mean(spret), 3)` and standard deviation `r round(sd(spret), 3)`.
-
 :::
 
 ## Normal with Unknown Mean
@@ -1112,7 +1101,7 @@ Their next game was at home against the Minnesota Vikings. Current line against 
 \bar{y} \mid \mu & \sim N \left ( \mu , \frac{\sigma^2}{n} \right ) \sim N \left ( \mu , \frac{18.34^2}{9} \right )\\ 
 \mu & \sim N( 0 , \tau^2 )
 \end{align*}
-Here $n =9$ games so far. With $s = 18.34$ points. We assume the pre-season prior mean $\mu_0 = 0$, standard deviation $\tau = 4$. Base on the observed data so-far: $\bar{y} = -9.22$. 
+Here $n =9$ games so far. With $s = 18.34$ points. We assume the pre-season prior mean $\mu_0 = 0$, standard deviation $\tau = 4$. Based on the observed data so-far: $\bar{y} = -9.22$. 
 
 
 The Bayes Shrinkage estimator is then 
@@ -1126,7 +1115,7 @@ $$
 $$
 where current line is $-3.5$. 
 
-- Based on our hierarchical model, this is an over-reaction. One point change on the line is about $3$\% on a probability scale. 
+- Based on our hierarchical model, this is an over-reaction. One point change on the line is about $2$\% on a probability scale. 
 - Alternatively, calculate a market-based $\tau$ given line $=-3.5$.
 $$
 w = \frac{3.5}{9.22} = 0.38, \quad \tau^2 = \frac{w}{1-w}\,\frac{\sigma^2}{n} \approx 22.9.
@@ -1156,11 +1145,11 @@ The posterior predictive distribution is the distribution of a new observation $
 p(y_{n+1} \mid & y_1,\ldots,y_n) = \int p(y_{n+1} \mid \mu) p(\mu \mid y_1,\ldots,y_n) d\mu \\
 &  = \int N(y_{n+1} \mid \mu, \sigma^2) N(\mu \mid \mu_n, \sigma_n^2) d\mu = N(y_{n+1} \mid \mu_n, \sigma_n^2 + \sigma^2).
 \end{align*}
-This follows from the general properties of the Gaussian distribution
+This follows from the general properties of the Gaussian distribution.
 
 
 ## Normal with Unknown Variance
-Consider another example, when mean $\mu$ is fixed, and variance is a random variable which follows some distribution $\sigma^2 \sim p(\sigma^2)$. Given an observed sample $y$, we can update the distribution over variance using Bayes' rule
+Consider another example, when mean $\mu$ is known, and variance is a random variable which follows some distribution $\sigma^2 \sim p(\sigma^2)$. Given an observed sample $y$, we can update the distribution over variance using Bayes' rule
 $$
 p(\sigma^2 \mid  y) = \dfrac{p(y\mid \sigma^2 )p(\sigma^2)}{p(y)}.
 $$
@@ -1186,7 +1175,7 @@ $$
 
 Now, the predictive distribution over $y$ can be calculated by 
 $$
-p(y_{new}\mid y) = \int p(y_{new},\sigma^2\mid y)p(\sigma^2\mid y)d\sigma^2.
+p(y_{new}\mid y) = \int p(y_{new}\mid \sigma^2)p(\sigma^2\mid y)d\sigma^2.
 $$
 Which happens to be a $t$-distribution with $2\alpha_{\mathrm{posterior}}$ degrees of freedom, mean $\mu$ and variance $\beta_{\mathrm{posterior}}/(\alpha_{\mathrm{posterior}}-1)$.
 
@@ -1218,7 +1207,7 @@ $$
 where $\bar{y} = n^{-1}\sum_{i=1}^n y_i$ is the sample mean and $n$ is the sample size. The posterior distribution is a normal-Gamma distribution with parameters $\mu_n, \nu_n, \alpha_n, \beta_n$. 
 
 ### Credible Intervals for Normal-Gamma Model Posterior Parameters
-The precision posterior follows a Gamma distribution with parameters $\alpha_n, \beta_n$, thus we can use quantiles of the Gamma distribution to calculate credible intervals. A symmetric $100(1-c)%$ credible interval $[g_{c/2},g_{1-c/2}]$ is given by $c/2$ and $1-c/2$ quantiles of the gamma distribution. To find credible interval for the variance $v = 1/\tau$, we simply use
+The precision posterior follows a Gamma distribution with parameters $\alpha_n, \beta_n$, thus we can use quantiles of the Gamma distribution to calculate credible intervals. A symmetric $100(1-c)\%$ credible interval $[g_{c/2},g_{1-c/2}]$ is given by $c/2$ and $1-c/2$ quantiles of the gamma distribution. To find credible interval for the variance $v = 1/\tau$, we simply use
 $$
 [1/g_{1-c/2},1/g_{c/2}].
 $$
@@ -1226,7 +1215,7 @@ and for standard deviation $s = \sqrt{v}$ we use
 $$
 [\sqrt{1/g_{1-c/2}},\sqrt{1/g_{c/2}}].
 $$
-To find credible interval over the mean $\theta$, we need to integrate out the precision $\tau^{-2}$ from the posterior distribution. The marginal distribution of $\theta$ is a Student's $t$-distribution with parameters center at $\mu_n$, variance $\beta_n/(\nu_n\alpha_n)$, and degrees of freedom $2\alpha_n$. 
+To find credible interval over the mean $\theta$, we need to integrate out the precision $\tau$ from the posterior distribution. The marginal distribution of $\theta$ is a Student's $t$-distribution with parameters center at $\mu_n$, squared scale $\beta_n/(\nu_n\alpha_n)$, and degrees of freedom $2\alpha_n$. 
 
 
 
@@ -1290,8 +1279,6 @@ We use the returns up to July 2015 as our prior (this window covers the years be
 
 ```{r}
 #| echo: true
-#| label: fig-portfolio
-#| fig-cap: "Bayesian Portfolio Updating."
 getSymbols(c("MSFT", "SPY"), from = "2001-01-01", to = "2023-12-31")
 s <- 3666 # 2015-07-30
 prior <- 1:s
@@ -1319,9 +1306,9 @@ muPost <- SigmaPost %*% (solve(Sigma0) %*% mu0 + solve(Sigma) %*% mu)
 #| fig-height: 2.5
 # Plot
 par(mar = c(2.5, 3.2, 1.8, 0.5))
-plot(a[obs], c[obs],
-  xlab = "MSFT", ylab = "", xlim = c(-0.005, 0.005),
-  ylim = c(-0.005, 0.005), pch = 16, cex = 0.5, las = 1, tcl = -0.3
+plot(NA,
+  xlab = "MSFT", ylab = "", xlim = c(-0.0015, 0.0015),
+  ylim = c(-0.0015, 0.0015), las = 1, tcl = -0.3
 )
 title(ylab = "SPY", line = 2.2)
 abline(v = 0, h = 0, col = "grey")
@@ -1334,9 +1321,9 @@ legend("top", c("Prior", "Likelihood", "Posterior"),
 )
 ```
 
-We can see the posterior mean for SPY is close to the prior mean, while the posterior mean for MSFT is further away. MSFT did much better than SPY after July 2015. The posterior mean (dotted line) represents mean reversion value. We can think of it as the expected mean return if the performance of MSFT starts reverting to its historical averages. 
+Both posterior means sit a bit over a third of the way from the prior mean to the data mean (38% for MSFT, 35% for SPY). MSFT did much better than SPY after July 2015. The posterior mean (dotted line) represents mean reversion value. We can think of it as the expected mean return if the performance of MSFT starts reverting to its historical averages. 
 
-This model is particularly powerful because it can be extended to more dimensions (more stocks) and can include more complex relationships between the variables. It's often used in finance, econometrics, and other fields where understanding the joint behavior of multiple normally-distributed variables is important.
+This model can be extended to more dimensions (more stocks) and can include more complex relationships between the variables. It's often used in finance, econometrics, and other fields where understanding the joint behavior of multiple normally-distributed variables is important.
 :::
 
 ## Mixtures of Conjugate Priors
@@ -1358,7 +1345,7 @@ Assume our prior is a mixture of distributions, that is
 $$
 \theta \sim p(\theta) = \sum_{k=1}^K \pi_k p_k(\theta).
 $$
-Then the posterior is also a mixture of normal distributions, that is
+Then the posterior is also a mixture, as we now show:
 $$
 p(\theta\mid y) = p(y\mid \theta)\sum_{k=1}^K \pi_k p_k(\theta)/Z.
 $$
@@ -1380,7 +1367,7 @@ $$
 $$
 Then the posterior density is a mixture
 $$
-p(\theta\mid y) = \sum_{k=1}^K \hat \pi_k p_k(\theta \mid y).
+p(\theta\mid y) = \sum_{k=1}^K \hat \pi_k p_k(\theta \mid y), \quad \hat \pi_k = \pi_k Z_k/Z.
 $$
 
 Consider an example of a mixture of two normal distributions. The prior distribution is a mixture of two normal distributions, that is
@@ -1416,7 +1403,6 @@ mu3 <- (mu0 / sigma02 + y) / (1 / sigma02 + 1)
 sigma3 <- 1 / (1 / sigma02 + 1)
 Z <- dnorm(y - mu0, 0, sqrt(1 + sigma02)) * w0
 w <- Z / sum(Z)
-# To add a new line in sprintf, use "\n" inside the format string.
 print("Component parameters:")
 sprintf(
   "Mean = (%1.1f,%2.1f)  Var = (%1.1f,%1.1f)  weights = (%1.2f,%1.2f)",
@@ -1442,7 +1428,7 @@ sprintf(
 : Summary table of commonly used random variables. {#tbl-rv tbl-colwidths="[15,10,30,8,15,22]"}
 
 
-@tbl-conjugate summarizes the conjugate prior distributions for common likelihoods. Thus far, we've considered the Normal-Normal model with both known and unknown variance as well as Poisson-Gamma and Beta Binomial. The other pairs are left as an exercise. Given observed data $x = (x_1,\ldots,x_n)$ and $s = \sum_{i=1}^nx_i$, $\bar x = s/n$. For each conjugate pair, the table lists the sufficient statistics that summarize all information in the data relevant to the parameter. The posterior depends on the data only through these sufficient statistics, which is a key property of conjugate families.
+@tbl-conjugate summarizes the conjugate prior distributions for common likelihoods. Thus far, we've considered the Normal-Normal model with both known and unknown variance as well as Poisson-Gamma and Beta Binomial. The Exponential-Gamma pair is derived above, and the Multinomial-Dirichlet pair is stated here without derivation. Given observed data $x = (x_1,\ldots,x_n)$ and $s = \sum_{i=1}^nx_i$, $\bar x = s/n$. For each conjugate pair, the table lists the sufficient statistics that summarize all information in the data relevant to the parameter. The posterior depends on the data only through these sufficient statistics, which holds for any prior.
 
 | Likelihood                | Prior                | Prior Parameters            | Model Parameters     | Sufficient Statistics                                          | Posterior Parameters                                                                                                                                                              |
 | ------------------------- | -------------------- | --------------------------- | -------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1452,7 +1438,7 @@ sprintf(
 | Poisson                   | Gamma                | $\alpha, \beta$             | $\lambda$            | $s, n$                                                         | $\alpha + s, \beta + n$                                                                                                                                                           |
 | Exponential               | Gamma                | $\alpha, \beta$             | $\lambda$            | $s, n$                                                         | $\alpha + n, \beta + s$                                                                                                                                                           |
 | Multinomial               | Dirichlet            | $\alpha \in \mathbb{R}^k$   | $p \in \mathbb{R}^k$ | $s_j$ for each category $j$                                    | $\alpha+s$                                                                                                                                                                        |
-| Normal                    | Normal-inverse gamma | $\mu_0, \nu, \alpha, \beta$ | $\mu, \sigma$        | $\bar x, \sum(x_i-\bar x)^2, n$                                | $\frac{\nu\mu_0+n\bar{x}}{\nu+n} ,\, \nu+n,\, \alpha+\frac{n}{2} ,\,$ <br/> $\beta + \tfrac{1}{2} \sum_{i=1}^n (x_i - \bar{x})^2 + \frac{n\nu}{\nu+n}\frac{(\bar{x}-\mu_0)^2}{2}$ |
+| Normal                    | Normal-inverse gamma | $\mu_0, \nu, \alpha, \beta$ | $\mu, \sigma^2$      | $\bar x, \sum(x_i-\bar x)^2, n$                                | $\frac{\nu\mu_0+n\bar{x}}{\nu+n} ,\, \nu+n,\, \alpha+\frac{n}{2} ,\,$ <br/> $\beta + \tfrac{1}{2} \sum_{i=1}^n (x_i - \bar{x})^2 + \frac{n\nu}{\nu+n}\frac{(\bar{x}-\mu_0)^2}{2}$ |
 
 : Conjugate prior table for common likelihoods. {#tbl-conjugate tbl-colwidths="[24,10,15,10,16,35]"}
 
@@ -1468,21 +1454,21 @@ This is the same law-of-large-numbers logic discussed in @sec-prob, but applied 
 
 ### Posterior Consistency and the Law of Large Numbers
 
-The law of large numbers provides theoretical justification for Bayesian learning. As we collect more data, the posterior distribution concentrates around the true parameter value, regardless of the prior. This phenomenon, known as *posterior consistency*, follows from the fact that the likelihood function—being a product of many terms—is dominated by the data for large samples.
+The law of large numbers provides theoretical justification for Bayesian learning. As we collect more data, the posterior distribution concentrates around the true parameter value, for any prior that puts positive mass on every neighborhood of that value, provided the model is identifiable. This phenomenon, known as *posterior consistency*, follows from the fact that the likelihood function (a product of many terms) is dominated by the data for large samples.
 
-Consider estimating the mean $\mu$ of a normal distribution from i.i.d. observations $x_1, \ldots, x_n \sim N(\mu, \sigma^2)$ with a prior $\mu \sim N(\mu_0, \tau_0^2)$. The posterior mean is:
+Consider estimating the mean $\mu$ of a normal distribution from i.i.d. observations $x_1, \ldots, x_n \sim N(\mu^\ast, \sigma^2)$, where $\mu^\ast$ is the true value, with a prior $\mu \sim N(\mu_0, \tau_0^2)$. The posterior mean is:
 
 $$
 \E{\mu \mid x_1, \ldots, x_n} = \frac{\tau_0^{-2}\mu_0 + n\sigma^{-2}\bar{x}_n}{\tau_0^{-2} + n\sigma^{-2}}
 $$
 
-As $n \to \infty$, the data term $n\sigma^{-2}\bar{x}_n$ dominates, and by the law of large numbers, $\bar{x}_n \to \mu$ almost surely. Thus:
+As $n \to \infty$, the data term $n\sigma^{-2}\bar{x}_n$ dominates, and by the law of large numbers, $\bar{x}_n \to \mu^\ast$ almost surely. Thus:
 
 $$
-\E{\mu \mid x_1, \ldots, x_n} \to \mu \quad \text{almost surely}.
+\E{\mu \mid x_1, \ldots, x_n} \to \mu^\ast \quad \text{almost surely}.
 $$
 
-The posterior concentrates at $\mu$, regardless of the prior $\mu_0$. The prior matters for small samples but becomes negligible for large samples—a reassuring property that ensures different researchers with different priors eventually reach consensus as evidence accumulates.
+The posterior concentrates at $\mu^\ast$, regardless of the prior mean $\mu_0$. The prior matters for small samples but becomes negligible for large samples, a reassuring property that ensures different researchers with different priors eventually reach consensus as evidence accumulates.
 
 ### Monte Carlo Methods
 
@@ -1491,9 +1477,9 @@ $$
 \hat{\mu}_n = \frac{1}{n}\sum_{i=1}^n f(x_i) \approx \E{f(x)}
 $$
 
-By the strong law of large numbers, $\hat{\mu}_n \to \E{f(X)}$ almost surely as $n \to \infty$, provided $\E{|f(X)|} < \infty$. The approximation error decreases at rate $O_p(n^{-1/2})$ by the central limit theorem, giving us both convergence guarantees and quantifiable uncertainty.
+By the strong law of large numbers, $\hat{\mu}_n \to \E{f(X)}$ almost surely as $n \to \infty$, provided $\E{|f(X)|} < \infty$. When $\E{f(X)^2} < \infty$, the approximation error decreases at rate $O_p(n^{-1/2})$ by the central limit theorem, giving us both convergence guarantees and quantifiable uncertainty.
 
-The formal development of Monte Carlo methods emerged from the Manhattan Project during World War II, when Stanislaw Ulam, recovering from illness in 1946, realized that complex probability problems could be solved by simulating random processes rather than through analytical calculations. Ulam shared this insight with John von Neumann, who recognized its potential for solving neutron diffusion problems critical to nuclear weapons design and implemented the algorithms on early electronic computers like ENIAC. Nicholas Metropolis coined the term "Monte Carlo" as a reference to the Monaco casino, and the first unclassified paper appeared in 1949 [@metropolis1949monte]. The 1953 Metropolis algorithm [@metropolis1953equation] extended the method beyond simple averaging to sampling from complex distributions—precisely the situation in Bayesian inference—laying the groundwork for modern MCMC. The law of large numbers had existed for centuries, but only the combination of electronic computing and wartime urgency transformed this theoretical principle into the practical computational tool that underpins contemporary Bayesian statistics [@metropolis1987beginning].
+The formal development of Monte Carlo methods emerged from the weapons work at Los Alamos just after World War II, when Stanislaw Ulam, recovering from illness in 1946, realized that complex probability problems could be solved by simulating random processes rather than through analytical calculations. Ulam shared this insight with John von Neumann, who recognized its potential for solving neutron diffusion problems critical to nuclear weapons design and implemented the algorithms on early electronic computers like ENIAC. Nicholas Metropolis coined the term "Monte Carlo" as a reference to the Monaco casino, and the first unclassified paper appeared in 1949 [@metropolis1949monte]. The 1953 Metropolis algorithm [@metropolis1953equation] extended the method beyond simple averaging to sampling from complex distributions, precisely the situation in Bayesian inference, laying the groundwork for modern MCMC. The law of large numbers had existed for centuries, but only the combination of electronic computing and the postwar weapons program transformed this theoretical principle into the practical computational tool that underpins contemporary Bayesian statistics [@metropolis1987beginning].
 
 ### Markov Chain Monte Carlo
 
@@ -1521,19 +1507,21 @@ The key feature of MCMC is that we only need to know the *ratio* of densities $\
 
 #### Metropolis-Hastings Algorithm
 
-The *Metropolis-Hastings* algorithm [@metropolis1953equation; @hastings1970monte] constructs a reversible Markov chain by proposing a candidate point $y$ from a symmetric proposal distribution and accepting it with probability:
+The *Metropolis-Hastings* algorithm [@metropolis1953equation; @hastings1970monte] constructs a reversible Markov chain by proposing a candidate point $y$ from a symmetric proposal distribution $q(x, y)$ and accepting it with probability:
 $$
-P(x, y) = \min\left(\frac{\pi(y)}{\pi(x)}, 1\right)
+\alpha(x, y) = \min\left(\frac{\pi(y)}{\pi(x)}, 1\right)
 $$
+The transition probability is then $P(x, y) = q(x, y)\alpha(x, y)$ for $y \neq x$, and a rejected move stays at $x$.
 
 It is straightforward to verify that this chain is time-reversible (satisfies detailed balance):
 $$
-\pi(x)P(x, y) = \min(\pi(y), \pi(x)) = \pi(y)P(y, x)
+\pi(x)P(x, y) = q(x, y)\min(\pi(y), \pi(x)) = \pi(y)P(y, x), \quad y \neq x
 $$
+since $q$ is symmetric, and detailed balance is trivial for $y = x$.
 
 This implies that $\pi$ satisfies the stationarity condition:
 $$
-\sum_x \pi(x)P(x, y) = \pi(y)
+\int \pi(x)P(x, y)dx = \pi(y)
 $$
 
 and is therefore the equilibrium distribution of the chain.

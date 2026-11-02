@@ -23,7 +23,9 @@ This chapter develops this decision-theoretic framework systematically, connecti
 ## Expected Utility
 Let $P,Q$ be two possible *risky gambles* or probability bets. An agent's preferences can then be specified as an ordering on probability bets where we write $P \succeq Q$ if $P$ is at least as good as $Q$, $P \succ Q$ for strict preference, and $P \sim Q$ for indifference. A compound or mixture bet is defined by the probability assignment $p P + (1 - p ) Q$ for a prospect weight $0 \leq p \leq 1$.
 
-Ramsey-de Finetti-Savage show that if an agent's preferences satisfy a number of plausible axioms---completeness, transitivity, continuity and independence---then they can be represented by the expectation of a utility function. The theory is a *normative* one and not necessarily *descriptive*. It suggests how a rational agent should formulate beliefs and preferences and not how they actually behave.
+Von Neumann and Morgenstern [@vonneumann1944theory] show that if an agent's preferences satisfy a number of plausible axioms (completeness, transitivity, continuity and independence) then they can be represented by the expectation of a utility function. Ramsey, de Finetti and Savage derive the probabilities as well [@ramsey1926truth; @definetti1937foresight; @savage1954foundations]. The theory is a *normative* one and not necessarily *descriptive*. It suggests how a rational agent should formulate beliefs and preferences and not how they actually behave.
+
+Independence: if $P \succ Q$, then $pP+(1-p)R \succ pQ+(1-p)R$ for every $R$ and $0<p\leq 1$. Continuity: if $P \succ R \succ Q$, there is $w \in (0,1)$ with $wP+(1-w)Q \sim R$.
 
 This representation of preferences in terms of expected utility $U(P)$ of a risky gamble is then equivalent to 
 $$
@@ -69,39 +71,39 @@ which is a contradiction, since both sides are indifferent to $R$.
 This can be used together with the axioms to then prove the existence and uniqueness of a utility function.
 
 ::: {#thm-existence}
-## Uniqueness of Utility
-If $V$ is any other function satisfying these results, then $V$ is an affine function of $U$.
+## Existence and Uniqueness of Utility
+If $V$ is any other function satisfying these results, then $V$ is a positive affine function of $U$.
 :::
 ::: {.proof}
-If $\forall P , Q$ we have $P \sim Q$, then define $u(P) \equiv 0$. Hence suppose that there exists $S \succ T$. Define $U(S) =1$ and $U(T)=0$. For any $P \in \mathcal{P}$ there are five possibilities: $P \succ S$ or $P \sim S$ or $S \succ P \succ T$ or $P \sim T$ or $T \succ P$.
+If $\forall P , Q$ we have $P \sim Q$, then define $U(P) \equiv 0$. Hence suppose that there exists $S \succ T$. Define $U(S) =1$ and $U(T)=0$. For any gamble $P$ there are five possibilities: $P \succ S$ or $P \sim S$ or $S \succ P \succ T$ or $P \sim T$ or $T \succ P$.
 
 In the first case, define $1/U(P)$ to be the unique $p$ (see previous theorem) defined by
 $p P + ( 1 -p )T \sim S$. In the second case, define $U(P) =1$. In the third, there exists a unique $q$ with
 $q S + ( 1 -q )T \sim P$ and then define $U(P)=q$. In the fourth case, define $U(P)=0$ and finally, when 
 $T \succ P$ there exists a unique $r$ with $r S + ( 1-r )P \sim T$, and then we define $U(P) = - r / (1 - r)$.
 
-Then check that $U(P)$ satisfies the conditions. For uniqueness, let $V$ be any other function satisfying them and put $a = V(S) - V(T) > 0$ and $b = V(T)$. Because $V(wP + (1-w)Q) = wV(P) + (1-w)V(Q)$ as well, the relation that defines $U(P)$ in each case gives $V(P) = aU(P) + b$: $qS + (1-q)T \sim P$ gives $V(P) = aq + b$, $pP + (1-p)T \sim S$ gives $V(P) = b + a/p$, and $rS + (1-r)P \sim T$ gives $V(P) = b - ar/(1-r)$, while $P \sim S$ and $P \sim T$ give $V(P) = a + b$ and $V(P) = b$. Hence $V = aU + b$ with $a > 0$. See Savage (1954), Ramsey (1926), and de Finetti (1931).
+Then check that $U(P)$ satisfies the conditions. For uniqueness, let $V$ be any other function satisfying them and put $a = V(S) - V(T) > 0$ and $b = V(T)$. Because $V(wP + (1-w)Q) = wV(P) + (1-w)V(Q)$ as well, the relation that defines $U(P)$ in each case gives $V(P) = aU(P) + b$: $qS + (1-q)T \sim P$ gives $V(P) = aq + b$, $pP + (1-p)T \sim S$ gives $V(P) = b + a/p$, and $rS + (1-r)P \sim T$ gives $V(P) = b - ar/(1-r)$, while $P \sim S$ and $P \sim T$ give $V(P) = a + b$ and $V(P) = b$. Hence $V = aU + b$ with $a > 0$. See @vonneumann1944theory for this construction, and @ramsey1926truth, @savage1954foundations and @definetti1937foresight for subjective probability.
 :::
 
-Other interesting extensions: how do people come to a consensus [@degroot1974reaching; @morris1994trade; @morris1996speculative]. Ramsey [-@ramsey1926truth] observation that if someone is willing to offer you a bet, then that's conditioning information for you. All probabilities are conditional probabilities. 
+Related questions are how people come to a consensus [@degroot1974reaching; @morris1994trade; @morris1996speculative]. Ramsey [-@ramsey1926truth] observed that if someone is willing to offer you a bet, then that's conditioning information for you. All probabilities are conditional probabilities. 
 
 If the bet outcome $x$ is a monetary value, then the utility functions $x, x^2, \sqrt{x}, \ln x$ are all monotonically increasing (the more the better). However, the utility function $x^2$ is convex, and the utility function $\ln x$ is concave. The concavity of the utility function implies that the agent is risk averse, and the convexity implies that the agent is risk seeking. 
 
 ::: {#exm-stpetersburg}
 ## Saint Petersburg Paradox
-The Saint Petersburg paradox is a concept in probability and decision theory that was first introduced by Daniel Bernoulli in 1738. It revolves around the idea of how individuals value risky propositions and how those valuations may not align with classical expected utility theory.
+The Saint Petersburg paradox is a concept in probability and decision theory that was posed by Nicolas Bernoulli in 1713 and resolved by Daniel Bernoulli in 1738 [@bernoulli1738exposition]. It revolves around the idea of how individuals value risky propositions and how those valuations may not align with expected value.
 
-The paradox is named after the city of Saint Petersburg, where the problem was formulated.
+The paradox is named after the Saint Petersburg Academy, whose journal published Daniel's paper.
 
 Imagine a gambling game where a fair coin is flipped repeatedly until it lands on heads. The payoff for the game is $2^N$, where $N$ is the number of tosses needed for the coin to land on heads. The expected value of this game, calculated by multiplying each possible payoff by its probability and summing the results, is infinite:
 
 $$
-E(X) = \frac{1}{2} \cdot 2 + \frac{1}{4} \cdot 4 + \frac{1}{8} \cdot 8 + \ldots = \infty
+\E{X} = \frac{1}{2} \cdot 2 + \frac{1}{4} \cdot 4 + \frac{1}{8} \cdot 8 + \ldots = \infty
 $$
 
 This means that, in theory, a rational person should be willing to pay any finite amount to play this game, as the expected value is infinite. However, in reality, most people would be unwilling to pay a large amount to play such a game.
 
-The paradox arises because traditional expected utility theory assumes that individuals make decisions based on maximizing their expected gain. Bernoulli argued that people do not maximize expected monetary value but rather expected utility, where utility is a subjective measure of satisfaction or happiness. He proposed that individuals exhibit diminishing marginal utility for wealth, meaning that the additional satisfaction gained from an extra unit of wealth decreases as total wealth increases.
+The paradox arises because the traditional expected value rule assumes that individuals make decisions based on maximizing their expected gain. Bernoulli argued that people do not maximize expected monetary value but rather expected utility, where utility is a subjective measure of satisfaction or happiness. He proposed that individuals exhibit diminishing marginal utility for wealth, meaning that the additional satisfaction gained from an extra unit of wealth decreases as total wealth increases.
 
 In the case of the Saint Petersburg paradox, although the expected monetary value is infinite, the utility gained from each additional dollar diminishes rapidly, leading to a reluctance to pay large amounts to play the game.
 
@@ -110,7 +112,7 @@ In modern decision theory and economics, concepts like diminishing marginal util
 One common approach is to consider aspects of potential players, such as their possible risk aversion, available funds, etc., through a utility function $U(x)$. Applying a utility function in this situation means changing our focus to the
 quantity 
 $$
-E[U(X)] = \sum^\infty_{k=1} 2^{-k} U(2^k).   
+\E{U(X)} = \sum^\infty_{k=1} 2^{-k} U(2^k).   
 $$
 
 Some examples of utility functions are,
@@ -125,7 +127,7 @@ For the log utility case, we need to find the certain dollar amount $x^*$ that p
 $$
 \log(x^*) = 2\log(2) = \log(2^2) = \log(4)
 $$
-which gives $x^* = 4$. Therefore, under log utility, a rational player would be willing to pay at most \$4 to play the Saint Petersburg game, despite its infinite expected monetary value. This is a dramatic reduction from infinity and demonstrates how risk aversion (captured by the concave log utility function) resolves the paradox.
+which gives $x^* = 4$. Therefore, ignoring the player's other wealth, the prize is worth a sure \$4 to a log-utility player (a player with wealth \$1,000 would pay about \$11), despite the game's infinite expected monetary value. This is a dramatic reduction from infinity and demonstrates how risk aversion (captured by the concave log utility function) resolves the paradox.
 
 Similarly, for the power utility $U(x) = W_0 (1-x^{-\alpha})$ with $\alpha > 0$, we have an expected utility of $W_0 \left(1-\frac{1}{2^{\alpha+1}-1}\right)$. To find the certainty equivalent $x^*$, we solve:
 $$
@@ -176,20 +178,20 @@ Newcomb's problem has practical relevance beyond philosophy. In game theory, sim
 A 2020 survey of professional philosophers found a modest plurality (39% vs. 31%) favoring two-boxing, though the debate remains very much alive.
 :::
 
-Now, consider a more general situation: when you have two gambles 1: get $P_1$ for sure, 2: get $P_2 = P_1+k$ and $P_3 = P_1-k$ with probability 1/2. Then we will compare the utility of those gambles 
+Now, consider a more general situation: when you have two gambles 1: get $w_0$ for sure, 2: get $w_0+k$ or $w_0-k$ with probability 1/2 each. Then we will compare the utility of those gambles 
 $$
-\dfrac{1}{2}U(P_2) + \dfrac{1}{2}U(P_3) \text{ and } U(P_1).
+\dfrac{1}{2}U(w_0+k) + \dfrac{1}{2}U(w_0-k) \text{ and } U(w_0).
 $$
-If the utility function is linear then we should be indifferent between the two gambles. However, if the utility function is concave, then we should prefer the sure thing. This is known as the *certainty effect*.
+If the utility function is linear then we should be indifferent between the two gambles. However, if the utility function is concave, then we should prefer the sure thing. This is *risk aversion*, and it follows from Jensen's inequality.
 $$
-\dfrac{1}{2}U(P_2) + \dfrac{1}{2}U(P_3) < U(P_1).
+\dfrac{1}{2}U(w_0+k) + \dfrac{1}{2}U(w_0-k) < U(w_0).
 $$
 
-The usual situation can be described as follows. Let $\Omega$ be a finite set of possible outcomes with $\Omega = \{ \omega_1 , \ldots , \omega_n \}$. Let $P_i$ be the consequence that assigns one to outcome $\omega_i$ and zero otherwise, and let $P = ( p_1 , \ldots , p_n )$ assign probability $p_i$ to outcome $\omega_i$. Then we can write the expected utility, $U(P)$, of the gamble $P$ as 
+The usual situation can be described as follows. Let $\Omega$ be a finite set of possible outcomes with $\Omega = \{ \omega_1 , \ldots , \omega_n \}$. Let $P_i$ be the degenerate gamble that assigns one to outcome $\omega_i$ and zero otherwise, let $w_i$ be the wealth that outcome $\omega_i$ brings, so that $U(P_i)=U(w_i)$, and let $P = ( p_1 , \ldots , p_n )$ assign probability $p_i$ to outcome $\omega_i$. Then we can write the expected utility, $U(P)$, of the gamble $P$ as 
 $$
 U(P) = \sum_{i=1}^n p_i U( P_i ).
 $$ 
-That is, the utility of $P$ is the expected utility of a random variable $W$ (wealth) that takes the value $P_i$ if the outcome is $\omega_i$. Therefore, we can write $U(P) = \E[P]{U(W)}$.
+That is, the utility of $P$ is the expected utility of a random variable $W$ (wealth) that takes the value $w_i$ if the outcome is $\omega_i$. Therefore, we can write $U(P) = \E[P]{U(W)}$.
 
 This leads us to the notion of *risk aversion* and a categorization of agents according to their risk tolerance: the agent is said to be 
 
@@ -221,7 +223,7 @@ Higher values of $\gamma$ imply greater concavity, meaning the agent is more ris
 - $\gamma = 1$: Log utility (Kelly criterion).
 - $\gamma > 1$: High risk aversion (e.g., fractional Kelly).
 
-@fig-risk-aversion demonstrates the effect of $\gamma$. As $\gamma$ increases, the utility function becomes more curved ("bends" more). This means that losses (moving left from $W=1$) hurt much more in utility terms than equivalent gains (moving right) help.
+@fig-risk-aversion compares log utility ($\gamma=1$) with power utility for $\gamma = 2$. As $\gamma$ increases, the utility function becomes more curved ("bends" more). This means that losses (moving left from $W=1$) hurt much more in utility terms than equivalent gains (moving right) help.
 
 ```{r}
 #| fig-height: 3
@@ -229,17 +231,15 @@ Higher values of $\gamma$ imply greater concavity, meaning the agent is more ris
 #| label: fig-risk-aversion
 w <- seq(0.2, 2, length.out = 500)
 gamma <- 2
-# Plot this data frame
 df <- data.frame(
   w = w,
   logu = log(w),
-  kelly = (w^(1 - gamma) - 1) / (1 - gamma)
+  powu = (w^(1 - gamma) - 1) / (1 - gamma)
 )
 ulab <- expression("log utility", "power utility" ~ (gamma == 2))
-# 3. Plot use different y-scales for
 ggplot(df, aes(x = w)) +
-  geom_line(aes(y = logu, color = "log utility", linetype = "log utility"), size = 1.3) +
-  geom_line(aes(y = kelly, color = "power utility (gamma=2)", linetype = "power utility (gamma=2)"), size = 1.3) +
+  geom_line(aes(y = logu, color = "log utility", linetype = "log utility"), linewidth = 1.3) +
+  geom_line(aes(y = powu, color = "power utility (gamma=2)", linetype = "power utility (gamma=2)"), linewidth = 1.3) +
   geom_vline(xintercept = c(0.5, 1, 1.5), linetype = "dashed", color = "black") +
   scale_color_manual(values = c("log utility" = "blue", "power utility (gamma=2)" = "red"), labels = ulab) +
   scale_linetype_manual(values = c("log utility" = "solid", "power utility (gamma=2)" = "dotdash"), labels = ulab) +
@@ -254,7 +254,7 @@ ggplot(df, aes(x = w)) +
   theme(legend.position = "bottom", legend.key.width = unit(1.5, "cm"))
 ```
 
-To see this concretely, consider a simple gamble with two equally likely outcomes: wealth $w_1 = 0.5$ and $w_2 = 1.5$. The expected wealth is $E[W] = 0.5(0.5) + 0.5(1.5) = 1.0$.
+To see this concretely, consider a simple gamble with two equally likely outcomes: wealth $w_1 = 0.5$ and $w_2 = 1.5$. The expected wealth is $\E{W} = 0.5(0.5) + 0.5(1.5) = 1.0$.
 
 For a risk-neutral agent ($\gamma=0$), the utility is linear, so the value of the gamble is exactly the expected wealth ($1.0$). However, for a risk-averse agent ($\gamma > 0$), the utility of the expected wealth is greater than the expected utility of the gamble. The *Certainty Equivalent (CE)* is the guaranteed amount of wealth that provides the same utility as the risky gamble. The difference between the expected wealth and the certainty equivalent is the *Risk Premium*, the amount the agent is willing to "pay" (forgo in expected value) to avoid the risk.
 
@@ -302,7 +302,7 @@ knitr::kable(results,
 ::: {#exm-kelly}
 ## Kelly Criterion
 
-The Kelly criterion has been used effectively by many practitioners. Ed Thorp, in his book *Beat the Dealer*, pioneered its use in blackjack and later applied it to investing in financial markets. Since then, many market participants, such as Jim Simons, have stressed the importance of this money management approach. The criterion's application extends to other domains: Phil Laak described its use for bet sizing in a game-theoretic approach to poker, and Bill Benter applied it to horse racing. Stewart Ethier provided a mathematical framework for multiple outcomes and analyzed a "play the winner" rule in roulette. Claude Shannon also developed a system to detect and exploit unintentionally biased roulette wheels, an endeavor chronicled in the book *The Eudaemonic Pie*.
+The Kelly criterion has been used effectively by many practitioners. Ed Thorp, in his book *Beat the Dealer*, pioneered its use in blackjack and later applied it to investing in financial markets. Since then, many market participants, such as Jim Simons, have stressed the importance of this money management approach. The criterion's application extends to other domains: Phil Laak described its use for bet sizing in a game-theoretic approach to poker, and Bill Benter applied it to horse racing. Stewart Ethier provided a mathematical framework for multiple outcomes and analyzed a "play the winner" rule in roulette. Claude Shannon and Thorp built a wearable computer to predict the outcome of a roulette spin from the timing of the ball.
 
 
 Suppose you have \$1000 to invest. With probability $0.55$ you will win whatever you wager, and with probability $0.45$ you lose whatever you wager. What's the proportion of capital that leads to the fastest compounded growth rate? 
@@ -326,7 +326,7 @@ in which the limits of $k/T$ and $(T-k)/T$ are the probabilities $p$ and $q$, re
 
 This also comes about by considering the sequence of i.i.d. bets with
 $$
-p ( X_t = 1 ) = p \; \; \text{ and} \; \; p ( X_t = -1 ) = q=1-p 
+P ( X_t = 1 ) = p \; \; \text{ and} \; \; P ( X_t = -1 ) = q=1-p 
 $$
 We want to find an optimal allocation $\omega^*$ that maximizes the expected long-run growth rate:
 \begin{align*}
@@ -335,9 +335,9 @@ We want to find an optimal allocation $\omega^*$ that maximizes the expected lon
  & \leq p \ln p + q \ln q + \ln 2 \; \text{ and} \; \omega^\star = p - q
 \end{align*}
 
-The solution is $w^* = 0.55 - 0.45 = 0.1$.
+The solution is $\omega^* = 0.55 - 0.45 = 0.1$.
 
-Both approaches give the same optimization problem, which, when solved, give the optimal fraction rate $\omega^* = p-q$, thus, with $p=0.55$, the optimal allocation is 10\% of capital.
+Both approaches give the same optimization problem, which, when solved, give the optimal fraction $\omega^* = p-q$, thus, with $p=0.55$, the optimal allocation is 10\% of capital.
 
 We can generalize the rule to the case of  asymmetric payouts $(a,b)$. Then the expected utility function is
 $$
@@ -361,7 +361,7 @@ Both offer the same $4/3$ ratio of market to personal odds. In terms of maximizi
 
 @tbl-kelly shows the Kelly criterion advises allocating about 2.5 times as much capital to the lower odds proposition: $1/16$ weight versus $1/40$. 
 
-| Market | You   | $\Delta$    | $\omega^\star$   |
+| Market | You   | Edge $pO-q$ | $\omega^\star$   |
 |--------|-------|--------|------------------|
 | $4/1$  | $3/1$ | $1/4$  | $1/16$           |
 | $12/1$ | $9/1$ | $3/10$ | $1/40$           |
@@ -402,7 +402,7 @@ $$
 t_z g_\infty(f) = 0.119z^2, \quad t_z = 0.63z^2 \text{ years}.
 $$
 
-Leverage to the level $6.22$ would be inadvisable here in the real world because security prices may change suddenly and discontinuously. In the crash of October 1987, the S&P 500 index dropped 23% in a single day. If this happened at leverage of 2.0, the new leverage would suddenly be $77/27 = 2.85$ before readjustment by selling part of the portfolio. In the case of Berkshire, which is a large, well-diversified portfolio, suppose we chose the conservative $f = 2.0$. Note that this is the maximum initial leverage allowed "customers" under current regulations.
+Leverage to the level $6.22$ would be inadvisable here in the real world because security prices may change suddenly and discontinuously. In the crash of October 1987, the Dow Jones index dropped 23% in a single day. If this happened at leverage of 2.0, the new leverage would suddenly be $77/27 = 2.85$ before readjustment by selling part of the portfolio. In the case of Berkshire, which is a large, well-diversified portfolio, suppose we chose the conservative $f = 2.0$. Note that this is the maximum initial leverage allowed "customers" under current regulations.
 
 Then $g_\infty(2) = 0.295$. The values in 30 years for median $V(30)/V_0$ are approximately: $f = 1$, $V(30)/V_0 = 288$; $f = 2$, $V(30)/V_0 = 6{,}974$; $f = 6.22$, $V(30)/V_0 = 2.86 \times 10^6$. So the differences in results of leveraging are enormous in a generation.
 
@@ -419,7 +419,7 @@ $$
  U_\gamma (W) = \frac{ W^{1-\gamma} -1 }{1-\gamma} 
 $$ 
 
-The special case $U(W) = \log (W )$ for $\gamma = 1$. This leads to a myopic Kelly criterion rule.
+The special case $\gamma = 1$ is $U(W) = \log (W )$. This leads to a myopic Kelly criterion rule.
 
 ## Historical Perspectives on Optimal Decision Making
 
@@ -431,9 +431,9 @@ In 1940, more than a decade before the canonical papers on portfolio theory, the
 
 De Finetti formulated this as a mean-variance optimization problem with constraints $0 \le f_i \le 1$ on the retention fractions, where $f_i$ represents the fraction of policy $i$ kept for the company's own account. For uncorrelated risks, he proved that the optimal retention for each policy should be
 $$
-f_i = A \frac{k_i}{\sigma_i^2}
+f_i = \min\left\{1,\, A \frac{k_i}{\sigma_i^2}\right\}
 $$
-where $k_i$ is the margin of gain from the policy, $\sigma_i^2$ is its variance, and $A$ is a constant determined by the company's risk tolerance. This elegant result states that retention should be proportional to profitability and inversely proportional to variance, precisely the Kelly criterion's risk-return trade-off.
+where $k_i$ is the margin of gain from the policy, $\sigma_i^2$ is its variance, and $A$ is a constant determined by the company's risk tolerance. This elegant result states that retention (below the cap of one) should be proportional to profitability and inversely proportional to variance, precisely the Kelly criterion's risk-return trade-off.
 
 De Finetti extended this analysis to the case of *correlated* risks, recognizing that insurance claims (like stock returns) are often positively correlated due to common factors such as economic conditions or natural disasters. In this case, the problem becomes significantly more complex. De Finetti showed that with correlations, one must solve a system of linear equations to determine optimal retentions, and he outlined, though did not fully solve, the general algorithm for finding the efficient frontier when risks are correlated.
 
@@ -459,25 +459,25 @@ While the static Kelly criterion provides optimal allocation for a single period
 
 For asset allocation, this leads to a fundamental recursion. If $Q_t(s, a)$ denotes the value of taking action $a$ in state $s$ at time $t$, then
 $$
-Q_t(s, a) = \E{r(a, s, S_{t+1}) + V(S_{t+1}) \mid s, a}
+Q_t(s, a) = \E{r(a, s, S_{t+1}) + V_{t+1}(S_{t+1}) \mid s, a}
 $$
-where $V(s) = \max_a Q_t(s, a)$ is the value function. In the i.i.d. case with logarithmic utility, the myopic Kelly rule remains optimal: future learning opportunities don't change today's allocation. This simplification explains the Kelly criterion's enduring popularity.
+where $V_t(s) = \max_a Q_t(s, a)$ is the value function. In the i.i.d. case with logarithmic utility, the myopic Kelly rule remains optimal: future learning opportunities don't change today's allocation. This simplification explains the Kelly criterion's enduring popularity.
 
 ::: {#res-option-value-of-learning}
 
-However, when the investor can *learn* about the underlying probabilities, the dynamic problem becomes more sophisticated [@jacquier2013asset]. Consider a Bernoulli-Beta setting where success probability $p$ is unknown and the investor starts with prior $p \sim \text{Beta}(\alpha, \beta)$. The myopic Kelly rule would invest nothing if $\alpha < \beta$ (unfavorable prior odds). Yet the dynamic Bellman solution shows that even a risk-averse investor with $\alpha < \beta$ should invest a small positive amount! 
+However, when the investor can *learn* about the underlying probabilities, the dynamic problem becomes more sophisticated [@jacquier2013asset]. Consider a Bernoulli-Beta setting where success probability $p$ is unknown and the investor starts with prior $p \sim \text{Beta}(\alpha, \beta)$. The myopic Kelly rule would invest nothing if $\alpha < \beta$ (unfavorable prior odds). Yet the dynamic Bellman solution can show that an investor with $\alpha < \beta$ should invest a positive amount, provided the investor is not too risk averse (with log utility the rule stays myopic). 
 
-The reason is the *option value of learning*: by investing even when current odds seem unfavorable, the investor gains information that may reveal the true environment is actually favorable. For instance, with a uniform prior $\text{Beta}(1,1)$ and 10 remaining periods, an investor might optimally allocate 11.7% even after observing one failure (giving posterior $\text{Beta}(1,2)$ with expected odds 1:2 against). The potential to learn trumps the current negative expectation. This insight has direct implications for exploration-exploitation trade-offs in uncertain environments.
+The reason is the *option value of learning*: by investing even when current odds seem unfavorable, the investor gains information that may reveal the true environment is actually favorable. For instance, with a uniform prior $\text{Beta}(1,1)$ and a long horizon, a sufficiently risk-tolerant investor might optimally allocate a positive fraction even after observing one failure (giving posterior $\text{Beta}(1,2)$ with expected odds 1:2 against). The potential to learn trumps the current negative expectation. This insight has direct implications for exploration-exploitation trade-offs in uncertain environments.
 
 :::
 
 ### Livermore's Trading Wisdom
 
-The legendary trader Jesse Livermore, whose methods were chronicled in the 1923 classic *Reminiscences of a Stock Operator*, articulated trading principles that align remarkably well with Bellman's optimal control framework [@polson2014bellman]. Two of his famous maxims are particularly revealing:
+The legendary trader Jesse Livermore, whose methods were chronicled by Edwin Lefevre in the 1923 classic *Reminiscences of a Stock Operator*, articulated trading principles that align remarkably well with Bellman's optimal control framework [@polson2014bellman]. Two of his famous maxims are particularly revealing:
 
 ::: {#res-livermore-maxims}
 
-"Profits always take care of themselves, but losses never do." In the Bellman framework, suppose an investor holds a long position because $Q_t(s, a_L) > Q_t(s, a_N)$ (long is better than neutral). If the position subsequently loses money, the trader faces a choice. Under unchanged beliefs, the same logic would suggest staying long. But Livermore's insight is that the price movement itself contains information. By Bayes' theorem, observing a loss should update beliefs such that $Q_{t+1}^{q \cup \{x_t\}}(s', a_L) < Q_{t+1}^{q \cup \{x_t\}}(s', a_N)$, where $q \cup \{x_t\}$ represents updated beliefs incorporating the price change. The optimal action is to exit. Conversely, a winning position confirms the original thesis: "it takes care of itself."
+"Profits always take care of themselves, but losses never do." In the Bellman framework, suppose an investor holds a long position because $Q_t(s, a_L) > Q_t(s, a_N)$ (long is better than neutral). If the position subsequently loses money, the trader faces a choice. Under unchanged beliefs, the same logic would suggest staying long. But Livermore's insight is that the price movement itself contains information. By Bayes' theorem, a loss lowers the probability of a gain, and if the update is large enough then $Q_{t+1}^{q \cup \{x_t\}}(s', a_L) < Q_{t+1}^{q \cup \{x_t\}}(s', a_N)$, where $q \cup \{x_t\}$ represents updated beliefs incorporating the price change. The optimal action is then to exit. Conversely, a winning position confirms the original thesis: "it takes care of itself."
 
 "Never average down." The practice of doubling up on losing positions seems to violate basic decision theory. If averaging down is optimal, it means $Q_t(s', a_L) > Q_t(s', a_N)$ after a loss. But if we've updated beliefs based on the adverse price movement, this typically cannot hold unless we've received external information beyond what the market revealed. Livermore put it bluntly: "Why send good money after bad?"
 
@@ -491,16 +491,17 @@ These four contributions (de Finetti's insurance mathematics, Markowitz's portfo
 
 ## Statistical Decisions and Risk
 
-While Bernoulli's work laid the foundation for expected utility, it was in the mid-20th century that *L.J. Savage* and *John von Neumann/Oskar Morgenstern* formalized these concepts into a rigorous mathematical decision theory. This framework provides the "rational" standard against which human behavior is often measured.
+While Bernoulli's work laid the foundation for expected utility, it was in the mid-20th century that *L.J. Savage* [@savage1954foundations] and *John von Neumann/Oskar Morgenstern* [@vonneumann1944theory] formalized these concepts into a rigorous mathematical decision theory. This framework provides the "rational" standard against which human behavior is often measured.
 
 The statistical decision making problem can be posed as follows. A decision maker (you) has to choose from a set of decisions or acts. The consequences of these decisions depend on an unknown state of the world. Let $d\in\mathcal{D}$
 denote the decision and $\theta\in\Theta$ the state of the world. As an example, think of $\theta$ as the unknown parameter and the decision as choosing a parameter estimation or hypothesis testing procedure. To provide information about the parameter, the decision maker obtains a sample $y\in\mathcal{Y}$ that is generated from the likelihood function $p\left(y\mid\theta\right)$. The resulting decision depends on the observed data, is denoted as $d\left(  y\right)$, and is commonly called the decision rule.
 
-To make the decision, the decision maker uses a "loss" function as a quantitative metric to assesses the consequences or performance of different decisions. For each state of the world $\theta$, and decision $d$, $\mathcal{L}\left(  \theta,d\right)$ quantifies the "loss" made by choosing $d$ when the state of the world is $\theta.$ Common loss functions include a quadratic loss,
+To make the decision, the decision maker uses a "loss" function as a quantitative metric to assess the consequences or performance of different decisions. For each state of the world $\theta$, and decision $d$, $\mathcal{L}\left(  \theta,d\right)$ quantifies the "loss" made by choosing $d$ when the state of the world is $\theta.$ Common loss functions include a quadratic loss,
 $\mathcal{L}(\theta,d)=(\theta-d)^{2},$ an absolute loss, $\mathcal{L}(\theta,d)=|\theta-d|$, and a $0-1$ loss, 
 $$
-\mathcal{L}(\theta,d)=L_{0}1_{\left[  \theta\in\Theta_{0}\right]  }+L_{1}1_{\left[  \theta\in\Theta_{1}\right]  }.
+\mathcal{L}(\theta,d)=L_{0}1_{\left[\theta\in\Theta_{0},\,d=a_{1}\right]}+L_{1}1_{\left[\theta\in\Theta_{1},\,d=a_{0}\right]},
 $$ 
+where $a_i$ is the decision for $\Theta_i$. 
 For Bayesians, the utility function provides a natural loss function. Historically, decision theory was developed by classical statisticians, thus the development in terms of "objective" loss functions instead of "subjective" utility.
 
 Classical decision theory takes a frequentist approach, treating parameters as "fixed but unknown" and evaluating decisions based on their population properties. Intuitively, this thought experiment entails drawing a dataset $y$
@@ -516,8 +517,8 @@ R(\theta,d)  &  =\int_{\mathcal{Y}}\left[  \theta-d\left(  y\right)  \right]
 \mid \theta}  \right)  ^{2} \mid \theta}  +\E{\left(
 \E{d\left(  y\right)  \mid \theta}  -\theta\right)  ^{2} \mid \theta}
 \\
-&  =\text{Var}\left(  d\left(  y\right)  \mid \theta\right)  +\left[  bias\left(
-d\left(  y\right)  -\theta\right)  \right]  ^{2}%
+&  =\Var{d\left(  y\right)  \mid \theta}  +\left[  \text{bias}\left(
+d\left(  y\right) \mid \theta\right)  \right]  ^{2}%
 \end{align*}
 which can be interpreted as the squared bias of the decision/estimator plus the variance of the decision/estimator. Common frequentist estimators choose unbiased estimators so that the bias term is zero, and among them the one with the smallest variance.^[Unbiased estimators are not unique in general: if $y_1, \ldots, y_n$ are i.i.d. $N(\theta, 1)$, both $y_1$ and $\bar{y}$ are unbiased for $\theta$, with variances $1$ and $1/n$. When a complete sufficient statistic exists, the Lehmann-Scheffé theorem [@lehmann1950completeness] shows that an unbiased function of it is the unique minimum variance unbiased estimator.]
 
@@ -543,15 +544,15 @@ $$
 d_{\pi}^{\ast}=\underset{d\in\mathcal{D}}{\arg\min}\text{ }r(\pi,d)\text{.}%
 $$
 The classical risk of a Bayes decision rule is defined as $R\left(
-\theta,d_{\pi}^{\ast}\right)$, where $d_{\pi}^{\ast}$ does not depend on $\theta$ or $y$. Minimizing expected risk is consistent with maximizing posterior expected utility or, in this case, minimizing expected loss.
-Expected posterior risk is
+\theta,d_{\pi}^{\ast}\right)$, where $d_{\pi}^{\ast}$ does not depend on $\theta$. Minimizing expected risk is consistent with maximizing posterior expected utility or, in this case, minimizing expected loss.
+Changing the order of integration gives
 $$
 r(\pi,d)=\int_{\mathcal{Y}}\left[  \int_{\mathcal{\Theta}}\mathcal{L}\left[
 \theta,d(y)\right]  p(y \mid \theta)\pi\left(  \theta\right)  d\theta\right]  dy,
 $$
-where the term in the brackets is posterior expected loss. Minimizing posterior expected loss for every $y\in\mathcal{Y}$ is clearly equivalent to minimizing posterior expected risk, provided it is possible to interchange the order of integration.
+where the term in the brackets is the posterior expected loss times the marginal density $p(y)$. Minimizing posterior expected loss for every $y\in\mathcal{Y}$ is equivalent to minimizing the Bayes risk, provided it is possible to interchange the order of integration.
 
-The previous definitions did not explicitly state that the prior distribution was proper, that is, that $\int_{\mathcal{\Theta}}\pi\left(  \theta\right)d\theta=1$. In some applications and for some parameters, researchers may use priors that do not integrate, $\int_{\Theta}\pi\left(  \theta\right)d\theta=\infty$, commonly called improper priors. A generalized Bayes rule is one that minimizes $r(\pi,d),$ where $\pi$ is not necessarily a distribution, if such a rule exists. If $r(\pi,d)<\infty$, then the mechanics of this rule is clear, although its meaning is less clear.
+The previous definitions did not explicitly state that the prior distribution was proper, that is, that $\int_{\mathcal{\Theta}}\pi\left(  \theta\right)d\theta=1$. In some applications and for some parameters, researchers may use priors that do not integrate, $\int_{\Theta}\pi\left(  \theta\right)d\theta=\infty$, commonly called improper priors. A generalized Bayes rule is one that minimizes $\int_{\Theta}\mathcal{L}[\theta,d(y)]p(y\mid\theta)\pi(\theta)d\theta$ at each $y$, where $\pi$ is not necessarily a distribution, if such a rule exists. If this integral is finite, then the mechanics of this rule is clear, although its meaning is less clear.
 
 
 ## Unintuitive Nature of Decision Making
@@ -578,9 +579,7 @@ This pattern of preferences violates the axioms of expected utility theory. If w
 - Preferring 1A over 1B implies: $0.5 > p$
 - Preferring 2A over 2B implies: $0.5 > (1-p)$, which means $p > 0.5$
 
-These two inequalities are contradictory, yet this preference pattern is commonly observed. The paradox demonstrates that people exhibit *ambiguity aversion*: they prefer known probabilities (risk) over unknown probabilities (ambiguity), even when the expected values might be similar. This behavior cannot be explained by standard expected utility theory, which treats all probabilities symmetrically regardless of whether they are known or unknown.
-
-The Ellsberg paradox demonstrates that human decision-making is sensitive not just to risk (known probabilities) but to *ambiguity* (unknown probabilities). Standard expected utility theory fails to capture this "ambiguity aversion," leading to the development of more generalized decision theories that incorporate confidence in probability estimates.
+These two inequalities are contradictory, yet this preference pattern is commonly observed. The paradox demonstrates that people exhibit *ambiguity aversion*: they prefer known probabilities (risk) over unknown probabilities (ambiguity), even when the expected values might be similar. This behavior cannot be explained by standard expected utility theory, which treats all probabilities symmetrically regardless of whether they are known or unknown. This led to more general decision theories that incorporate confidence in probability estimates.
 
 :::
 
@@ -629,10 +628,10 @@ E4 <- 25 * 0.1 + 0 * 0.9
 print(c(E1 - E2, E3 - E4), digits = 3)
 ```
 
-However, typically a person prefers $\mathcal{G}_1$ to $\mathcal{G}_2$ and $\mathcal{G}_4$ to $\mathcal{G}_3$, we can conclude that the expected utilities of the preferred are greater than the expected utilities of the second choices. The fact is that  if $\mathcal{G}_1 \geq \mathcal{G}_2$ then $\mathcal{G}_3 \geq \mathcal{G}_4$ and vice versa.
+However, typically a person prefers $\mathcal{G}_1$ to $\mathcal{G}_2$ and $\mathcal{G}_4$ to $\mathcal{G}_3$. Under expected utility, if $\mathcal{G}_1 \succeq \mathcal{G}_2$ then $\mathcal{G}_3 \succeq \mathcal{G}_4$ and vice versa, as the calculation below shows, so these choices cannot both come from maximizing expected utility.
  
 
-Assuming the  subjective probabilities $P = ( p_1 , p_2 , p_3)$. The expected utility $E ( U \mid P )$ is  $u ( 0 ) = 0$ and for the high prize set $u ( \$ 25 \; \text{million} ) = 1$, which leaves one free parameter $u = u(\$ 5 \; \text{million})$.  
+Let $P = (p_1, p_2, p_3)$ be the probabilities of \$0, \$5 million and \$25 million. Set $u ( 0 ) = 0$ and for the high prize set $u ( \$ 25 \; \text{million} ) = 1$, which leaves one free parameter $u = u(\$ 5 \; \text{million})$.  
 
 
 Hence to compare gambles with probabilities $P$ and $Q$ we look at the difference
@@ -647,7 +646,7 @@ E ( u \mid \mathcal{G}_3 ) - E ( u \mid \mathcal{G}_4 ) &= 0.11 u - 0.1
 \end{align*}
 The order is the same, given your $u$. If your utility satisfies  $u < 0.1/0.11 = 0.909$  you take the "riskier" gamble.
 
-The Allais paradox is particularly damaging to the *Independence Axiom*, which states that if you prefer A to B, you should also prefer A+C to B+C. Here, adding a common consequence flips the preference. This finding suggests that people value "certainty" disproportionately, a phenomenon famously captured by Prospect Theory.
+The Allais paradox is particularly damaging to the *Independence Axiom*, which states that if you prefer A to B, you should also prefer $pA+(1-p)C$ to $pB+(1-p)C$. Here, adding a common consequence flips the preference. This finding suggests that people value "certainty" disproportionately, a phenomenon famously captured by Prospect Theory.
 :::
 ::: {#exm-Curse}
 ## Winner's Curse
@@ -656,7 +655,7 @@ One of the interesting facts about expectation is that when you are in a competi
 
 The winner's curse: given that you win, you should feel regret: $E(X\mid W) < E(X)$.
 
-A good example is claiming racehorse whose value is uncertain. 
+A good example is claiming a racehorse whose value is uncertain. 
 
 | Value  | Outcome          |
 |--------|------------------|
@@ -669,7 +668,7 @@ E(X) = \frac{1}{2} \cdot 0 + \frac{1}{2} \cdot 50{,}000 = \$25{,}000.
 $$
 In a \$20,000 claiming race (you can buy the horse for this fixed fee ahead of time from the owner) it looks like a simple decision to claim the horse.
 
-It's not so simple! We need to calculate a conditional expectation. What's $E( X\mid W )$, given you win event ($W$)? This is the expected value of the horse given that you win that is relevant to assessing your bid. In most situations $E(X\mid W) < 20{,}000$.
+It's not so simple! We need to calculate a conditional expectation. What's $E( X\mid W )$, given you win event ($W$)? This is the expected value of the horse given that you win that is relevant to assessing your bid. Under the signal of @exr-winners-curse-conditioning, $E(X\mid W) = \$18{,}000 < 20{,}000$.
 
 Another related feature of this problem is *asymmetric information*. The owner or trainer of the horse may know something that you don't know. There's a reason why they are entering the horse into a claiming race in the first place.
 
@@ -678,11 +677,11 @@ Winner's curse implies that immediately after you have won, you should feel a li
 
 ::: {#exm-hat}
 ## The Hat Problem
-There are $N$ prisoners in a forward-facing line. Each guy is wearing a blue or red hat. Everyone can see all the hats in front of him, but cannot see his own hat. The hats can be in any combination of red and blue, from all red to all blue and every combination in between. The first guy doesn't know his own hat.
+There are $N=100$ prisoners in a forward-facing line, numbered from the front. Each guy is wearing a blue or red hat. Everyone can see all the hats in front of him, but cannot see his own hat. The hats can be in any combination of red and blue, from all red to all blue and every combination in between.
 
 A guard is going to walk down the line, starting in the back, and ask each prisoner what color hat they have on. They can only answer "blue" or "red." If they answer incorrectly, or say anything else, they will be shot dead on the spot. If they answer correctly, they will be set free. Each prisoner can hear all of the other prisoners' responses, as well as any gunshots that indicate an incorrect response. They can remember all of this information.
 
-There is a rule that all can agree to follow such that the first guy makes a choice ("My hat is ...") and everyone after that, including the last guy, will get their color right with probability $1$. 
+There is a rule that all can agree to follow such that the prisoner at the back (Prisoner 100) makes a choice ("My hat is ...") and everyone after that, including Prisoner 1, will get their color right with probability $1$. 
 
 Here is the strategy:
 
@@ -692,58 +691,58 @@ Here is the strategy:
    - If the total parity (from 100) matches the parity he sees, his own hat must be Red (contributing 0 to the count).
    - If the parities differ, his own hat must be Blue (changing the parity).
 4. He yells his calculated color, saving himself and passing the parity information down to Prisoner 98.
-5. This induction continues, allowing every prisoner except the first to determine their hat color with certainty. The first prisoner survives with probability 0.5 (random guess that conveys the bit).
+5. This induction continues, allowing every prisoner except Prisoner 100 to determine their hat color with certainty. Prisoner 100 survives with probability 0.5 (random guess that conveys the bit).
 
 One hundred prisoners are too many to work with. Suppose there are two (1 and 2, where 2 is the back). Prisoner 2 sees prisoner 1. If he sees Blue, he yells "Red" (odd). Prisoner 1 hears "Red", sees 0 blue hats (even). Mismatch -> Blue.
 This logic extends to any $N$. By using parity, the group collectively solves the problem with only 1 bit of uncertainty for the entire group. 
 :::
 
 ::: {#exm-lemons}
-## Lemon's Problem
+## Lemons Problem
 The lemon problem is an interesting conditional probability puzzle  and is a classic example of asymmetric information in economics. It was first proposed by George Akerlof in his 1970 paper "The Market for Lemons: Quality Uncertainty and the Market Mechanism." The problem highlights the importance of information in markets and how it can lead to adverse selection, where the quality of goods or services is lower than expected. 
 
 The basic tenet of the lemons principle is that low-value cars force high-value cars out of the market because of the asymmetrical information available to the buyer and seller of a used car. This is primarily due to the fact that a buyer does not know what the true value of a used car is and, therefore, is not willing to pay a premium on the chance that the car might be a lemon. Premium-car sellers are not willing to sell below the premium price, so this results in only lemons being sold.
 
-Suppose that a dealer pays \$20K for a car and wants to sell for \$25K.   Some cars on the market are Lemons. The dealer knows whether a car is a lemon. A lemon is only worth \$5K. There is asymmetric information as the customer doesn't know if the particular new car is a lemon. S/he estimates the probability of lemons on the road by using the observed frequency of lemons. We will consider two separate cases:
+Suppose that a dealer pays \$20K for a car and wants to sell for \$25K.   Some cars on the market are Lemons. The dealer knows whether a car is a lemon. A lemon is only worth \$5K. There is asymmetric information as the customer doesn't know if the particular used car is a lemon. S/he estimates the probability of lemons on the road by using the observed frequency of lemons. We will consider two separate cases:
 
 - Let's first suppose only 10\% of cars are lemons. 
 - We'll then see what happens if 50\% are lemons.
 
-The question is how does the market clear (i.e., at what price do car's sell). Or put another way, does the customer buy the car and if so what price is agreed on? This is very similar to winner's curse: when computing an expected value, what conditioning information should I be taking into account?
+The question is how does the market clear (i.e., at what price do cars sell). Or put another way, does the customer buy the car and if so what price is agreed on? This is very similar to winner's curse: when computing an expected value, what conditioning information should I be taking into account?
 
-In the case where the customer thinks that $p=0.10$ of the car's are lemons, they are willing to pay 
+In the case where the customer thinks that $p=0.10$ of the cars are lemons, they are willing to pay 
 $$
 E (X)= \frac{9}{10} \cdot 25 + \frac{1}{10} \cdot 5 = \$ 23 K
 $$
 This is greater than the initial \$20K that the dealer paid. The car then sells at \$23K $<$ \$25K. 
 
 Of course, the dealer is disappointed that there are lemons on the road as he is
-not achieving the full value---missing \$2000. Therefore, they should try and persuade the
+not achieving the full value, missing \$2000. Therefore, they should try and persuade the
 customer its not a lemon by offering a warranty, for example.
 
 The more interesting case is when $p=0.5$. The customer now values the car at
 $$
 E (X)  = \frac{1}{2} \cdot 25 + \frac{1}{2} \cdot 5 = \$ 15K
 $$
-This is lower than the \$20K---the reservation price that the dealer would have for a good car.  Now what  type of car and at what price do they sell?
+This is lower than the \$20K, the reservation price that the dealer would have for a good car.  Now what  type of car and at what price do they sell?
 
 The key point in asymmetric information is that the customer must condition on the fact that  if the dealer still wants to sell the car, the customer must update his probability of the type of the car.  We already know that if the car is not a lemon, the dealer won't sell under his initial cost of \$20K. So at \$15K, he is only willing to sell a lemon. But then if the customer computes a conditional expectation
-$E( X \mid \mathrm{Lemon})$---conditioning on new information that the car is a lemon $L$, we get the valuation
+$E( X \mid \mathrm{Lemon})$, conditioning on new information that the car is a lemon $L$, we get the valuation
 $$
 E ( X \mid L ) = 1 \cdot  5 = \$ 5K
 $$
 Therefore only lemons sell, at \$ 5K, even if the dealer has a perfectly good car, the customer is not willing to buy!
 
-Again what should the dealer do? Try to raise the quality and decrease the frequency of lemons in the observable market. This type of modeling has all been used to understand credit markets and rationing in periods of loss of confidence.
+Again what should the dealer do? Try to raise the quality and decrease the frequency of lemons in the observable market. This type of modeling has been used to understand credit markets and rationing in periods of loss of confidence.
 :::
 
 ::: {#exm-envelope}
 ## Envelope Paradox
 The envelope paradox is a thought experiment or puzzle related to decision-making under uncertainty. It is also known as the "exchange paradox" or the "two-envelope paradox."
 
-A swami puts $m$ dollars in one envelope and $2 m$ in another. He hands on envelope to you and one to your opponent.  The amounts are placed randomly and so there is a probability of $\frac{1}{2}$ that you get either envelope. 
+A swami puts $m$ dollars in one envelope and $2 m$ in another. He hands one envelope to you and one to your opponent.  The amounts are placed randomly and so there is a probability of $\frac{1}{2}$ that you get either envelope. 
 
-You open your envelope and find $x$ dollars. Let $y$ be the amount in your opponent's envelope. You know that $y = \frac{1}{2} x$ or $y = 2 x$. You are thinking about whether you should switch your opened envelope for the unopened envelope of your friend. It is tempting to do an expected value calculation as follows
+You open your envelope and find $x$ dollars. Let $y$ be the amount in your opponent's envelope. You know that $y = \frac{1}{2} x$ or $y = 2 x$. You are thinking about whether you should switch your opened envelope for the unopened envelope of your opponent. It is tempting to do an expected value calculation as follows
 $$
 E(y) = \frac{1}{2} \cdot  \frac{1}{2} x + \frac{1}{2} \cdot 2 x = \frac{5}{4} x > x 
 $$
@@ -751,11 +750,11 @@ Therefore, it looks as if you should switch no matter what value of $x$ you see.
 
 This problem permits multiple interpretations, yet it serves as an excellent case study for distinguishing between frequentist and Bayesian reasoning. First, assume we are risk-neutral (note that we can simply substitute "money" with "utility" without loss of generality). We will compare frequentist vs. Bayesian, and open vs. closed envelope scenarios.  
 
-If I DO NOT look in my envelope, in this case, even from a frequentist viewpoint, we can find a fallacy in this naive expectation reasoning $E[trade] = 5x/4$. First, the right answer from a frequentist view is, loosely, as follows.  If we switch the envelope, we can obtain $m$ (when $X = m$) or lose $m$  (when $X = 2m$) with the same probability $1/2$.  Thus, the value of a trade is zero, so that trading matters not for my expected wealth. 
+If I do not look in my envelope, in this case, even from a frequentist viewpoint, we can find a fallacy in this naive expectation reasoning $\E{\text{trade}} = 5x/4$. First, the right answer from a frequentist view is, loosely, as follows.  If we switch the envelope, we can obtain $m$ (when $X = m$) or lose $m$  (when $X = 2m$) with the same probability $1/2$.  Thus, the value of a trade is zero, so that trading matters not for my expected wealth. 
 
 Instead, naive reasoning is confusing the property of variables $X$ and $m$,  $X$ is a random variable, and $m$ is a fixed parameter which is constant (again, from a frequentist viewpoint).  By trading, we can obtain $m$  or lose $m$ with the same probability.  Here, the former $X=m$ is different from the latter $X= 2m$. Thus,  $X \frac{1}{2} - \frac{X}{2} \frac{1}{2} = \frac{X}{4}$ is the wrong expected value of trading.  On the other hand, from a Bayesian view, since we have no information, we are indifferent to either trading or not.  
 
-The second scenario is if I do look in my envelope. As the Christensen \& Utts (1992) article said, the classical view cannot provide a completely reasonable resolution to this case. It is just ignoring the information revealed. Also, the arbitrary decision rule introduced at the end of the paper or the extension of it commented by Ross (1996) are not the results of reasoning from a classical approach. However, the Bayesian approach provides a systematic way of finding an optimal decision rule using the given information.
+The second scenario is if I do look in my envelope. As Christensen \& Utts [-@christensen1992bayesian] said in their article on the exchange paradox, the classical view cannot provide a completely reasonable resolution to this case. It is just ignoring the information revealed. However, the Bayesian approach provides a systematic way of finding an optimal decision rule using the given information.
 
 We can use Bayes' rule to update the probabilities of which envelope your opponent has! Assume $p(m)$ of dollars to be placed in the envelope by the swami. Such an assumption then allows us to calculate an odds ratio
 $$
@@ -770,28 +769,28 @@ E(Y\mid X = x) =  p \left ( Y = \frac{1}{2} x \mid  X = x \right ) \cdot  \frac{
 $$
 and the condition $E(Y \mid X = x) > x$ becomes a  decision rule.
 
-Let $g(m)$ be the prior distribution of $m$. Applying Bayes' theorem, we have
+Let $g(m)$ be a discrete prior distribution of $m$. Applying Bayes' theorem, we have
 $$
 p(m = x \mid X = x) = \frac{p(X = x \mid m = x) g(x)}{p(X = x)} = \frac{g(x)}{g(x)+g(x/2)}.
 $$
 Similarly, we have
 $$
-p(m = x/2 \mid X = x) = \frac{p(X = x \mid m = x/2) g(x/2)}{p(X = x/2)} = \frac{g(x/2)}{g(x)+g(x/2)}.
+p(m = x/2 \mid X = x) = \frac{p(X = x \mid m = x/2) g(x/2)}{p(X = x)} = \frac{g(x/2)}{g(x)+g(x/2)}.
 $$
 The Bayesian can now compute his expected winnings from the two actions. If he keeps the envelope he has, he wins $x$ dollars. If he trades envelopes, he
 wins $x/2$ if he currently has the envelope with $2m$ dollars, i.e., if $m = x/2$, and he wins $2x$ if he currently has the envelope with $m$ dollars, i.e., $m = x$. His expected winnings from a trade are
 $$
 E(W\mid Trade) = E(Y\mid X = x) = \frac{g(x/2)}{g(x)+g(x/2)} \frac{x}{2} + \frac{g(x)}{g(x)+g(x/2)} 2x.
 $$
-It is easily seen that when $g(x/2) = 2g(x)$, $E(W\mid Trade) = x$. Therefore, if $g(x/2) > 2g(x)$ it is optimal to keep the envelope, and if $g(x/2) < 2g(x)$, it is optimal to trade envelopes. For example, if your prior distribution on $m$ is exponential $\lambda$, so that $g(m) = \lambda e^{-\lambda m}$, then it is easily seen that it is optimal to keep your envelope if $x > 2\log(2)/\lambda$.
+It is easily seen that when $g(x/2) = 2g(x)$, $E(W\mid Trade) = x$. Therefore, if $g(x/2) > 2g(x)$ it is optimal to keep the envelope, and if $g(x/2) < 2g(x)$, it is optimal to trade envelopes. For example, if your prior distribution on $m$ is exponential $\lambda$, so that $g(m) = \lambda e^{-\lambda m}$, then the discrete rule gives $x > 2\log(2)/\lambda$, but for a density the correct threshold, derived below, is $x > 4\log(2)/\lambda$.
 
 The intuitive value of the expected winnings when trading envelopes was shown to be $5x/4$. This value can be obtained by assuming that $g(x)/[g(x) + g(x/2)] =
-1/2$ for all $x$. In particular, this implies that $g(x) = g(x/2)$ for all x, i.e., $g(x)$ is a constant function. In other words, the intuitive expected winnings assumes an improper "noninformative" uniform density on $[0, \infty)$. It is of interest to note that the improper noninformative prior for this problem gives a truly noninformative (maximum entropy) posterior distribution.
+1/2$ for all $x$. In particular, this implies that $g(x) = g(x/2)$ for all x, i.e., $g(x)$ is a constant function. In other words, the intuitive expected winnings assumes an improper "noninformative" uniform distribution on a discrete grid of values of $m$. For a density, the corrected formula below gives $5x/4$ under $g(m)\propto 1/m$.
 
 
-Most of the arguments in the Christensen \& Utts (1992) paper are right, but there is one serious error in the article which is corrected in Blachman, Christensen \& Utts [-@blachman1996comment] and discussed in Brams \& Kilgour (1995).  The paper calculated the marginal density of $X$ like below.
+Most of the arguments in the Christensen \& Utts [-@christensen1992bayesian] paper are right, but there is one serious error in the article which is corrected in Blachman, Christensen \& Utts [-@blachman1996comment] and discussed in Brams \& Kilgour [-@brams1995box].  The paper calculated the marginal density of $X$ like below.
 \begin{align*}
-p(X = x) &= p(m = x)g(x) + p(2m = x)g(x/2) \\ 
+p(X = x) &= \prob{X=m}g(x) + \prob{X=2m}g(x/2) \\ 
 &= \frac{1}{2} g(x) + \frac{1}{2} g(x/2)
 \end{align*}
 where $g(x)$ is the prior distribution of $m$.  However, integrating  $p(X = x)$ with respect to $x$ from $0$ to $\infty$ gives $3/2$ instead of $1$. In fact, their calculation of $p(X = x)$ can hold only when the prior distribution $g(x)$ is discrete and $p(X = x)$, $g(m)$, $g(m/2)$ represent the probabilities that $X = x$, $m = m$, $m = m/2$, respectively.  
@@ -800,16 +799,16 @@ For the correct calculation of the continuous $X$ case, one needs to properly tr
 
 Let $G(x)$ be the CDF of the prior distribution of $m$ corresponding to $g(x)$.
 \begin{align*}
-p(x < X \leq x+dx) &= p(m = x)dG(x)+ p(2m = x)dG(x/2) \\
+p(x < X \leq x+dx) &= \prob{X=m}dG(x)+ \prob{X=2m}dG(x/2) \\
 &= \frac{1}{2} \left( dG(x)+ dG(x/2) \right)
 \end{align*}
 where $g(x) = dG(x)/dx$.  Now, the PDF of $X$ is
 \begin{align*}
-f_X(x) &= \frac{d}{dx} p(x < X \leq x + dx) \\
+f_X(x) &= p(x < X \leq x + dx)/dx \\
 &= \frac{1}{2} \left(g(x) + \frac{1}{2} g(x/2) \right)
 \end{align*}
 We have an additional $1/2$ in the last term due to the chain rule, or the Jacobian in the
-change-in-variable formula. (Recall that when transforming a probability density $f_X(x)$ to $f_Y(y)$ where $y=g(x)$, we must scale by $|dx/dy|$ to preserve the total probability mass of 1). Therefore, the expected amount of a trade is 
+change-in-variable formula. (Recall that when transforming a probability density $f_X(x)$ to $f_Y(y)$ where $y=h(x)$, we must scale by $|dx/dy|$ to preserve the total probability mass of 1). Therefore, the expected amount of a trade is 
 \begin{align*}
 E(Y\mid X = x) &= \frac{x}{2} p(2m = x\mid X = x) + 2 x \, p(m = x\mid X = x) \\
 &= \frac{x}{2} \frac{g(x/2)/2}{g(x) + g(x/2)/2} + 2 x \frac{g(x)}{g(x) + g(x/2)/2} \\
@@ -828,7 +827,7 @@ Each node in a decision tree, including the root, represents an event or conditi
 
 ::: {#exm-medical}
 ## Medical Testing
-A patient goes to see a doctor. The doctor performs a test which is 95\% sensitive---that is 95 percent of people who are sick test positive and 99\% specific---that is 99 percent of the healthy people test negative. The doctor also knows that only 2 percent of the people in the country are sick. Now the question is: if the patient tests positive, what are the chances the patient is sick? The intuitive answer is 99 percent, but the correct answer is 66 percent.
+A patient goes to see a doctor. The doctor performs a test which is 95\% sensitive (that is, 95 percent of people who are sick test positive) and 99\% specific (that is, 99 percent of the healthy people test negative). The doctor also knows that only 2 percent of the people in the country are sick. Now the question is: if the patient tests positive, what are the chances the patient is sick? The intuitive answer is 99 percent, but the correct answer is 66 percent.
 
 Formally, we have two binary variables, $D=1$ that indicates you have a disease and  $T=1$ that indicates that you test positive for it.  The estimates we know already are given by $P(D) = 0.02$, $P(T\mid D) = 0.95$, and $P(\bar T \mid \bar D) = 0.99$. 	Here we used shortcut notations, instead of writing $P(D=1)$ we used $P(D)$ and instead of $P(D=0)$ we wrote $P(\bar D)$.
 
@@ -843,12 +842,12 @@ Now if the doctor sends everyone who tests positive to the national hospital, th
 
 Let's extend the example and add the utility  of the test and the utility of the treatment. Then the decision problem is to treat $a_T$ or not to treat $a_N$. The Q-function is the function of the state $S \in \{D_0,D_1\}$ and the action $A \in \{a_T,a_N\}$
 
-| A/S   | $a_T$ | $a_N$ |
+| S/A   | $a_T$ | $a_N$ |
 |-------|-------|-------|
 | $D_0$ | 90    | 100   |
 | $D_1$ | 90    | 0     |
 
-: Utility of the test and the treatment. 
+: Utility by state and action. 
 
 Then expected utility of the treatment is 90, and of no treatment is 98. A huge difference. Given our prior knowledge, we should not treat everyone.
 ```{r}
@@ -873,14 +872,14 @@ legend("bottomleft", legend = c(
 ), col = c("black", "red"), lty = 1, bty = "n")
 ```
 
-If our estimate is at the crossover point, then we should be indifferent between treatment and no treatment; if on the left of the crossover point, we should not treat; and if on the right, we should treat. The crossover point is.
+If our estimate is at the crossover point, then we should be indifferent between treatment and no treatment; if on the left of the crossover point, we should not treat; and if on the right, we should treat. The crossover point is given by
 $$
 100(1-p) = 90, ~p = 0.1
 $$
 
 The gap of $90-100(1-p)$ is the expected gain from treatment.
 
-Now, let us calculate the value of test, e.g., the change in expected utility from the test. We will need to calculate the posterior probabilities
+Now, let us calculate the value of test, i.e., the change in expected utility from the test. We will need to calculate the posterior probabilities
 ```{r}
 #| echo: true
 # P(D | T = 0) = P(T = 0 | D) P(D) / P(T = 0)
@@ -929,7 +928,7 @@ I live in a house that is at risk of being damaged by a mudslide. I can build a 
 Let's formally solve this as follows:
 
 - Build a decision tree.
-- The tree will list the probabilities at each node. It will also list any costs there are you going down a particular branch.
+- The tree will list the probabilities at each node. It will also list any costs of going down a particular branch.
 - Finally, it will list the expected cost of going down each branch, so we can see which one has the better risk/reward
 characteristics.
 
@@ -939,7 +938,7 @@ characteristics.
 
 The first dollar value is the cost of the edge, e.g., the cost of building the wall is \$10,000. The second dollar value is the expected cost of going down that branch. For example, if you build the wall and there is a mudslide, the expected cost is \$15,000. If you build the wall and there is no mudslide, the expected cost is \$10,000. The expected cost of building the wall is \$10,050. The expected cost of not building the wall is \$1,000. The expected cost of building the wall is greater than the expected cost of not building the wall, so you should not build the wall. The dollar value at the leaf nodes is the expected cost of going down that branch. For example, if you build the wall and there is a mudslide and the wall does not hold, the expected cost is \$110,000.
 
-There's also the possibility of a further test to see if the wall will hold. Let's include the geological testing option. The test costs \$3000 and has the following accuracies.
+There's also the possibility of a further test to see if there will be a slide. Let's include the geological testing option. The test costs \$3000 and has the following accuracies.
 $$
 P( T  \mid  \mathrm{Slide} ) = 0.90 \; \; \mathrm{and } \; \; P( \mathrm{not~}T  \mid 
 \mathrm{No \; Slide} ) = 0.85
@@ -973,6 +972,8 @@ P \left ( \mathrm{Slide}  \mid  \mathrm{not~}T \right ) & = \frac{ P ( \mathrm{n
 
 Compare this to the initial base rate of a $1$\% chance of having a mud slide.
 
+After a positive test, building the wall costs $10{,}000+0.05714\times 0.05\times 100{,}000=\$10{,}286$ in expectation, while not building costs $0.05714\times 100{,}000=\$5{,}714$. So on expected cost alone you would not build even after a positive test, and testing and then never building costs $3000+1000=\$4{,}000$. The table below assumes the policy of building after a positive test, which is the one with the lower risk of losing everything.
+
 
 Given that you build the wall without testing, what is the probability that you'll lose everything? With the given situation, there is one path (or sequence of events
 and decisions) that leads to losing everything:
@@ -987,9 +988,9 @@ $$
 Given that you choose the test, what is the probability that
 you'll lose everything? There are two paths that lead to losing everything:
 
-- There are three things that have to happen to lose everything. Test +ve ($P=0.1575$), Build, Slide ($P= 0.0571$), Doesn't Hold ($P=0.05$)
+- First, all of the following happen: Test positive ($P=0.1575$), Build, Slide ($P= 0.0571$), Doesn't Hold ($P=0.05$)
 
-- Now you lose everything if Test -ve ($P=0.8425$), Don't Build, Slide given negative ($P=0.001187$). 
+- Second, Test negative ($P=0.8425$), Don't Build, Slide given negative ($P=0.001187$). 
 
 The conditional probabilities for the first path
 $$
@@ -1014,10 +1015,10 @@ Putting these three cases together we can build a risk/reward table
 |-------------------|---------------|---------|-------------|
 | Don't Build       | \$1,000       | 0.01    | 1  in  100  |
 | Build w/o testing | \$10,050      | 0.0005  | 1  in  2000 |
-| Test              | \$4,720       | 0.00145 | 1  in  700  |
+| Test, build if positive | \$4,720       | 0.00145 | 1  in  700  |
 
 
-The expected cost with the test is $3000+10000\times 0.1575+100000\times 0.00145 = 4720$
+The expected cost with the test (building after a positive test) is $3000+10000\times 0.1575+100000\times 0.00145 = 4720$
 
 What do you choose?
 :::
@@ -1042,6 +1043,8 @@ Here is a subtle marble game where players have to call out (or present) either 
 - If both present blue, $A$ wins \$1.
 - If the colors do not match, $B$ wins \$2
 
+Nobody pays the other player, so the game is not zero-sum.
+
 The question is whether it is better to be $A$ or $B$ or does it matter? Moreover, what kind of strategy should you play? A lot depends on how much credit you give your opponent. A lot of empirical research was done on the *tit-for-tat* strategy, where you cooperate until your opponent defects. Then you match his last response.
 
 Nash equilibrium will also allow us to study the concept of a *randomized strategy* (ie. picking a choice with a certain probability) which turns out to be optimal in many game theory problems.
@@ -1051,7 +1054,7 @@ First, assume that the players have a $\frac{1}{2}$ probability of playing Red o
 	E(A) &= \frac{1}{4} \cdot 3 + \frac{1}{4} \cdot 1 =1 \\
 	E(B) &= \frac{1}{4} \cdot 2 + \frac{1}{4} \cdot 2 =1
 \end{align*}
-We might go one step further and look at the risk (and measured by a standard deviation) and calculate the  variances of each player's payouts.
+We might go one step further and look at the risk and calculate the variances of each player's payouts.
 \begin{align*}
 	Var (A) & = (1-1)^2 \cdot \frac{1}{4} +(3-1)^2 \cdot \frac{1}{4} + (0-1)^2 \cdot \frac{1}{2} = 1.5 \\
 	Var(B) & = 1^2 \cdot \frac{1}{2} + (2-1)^2 \cdot \frac{1}{2} = 1
@@ -1077,7 +1080,7 @@ In this case, the expected payoff to playing Red equals that of playing Blue for
 $$
 E(A) = \frac{1}{8} \cdot 3 + \frac{3}{8} \cdot 1 = \frac{3}{4}
 $$
-Moreover, $E(B) =1$, thus $E(B) > E(A)$. We see that $B$ is the favored position. It is clear that if I know that you are going to play this strategy and vice versa, neither of us will deviate from this strategy---hence the Nash equilibrium concept.
+Moreover, $E(B) =1$, thus $E(B) > E(A)$. We see that $B$ is the favored position. It is clear that if I know that you are going to play this strategy and vice versa, neither of us will deviate from this strategy, hence the Nash equilibrium concept.
 
 Nash equilibrium probabilities are: $p=P( A \; red )= 1/2, p_1 = P( B \; red ) = 1/4$
 with payout matrix

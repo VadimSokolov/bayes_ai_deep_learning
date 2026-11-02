@@ -1,0 +1,30 @@
+%%{init: {'flowchart': {'rankSpacing': 25, 'nodeSpacing': 15}}}%%
+flowchart LR
+    subgraph S["Sequential"]
+        direction TB
+        s1[A1] --> s2[A2] --> s3[A3] --> s4[A4]
+    end
+    subgraph P["Parallel"]
+        direction TB
+        po[Orch.] --> p1[A1]
+        po --> p2[A2]
+        po --> p3[A3]
+        po --> p4[A4]
+    end
+    subgraph H["Hierarchical"]
+        direction TB
+        hs[Sup.] --> h1[A1]
+        hs --> h2[A2]
+        h1 --> h3[A3]
+        h1 --> h4[A4]
+    end
+    subgraph D["Dynamic"]
+        direction TB
+        d1[A1] <--> d2[A2]
+        d2 <--> d3[A3]
+        d3 <--> d4[A4]
+        d4 <--> d1
+        d1 <--> d3
+        d2 <--> d4
+    end
+    S ~~~ P ~~~ H ~~~ D

@@ -37,6 +37,7 @@ prob <- bandit(x, n, ndraws = 10000)
 regret <- (apply(prob, 1, max) - prob[, 3]) / prob[, 3]
 hist(regret, breaks = 10, xlab = "Regret", main = "")
 abline(v = quantile(regret, 0.95), col = "red")
+
 wat <- table(factor(max.col(prob), levels = 1:3)) / 10000
 knitr::kable(t(wat), digits = 2)
 
@@ -45,38 +46,27 @@ quantile(regret, 0.95)
 # ---- Secretary Problem -----------------------------------------------------
 
 # (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
+# # one trial: screen the first r - 1 candidates, then take the first one better than all of them
+# secretary <- function(n, r) {
+#   x <- sample(1:n, n)
+#   best_screen <- max(x[1:(r - 1)])
+#   later <- x[r:n]
+#   better <- which(later > best_screen)
+#   choice <- if (length(better) == 0) x[n] else later[min(better)]
+#   c(best = choice == max(x), quality = choice)
+# }
+
+# (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
 # set.seed(17) # Kharlamov
 # nmc <- 1000
 # n <- 1000
-# sz <- 300
-# rules <- round(n * seq(0.002, 0.8, length.out = sz))
+# rules <- round(n * seq(0.002, 0.8, length.out = 300))
 # rules <- unique(rules[rules > 0])
-# sz <- length(rules)
-# cnt <- rep(0, sz)
-# quality <- rep(0, sz)
-# for (i in 1:sz)
-# {
-#   for (j in 1:nmc) {
-#     x <- sample(1:n, n)
-#     screen <- x[1:(rules[i] - 1)]
-#     best_screen <- max(screen)
-#     xchoice <- x[(rules[i]):n]
-#     better_candidates <- which(xchoice > best_screen)
-#     if (length(better_candidates) == 0) {
-#       choice <- x[n]
-#     } else {
-#       choice <- xchoice[min(better_candidates)]
-#     }
-#     cnt[i] <- cnt[i] + (choice == max(x))
-#     quality[i] <- quality[i] + choice
-#   }
-# }
-# d <- data.frame(cnt = cnt, quality = quality, nmc = nmc, rules = rules)
-
-# (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
-# d <- data.frame(cnt = cnt, quality = quality, nmc = nmc, rules = rules)
+# res <- sapply(rules, function(r) rowSums(replicate(nmc, secretary(n, r))))
+# d <- data.frame(cnt = res[1, ], quality = res[2, ], nmc = nmc, rules = rules)
 # write.csv(d, "data/secretary.csv", row.names = FALSE)
 
+# [fig-secretary]
 d <- read.csv("data/secretary.csv")
 # rules[i] is the index of the first candidate that can be chosen,
 # so the number screened (rejected) is rules - 1.
@@ -204,6 +194,7 @@ gp <- newGP(x, profit, 1000, 1e-6, dK = TRUE)
 p <- predGP(gp, XX)
 plotgp(x, profit, XX, p)
 
+# [fig-bo-steps]
 nextsample <- function() {
   ei <- acq(p, min(profit))
   plot(xx, ei, type = "l", col = 2, lwd = 2, xlab = "Number of taxis", ylab = "Expected improvement")

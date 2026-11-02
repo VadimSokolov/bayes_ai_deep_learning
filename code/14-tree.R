@@ -68,7 +68,7 @@ ggplot(pred_data, aes(x = carat, y = clarity, fill = pred_price)) +
 
 library(MASS)
 data(Boston)
-head(Boston)
+head(Boston[, c("crim", "rm", "age", "dis", "tax", "ptratio", "lstat", "medv")])
 
 # [bostontree]
 library(tree)
@@ -79,6 +79,7 @@ length(unique(temp$where)) # first big tree size
 boston.tree <- prune.tree(temp, best = 7)
 length(unique(boston.tree$where)) # pruned tree size
 
+# [fig-boston-tree-step]
 plot(boston.tree, type = "uniform") # pruned tree
 text(boston.tree, label = NULL, col = "blue", cex = .8, adj = 1.05) # rules end left of the branch that comes down
 text(boston.tree, splits = FALSE, col = "blue", label = "yval", cex = .8, digits = 3)
@@ -91,14 +92,13 @@ for (i in seq_along(cvals)) abline(v = cvals[i], col = "magenta", lty = 2) # cut
 
 # Select specific columns by name
 df2 <- Boston[, c("dis", "lstat", "medv")]
-print(names(df2))
 
 temp <- tree(medv ~ ., df2, mindev = .0001)
 length(unique(temp$where)) #
 
 boston.tree <- prune.tree(temp, best = 7)
 
-# [boston-partition]
+# [fig-boston-tree-partition]
 plot(boston.tree, type = "u") # plot tree and partition in x.
 text(boston.tree, label = NULL, col = "blue", cex = .8, adj = 1.05)
 text(boston.tree, splits = FALSE, col = "blue", label = "yval", cex = .8, digits = 3)
@@ -113,7 +113,7 @@ lmedpred <- predict(boston.tree, dfpred)
 
 # Create a perspective plot (3D surface)
 # theta sets the viewing angle, zlim ensures the vertical axis covers the data range
-persp(x1q, x2q, matrix(lmedpred, ncol = length(x2q), byrow = T),
+persp(x2q, x1q, matrix(lmedpred, ncol = length(x2q), byrow = T),
   theta = 150, xlab = "dis", ylab = "lstat", zlab = "medv",
   zlim = c(min(df2$medv), 1.1 * max(df2$medv))
 )
@@ -142,6 +142,7 @@ for (i in 1:3) {
   cat("Mean Squared Error with", ntreev[i], "trees:", round(mse), "\n")
 }
 
+# [fig-bagging-oob]
 oo <- order(Boston$lstat)
 for (i in 1:3) {
   plot(Boston$lstat, Boston$medv, xlab = "lstat", ylab = "medv", pch = 16, cex = 0.3, col = "grey60")
@@ -161,9 +162,8 @@ for (j in 1:2) dotchart(sort(imp[, j]), xlim = c(min(0, imp[, j]), max(imp[, j])
 set.seed(1)
 rf.boston <- randomForest(medv ~ ., data = Boston, mtry = 6, ntree = 50, maxnodes = 50)
 yhat.rf <- predict(rf.boston, newdata = Boston)
-oo <- order(Boston$lstat)
-plot(Boston$lstat[oo], Boston$medv[oo], pch = 21, bg = "grey", xlab = "lstat", ylab = "medv") # plot data
-lines(Boston$lstat[oo], yhat.rf[oo], col = "red", lwd = 3) # step function fit
+plot(Boston$lstat, Boston$medv, pch = 21, bg = "grey", xlab = "lstat", ylab = "medv") # plot data
+points(Boston$lstat, yhat.rf, pch = 16, cex = 0.5, col = "red") # fitted values
 
 # ---- Boosting --------------------------------------------------------------
 
@@ -176,9 +176,9 @@ boost.boston <- gbm(medv ~ .,
 yhat.boost <- predict(boost.boston, newdata = Boston, n.trees = 5000)
 mean((yhat.boost - Boston$medv)^2)
 
-par(mar = c(0, 2, 0, 0))
 summary(boost.boston, plotit = FALSE)
 
+# [fig-boost-pdp]
 lattice::trellis.par.set(fontsize = list(text = 8))
 plot(boost.boston, i = "rm", ylab = "Partial dependence")
 plot(boost.boston, i = "lstat", ylab = "Partial dependence",
@@ -203,17 +203,20 @@ plot(boost.boston, i = "lstat", ylab = "Partial dependence",
 #   treatment = lalonde$treat,
 #   confounders = lalonde[, confounders],
 #   estimand = "att",
-#   commonSup.rule = "sd" # Rule to handle poor overlap
+#   commonSup.rule = "sd", # Rule to handle poor overlap
+#   seed = 1
 # )
 
 # ---- The Problem of High Dimensions ----------------------------------------
 
 # [fig-hd-ball]
-set.seed(66) # Lemieux
+set.seed(66)
 n <- 1000
 p <- 50
 z <- matrix(rnorm(n * p), n, p)
 y <- z / sqrt(rowSums(z^2)) * runif(n)^(1 / p)
-plot(y[, 1], y[, 2], cex = 0.4, col = adjustcolor("black", 0.4), asp = 1, xlim = c(-1, 1), ylim = c(-1, 1), xlab = expression(e[1]^T * Y), ylab = expression(e[2]^T * Y))
+par(mfrow = c(1, 1), pty = "s", mar = c(3, 3, 0.5, 0.5), mgp = c(1.8, 0.6, 0))
+plot(y[, 1], y[, 2], cex = 0.4, col = adjustcolor("black", 0.4), xlim = c(-1, 1), ylim = c(-1, 1), xlab = expression(e[1]^T * Y), ylab = expression(e[2]^T * Y))
 theta <- seq(0, 2 * pi, length.out = 200)
 lines(cos(theta), sin(theta))
+par(pty = "m")

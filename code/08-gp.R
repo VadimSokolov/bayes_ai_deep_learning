@@ -60,7 +60,7 @@ plot_gp = function(mup, Sigmap, X, Y, XX, YY, ...){
 # [fig-gp-sin]
 plot_gp(mup, Sigmap, X, Y, XX, YY)
 
-# ---- Gaussian Process for Simulated Data Using MLE -------------------------
+# ---- Gaussian Process for the Sine Function Using MLE ----------------------
 
 # [gpmle]
 loglik = function(par, X, Y) {
@@ -95,7 +95,7 @@ dloglik_sigma = function(par, X, Y) {
   sigma = par[1]; l = par[2]
   K = outer(X[,1],X[,1], sqexpcov,l,sigma) + diag(eps, n)
   Si = solve(K)
-  dK = 2*K/sigma
+  dK = 2*(K - diag(eps, n))/sigma
   tr = sum(diag(Si %*% dK))
   return(-(-0.5 * tr + 0.5 * t(Y) %*% Si %*% dK %*% Si %*% Y))
 }
@@ -128,6 +128,7 @@ print(l.laGP)
 predplot(X, Y, XX, YY, l, sigma)
 predplot(X, Y, XX, YY, l.laGP, 1)
 
+# [fig-gp-sin-extrap]
 XX1 = matrix(seq(-4*pi, 6*pi + 0.5, length=q), ncol=1)
 predplot(X, Y, XX1, YY, l, sigma, ylim = c(-6, 6))
 predplot(X, Y, XX1, YY, l.laGP, 1, ylim = c(-6, 6))
@@ -137,13 +138,12 @@ predplot(X, Y, XX1, YY, l.laGP, 1, ylim = c(-6, 6))
 library(MASS)
 X = mcycle$times
 Y = mcycle$accel
-gp = newGP(matrix(X), Y, 2, 1e-6, dK = TRUE)
-mleGP(gp, tmax=10)
+gp = newGP(matrix(X), Y, 20, 0.1, dK = TRUE)
+jmleGP(gp, drange = c(0.01, 500), grange = c(1e-6, 5))
 
 XX = matrix(seq(2.4, 55, length = 499), ncol=1)
 p = predGP(gp, XX)
 
-N = 499
 q1 = qnorm(0.05, mean = p$mean, sd = sqrt(diag(p$Sigma)))
 q2 = qnorm(0.95, mean = p$mean, sd = sqrt(diag(p$Sigma)))
 q3 = qnorm(0.5, mean = p$mean, sd = sqrt(diag(p$Sigma)))

@@ -13,7 +13,6 @@ q <- 0.8916
 p <- dbinom(45, 46, q)
 N <- 10000
 odds <- p * N
-print(1 - 1 / (1 + odds))
 print(1 / (1 + odds))
 print(N * p / (N * p + 1))
 
@@ -56,7 +55,8 @@ knitr::kable(elect2012[42:46, ], longtable = TRUE)
 
 set.seed(66) # Lemieux
 rdirichlet <- function(n, alpha) {
-  g <- matrix(rgamma(n * length(alpha), alpha), ncol = length(alpha), byrow = TRUE)
+  g <- matrix(rgamma(n * length(alpha), alpha),
+              ncol = length(alpha), byrow = TRUE)
   g / rowSums(g)
 }
 prob.Obama <- function(mydata) {
@@ -65,7 +65,8 @@ prob.Obama <- function(mydata) {
   mean(p[, 2] > p[, 1])
 }
 win.probs <- data.frame(state = elect2012$state)
-win.probs$Obama <- sapply(1:nrow(elect2012), function(i) prob.Obama(elect2012[i, ]))
+win.probs$Obama <- sapply(1:nrow(elect2012),
+                          function(i) prob.Obama(elect2012[i, ]))
 
 win.probs$EV <- elect2012$EV
 # The five states without a poll go to the winner of 2008

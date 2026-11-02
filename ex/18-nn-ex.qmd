@@ -6,7 +6,7 @@
 
 Consider a simple neural network with:
 
-- Input: $x = (1, 2)^T$ (2 features)
+- Input: $x = (1, 2)^\top$ (2 features)
 - Hidden layer: 2 neurons with ReLU activation
 - Output layer: 1 neuron with sigmoid activation
 
@@ -82,7 +82,7 @@ a) Formulas:
 - Sigmoid: $\sigma(x) = \frac{1}{1 + e^{-x}}$
 - Tanh: $\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$
 - ReLU: $\text{ReLU}(x) = \max(0, x)$
-- Leaky ReLU: $\text{LeakyReLU}(x) = \max(0.01x, x)$
+- Leaky ReLU: $\text{LeakyReLU}(x) = \max(0.1x, x)$
 
 b) Plots:
 ```{r}
@@ -90,7 +90,7 @@ x <- seq(-3, 3, by = 0.1)
 
 sigmoid <- function(x) 1 / (1 + exp(-x))
 relu <- function(x) pmax(0, x)
-leaky_relu <- function(x) ifelse(x > 0, x, 0.01 * x)
+leaky_relu <- function(x) ifelse(x > 0, x, 0.1 * x)
 
 plot(x, sigmoid(x), type = "l", col = "blue", lwd = 2, ylim = c(-1.5, 3),
      xlab = "x", ylab = "f(x)", main = "Activation Functions")
@@ -106,7 +106,7 @@ c) Vanishing gradient:
 - **Sigmoid**: $\sigma'(x) = \sigma(x)(1-\sigma(x))$. Maximum at 0.25 when $x=0$. For large |x|, gradient $\to 0$.
 - **Tanh**: $\tanh'(x) = 1 - \tanh^2(x)$. Maximum of 1 at $x=0$. Saturates for large |x|.
 - **ReLU**: $\text{ReLU}'(x) = 1$ for $x > 0$, 0 otherwise. No vanishing gradient for positive inputs, but "dying ReLU" for negative inputs.
-- **Leaky ReLU**: Always has gradient (1 or 0.01). No vanishing gradient.
+- **Leaky ReLU**: Always has gradient (1 or 0.1). No vanishing gradient.
 
 Sigmoid and Tanh suffer most from vanishing gradients in deep networks.
 
@@ -129,7 +129,7 @@ $$
 f(x) = W_2 \cdot \text{ReLU}(W_1 x + b_1) + b_2
 $$
 
-Given: $W_1 = (-1, 2, 0.5)^T$, $b_1 = (1, -1, 0)^T$, $W_2 = (1, 1, -2)$, $b_2 = 0$
+Given: $W_1 = (-1, 2, 0.5)^\top$, $b_1 = (1, -1, 0)^\top$, $W_2 = (1, 1, -2)$, $b_2 = 0$
 
 a) For what values of $x$ is each ReLU unit "active" (output > 0)?
 b) Write out $f(x)$ as a piecewise linear function.
@@ -196,11 +196,11 @@ d) Number of pieces:
 ::: {#exr-}
 ## Universal Approximation
 
-The Universal Approximation Theorem states that a neural network with one hidden layer can approximate any continuous function to arbitrary accuracy.
+The Universal Approximation Theorem states that a neural network with one hidden layer can approximate any continuous function on a compact set to arbitrary accuracy.
 
 a) What are the conditions for this theorem to hold?
 b) Why doesn't this theorem guarantee that neural networks will always learn the correct function?
-c) If you want to approximate $f(x) = \sin(x)$ on $[0, 2\pi]$ to achieve max absolute error < 0.05, approximately how many hidden units would you need for ReLU vs sigmoid activations?
+c) If you want to approximate $f(x) = \sin(x)$ on $[0, 2\pi]$ to achieve max absolute error < 0.05, approximately how many hidden units would you need with the ReLU activation?
 d) What is the trade-off between width (more hidden units) and depth (more layers)?
 
 ::: {.content-hidden unless-meta="showsln"}
@@ -226,21 +226,17 @@ c) Approximating $\sin(x)$:
 # Need enough pieces to follow the sine curve
 # sin(x) on [0, 2pi] has 1 full cycle
 
-# Rough estimate: want error < 0.01
-# Must approximate the curvature with linear segments
-# About 10-20 ReLU units for reasonable accuracy
-
-# Sigmoid is smoother, might need fewer units
-# But optimization is harder
+# Linear interpolation with spacing h has max error h^2/8 * max|f''| = h^2/8
+# Need h^2/8 <= 0.05, so h <= 0.632 and 2*pi/h >= 9.94: 10 pieces
 
 x <- seq(0, 2*pi, length = 100)
 plot(x, sin(x), type = "l", lwd = 2, main = "Approximating sin(x)")
 
-# Example: 8-piece linear approximation
-breakpoints <- seq(0, 2*pi, length = 9)
+# Example: 10-piece linear approximation, max error (2*pi/10)^2/8 = 0.049
+breakpoints <- seq(0, 2*pi, length = 11)
 lines(breakpoints, sin(breakpoints), col = "red", lwd = 1, lty = 2)
 points(breakpoints, sin(breakpoints), col = "red", pch = 19)
-legend("topright", c("sin(x)", "8-piece linear"), col = c("black", "red"), lty = c(1, 2))
+legend("topright", c("sin(x)", "10-piece linear"), col = c("black", "red"), lty = c(1, 2))
 ```
 
 d) Width vs Depth trade-off:
@@ -320,18 +316,16 @@ a) A neural network with no hidden layers is equivalent to logistic regression (
 
 b) Deeper networks are always better than wider networks.
 
-c) ReLU networks can only represent piecewise linear functions.
+c) A ReLU network with a linear output layer can only represent piecewise linear functions.
 
 d) The number of parameters in a fully connected layer from $n$ inputs to $m$ outputs is $n \times m + m$.
-
-e) Batch normalization is applied before the activation function.
 
 ::: {.content-hidden unless-meta="showsln"}
 **Solution**:
 
 a) **TRUE**. With no hidden layers:
-- Classification: $\sigma(w^T x + b)$ = logistic regression
-- Regression: $w^T x + b$ = linear regression
+- Classification: $\sigma(w^\top x + b)$ = logistic regression
+- Regression: $w^\top x + b$ = linear regression
 
 b) **FALSE**. Depth vs width trade-off depends on the problem:
 - Deeper networks can represent hierarchical features
@@ -345,13 +339,6 @@ d) **TRUE**. A fully connected layer: $y = Wx + b$
 - $W$: $m \times n$ matrix = $mn$ parameters
 - $b$: $m$-dimensional vector = $m$ parameters
 - Total: $mn + m = m(n + 1)$
-
-e) **TRUE** (conventionally). The typical order is:
-1. Linear transformation: $z = Wx + b$
-2. Batch normalization: normalize $z$
-3. Activation: $a = \text{ReLU}(z_{normalized})$
-
-Though some architectures put BN after activation, the original paper placed it before.
 
 :::
 :::
@@ -389,7 +376,7 @@ Here $z_1(x)-z_2(x) = -5x - 5x = -10x$, so
 $$
 g_1(x) = \sigma(-10x) = \frac{1}{1+e^{10x}}, \qquad g_2(x) = \sigma(10x) = 1 - g_1(x).
 $$
-Because $w_{g1} < w_{g2}$, $g_1(x) \to 1$ as $x \to -\infty$ and $g_1(x)\to 0$ as $x\to\infty$: expert 1 is favored for very negative $x$, expert 2 for very positive $x$.
+Because the gate weights are $-5 < 5$, $g_1(x) \to 1$ as $x \to -\infty$ and $g_1(x)\to 0$ as $x\to\infty$: expert 1 is favored for very negative $x$, expert 2 for very positive $x$.
 
 b)
 
@@ -418,13 +405,9 @@ against targets $y(-1)=3$ and $y(1)=4$, giving errors $\lvert\bar Y(-1)-y(-1)\rv
 :::
 :::
 
-### Computing {.unnumbered}
-
-::: {.content-visible when-format="pdf" unless-meta="showsln"}
-The computing exercises of this chapter are online, as notebooks in the `exercises/` folder of <https://github.com/VadimSokolov/bayes_ai_deep_learning>.
-:::
-
 :::: {.content-hidden when-format="pdf" unless-meta="showsln"}
+
+### Computing {.unnumbered}
 
 ::: {#exr-relu-vs-tanh}
 ## ReLU vs Tanh on a Smooth Target
@@ -559,7 +542,7 @@ print(cos_angles.round(6), angles_deg.round(6))
 ```
 Both principal angles are tiny, about $0.000006$ and $0.001083$ degrees (both cosines $1.000000$ to six decimals), essentially zero. The autoencoder did not recover PCA's specific orthonormal loading vectors, $W_1$'s rows need not equal $V^\top$ and need not even be orthogonal to each other, but it recovered the same two-dimensional subspace of $\mathbb{R}^6$ that PCA found.
 
-d) Since $XW_1^\top W_2^\top$ depends on $W_1, W_2$ only through their product $W_2W_1$ (in the chapter's column-vector convention, $\hat x = W_2(W_1x)$), any invertible $K\times K$ change of basis $R$ applied as $W_1\to RW_1$, $W_2\to W_2R^{-1}$ leaves $W_2(R^{-1}R)W_1 = W_2W_1$, and hence every fitted value, exactly unchanged. So the two weight matrices are identified only up to this $K\times K$ gauge freedom, which is why the specific rows of $W_1$ or columns of $W_2$ need not match PCA's loadings. What is identified is the map itself, equivalently the column space of $W_2$ (or row space of $W_1$), and part (b) showed that the globally optimal linear map achieves the minimal rank-$K$ reconstruction error, whose unique minimizer as a *subspace* is the PCA subspace (Eckart-Young). Part (c) confirms numerically that the autoencoder's subspace and PCA's subspace coincide. This equivalence between linear autoencoders trained by squared error and PCA is a classical result (Baldi and Hornik, 1989); giving the network a nonlinear activation, or otherwise breaking this gauge freedom, is what lets autoencoders move beyond a fixed linear subspace.
+d) Since $XW_1^\top W_2^\top$ depends on $W_1, W_2$ only through their product $W_2W_1$ (in the chapter's column-vector convention, $\hat x = W_2(W_1x)$), any invertible $K\times K$ change of basis $R$ applied as $W_1\to RW_1$, $W_2\to W_2R^{-1}$ leaves $W_2(R^{-1}R)W_1 = W_2W_1$, and hence every fitted value, exactly unchanged. So the two weight matrices are identified only up to this $K\times K$ gauge freedom, which is why the specific rows of $W_1$ or columns of $W_2$ need not match PCA's loadings. What is identified is the map itself, equivalently the column space of $W_2$ (or row space of $W_1$), and part (b) showed that the globally optimal linear map achieves the minimal rank-$K$ reconstruction error, whose minimizer as a *subspace* is the PCA subspace when $\sigma_K > \sigma_{K+1}$ (Eckart-Young). Part (c) confirms numerically that the autoencoder's subspace and PCA's subspace coincide. This equivalence between linear autoencoders trained by squared error and PCA is a classical result [@baldi1989neural]; giving the network a nonlinear activation, or otherwise breaking this gauge freedom, is what lets autoencoders move beyond a fixed linear subspace.
 
 :::
 :::
@@ -567,7 +550,7 @@ d) Since $XW_1^\top W_2^\top$ depends on $W_1, W_2$ only through their product $
 ::: {#exr-ensemble-variance-reduction}
 ## Variance Reduction in Correlated Ensembles
 
-The chapter argues that averaging $M$ models "with the same bias but independent estimation errors" reduces the variance term "by a factor of $M$, assuming the models are uncorrelated," and then cautions that "in practice, models are not perfectly independent, but ensembles still reduce variance" [@dietterich2000ensemble]. This exercise makes the correlated case precise and demonstrates it with an ensemble of neural networks.
+The chapter argues that averaging $M$ models "with the same bias but independent estimation errors" reduces the variance term "by a factor of $M$, assuming the models are uncorrelated," and then cautions that "in practice, models are not perfectly independent, but ensembles still reduce variance". This exercise makes the correlated case precise and demonstrates it with an ensemble of neural networks.
 
 Consider the chapter's ensemble average $\hat Y_{\text{ens}}(X) = \frac{1}{M}\sum_{m=1}^M f_m(X)$ of $M$ regression models predicting $Y = f(X) + \epsilon$ with $\epsilon \sim N(0, \sigma_\epsilon^2)$. Assume every model has the same conditional bias $\E{f_m(X)} - f(X) = \beta$, the same conditional variance $\Var{f_m(X)} = \sigma^2$, and the same pairwise correlation $\rho = \Cor{f_m(X), f_{m'}(X)}$ for all $m \neq m'$.
 

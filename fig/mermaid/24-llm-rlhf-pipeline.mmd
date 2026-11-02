@@ -1,10 +1,10 @@
-%%{init: {'flowchart': {'wrappingWidth': 300, 'rankSpacing': 25}}}%%
-flowchart TB
-    P[Pre-trained Model] --> SFT[Supervised Fine-Tuning]
-    SFT --> Gen[Generate Responses]
-    Gen --> H[Human Ranking]
-    H --> RM[Reward Model]
-    RM --> PPO[Policy Optimization]
-    PPO --> AM[Aligned Model]
+%%{init: {'flowchart': {'rankSpacing': 14, 'nodeSpacing': 20, 'padding': 8}}}%%
+flowchart LR
+    P["Pre-trained<br>Model"] --> SFT["Supervised<br>Fine-Tuning"]
+    SFT --> Gen["Generate<br>Responses"]
+    Gen --> H["Human<br>Ranking"]
+    H --> RM["Reward<br>Model"]
+    RM --> PPO["Policy<br>Optimization"]
+    PPO --> AM["Aligned<br>Model"]
 
     style AM fill:#ccffcc,stroke:#00cc00

@@ -1,10 +1,11 @@
 % Paperback trim 7 x 10 in, black and white. The class is the standard book class at 10 pt; the page is cut to the trim and a
-% text block of 33pc x 51pc (5.5 x 8.5 in, the width the figures are made for) is centred on it.
+% text block of 33pc x 53pc (5.5 in wide, the width the figures are made for) sits on it, with the gutter KDP asks for at this length.
 \makeatletter
 \@ifpackageloaded{geometry}%
-  {\geometry{paperwidth=7in,paperheight=10in,total={33pc,51pc},centering}}%
-  {\usepackage[paperwidth=7in,paperheight=10in,total={33pc,51pc},centering]{geometry}}
+  {\geometry{paperwidth=7in,paperheight=10in,total={33pc,53pc},centering,bindingoffset=0.50in,headsep=14pt,footskip=22pt}}%
+  {\usepackage[paperwidth=7in,paperheight=10in,total={33pc,53pc},centering,bindingoffset=0.50in,headsep=14pt,footskip=22pt]{geometry}}
 \makeatother
+\raggedbottom
 \usepackage{amsmath}
 \usepackage{cancel}
 \usepackage{fvextra}

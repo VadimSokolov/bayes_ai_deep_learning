@@ -30,7 +30,6 @@ letters, counts = zip(*sorted_letter_counts);
 plt.bar(letters, counts, color='skyblue')
 plt.xlabel('Letters')
 plt.ylabel('Frequency')
-plt.title('Letter Frequencies in Wikipedia Article on Cats')
 plt.xticks(rotation=0);
 plt.tight_layout()
 plt.show()
@@ -67,9 +66,8 @@ for (a, b), count in sorted_bigram_counts:
 sns.heatmap(bigram_matrix, cmap='Blues')
 plt.xlabel('Second Letter')
 plt.ylabel('First Letter')
-plt.title('Bigram Frequencies in Wikipedia Article on Cats')
-plt.xticks(ticks=np.arange(26) + 0.5, labels=[chr(i + ord('a')) for i in range(26)], rotation=0, fontsize=6);
-plt.yticks(ticks=np.arange(26) + 0.5, labels=[chr(i + ord('a')) for i in range(26)], rotation=0, fontsize=6);
+plt.xticks(ticks=np.arange(26) + 0.5, labels=[chr(i + ord('a')) for i in range(26)], rotation=0, fontsize=8);
+plt.yticks(ticks=np.arange(26) + 0.5, labels=[chr(i + ord('a')) for i in range(26)], rotation=0, fontsize=8);
 plt.tight_layout()
 
 # ---- Pretraining and Generation: One Token at a Time -----------------------
