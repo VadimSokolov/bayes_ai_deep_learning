@@ -355,7 +355,7 @@ Calibration concerns the probabilistic interpretation of predicted probabilities
 
 A proper scoring rule assigns a numerical score to a probabilistic forecast and is designed so that, in expectation, the best strategy is to report the true predictive distribution; see @gneiting2007strictly. Two widely used examples are the log score (negative log predictive density) and the Brier score for binary outcomes @brier1950verification. These connect directly to @sec-Decisions: choosing a scoring rule is equivalent to choosing a loss for probabilistic prediction, and the expected score becomes a decision-theoretic risk.
 
-For Bayesian models, posterior predictive checks compare observed data to replicated data drawn from the posterior predictive distribution. The workflow is: sample parameters from the posterior, simulate replicated datasets, and compare summary statistics or discrepancies between observed and replicated data; see @gelman2013bda.
+For Bayesian models, posterior predictive checks compare observed data to replicated data drawn from the posterior predictive distribution. The workflow is: sample parameters from the posterior, simulate replicated datasets, and compare summary statistics or discrepancies between observed and replicated data; see @rubin1984bayesianly.
 
 ## Bayesian Model Selection
 

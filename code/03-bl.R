@@ -357,6 +357,31 @@ sprintf(
   mu3[1], mu3[2], sigma3[1], sigma3[2], w[1], w[2]
 )
 
+# ---- SAT Coaching in Eight Schools -----------------------------------------
+
+y <- c(A = 28, B = 8, C = -3, D = 7, E = -1, F = 1, G = 18, H = 12)
+s <- c(15, 10, 16, 11, 9, 11, 10, 18)
+J <- length(y); N <- 200000
+draws <- matrix(NA, N, J + 2, dimnames = list(NULL, c(names(y), "mu", "tau")))
+mu <- mean(y); tau <- 5
+set.seed(3)
+for (n in 1:N) {
+  v <- 1 / (1 / s^2 + 1 / tau^2)
+  theta <- rnorm(J, v * (y / s^2 + mu / tau^2), sqrt(v))
+  mu <- rnorm(1, mean(theta), tau / sqrt(J))
+  tau <- sqrt(1 / rgamma(1, (J - 1) / 2, sum((theta - mu)^2) / 2))
+  draws[n, ] <- c(theta, mu, tau)
+}
+draws <- draws[-(1:1000), ]
+
+# [tbl-eight-schools]
+q <- t(apply(draws, 2, quantile, c(0.025, 0.25, 0.5, 0.75, 0.975)))
+q[] <- sprintf("%.1f", q)
+tab <- data.frame(Parameter = c(names(y), "$\\mu$", "$\\tau$"), y = c(y, NA, NA), se = c(s, NA, NA), q)
+names(tab) <- c("School", "$y_j$", "$\\sigma_j$", "2.5%", "25%", "50%", "75%", "97.5%")
+options(knitr.kable.NA = "")
+knitr::kable(tab, row.names = FALSE, align = "c")
+
 # ---- Poisson for Car Counts ------------------------------------------------
 
 cnt = c(2, 2, 1, 1, 0, 4, 3, 0, 2, 1, 1, 1, 4, 0, 2, 2, 3, 2, 4, 3, 2)

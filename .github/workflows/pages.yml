@@ -34,7 +34,7 @@ jobs:
       - name: Render the book from its frozen results
         run: |
           printf 'execute:\n  freeze: true\n' > _quarto-htmlfreeze.yml
-          quarto render --to html --profile all,htmlfreeze -M book-has-isbn:false
+          quarto render --to html --profile all,web,htmlfreeze -M book-has-isbn:false
 
       - name: Offer the release PDF where the pages link to it
         run: |

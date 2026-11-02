@@ -1,6 +1,6 @@
 # Linear Algebra Toolkit {#sec-linalg-toolkit}
 
-This tutorial accompanies the book *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov. It collects a small set of linear algebra definitions and identities that the book uses repeatedly for the multivariate normal, Gaussian processes, and optimization-based estimation. It is not intended to be exhaustive.
+This appendix appears in the online edition only. It collects a small set of linear algebra definitions and identities that the book uses repeatedly for the multivariate normal, Gaussian processes, and optimization-based estimation. It is not intended to be exhaustive.
 
 ## Vectors, Matrices, and Dimensions
 
@@ -82,4 +82,4 @@ is always nonnegative and equals zero only when $x=\mu$.
 
 ## The Multivariate Normal
 
-The marginal and conditional distributions of a partitioned multivariate normal are in the section "Multivariate Normal" of Chapter 3 of the book.
+The marginal and conditional distributions of a partitioned multivariate normal are in @sec-bl, @eq-mvn-conditional.

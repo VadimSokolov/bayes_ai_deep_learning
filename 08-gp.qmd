@@ -170,7 +170,7 @@ plot_gp(mup, Sigmap, X, Y, XX, YY)
 ## Gaussian Process for Simulated Data Using MLE
 In the previous example, we assumed fixed values for the hyperparameters: $\sigma^2 = 1$ and $l^2 = 1$ (i.e., $2l^2 = 2$). In real applications, we don't know these values; we must estimate them from the data.
 
-We use Maximum Likelihood Estimation (MLE) to find the parameters that maximize the probability of observing our data. This parallels the likelihood-to-loss framing in @sec-pattern: we write down a (marginal) likelihood for the data and then optimize it, often via its log-likelihood. This section relies on basic matrix operations (inverse, determinant); a short refresher is on the book's website, <https://vsokolov.org/books/bayes_ai_deep_learning/>. If you have not seen gradient-based optimization, the core intuition appears in @sec-sgd; here we use it only as a practical tool to fit GP hyperparameters.
+We use Maximum Likelihood Estimation (MLE) to find the parameters that maximize the probability of observing our data. This parallels the likelihood-to-loss framing in @sec-pattern: we write down a (marginal) likelihood for the data and then optimize it, often via its log-likelihood. This section relies on basic matrix operations (inverse, determinant); a short refresher is an appendix of the online edition, <https://vsokolov.org/bayes_ai_deep_learning/appendix-linalg.html>. If you have not seen gradient-based optimization, the core intuition appears in @sec-sgd; here we use it only as a practical tool to fit GP hyperparameters.
 
 The marginal likelihood of the data $\mathbf{y}$ (integrating out the function values $f$) is:
 

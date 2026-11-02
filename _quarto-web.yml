@@ -1,0 +1,5 @@
+# The online edition only: the linear algebra tutorial as an appendix (23 Oct 2026).
+# The PDF and the paperback do not include it; the Pages workflow renders with --profile all,web,htmlfreeze.
+book:
+  appendices:
+    - appendix-linalg.qmd

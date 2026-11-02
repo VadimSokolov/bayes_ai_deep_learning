@@ -1232,7 +1232,7 @@ To find credible interval over the mean $\theta$, we need to integrate out the p
 
 
 ## Multivariate Normal
-We write $X \sim N(\mu,\Sigma)$ for a $d$-dimensional multivariate normal random vector with mean vector $\mu \in \mathbb{R}^d$ and covariance matrix $\Sigma \in \mathbb{R}^{d\times d}$, where $\Sigma$ is symmetric and positive definite. If the linear algebra below is unfamiliar (transpose, inverse, determinant, positive definiteness), a short refresher is on the book's website, <https://vsokolov.org/books/bayes_ai_deep_learning/>. Its density is
+We write $X \sim N(\mu,\Sigma)$ for a $d$-dimensional multivariate normal random vector with mean vector $\mu \in \mathbb{R}^d$ and covariance matrix $\Sigma \in \mathbb{R}^{d\times d}$, where $\Sigma$ is symmetric and positive definite. If the linear algebra below is unfamiliar (transpose, inverse, determinant, positive definiteness), a short refresher is an appendix of the online edition, <https://vsokolov.org/bayes_ai_deep_learning/appendix-linalg.html>. Its density is
 $$
 p(x\mid \mu,\Sigma) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\left(-\frac{1}{2}(x-\mu)^\top \Sigma^{-1}(x-\mu)\right), \qquad x\in\mathbb{R}^d.
 $$
@@ -1560,6 +1560,66 @@ $$
 Repeating this produces an empirical approximation to the posterior predictive distribution $p(\tilde y\mid y)$ and makes uncertainty propagation concrete: parameter uncertainty becomes predictive uncertainty.
 
 Later chapters return to this pattern in different guises: sampling-based Bayesian inference (e.g., for logistic regression), approximate inference for scalable models, and simulation-based decision making. The key takeaway here is that conjugacy is a convenience, not a requirement; when the algebra ends, simulation provides the continuation.
+
+## SAT Coaching in Eight Schools
+
+@rubin1981estimation analyzes randomized experiments of coaching programs for the verbal SAT, which is scored from 200 to 800, in eight high schools. Each school $j$ reports an estimated treatment effect $y_j$ with standard error $\sigma_j$, the data columns of @tbl-eight-schools, and we want the average effect $\theta_j$ of its program. Two programs appear to work, with improvements of 28 and 18 points, but the standard errors are large and the intervals overlap. A classical test does not reject that the $\theta_j$ are equal ($\sum_j (y_j-\hat\theta)^2/\sigma_j^2 = 4.7$ on 7 degrees of freedom, $p = 0.70$), and the pooled estimate is
+$$
+\hat\theta = \frac{\sum_j y_j/\sigma_j^2}{\sum_j 1/\sigma_j^2} = 7.7,
+$$
+with standard error 4.1. Neither answer seems sensible: taken separately, School A gains 28 points, and pooled, it gains no more than School E.
+
+The hierarchical model treats the effects as exchangeable and lets the data decide how far to pool. With $\sigma_j^2$ known,
+$$
+y_j \mid \theta_j \sim N(\theta_j, \sigma_j^2),\qquad \theta_j \mid \mu, \tau \sim N(\mu, \tau^2),\qquad p(\mu, \tau^2) \propto 1/\tau,
+$$
+which is a uniform prior on $\tau$. As $\tau \to 0$ we get complete pooling and as $\tau \to \infty$ separate estimates. The joint posterior is
+$$
+\begin{aligned}
+p(\theta, \mu, \tau^2 \mid y) &\propto p(\mu, \tau^2) \prod_{j=1}^8 N(\theta_j \mid \mu, \tau^2) \prod_{j=1}^8 N(y_j \mid \theta_j, \sigma_j^2)\\
+&\propto \tau^{-9} \exp\left(-\frac{1}{2}\sum_j \frac{(\theta_j-\mu)^2}{\tau^2} - \frac{1}{2}\sum_j \frac{(y_j-\theta_j)^2}{\sigma_j^2}\right).
+\end{aligned}
+$$
+It is not a member of a familiar family, but every full conditional is, so the Gibbs sampler applies:
+$$
+\begin{aligned}
+\theta_j \mid \mu, \tau, y &\sim N\left(v_j\left(\frac{y_j}{\sigma_j^2} + \frac{\mu}{\tau^2}\right), v_j\right),\qquad v_j = \left(\frac{1}{\sigma_j^2} + \frac{1}{\tau^2}\right)^{-1},\\
+\mu \mid \theta, \tau &\sim N(\bar\theta, \tau^2/8),\\
+\tau^2 \mid \theta, \mu &\sim \text{Inv-Gamma}\left(\frac{7}{2}, \frac{1}{2}\sum_j (\theta_j-\mu)^2\right).
+\end{aligned}
+$$
+The variances are unequal, so the shrinkage differs: the larger $\sigma_j$, the more weight the conditional mean of $\theta_j$ puts on $\mu$.
+
+```{r}
+#| echo: true
+y <- c(A = 28, B = 8, C = -3, D = 7, E = -1, F = 1, G = 18, H = 12)
+s <- c(15, 10, 16, 11, 9, 11, 10, 18)
+J <- length(y); N <- 200000
+draws <- matrix(NA, N, J + 2, dimnames = list(NULL, c(names(y), "mu", "tau")))
+mu <- mean(y); tau <- 5
+set.seed(3)
+for (n in 1:N) {
+  v <- 1 / (1 / s^2 + 1 / tau^2)
+  theta <- rnorm(J, v * (y / s^2 + mu / tau^2), sqrt(v))
+  mu <- rnorm(1, mean(theta), tau / sqrt(J))
+  tau <- sqrt(1 / rgamma(1, (J - 1) / 2, sum((theta - mu)^2) / 2))
+  draws[n, ] <- c(theta, mu, tau)
+}
+draws <- draws[-(1:1000), ]
+```
+
+```{r}
+#| label: tbl-eight-schools
+#| tbl-cap: "Eight schools: the data and the posterior quantiles of the effects $\\theta_j$, of $\\mu$ and of $\\tau$."
+q <- t(apply(draws, 2, quantile, c(0.025, 0.25, 0.5, 0.75, 0.975)))
+q[] <- sprintf("%.1f", q)
+tab <- data.frame(Parameter = c(names(y), "$\\mu$", "$\\tau$"), y = c(y, NA, NA), se = c(s, NA, NA), q)
+names(tab) <- c("School", "$y_j$", "$\\sigma_j$", "2.5%", "25%", "50%", "75%", "97.5%")
+options(knitr.kable.NA = "")
+knitr::kable(tab, row.names = FALSE, align = "c")
+```
+
+@tbl-eight-schools shows the shrinkage. The estimate of 28 for School A falls to a median of about 10, the same as School G, which reported 18: Schools A and G are similar. The 95% interval for every school contains zero, and the posterior of $\tau$, with median near 5 and an interval from near 0 to about 21, shows that the data do not settle how much to pool. School A's interval is still wider than School G's, because its standard error is larger. The sampler moves slowly when $\tau$ is near zero, since a small $\tau$ pulls the $\theta_j$ together, and those $\theta_j$ in turn keep $\tau$ small: the draws of $\tau$ have autocorrelation 0.78 at lag 1 and 0.04 at lag 50, which is why we run the chain for so long.
 
 ## Exercises {.unnumbered}
 
