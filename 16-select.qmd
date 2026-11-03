@@ -227,9 +227,9 @@ For any predictive model, we seek to achieve the best possible results, i.e., th
 
 :::{#exm-bias-variance}
 ## Bias-variance
-We demonstrate bias-variance concept using Boston housing example. We fit a model $\mathrm{medv} = f(\mathrm{lstat})$. We use polynomial functions to approximate this relation. We fitted twelve polynomial functions with degree $1,\ldots,12$ ten times. Each time we randomly selected 20% of the sample for testing and the rest for training. We estimated in-sample and out-of-sample performance by calculating MSE on training and testing sets correspondingly. For each polynomial $f$ we averaged MSE from each of the ten models.
+We demonstrate bias-variance concept using Boston housing example. We fit a model $\mathrm{medv} = f(\mathrm{lstat})$. We use polynomial functions to approximate this relation. We fitted twelve polynomial functions with degree $1,\ldots,12$ one hundred times. Each time we randomly selected 20% of the sample for testing and the rest for training. We estimated in-sample and out-of-sample performance by calculating MSE on training and testing sets correspondingly. For each polynomial $f$ we took the mean of the in-sample MSE and the median of the out-of-sample MSE, because a few extreme values of lstat in a test set make the mean of a high degree polynomial explode.
 
-@fig-boston-bias-variance shows bias and variance for our twelve different models. As expected, bias decreases while variance increases as model complexity grows. On the other hand out-of-sample MSE is a U-shaped curve. The optimal model is the one that has smallest out-of-sample MSE. In our case, it is a polynomial of degree 5.
+@fig-boston-bias-variance shows in-sample MSE and model variance, the variance of the predictions across fits, for our twelve different models. As expected, in-sample MSE, which reflects the falling bias, decreases while variance increases as model complexity grows. On the other hand out-of-sample MSE is a U-shaped curve. The optimal model is the one that has smallest out-of-sample MSE. In our case, it is a polynomial of degree 5.
 
 ::: {#fig-boston layout-ncol=2}
 
@@ -237,7 +237,7 @@ We demonstrate bias-variance concept using Boston housing example. We fit a mode
 
 ![Optimal complexity model.](fig/boston-optimal-model.svg){#fig-boston-optimal-model}
 
-Metrics for twelve polynomial functions fitted into Boston housing dataset. Left panel: As model complexity (degree of the polynomial function) increases, model variance increases and bias decreases. Out-of-sample MSE is smallest for 5th degree polynomial function, which is the optimal model in terms of bias-variance trade-off. Right panel: Optimal model, which is 5th degree polynomial used to predict observations from testing dataset. Model predictions (solid line) are compared to actual observed values of medv variable (dots).
+Metrics for twelve polynomial functions fitted into Boston housing dataset. Left panel: As model complexity (degree of the polynomial function) increases, model variance increases and in-sample MSE decreases. Out-of-sample MSE is smallest for 5th degree polynomial function, which is the optimal model in terms of bias-variance trade-off. Right panel: Optimal model, which is 5th degree polynomial used to predict observations from testing dataset. Model predictions (solid line) are compared to actual observed values of medv variable (dots).
 :::
 
 Let's take another, more formal look at the bias-variance trade-off for a linear regression problem. We are interested in the decomposition of the error $\E{(y-\hat{y})^2}$ as a function of bias $\E{y-\hat{y}}$ and variance $\Var{\hat{y}}$.

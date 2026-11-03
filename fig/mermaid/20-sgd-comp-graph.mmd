@@ -3,16 +3,16 @@ graph TB
     %% Input nodes
     X["x = 2<br/>∇x = w × v3(1-v3)"]
     W["w = 3<br/>∇w = x × v3(1-v3)"]
-    B["b = 5<br/>∇b = v3(1-v3)"]
+    B["b = -5<br/>∇b = v3(1-v3)"]
 
     %% Computation nodes
     V1["v1 = w × x = 6<br/>∇v1 = v3(1-v3)"]
-    V2["v2 = v1 + b = 11<br/>∇v2 = v3(1-v3)"]
-    NEG["-v2 = -11<br/>∇(-v2) = -v3(1-v3)"]
-    EXP["exp(-v2) = 1.67e-05<br/>∇exp = -v3²"]
+    V2["v2 = v1 + b = 1<br/>∇v2 = v3(1-v3)"]
+    NEG["-v2 = -1<br/>∇(-v2) = -v3(1-v3)"]
+    EXP["exp(-v2) = 0.368<br/>∇exp = -v3²"]
     ONE["1"]
-    ADD1["1 + exp(-v2) = 1.0000<br/>∇add = -v3²"]
-    V3["v3 = 1/(1+exp(-v2)) = 0.99998<br/>∇v3 = 1"]
+    ADD1["1 + exp(-v2) = 1.368<br/>∇add = -v3²"]
+    V3["v3 = 1/(1+exp(-v2)) = 0.731<br/>∇v3 = 1"]
 
     %% Forward pass connections (solid arrows)
     X --> V1

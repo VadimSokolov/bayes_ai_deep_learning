@@ -398,13 +398,13 @@ $$
 $$
 
 
-In the forward mode, an auxiliary variable, called a dual number, will be added to each line of the code to track the value of the derivative associated with this line. In our example, if we set `x=2, w=3, b=5`, we get the calculations given in the table below.
+In the forward mode, an auxiliary variable, called a dual number, will be added to each line of the code to track the value of the derivative associated with this line. In our example, if we set `x=2, w=3, b=-5`, we get the calculations given in the table below.
 
  Function calculations           | Derivative calculations                                     
 ---------------------------------|-------------------------------------------------------------
  1. `v1 = w*x = 6`               | 1. `dv1 = w = 3` (derivative of `v1` with respect to `x`)   
- 2. `v2 = v1 + b = 11`           | 2. `dv2 = dv1 = 3` (derivative of `v2` with respect to `x`) 
- 3. `v3 = 1/(1+exp(-v2)) = 0.99998` | 3. `dv3 = dv2*v3*(1-v3) = 5e-05` 
+ 2. `v2 = v1 + b = 1`            | 2. `dv2 = dv1 = 3` (derivative of `v2` with respect to `x`) 
+ 3. `v3 = 1/(1+exp(-v2)) = 0.731` | 3. `dv3 = dv2*v3*(1-v3) = 0.590` 
  
 Variables `dv1,dv2,dv3` correspond to partial (local) derivatives of each intermediate variable `v1,v2,v3` with respect to $x$, and are called dual variables. Tracking for dual variables can either be implemented using source code modification tools that add new code for calculating the dual numbers or via operator overloading. 
 
@@ -413,9 +413,9 @@ The reverse AD also applies the chain rule recursively but starts from the outer
 
  Function calculations           | Derivative calculations                           
 ---------------------------------|---------------------------------------------------
- 1. `v1 = w*x = 6`               | 4. `dv1 = dv2*dv2dv1 = 1.67e-05; df/dx = dv1*w = 5e-05`
- 2. `v2 = v1 + b = 11`           | 3. `dv2dv1 = 1; dv2 = dv3*dv3dv2 = 1.67e-05`      
- 3. `v3 = 1/(1+exp(-v2)) = 0.99998` | 2. `dv3 = dv4 = 1; dv3dv2 = v3*(1-v3) = 1.67e-05`           
+ 1. `v1 = w*x = 6`               | 4. `dv1 = dv2*dv2dv1 = 0.197; df/dx = dv1*w = 0.590`
+ 2. `v2 = v1 + b = 1`            | 3. `dv2dv1 = 1; dv2 = dv3*dv3dv2 = 0.197`      
+ 3. `v3 = 1/(1+exp(-v2)) = 0.731` | 2. `dv3 = dv4 = 1; dv3dv2 = v3*(1-v3) = 0.197`           
  4. `v4 = v3`                    | 1. `dv4 = 1`                                        
 
 The key difference between forward and reverse mode is the direction of computation:
@@ -431,7 +431,7 @@ For neural networks with millions of parameters (inputs to the loss function) bu
 
 @fig-comp-graph shows a graph representation of the composition of affine and sigmoid functions (a single sigmoid unit). The numbers in the nodes are the values of the variables at a specific point, and the arrows show the flow of data. During the forward pass (solid arrows), the data flow from inputs (x, w, b) to the final output v3, and all intermediate variables are computed. During the backward pass (dashed arrows), the gradient values flow from the output back to the inputs by applying the chain rule to each variable.
 
-![Computational Graph for Sigmoid Function](fig/mermaid/20-sgd-comp-graph.png){#fig-comp-graph width=65% fig-alt="Computational graph of the sigmoid of w times x plus b for x = 2, w = 3 and b = 5, with solid arrows for the forward pass to v3 = 0.99998 and dashed arrows for the gradients flowing back to the inputs."}
+![Computational Graph for Sigmoid Function](fig/mermaid/20-sgd-comp-graph.png){#fig-comp-graph width=65% fig-alt="Computational graph of the sigmoid of w times x plus b for x = 2, w = 3 and b = -5, with solid arrows for the forward pass to v3 = 0.731 and dashed arrows for the gradients flowing back to the inputs."}
 
 For DL, derivatives are calculated by applying the reverse AD algorithm to a model which is defined as a composition of functions. A model is defined either using a general-purpose language as it is done in `PyTorch` or through a sequence of function calls defined by framework libraries (e.g., in `TensorFlow`). Forward AD algorithms calculate the derivative with respect to a single input variable, but reverse AD produces derivatives with respect to all intermediate variables. For models with many parameters, it is much more computationally feasible to perform the reverse AD. 
 

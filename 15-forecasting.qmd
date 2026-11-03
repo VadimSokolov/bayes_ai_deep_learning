@@ -230,6 +230,8 @@ plot(model3, "coef")
 par(op)
 ```
 
+Each bar is the posterior inclusion probability of a predictor, and its shade is the probability that the coefficient is positive, from black (negative) to white (positive).
+
 The search terms "unemployment office" and "Idaho unemployment" show up with probability close to one in both models. Increasing the expected model size from 1 (the default) to 5 gives noticeable probability to other terms, such as "New Jersey unemployment" and "filing unemployment" (about 0.4 and 0.3), but none of them is included with high probability.
 
 Those probabilities are the share of MCMC draws in which each $\beta$ is nonzero.
