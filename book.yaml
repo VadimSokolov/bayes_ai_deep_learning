@@ -3,7 +3,7 @@
 # The books website reads it too. Guide: references/repository.md of the book-writing skill.
 
 slug: bayes_ai_deep_learning                     # lowercase letters, digits and underscores; also the name of the book's page on the site
-title: "Bayes, Artificial Intelligence, and Deep Learning"
+title: "Bayes, AI and Deep Learning"
 subtitle: "Foundations of Data Science"
 authors:
   - given: "Nick"
@@ -17,12 +17,12 @@ authors:
 credit_names: ""                 # how a citation names the authors, e.g. "Polson and Sokolov"; empty: built from the family names
 year: 2026
 edition: "1"
-version: "1.0.4"                 # the release tag is v<version>
-date_released: "2026-11-02"      # YYYY-MM-DD, set at release
+version: "1.0.5"                 # the release tag is v<version>
+date_released: "2026-11-05"      # YYYY-MM-DD, set at release
 publisher: "Independently published"                    # "Independently published" (the imprint KDP shows for a free KDP ISBN)
 # no isbn: a free KDP ISBN may be used only on KDP, so it goes on the ISBN line of kdp.md (private) and is printed
 # only in the print edition (kdp.py interior); this file is published (references/publishing.md)
-doi: "10.5281/zenodo.23905441" # this edition's DOI; zenodo.py reserve writes it before the final build
+doi: "10.5281/zenodo.23986335" # this edition's DOI; zenodo.py reserve writes it before the final build
 license_text: CC-BY-4.0          # text, figures and PDF
 license_code: MIT
 repository: https://github.com/VadimSokolov/bayes_ai_deep_learning   # the public repository, named after the slug like the other books (22 Oct 2026)
@@ -30,7 +30,7 @@ site_page: https://vsokolov.org/books/bayes_ai_deep_learning/    # the book page
 html_url: https://vsokolov.org/bayes_ai_deep_learning/   # the HTML edition, GitHub Pages of the repository (23 Oct 2026)
 language: en
 print_url: ""                    # where to buy the printed book (optional)
-cover_image: fig/cover_gpt4o_mucha.png   # front cover image (PNG or JPEG, about 1600 px tall) in the repository, e.g. pdf/cover.png
+cover_image: pdf/cover.jpg   # front cover image (PNG or JPEG, about 1600 px tall) in the repository, e.g. pdf/cover.png
 pdf: pdf/bayes_ai_deep_learning.pdf              # the released PDF; bookrepo.py pdf copies the build here
 keywords:                        # 5 to 12 search terms
   - "Bayesian learning"
@@ -60,7 +60,7 @@ source:
   main: index.qmd
   aux: index.aux       # kept by the PDF build when _quarto.yml sets latex-clean: false
   toc: index.toc
-  pdf: _book/Bayes,-Artificial-Intelligence,-and-Deep-Learning.pdf  # the built PDF; its name follows the book title or output-file
+  pdf: _book/Bayes,-AI-and-Deep-Learning.pdf  # the built PDF; its name follows the book title or output-file
   meta: bookmeta.yml   # generated: book-doi, book-version ...; list it under metadata-files in _quarto.yml
 macros: misc/preamble.tex        # the file that defines the book's macros
 code_dir: code             # empty if the book has no code

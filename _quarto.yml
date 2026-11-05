@@ -3,7 +3,7 @@ project:
   output-dir: _book
 
 book:
-  title: "Bayes, Artificial Intelligence, and Deep Learning"
+  title: "Bayes, AI and Deep Learning"
   subtitle: "Foundations of Data Science"
   author: "Nick Polson and Vadim Sokolov"
   date: today

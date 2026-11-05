@@ -1,6 +1,6 @@
 # Computing exercises
 
-The computing exercises of *Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov, <https://github.com/VadimSokolov/bayes_ai_deep_learning>, as Jupyter notebooks, one per chapter and language. The printed book holds the pen-and-pencil exercises and points here for the computing ones. 123 exercises in 27 notebooks.
+The computing exercises of *Bayes, AI and Deep Learning: Foundations of Data Science* by Nick Polson and Vadim Sokolov, <https://github.com/VadimSokolov/bayes_ai_deep_learning>, as Jupyter notebooks, one per chapter and language. The printed book holds the pen-and-pencil exercises and points here for the computing ones. 123 exercises in 27 notebooks.
 
 Each notebook opens in Google Colab with its badge, and also runs in Jupyter (the R notebooks need the R kernel, IRkernel). The first code cell installs the R packages that the exercises use, or lists the Python modules, and downloads `data.zip` of the latest release of the book when an exercise reads files from `data/`. Then every exercise has its statement as in the book, the starter code that the book gives, and an empty code cell for your answer. The exercises are numbered as in the HTML version of the book: Exercise 8.6 is the sixth exercise of Chapter 8, counting the pen-and-pencil ones first.
 

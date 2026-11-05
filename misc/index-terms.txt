@@ -1,4 +1,4 @@
-# Index vocabulary for "Bayes, Artificial Intelligence, and Deep Learning"
+# Index vocabulary for "Bayes, AI and Deep Learning"
 # Line grammar:
 #   term                 -> match "term", index under "term"
 #   synonym => Canonical -> match "synonym", index under "Canonical"

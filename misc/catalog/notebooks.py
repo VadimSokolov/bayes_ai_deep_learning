@@ -31,7 +31,7 @@ BLOB = f'{SITE}/blob/main/'
 COLAB = f'https://colab.research.google.com/github/{REPO}/blob/main/exercises/'
 BADGE = 'https://colab.research.google.com/assets/colab-badge.svg'
 DATA_ZIP = f'{SITE}/releases/latest/download/data.zip'
-BOOK = 'Bayes, Artificial Intelligence, and Deep Learning: Foundations of Data Science'
+BOOK = 'Bayes, AI and Deep Learning: Foundations of Data Science'
 EM = '\u2014'
 DASH3 = '-' * 3
 

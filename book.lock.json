@@ -1,7 +1,7 @@
 {
  "edition": "1",
  "pdf": {
-  "bytes": 37480292,
+  "bytes": 37483660,
   "file": "pdf/bayes_ai_deep_learning.pdf",
   "pages": 805,
   "parts": [
@@ -202,7 +202,7 @@
     "title": "Index"
    }
   ],
-  "sha256": "56fb54a9d1714b3fd63d0c9b19512e74d4dbbfaa4ea3f0378f4c46b99414a17f"
+  "sha256": "15722cc2289e1176cec869e6427fdbb5983f226f416a1adca515af8c6e86c751"
  },
  "results": {
   "bayesian_bridge_bartlett_fejer_mixture": {
@@ -305,10 +305,17 @@
    "verified_on": "2026-11-02"
   }
  },
- "updated": "2026-11-02",
+ "updated": "2026-11-05",
  "zenodo": {
   "concept_doi": "10.5281/zenodo.23603836",
   "doi": "10.5281/zenodo.23905441",
+  "draft": {
+   "doi": "10.5281/zenodo.23986335",
+   "html": "https://zenodo.org/deposit/23986335",
+   "id": 23986335,
+   "reserved_on": "2026-11-05",
+   "version": "1.0.5"
+  },
   "html": "https://zenodo.org/records/23905441",
   "latest_id": 23905441,
   "tag": "v1.0.4",
