@@ -1,5 +1,4 @@
-{{< pagebreak >}}
-
+::: {.content-visible when-format="html"}
 Copyright © {{< meta book-year >}} Nick Polson and Vadim Sokolov. First edition, {{< meta book-year >}}.
 
 ::: {.content-visible when-meta="book-has-isbn"}
@@ -11,8 +10,7 @@ Digital Object Identifier (DOI): [{{< meta book-doi >}}](https://doi.org/{{< met
 :::
 
 License: distributed under the Creative Commons Attribution 4.0 International License (CC BY 4.0), <https://creativecommons.org/licenses/by/4.0/>: you may copy, share and adapt this book for any purpose, provided you credit the authors. Figures credited to another source are not covered by this license and remain under the terms of their owners. The code is released under the MIT License.
-
-{{< pagebreak >}}
+:::
 
 # Preface {.unnumbered}
 Modern AI rests on three foundations: Bayesian reasoning, statistical learning, and deep neural networks. This book develops all three, starting from probability and decision theory, progressing through classical machine learning, and ending with transformers and autonomous agents. Whether you are a business analyst seeking operational intuition or an engineer building systems, this book provides mathematical depth and practical fluency. Throughout, uncertainty is a first-class citizen: the foundation for better algorithms and clearer thinking about data, models, and decisions.

@@ -37,6 +37,7 @@ execute:
 
 filters:
   - misc/index-terms.lua
+  - misc/frontmatter-pdf.lua
   - misc/epub-math.lua
   - misc/epub-fixups.lua
 
