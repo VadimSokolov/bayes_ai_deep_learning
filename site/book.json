@@ -23,10 +23,10 @@
  "credit_names": "Polson and Sokolov",
  "year": "2026",
  "edition": "1",
- "version": "1.0.6",
+ "version": "1.0.7",
  "date_released": "2026-11-05",
  "publisher": "Independently published",
- "doi": "10.5281/zenodo.23987544",
+ "doi": "10.5281/zenodo.23992805",
  "concept_doi": "10.5281/zenodo.23603836",
  "language": "en",
  "keywords": [
@@ -56,21 +56,19 @@
   "url": "https://opensource.org/license/mit"
  },
  "release": {
-  "tag": "v1.0.6",
-  "url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/tag/v1.0.6"
+  "tag": "v1.0.7",
+  "url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/tag/v1.0.7"
  },
  "links": {
   "page": "https://vsokolov.org/books/bayes_ai_deep_learning/",
   "page_markdown": "https://vsokolov.org/books/bayes_ai_deep_learning/index.html.md",
   "results": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html",
   "results_markdown": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html.md",
-  "pdf": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/download/v1.0.6/bayes_ai_deep_learning.pdf",
+  "pdf": "https://github.com/VadimSokolov/bayes_ai_deep_learning/releases/download/v1.0.7/bayes_ai_deep_learning.pdf",
   "repository": "https://github.com/VadimSokolov/bayes_ai_deep_learning",
-  "source": "https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/v1.0.6",
-  "doi": "https://doi.org/10.5281/zenodo.23987544",
+  "source": "https://github.com/VadimSokolov/bayes_ai_deep_learning/tree/v1.0.7",
+  "doi": "https://doi.org/10.5281/zenodo.23992805",
   "concept_doi": "https://doi.org/10.5281/zenodo.23603836",
-  "zenodo": "https://zenodo.org/records/23987544",
-  "doi_badge": "https://zenodo.org/badge/DOI/10.5281/zenodo.23987544.svg",
   "icon_pdf": "https://vsokolov.org/books/icon-pdf.svg",
   "icon_github": "https://vsokolov.org/books/icon-github.svg",
   "icon_web": "https://vsokolov.org/books/icon-web.svg",
@@ -78,16 +76,16 @@
   "cover": "https://vsokolov.org/books/bayes_ai_deep_learning/cover.jpg"
  },
  "citation": {
-  "text": "Polson and Sokolov (2026), Bayes, AI and Deep Learning: Foundations of Data Science, edition 1, https://doi.org/10.5281/zenodo.23987544.",
-  "bibtex": "@book{polsonsokolov2026bayes_ai_deep_learning,\n  author = {Polson, Nick and Sokolov, Vadim},\n  title = {{Bayes, AI and Deep Learning: Foundations of Data Science}},\n  year = {2026},\n  publisher = {Independently published},\n  doi = {10.5281/zenodo.23987544},\n  url = {https://vsokolov.org/books/bayes_ai_deep_learning/}\n}",
+  "text": "Polson and Sokolov (2026), Bayes, AI and Deep Learning: Foundations of Data Science, edition 1, https://doi.org/10.5281/zenodo.23992805.",
+  "bibtex": "@book{polsonsokolov2026bayes_ai_deep_learning,\n  author = {Polson, Nick and Sokolov, Vadim},\n  title = {{Bayes, AI and Deep Learning: Foundations of Data Science}},\n  year = {2026},\n  publisher = {Independently published},\n  doi = {10.5281/zenodo.23992805},\n  url = {https://vsokolov.org/books/bayes_ai_deep_learning/}\n}",
   "bibkey": "polsonsokolov2026bayes_ai_deep_learning",
   "example": "Polson and Sokolov (2026), Example 2.10"
  },
  "pdf": {
   "file": "bayes_ai_deep_learning.pdf",
   "pages": 803,
-  "bytes": 37482226,
-  "sha256": "f72a35f4e83612be66b3b818955aa282a2d0608dbd06e2f21ce2b1eca2f58a88"
+  "bytes": 37484500,
+  "sha256": "df7618b357bb677dcc89342189abcf03f037b29d7ecdf0ebba77449ad438bcd3"
  },
  "bundle": {
   "page": "site/index.md",
@@ -99,7 +97,7 @@
  "serve": [
   {
    "path": "cover.jpg",
-   "url": "https://raw.githubusercontent.com/VadimSokolov/bayes_ai_deep_learning/v1.0.6/pdf/cover.jpg"
+   "url": "https://raw.githubusercontent.com/VadimSokolov/bayes_ai_deep_learning/v1.0.7/pdf/cover.jpg"
   }
  ],
  "chapters": [
@@ -397,7 +395,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#nakamura_streak_posterior_innocence",
    "source": "02-bayes.qmd",
    "label": "exm-nakamura",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/02-bayes.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/02-bayes.qmd"
   },
   {
    "id": "bernoulli_beta_option_value_of_learning",
@@ -416,7 +414,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#bernoulli_beta_option_value_of_learning",
    "source": "04-dec.qmd",
    "label": "res-option-value-of-learning",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/04-dec.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/04-dec.qmd"
   },
   {
    "id": "livermore_maxims_bellman_view",
@@ -435,7 +433,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#livermore_maxims_bellman_view",
    "source": "04-dec.qmd",
    "label": "res-livermore-maxims",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/04-dec.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/04-dec.qmd"
   },
   {
    "id": "polya_gamma_integral_identity",
@@ -454,7 +452,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#polya_gamma_integral_identity",
    "source": "13-logistic.qmd",
    "label": "thm-polya-gamma-identity",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/13-logistic.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/13-logistic.qmd"
   },
   {
    "id": "polya_gamma_gibbs_sampler_logistic",
@@ -473,7 +471,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#polya_gamma_gibbs_sampler_logistic",
    "source": "13-logistic.qmd",
    "label": "res-polya-gamma-gibbs",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/13-logistic.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/13-logistic.qmd"
   },
   {
    "id": "bayesian_bridge_bartlett_fejer_mixture",
@@ -492,7 +490,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#bayesian_bridge_bartlett_fejer_mixture",
    "source": "17-theoryai.qmd",
    "label": "res-bartlett-fejer-mixture",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/17-theoryai.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/17-theoryai.qmd"
   },
   {
    "id": "posterior_concentration_sparse_deep_learning",
@@ -509,7 +507,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#posterior_concentration_sparse_deep_learning",
    "source": "19-theorydl.qmd",
    "label": "res-posterior-concentration",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/19-theorydl.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/19-theorydl.qmd"
   },
   {
    "id": "meu_quantile_network_method",
@@ -528,7 +526,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#meu_quantile_network_method",
    "source": "21-qnn.qmd",
    "label": "res-meu-quantile-network",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/21-qnn.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/21-qnn.qmd"
   },
   {
    "id": "quantile_trend_filtering_hierarchical_model",
@@ -547,7 +545,7 @@
    "url": "https://vsokolov.org/books/bayes_ai_deep_learning/results.html#quantile_trend_filtering_hierarchical_model",
    "source": "21-qnn.qmd",
    "label": "res-quantile-trend-filtering",
-   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.6/21-qnn.qmd"
+   "source_url": "https://github.com/VadimSokolov/bayes_ai_deep_learning/blob/v1.0.7/21-qnn.qmd"
   }
  ]
 }

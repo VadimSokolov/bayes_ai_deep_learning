@@ -10,8 +10,8 @@ authors:
   given-names: Vadim
   orcid: https://orcid.org/0000-0002-6618-2965
   affiliation: George Mason University
-version: 1.0.6
-doi: 10.5281/zenodo.23987544
+version: 1.0.7
+doi: 10.5281/zenodo.23992805
 date-released: '2026-11-05'
 license: CC-BY-4.0
 repository-code: https://github.com/VadimSokolov/bayes_ai_deep_learning
@@ -51,7 +51,7 @@ preferred-citation:
     orcid: https://orcid.org/0000-0002-6618-2965
     affiliation: George Mason University
   year: 2026
-  doi: 10.5281/zenodo.23987544
+  doi: 10.5281/zenodo.23992805
   url: https://vsokolov.org/books/bayes_ai_deep_learning/
   publisher:
     name: Independently published

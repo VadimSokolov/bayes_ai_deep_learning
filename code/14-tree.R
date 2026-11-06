@@ -162,6 +162,7 @@ for (j in 1:2) dotchart(sort(imp[, j]), xlim = c(min(0, imp[, j]), max(imp[, j])
 set.seed(1)
 rf.boston <- randomForest(medv ~ ., data = Boston, mtry = 6, ntree = 50, maxnodes = 50)
 yhat.rf <- predict(rf.boston, newdata = Boston)
+par(mfrow = c(1, 1))
 plot(Boston$lstat, Boston$medv, pch = 21, bg = "grey", xlab = "lstat", ylab = "medv") # plot data
 points(Boston$lstat, yhat.rf, pch = 16, cex = 0.5, col = "red") # fitted values
 

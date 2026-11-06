@@ -650,11 +650,8 @@ When pure predictive accuracy on massive datasets with complex non-linear intera
 
 ## Advanced Theory: Under the Hood
 
-::: {.callout-tip}
 *Optional Section*: This section delves into the mathematical machinery driving the models. Readers focused primarily on application can skip ahead to the exercises.
-:::
 
-::: {.callout-note}
 *A Note on Notation*: In this section, we transition to the standard state-space notation to align with the classic literature, and $\alpha_t$ becomes $x_t$. Two conventions appear, and they disagree about which letter does what, so it is worth pinning them down before we start.
 
 |  | Observation matrix | Transition matrix |
@@ -663,7 +660,6 @@ When pure predictive accuracy on massive datasets with complex non-linear intera
 | Robot example (engineering/Kalman) | $G$ | $A$ |
 
 The letter $G$ is the one to watch: in the derivation it multiplies the previous state, and in the robot example it multiplies the current state inside the observation equation. Read it from its position in the equation, not from the letter alone.
-:::
 
 
 The models we have discussed in the `bsts` framework are all special cases of the *linear Gaussian state space model* (also known as the Dynamic Linear Model). While `bsts` provides a convenient high-level interface to fit these models using MCMC, understanding the underlying machinery provides deeper insight into how these forecasts are generated and updated as new data arrive.

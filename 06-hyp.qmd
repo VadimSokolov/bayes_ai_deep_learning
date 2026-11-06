@@ -1371,6 +1371,7 @@ cat(
 cat("  Average days to finish:", round(mean(bandit_days), 1), "\n")
 cat("  Average days saved:", round(mean(days_saved), 1), "\n")
 cat("  Average conversions saved:", round(mean(conversions_saved), 1), "\n")
+par(mfrow = c(1, 1))
 ```
 
 

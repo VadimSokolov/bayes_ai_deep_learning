@@ -435,6 +435,7 @@ The next figure shows the in-sample fit of a forest on all 13 predictors (`mtry 
 set.seed(1)
 rf.boston <- randomForest(medv ~ ., data = Boston, mtry = 6, ntree = 50, maxnodes = 50)
 yhat.rf <- predict(rf.boston, newdata = Boston)
+par(mfrow = c(1, 1))
 plot(Boston$lstat, Boston$medv, pch = 21, bg = "grey", xlab = "lstat", ylab = "medv") # plot data
 points(Boston$lstat, yhat.rf, pch = 16, cex = 0.5, col = "red") # fitted values
 ```
@@ -767,12 +768,12 @@ This phenomenon means that in high dimensions, "local neighbors" are not actuall
 
 Decision trees solve this by defining "neighbors" differently. Instead of using a fixed distance metric (like Euclidean distance), trees define a neighborhood as a rectangular box learned from the data, which extends over the whole range of the predictors it ignores (hence the *cylindrical region*) (@fig-cilinder).
 
-::: {#fig-cilinder layout="[[-1,8,-1],[-1,8,-1]]"}
+::: {#fig-cilinder layout-ncol=2}
 ![](fig/cylinder_kernel.svg)
 
 ![](fig/rf_kernel.svg)
 
-Cylindrical kernels for trees (upper) and random forests (lower).
+Cylindrical kernels for trees (left) and random forests (right).
 :::
 
 Constructing the regions is fundamental to reducing the curse of dimensionality. It is useful to imagine a very large dataset, e.g., 100k images, and think about how a new image's input coordinates, $X$, are "neighbors" to data points in the training set. Our predictor will then be a smart conditional average of the observed outputs, $Y$, for our neighbors. When $p$ is large, spheres ($L^2$ balls or Gaussian kernels) are terrible: either no points or all points are "neighbors" of the new input variable. Trees are good because their neighborhoods contain neither no points nor all points.
