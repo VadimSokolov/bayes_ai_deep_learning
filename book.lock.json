@@ -308,18 +308,11 @@
  "updated": "2026-11-05",
  "zenodo": {
   "concept_doi": "10.5281/zenodo.23603836",
-  "doi": "10.5281/zenodo.23987544",
-  "draft": {
-   "doi": "10.5281/zenodo.23992805",
-   "html": "https://zenodo.org/deposit/23992805",
-   "id": 23992805,
-   "reserved_on": "2026-11-05",
-   "version": "1.0.7"
-  },
-  "html": "https://zenodo.org/records/23987544",
-  "latest_id": 23987544,
-  "tag": "v1.0.6",
-  "version": "1.0.6",
+  "doi": "10.5281/zenodo.23992805",
+  "html": "https://zenodo.org/records/23992805",
+  "latest_id": 23992805,
+  "tag": "v1.0.7",
+  "version": "1.0.7",
   "versions": [
    {
     "doi": "10.5281/zenodo.23603837",
@@ -368,6 +361,14 @@
     "published_on": "2026-11-05",
     "tag": "v1.0.6",
     "version": "1.0.6"
+   },
+   {
+    "doi": "10.5281/zenodo.23992805",
+    "html": "https://zenodo.org/records/23992805",
+    "id": 23992805,
+    "published_on": "2026-11-05",
+    "tag": "v1.0.7",
+    "version": "1.0.7"
    }
   ]
  }
