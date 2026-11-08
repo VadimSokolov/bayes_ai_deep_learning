@@ -338,73 +338,71 @@ legend("topleft",
 
 # ---- Operating Characteristics via Simulation ------------------------------
 
-# (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
-# # Function to simulate one trial
-# simulate_trial <- function(p_C_true, p_T_true, n_max = 30,
-#                            interim_points = c(10, 20, 30),
-#                            theta_E = 0.95, theta_F = 0.10,
-#                            alpha_prior = 1, beta_prior = 1, n_mc = 5000) {
-#   # Generate all outcomes upfront
-#   control_outcomes <- rbinom(n_max, 1, p_C_true)
-#   treatment_outcomes <- rbinom(n_max, 1, p_T_true)
+# (the book does not run this chunk when it builds; it has no output in the book, and it stays active here because the chunks after it use what it defines)
+# Function to simulate one trial
+simulate_trial <- function(p_C_true, p_T_true, n_max = 30,
+                           interim_points = c(10, 20, 30),
+                           theta_E = 0.95, theta_F = 0.10,
+                           alpha_prior = 1, beta_prior = 1, n_mc = 5000) {
+  # Generate all outcomes upfront
+  control_outcomes <- rbinom(n_max, 1, p_C_true)
+  treatment_outcomes <- rbinom(n_max, 1, p_T_true)
 
-#   for (n_current in interim_points) {
-#     x_C <- sum(control_outcomes[1:n_current])
-#     x_T <- sum(treatment_outcomes[1:n_current])
+  for (n_current in interim_points) {
+    x_C <- sum(control_outcomes[1:n_current])
+    x_T <- sum(treatment_outcomes[1:n_current])
 
-#     # Posterior samples
-#     p_C_samp <- rbeta(n_mc, alpha_prior + x_C, beta_prior + n_current - x_C)
-#     p_T_samp <- rbeta(n_mc, alpha_prior + x_T, beta_prior + n_current - x_T)
-#     p_superior <- mean(p_T_samp > p_C_samp)
+    # Posterior samples
+    p_C_samp <- rbeta(n_mc, alpha_prior + x_C, beta_prior + n_current - x_C)
+    p_T_samp <- rbeta(n_mc, alpha_prior + x_T, beta_prior + n_current - x_T)
+    p_superior <- mean(p_T_samp > p_C_samp)
 
-#     if (p_superior > theta_E) {
-#       return(list(decision = "Efficacy", n_final = n_current, p_superior = p_superior))
-#     } else if (p_superior < theta_F) {
-#       return(list(decision = "Futility", n_final = n_current, p_superior = p_superior))
-#     }
-#   }
+    if (p_superior > theta_E) {
+      return(list(decision = "Efficacy", n_final = n_current, p_superior = p_superior))
+    } else if (p_superior < theta_F) {
+      return(list(decision = "Futility", n_final = n_current, p_superior = p_superior))
+    }
+  }
 
-#   # Reached max sample size
-#   return(list(decision = "Max reached", n_final = n_max, p_superior = p_superior))
-# }
+  # Reached max sample size
+  return(list(decision = "Max reached", n_final = n_max, p_superior = p_superior))
+}
 
-# [operating-chars]
-# (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
-# # Simulate under different scenarios
-# set.seed(42)
-# n_trials <- 1000
-# scenarios <- data.frame(
-#   scenario = c("Null (no effect)", "Small effect", "Moderate effect", "Large effect"),
-#   p_C = c(0.30, 0.30, 0.30, 0.30),
-#   p_T = c(0.30, 0.40, 0.50, 0.60)
-# )
+# [operating-chars-code]
+# (the book does not run this chunk when it builds; its output is kept in results/06-hyp/operating-chars-*)
+# Simulate under different scenarios
+set.seed(42)
+n_trials <- 1000
+scenarios <- data.frame(
+  scenario = c("Null (no effect)", "Small effect", "Moderate effect", "Large effect"),
+  p_C = c(0.30, 0.30, 0.30, 0.30),
+  p_T = c(0.30, 0.40, 0.50, 0.60)
+)
 
-# results_all <- list()
-# for (i in 1:nrow(scenarios)) {
-#   trials <- replicate(n_trials,
-#     simulate_trial(scenarios$p_C[i], scenarios$p_T[i]),
-#     simplify = FALSE
-#   )
+results_all <- list()
+for (i in 1:nrow(scenarios)) {
+  trials <- replicate(n_trials,
+    simulate_trial(scenarios$p_C[i], scenarios$p_T[i]),
+    simplify = FALSE
+  )
 
-#   decisions <- sapply(trials, function(x) x$decision)
-#   n_finals <- sapply(trials, function(x) x$n_final)
+  decisions <- sapply(trials, function(x) x$decision)
+  n_finals <- sapply(trials, function(x) x$n_final)
 
-#   results_all[[i]] <- data.frame(
-#     Scenario = scenarios$scenario[i],
-#     `True p_C` = scenarios$p_C[i],
-#     `True p_T` = scenarios$p_T[i],
-#     `P(Efficacy)` = mean(decisions == "Efficacy"),
-#     `P(Futility)` = mean(decisions == "Futility"),
-#     `E[N per arm]` = mean(n_finals),
-#     check.names = FALSE
-#   )
-# }
+  results_all[[i]] <- data.frame(
+    Scenario = scenarios$scenario[i],
+    `True p_C` = scenarios$p_C[i],
+    `True p_T` = scenarios$p_T[i],
+    `P(Efficacy)` = mean(decisions == "Efficacy"),
+    `P(Futility)` = mean(decisions == "Futility"),
+    `E[N per arm]` = mean(n_finals),
+    check.names = FALSE
+  )
+}
 
-# op_chars <- do.call(rbind, results_all)
-# knitr::kable(op_chars,
-#   digits = 3,
-#   caption = "Operating characteristics of the Bayesian sequential design"
-# )
+op_chars <- do.call(rbind, results_all)
+names(op_chars) <- c("Scenario", "True $p_C$", "True $p_T$", "P(Efficacy)", "P(Futility)", "E[N per arm]")
+writeLines(knitr::kable(op_chars, digits = 3), "results/06-hyp/operating-chars.md")
 
 # ---- Reproducing Scott's Bandit Experiment ---------------------------------
 
@@ -475,97 +473,109 @@ legend("right",
 cat("Experiment ended on day:", end_day, "\n")
 cat("Days saved vs classical:", classical_days - end_day, "\n")
 
-# [bandit-simulations]
-# (the book does not run this chunk when it builds; it has no output in the book, and it is commented out here: remove the comment marks to run it)
-# set.seed(2024)
+# [bandit-simulations-code]
+# (the book does not run this chunk when it builds; its output is kept in results/06-hyp/bandit-simulations-*)
+set.seed(2024)
 
-# # Parameters
-# theta_true <- c(0.04, 0.05)
-# K <- 2
-# visits_per_day <- 100
-# classical_days <- 223
-# n_simulations <- 500
-# n_mc <- 5000
-# min_days <- 14
+# Parameters
+theta_true <- c(0.04, 0.05)
+K <- 2
+visits_per_day <- 100
+classical_days <- 223
+n_simulations <- 500
+n_mc <- 5000
+min_days <- 14
 
-# # Function to run one bandit trial
-# run_bandit_trial <- function(theta_true, visits_per_day, max_days = 300) {
-#   alpha_params <- c(1, 1)
-#   beta_params <- c(1, 1)
-#   prob_optimal <- rep(1 / K, K)
-#   total_conversions <- 0
+# Function to run one bandit trial
+run_bandit_trial <- function(theta_true, visits_per_day, max_days = 300) {
+  alpha_params <- c(1, 1)
+  beta_params <- c(1, 1)
+  prob_optimal <- rep(1 / K, K)
+  total_conversions <- 0
 
-#   for (day in 1:max_days) {
-#     # Allocate the day's traffic by this morning's serving weights
-#     visits <- as.vector(rmultinom(1, visits_per_day, prob_optimal))
-#     conversions <- rbinom(K, visits, theta_true)
-#     alpha_params <- alpha_params + conversions
-#     beta_params <- beta_params + (visits - conversions)
-#     total_conversions <- total_conversions + sum(conversions)
+  for (day in 1:max_days) {
+    # Allocate the day's traffic by this morning's serving weights
+    visits <- as.vector(rmultinom(1, visits_per_day, prob_optimal))
+    conversions <- rbinom(K, visits, theta_true)
+    alpha_params <- alpha_params + conversions
+    beta_params <- beta_params + (visits - conversions)
+    total_conversions <- total_conversions + sum(conversions)
 
-#     # Overnight update of the probability each arm is optimal
-#     theta_samples <- cbind(
-#       rbeta(n_mc, alpha_params[1], beta_params[1]),
-#       rbeta(n_mc, alpha_params[2], beta_params[2])
-#     )
-#     prob_optimal <- tabulate(max.col(theta_samples, ties.method = "first"), K) / n_mc
+    # Overnight update of the probability each arm is optimal
+    theta_samples <- cbind(
+      rbeta(n_mc, alpha_params[1], beta_params[1]),
+      rbeta(n_mc, alpha_params[2], beta_params[2])
+    )
+    prob_optimal <- tabulate(max.col(theta_samples, ties.method = "first"), K) / n_mc
 
-#     # Check stopping
-#     if (day >= min_days && max(prob_optimal) > 0.95) break
-#   }
-#   winner <- which.max(prob_optimal)
-#   list(
-#     day = day, conversions = total_conversions,
-#     winner = winner, correct = (winner == 2)
-#   )
-# }
+    # Check stopping
+    if (day >= min_days && max(prob_optimal) > 0.95) break
+  }
+  winner <- which.max(prob_optimal)
+  list(
+    day = day, conversions = total_conversions,
+    winner = winner, correct = (winner == 2)
+  )
+}
 
-# # Run simulations
-# results <- lapply(1:n_simulations, function(i) run_bandit_trial(theta_true, visits_per_day))
+# Run simulations
+results <- lapply(1:n_simulations, function(i) run_bandit_trial(theta_true, visits_per_day))
 
-# # Extract results
-# bandit_days <- sapply(results, function(x) x$day)
-# bandit_conversions <- sapply(results, function(x) x$conversions)
-# correct_arm <- sapply(results, function(x) x$correct)
+# Extract results
+bandit_days <- sapply(results, function(x) x$day)
+bandit_conversions <- sapply(results, function(x) x$conversions)
+correct_arm <- sapply(results, function(x) x$correct)
 
-# # Classical experiment: fixed allocation for 223 days
-# # Expected conversions per day: 50 * 0.04 + 50 * 0.05 = 4.5
-# classical_conversions_per_day <- visits_per_day * mean(theta_true)
-# classical_total_conversions <- classical_days * classical_conversions_per_day
+# Classical experiment: fixed allocation for 223 days
+# Expected conversions per day: 50 * 0.04 + 50 * 0.05 = 4.5
+classical_conversions_per_day <- visits_per_day * mean(theta_true)
+classical_total_conversions <- classical_days * classical_conversions_per_day
 
-# # For bandit, compute expected conversions if we ran to classical_days
-# # with optimal allocation after stopping
-# expected_bandit_conversions <- bandit_conversions +
-#   (classical_days - bandit_days) * visits_per_day * max(theta_true)
+# For bandit, compute expected conversions if we ran to classical_days
+# with optimal allocation after stopping
+expected_bandit_conversions <- bandit_conversions +
+  (classical_days - bandit_days) * visits_per_day * max(theta_true)
 
-# # Days saved and conversions saved
-# days_saved <- classical_days - bandit_days
-# conversions_saved <- expected_bandit_conversions - classical_total_conversions
+# Days saved and conversions saved
+days_saved <- classical_days - bandit_days
+conversions_saved <- expected_bandit_conversions - classical_total_conversions
 
-# # Plot histograms
-# par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+# Plot histograms
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 
-# hist(days_saved,
-#   breaks = 20, col = "lightgreen", border = "white",
-#   main = "Days of Testing Saved", xlab = "Number of Days",
-#   ylab = "Frequency", xlim = c(-100, 250)
-# )
-# abline(v = mean(days_saved), col = "darkgreen", lwd = 2, lty = 2)
+hist(days_saved,
+  breaks = 20, col = "lightgreen", border = "white",
+  main = "Days of Testing Saved", xlab = "Number of Days",
+  ylab = "Frequency", xlim = c(-100, 250)
+)
+abline(v = mean(days_saved), col = "darkgreen", lwd = 2, lty = 2)
 
-# hist(conversions_saved,
-#   breaks = 20, col = "lightgreen", border = "white",
-#   main = "Conversions Saved", xlab = "Number of Conversions",
-#   ylab = "Frequency"
-# )
-# abline(v = mean(conversions_saved), col = "darkgreen", lwd = 2, lty = 2)
+hist(conversions_saved,
+  breaks = 20, col = "lightgreen", border = "white",
+  main = "Conversions Saved", xlab = "Number of Conversions",
+  ylab = "Frequency"
+)
+abline(v = mean(conversions_saved), col = "darkgreen", lwd = 2, lty = 2)
 
-# # Summary statistics
-# cat("Simulation results (n =", n_simulations, "):\n")
-# cat(
-#   "  Correct arm identified:", sum(correct_arm), "/", n_simulations,
-#   "(", round(100 * mean(correct_arm), 1), "%)\n"
-# )
-# cat("  Average days to finish:", round(mean(bandit_days), 1), "\n")
-# cat("  Average days saved:", round(mean(days_saved), 1), "\n")
-# cat("  Average conversions saved:", round(mean(conversions_saved), 1), "\n")
-# par(mfrow = c(1, 1))
+# Summary statistics
+cat("Simulation results (n =", n_simulations, "):\n")
+cat(
+  "  Correct arm identified:", sum(correct_arm), "/", n_simulations,
+  "(", round(100 * mean(correct_arm), 1), "%)\n"
+)
+cat("  Average days to finish:", round(mean(bandit_days), 1), "\n")
+cat("  Average days saved:", round(mean(days_saved), 1), "\n")
+cat("  Average conversions saved:", round(mean(conversions_saved), 1), "\n")
+par(mfrow = c(1, 1))
+
+# Table of the results beside the figures of Scott (2013)
+bandit_table <- data.frame(
+  Metric = c("Correct arm identified", "Median days to finish", "Average days to finish",
+             "Average days saved", "Average conversions saved"),
+  Value = c(sprintf("%d / %d (%.1f%%)", sum(correct_arm), n_simulations, 100 * mean(correct_arm)),
+            median(bandit_days), sprintf("%.1f", mean(bandit_days)),
+            sprintf("%.1f", mean(days_saved)), sprintf("%.1f", mean(conversions_saved))),
+  Scott = c("482 / 500 (96.4%)", "not reported", "48", "175", "97.5")
+)
+names(bandit_table)[3] <- "Scott's value"
+writeLines(knitr::kable(bandit_table, align = "lrr"), "results/06-hyp/bandit-simulations.md")

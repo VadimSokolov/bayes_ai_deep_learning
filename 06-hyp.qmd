@@ -308,7 +308,7 @@ plot(p, Pe * 1e7, type = "l", xlab = "p", ylab = expression(10^7 ~ P[e]))
 ::: {#exm-normalhypothesis}
 ## Hockey: Hypothesis Testing for Normal Mean
 
-The general manager of Washington Capitals (an NHL hockey team) thinks that their star center player Evgeny Kuznetsov is underperforming and is thinking of trading him to a different team. He uses the number of goals per season as a metric of performance. He knows that historically, a top forward scores on average 30 goals per season with a standard deviation of 5, $\theta \sim N(30,25)$. In the 2022--2023 season, Kuznetsov scored 12 goals. For the number of goals $X\mid \theta$, he uses a normal likelihood $N(\theta, 36)$. Kuznetsov's performance was not stable over the years, thus the high variance in the likelihood. Thus, the posterior is $N(23,15)$. 
+The general manager of Washington Capitals (an NHL hockey team) thinks that their star center player Evgeny Kuznetsov is underperforming and is thinking of trading him to a different team. He uses the number of goals per season as a metric of performance. He knows that historically, a top forward scores on average 30 goals per season with a standard deviation of 5, $\theta \sim N(30,25)$. In the 2022--2023 season, Kuznetsov scored 12 goals. For the number of goals $X\mid \theta$, he uses a normal likelihood $N(\theta, 36)$. Kuznetsov's performance was not stable over the years, thus the high variance in the likelihood. Thus, the posterior is $N(22.6, 14.8)$. 
 ```{r hockey-posterior}
 #| echo: true
 sigma2 <- 36
@@ -1079,7 +1079,7 @@ simulate_trial <- function(p_C_true, p_T_true, n_max = 30,
 }
 ```
 
-```{r operating-chars}
+```{r operating-chars-code}
 #| eval: false
 #| echo: false
 
@@ -1114,20 +1114,18 @@ for (i in 1:nrow(scenarios)) {
 }
 
 op_chars <- do.call(rbind, results_all)
-knitr::kable(op_chars,
-  digits = 3,
-  caption = "Operating characteristics of the Bayesian sequential design"
-)
+names(op_chars) <- c("Scenario", "True $p_C$", "True $p_T$", "P(Efficacy)", "P(Futility)", "E[N per arm]")
+writeLines(knitr::kable(op_chars, digits = 3), "results/06-hyp/operating-chars.md")
 ```
 
-|Scenario         | True $p_C$| True $p_T$| P(Efficacy)| P(Futility)| E[N]|
-|:----------------|--------:|--------:|-----------:|-----------:|------------:|
-|Null (no effect) |      0.3|      0.3|       0.095|       0.181|        26.28|
-|Small effect     |      0.3|      0.4|       0.281|       0.071|        25.53|
-|Moderate effect  |      0.3|      0.5|       0.543|       0.028|        22.91|
-|Large effect     |      0.3|      0.6|       0.807|       0.002|        19.59|
+```{r}
+#| label: tbl-operating-chars
+#| tbl-cap: "Operating characteristics of the Bayesian sequential design."
+#| output: asis
+#| purl: false
+cached_md("06-hyp/operating-chars")
+```
 
-: Operating characteristics of the Bayesian sequential design. {#tbl-operating-chars}
 
 The results in @tbl-operating-chars reveal several important properties of the sequential design. Under the null hypothesis (no treatment effect), the probability of declaring efficacy is 9.5%, which represents the Type I error rate (the false positive rate when there is truly no benefit). This exceeds the traditional 5% threshold, reflecting the fact that the sequential procedure with its multiple interim looks increases the chance of a spurious efficacy declaration. If stricter Type I error control were required, the efficacy threshold $\tau_E$ could be raised above 0.95.
 
@@ -1278,7 +1276,7 @@ This single path ends on day `r end_day`, saving `r classical_days - end_day` da
 
 To understand the distribution of outcomes, we run 500 simulations and compare to the classical experiment. Each run repeats the trial above without the plots and keeps the day count, the conversions accumulated, and which arm won.
 
-```{r bandit-simulations}
+```{r bandit-simulations-code}
 #| eval: false
 set.seed(2024)
 
@@ -1372,6 +1370,18 @@ cat("  Average days to finish:", round(mean(bandit_days), 1), "\n")
 cat("  Average days saved:", round(mean(days_saved), 1), "\n")
 cat("  Average conversions saved:", round(mean(conversions_saved), 1), "\n")
 par(mfrow = c(1, 1))
+
+# Table of the results beside the figures of Scott (2013)
+bandit_table <- data.frame(
+  Metric = c("Correct arm identified", "Median days to finish", "Average days to finish",
+             "Average days saved", "Average conversions saved"),
+  Value = c(sprintf("%d / %d (%.1f%%)", sum(correct_arm), n_simulations, 100 * mean(correct_arm)),
+            median(bandit_days), sprintf("%.1f", mean(bandit_days)),
+            sprintf("%.1f", mean(days_saved)), sprintf("%.1f", mean(conversions_saved))),
+  Scott = c("482 / 500 (96.4%)", "not reported", "48", "175", "97.5")
+)
+names(bandit_table)[3] <- "Scott's value"
+writeLines(knitr::kable(bandit_table, align = "lrr"), "results/06-hyp/bandit-simulations.md")
 ```
 
 
@@ -1380,15 +1390,13 @@ par(mfrow = c(1, 1))
 
 The histograms in @fig-bandit-simulation-results show the distribution of days saved (left) and conversions saved (right) compared to the classical 223-day experiment. The key results from 500 simulations are summarized in @tbl-bandit-results:
 
-| Metric | Value | Scott's value |
-|:-------|------:|------:|
-| Correct arm identified | 479 / 500 (95.8%) | 482 / 500 (96.4%) |
-| Median days to finish | 31 | not reported |
-| Average days to finish | 55.8 | 48 |
-| Average days saved | 167.2 | 175 |
-| Average conversions saved | 95.2 | 97.5 |
-
-: Simulation results for multi-armed bandit vs. classical experiment (n = 500), alongside the figures @scott2013bandit reports for the same setup. {#tbl-bandit-results}
+```{r}
+#| label: tbl-bandit-results
+#| tbl-cap: "Simulation results for multi-armed bandit vs. classical experiment (n = 500), alongside the figures @scott2013bandit reports for the same setup."
+#| output: asis
+#| purl: false
+cached_md("06-hyp/bandit-simulations")
+```
 
 On average, the bandit saves about 167 days of testing (a 75% reduction) while finding the correct arm 95.8% of the time, an error rate comparable to the classical test's. All three quantities land close to Scott's published values, which is the sense in which this is a reproduction; the residual gap may come from his production system reweighting twice a day rather than once, and from his stopping rule, which is the value-remaining criterion discussed below rather than the simpler 95% threshold used here. The distribution is right-skewed, with a median of 31 days against a mean of 55.8, so a typical experiment finishes sooner than the average suggests. The conversion savings come from two sources: ending the experiment earlier and allocating more traffic to the better-performing variation during the experiment.
 
@@ -1450,7 +1458,7 @@ where $p\left( \overline{y} \mid \mu_{1}\right) \sim\mathcal{N}\left( \mu _{1},\
 
 These tests can generate strikingly different conclusions. Consider a test of $H_{0}:\mu=0$ versus $H_{1}:\mu=5$, based on $T=100$ observations drawn from $y_{t}\sim\mathcal{N}\left( \mu,10^{2}\right)$ with $\overline{y}=2$. For NP, since $\sigma/\sqrt{T}=1$, $\overline{y}$ is two standard errors away from $0$; thus $H_{0}$ is rejected at the 5% level (the same conclusion holds for $p$-values). Since $p(\overline {y}=2 \mid H_{0})=0.054$ and $p(\overline{y}=2 \mid H_{1})=0.0044$, the Bayes factor is $\mathrm{BF}_{0,1}=12.18$ and $P \left( H_{0} \mid y\right) =92.41\%$. Thus, the Bayesian is quite sure the null is true, while the Neyman-Pearson test rejects the null.
 
-The paradox can be seen in two different ways. First, although $\overline{y}$ is actually closer to $\mu_{0}$ than $\mu_{1}$, the NP test rejects $H_{0}$. This is counterintuitive and makes little sense. The problem is one of calibration. The classical approach develops a test such that 5% of the time, a correct null would be rejected. The power of the test is easy to compute and implies that $\beta=0.0004$. Thus, this testing procedure will virtually never accept the null if the alternative is correct. For Bayesian procedure, assuming the prior odds is $1$ and $L(d_0\mid H_1)=L(d_1\mid H_0)$, then $\alpha=\beta=0.0062$. Notice that the sum of the two error probabilities is 1.24% in the Bayesian procedure compared to 5.04% in the classical procedure. It should seem clear that the Bayesian approach is more reasonable, absent a specific motivation for inflating $\alpha$. Second, suppose the null and alternative were reversed, testing $H_{0}:\mu=\mu_{1}$ versus $H_{1}:\mu=\mu_{0}$ In the previous example, the Bayes approach gives the same answer, while NP once again rejects the null hypothesis! Again, this result is counterintuitive and nonsensical, but is common when arbitrarily fixing $\alpha$, which essentially hardwires the test to over-reject the null.
+The paradox can be seen in two different ways. First, although $\overline{y}$ is actually closer to $\mu_{0}$ than $\mu_{1}$, the NP test rejects $H_{0}$. This is counterintuitive and makes little sense. The problem is one of calibration. The classical approach develops a test such that 5% of the time, a correct null would be rejected. With the one-sided cutoff $c=\mu_0+z_{0.05}\,\sigma/\sqrt{T}=1.645$, the type II error is $\beta=\Phi(1.645-5)=0.0004$. Thus, this testing procedure will virtually never accept the null if the alternative is correct. For Bayesian procedure, assuming the prior odds is $1$ and $L(d_0\mid H_1)=L(d_1\mid H_0)$, then $\alpha=\beta=0.0062$. Notice that the sum of the two error probabilities is 1.24% in the Bayesian procedure compared to 5.04% in the classical procedure. It should seem clear that the Bayesian approach is more reasonable, absent a specific motivation for inflating $\alpha$. Second, suppose the null and alternative were reversed, testing $H_{0}:\mu=\mu_{1}$ versus $H_{1}:\mu=\mu_{0}$ In the previous example, the Bayes approach gives the same answer, while NP once again rejects the null hypothesis! Again, this result is counterintuitive and nonsensical, but is common when arbitrarily fixing $\alpha$, which essentially hardwires the test to over-reject the null.
 :::
 
 ::: {#exm-lindleyparadox}

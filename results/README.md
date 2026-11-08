@@ -8,6 +8,8 @@ To refresh an output, run the chunk (the code file of the chapter has it) and re
 
 | Chapter | Name | Files |
 |---|---|---|
+| Chapter 6: Bayesian Hypothesis Testing | `bandit-simulations` | `bandit-simulations.md` |
+| Chapter 6: Bayesian Hypothesis Testing | `operating-chars` | `operating-chars.md` |
 | Chapter 13: Logistic Regression and Generalized Linear Models | `bayesian-betting-results` | `bayesian-betting-results.rds`; Posterior summaries of the betting model, written by `code/13-logistic-benter.R`. |
 | Chapter 15: Forecasting | `fig-pl-mixture` | `fig-pl-mixture-1.pdf`, `fig-pl-mixture-1.png`, `fig-pl-mixture-2.pdf`, `fig-pl-mixture-2.png` |
 | Chapter 15: Forecasting | `tft-forecast` | `tft-forecast.csv`; Quantile forecasts of the Temporal Fusion Transformer ensemble, written by `code/15-forecasting-tft.py`. |
